@@ -1,0 +1,14 @@
+Frank Meyer
+ for IRMP and IRSND
+ https://www.mikrocontroller.net/articles/IRMP
+
+Uwe Becker 
+ for adapting IRMP and IRSND to the STM32F4xx
+ for his USB_HID for the STM32F4xx
+ his work helped me in getting started with the STM32F105
+ http://mikrocontroller.bplaced.net/wordpress/?page_id=744
+
+Andrew Kambaroff
+ for his USB_HID for the STM32F103
+ his work helped me in getting started with the STM32F103
+ http://sysmagazine.com/posts/208026/
