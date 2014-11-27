@@ -7,6 +7,7 @@ MEMORY
 }
 
 _eram = 0x20000000 + 0x00005000;
+_estack = 0x20000000 + 0x00005000;
 SECTIONS
 {
 	.text :
@@ -32,7 +33,7 @@ SECTIONS
 		*(.dtors)
 		
 		*(.rodata*)
-		
+		. = ALIGN(4);
 		KEEP(*(.eh_fram e*))
 	} > rom 
 	
@@ -129,4 +130,4 @@ SECTIONS
 	
 	/* Check if data + heap + stack exceeds ram  limit */
 	ASSERT(__StackLimit >= __HeapLimit, "region ram  overflowed with stack")
-}
+}
