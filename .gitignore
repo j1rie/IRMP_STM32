@@ -10,10 +10,10 @@ ext/*
 *.pbxproj
 *.cogui
 *.comarker
-cmsis/*
-cmsis_boot/*
-stm_lib/*
-usb_hid/*
-irmp/*
+STM32F103/cmsis/*
+STM32F103/cmsis_boot/*
+STM32F103/stm_lib/*
+STM32F103/usb_hid/*
+STM32F103/irmp/*
 IR/*
-ext_src/*
+STM32F103/ext_src/*
