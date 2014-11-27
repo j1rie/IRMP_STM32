@@ -14,12 +14,12 @@ OBJCP = $(CROSS_COMPILE)objcopy
 
 ARCH = -mcpu=cortex-m3 -mthumb
 COMMON = -g -Os -flto
-INCLUDES = -Iext/stm32lib-4.0.0 -Iext/irmp-2.6.7 -Isrc
-DEFINES = -D$(PLATFORM) -DSTM32F10X_MD -DUSE_STDPERIPH_DRIVER -DIRMP_LOGGING
+INCLUDES = -Icmsis -Icmsis_boot -Istm_lib/inc -Iusb_hid/inc -Iirmp -Isrc
+DEFINES = -D$(PLATFORM) -DSTM32F10X_MD -DUSE_STDPERIPH_DRIVER
 
 DONT_CARE := $(shell ./scripts/prepare.sh)
 
-CRT0 = ext/stm32lib-4.0.0/startup_stm32f10x_md.o
+CRT0 = cmsis_boot/startup/startup_stm32f10x_md.o
 SRCS = $(shell find -type f -name "*.c")
 OBJS = $(CRT0) $(SRCS:.c=.o)
 
