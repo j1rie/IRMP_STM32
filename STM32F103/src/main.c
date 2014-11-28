@@ -302,14 +302,15 @@ void store_new_wakeup(void)
 	systicks = 0;
 	/* 5 seconds to press button on remote */
 	delay_ms(5000);
-	if (irmp_get_data(&wakeup_IRData))
-	/* wakeup_IRData -> buf[0-5] */
-	IRData_to_buf(&wakeup_IRData);
-	/* set flags to 0 */
-	buf[5] = 0;
-	/* buf[0-5] -> eeprom[0-2] */
-	Store_buf_to_Eeprom(0, 0);
-	toggle_LED();
+	if (irmp_get_data(&wakeup_IRData)) {
+		/* wakeup_IRData -> buf[0-5] */
+		IRData_to_buf(&wakeup_IRData);
+		/* set flags to 0 */
+		buf[5] = 0;
+		/* buf[0-5] -> eeprom[0-2] */
+		Store_buf_to_Eeprom(0, 0);
+		toggle_LED();
+	}
 }
 
 int main(void)
