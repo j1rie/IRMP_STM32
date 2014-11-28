@@ -191,25 +191,27 @@ void toggle_LED(void)
  * 2 halfwords in reverse order, little endian
  */
 
-/* buf[BufIdx ... (BufIdx+5)] -> eeprom[TabNr ... (TabNr+2)] */
-void Store_buf_to_Eeprom(uint8_t BufIdx, uint8_t TabNr)
+/* buf[0 ... 5] -> eeprom[virt_addr ... virt_addr + 2] */
+void eeprom_store(uint8_t *buf, uint8_t virt_addr)
 {
 	/* reverse order */
-	EE_WriteVariable(TabNr, ((buf[(BufIdx + 1)] << 8) | (buf[BufIdx])));
-	EE_WriteVariable(TabNr + 1, ((buf[(BufIdx + 3)] << 8) | (buf[(BufIdx + 2)])));
-	EE_WriteVariable(TabNr + 2, ((buf[(BufIdx + 5)] << 8) | (buf[(BufIdx + 4)])));
+	EE_WriteVariable(virt_addr, (buf[1] << 8) | buf[0]);
+	EE_WriteVariable(virt_addr + 1, (buf[3] << 8) | buf[2]);
+	EE_WriteVariable(virt_addr + 2, (buf[5] << 8) | buf[4]);
 }
 
-/* eeprom[TabNr ... (TabNr+2)] -> buf[0-5] */
-void Restore_Eeprom_to_buf(uint8_t TabNr)
+/* eeprom[virt_addr ... virt_addr + 2] -> buf[0-5] */
+void eeprom_restore(uint8_t *buf, uint8_t virt_addr)
 {
 	uint16_t EE_Data;
-	EE_ReadVariable(TabNr, &EE_Data);
 	/* reverse order */
+	EE_ReadVariable(virt_addr, &EE_Data);
 	memcpy(&buf[0], &EE_Data, 2);
-	EE_ReadVariable(TabNr + 1, &EE_Data);
+
+	EE_ReadVariable(virt_addr + 1, &EE_Data);
 	memcpy(&buf[2], &EE_Data, 2);
-	EE_ReadVariable(TabNr + 2, &EE_Data);
+
+	EE_ReadVariable(virt_addr + 2, &EE_Data);
 	memcpy(&buf[4], &EE_Data, 2);
 }
 
@@ -305,7 +307,7 @@ void store_new_wakeup(void)
 		/* set flags to 0 */
 		buf[5] = 0;
 		/* buf[0-5] -> eeprom[0-2] */
-		Store_buf_to_Eeprom(0, 0);
+		eeprom_store(buf, 0);
 		toggle_LED();
 	}
 }
@@ -331,16 +333,14 @@ int main(void)
 	Systick_Init();
 
 	/* read wakeup IR-data from eeprom: eeprom[0-2] -> wakeup_buf */
-	Restore_Eeprom_to_buf(0);
-	memcpy(wakeup_buf, buf, sizeof(wakeup_buf));
+	eeprom_restore(wakeup_buf, 0);
 
 	/* read trigger IR-data from eeprom: eeprom[3-5] -> trigger_send_buf */
-	Restore_Eeprom_to_buf(3);
-	memcpy(trigger_send_buf, buf, sizeof(trigger_send_buf));
+	eeprom_restore(trigger_send_buf, 3);
 
 	/* read IR-data to send from eeprom: eeprom[6-8] -> send_buf[0], eeprom[9-11] -> send_buf[1], etc */
-	for (k=0; k<SND_MAX; k++) {
-		Restore_Eeprom_to_buf(6+k*3);
+	for (k = 0; k < SND_MAX; k++) {
+		eeprom_restore(send_buf[k], 6 + k * 3);
 		memcpy(send_buf[k], buf, sizeof(send_buf[k]));
 	}
 
@@ -363,42 +363,38 @@ int main(void)
 			switch (buf[0]) {
 			/* set wakeup IRData */
 			case 0xFF:
-				/* buf[2-7] -> eeprom[0-2] */
-				Store_buf_to_Eeprom(1, 0);
+				/* buf[1-6] -> eeprom[0-2] */
+				eeprom_store(&buf[1], 0);
 				memset(buf, 0, sizeof(buf));
 				/* eeprom[0-2] -> buf[0-5] */
-				Restore_Eeprom_to_buf(0);
-				memcpy(wakeup_buf, buf, sizeof(wakeup_buf));
+				eeprom_restore(wakeup_buf, 0);
 				break;
 
 			/* set trigger_send IRData */
 			case 0xFE:
-				/* buf[2-7] -> eeprom[3-5] */
-				Store_buf_to_Eeprom(1, 3);
+				/* buf[1-6] -> eeprom[3-5] */
+				eeprom_store(&buf[1], 3);
 				memset(buf, 0, sizeof(buf));
 				/* eeprom[3-5] -> buf[0-5] */
-				Restore_Eeprom_to_buf(3);
-				memcpy(trigger_send_buf, buf, sizeof(trigger_send_buf));
+				eeprom_restore(trigger_send_buf, 3);
 				break;
 
 			/* set send[0] IRData */
 			case 0xFD:
-				/* buf[2-7] -> eeprom[6-8] */
-				Store_buf_to_Eeprom(1, 6);
+				/* buf[1-6] -> eeprom[6-8] */
+				eeprom_store(&buf[1], 6);
 				memset(buf, 0, sizeof(buf));
 				/* eeprom[6-8] -> buf[0-5] */
-				Restore_Eeprom_to_buf(6);
-				memcpy(send_buf[0], buf, sizeof(send_buf[0]));
+				eeprom_restore(send_buf[0], 6);
 				break;
 
 			/* set send[1] IRData */
 			case 0xFC:
-				/* buf[2-7] -> eeprom[9-11] */
-				Store_buf_to_Eeprom(1, 9);
+				/* buf[1-6] -> eeprom[9-11] */
+				eeprom_store(&buf[1], 9);
 				memset(buf, 0, sizeof(buf));
 				/* eeprom[9-11] -> buf[0-5] */
-				Restore_Eeprom_to_buf(9);
-				memcpy(send_buf[1], buf, sizeof(send_buf[1]));
+				eeprom_restore(send_buf[1], 9);
 				break;
 
 			/* get wakeup IRData */
