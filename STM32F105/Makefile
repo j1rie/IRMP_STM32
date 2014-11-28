@@ -1,10 +1,10 @@
 TARGET ?= IR
-PLATFORM ?= STM32F103C8
-#STM32F103C8
-#	MD PL - medium density performance line
+PLATFORM ?= STM32F105RC
+#STM32F105RC
+#	CL - connectivity line
 #	max. 72MHz
-#	64 KB (0x10000) of Flash memory
-#	20 KB (0x05000) of SRAM
+#	256 KB (0x40000) of Flash memory
+#	 40 KB (0x10000) of SRAM
 
 CROSS_COMPILE ?= arm-none-eabi-
 AS = $(CROSS_COMPILE)as
@@ -15,11 +15,11 @@ OBJCP = $(CROSS_COMPILE)objcopy
 ARCH = -mcpu=cortex-m3 -mthumb
 COMMON = -g -Os -flto
 INCLUDES = -Icmsis -Icmsis_boot -Istm_lib/inc -Iusb_hid/inc -Iirmp -Isrc
-DEFINES = -D$(PLATFORM) -DSTM32F10X_MD -DUSE_STDPERIPH_DRIVER
+DEFINES = -D$(PLATFORM) -DSTM32F10X_CL -DUSE_STDPERIPH_DRIVER
 
 DONT_CARE := $(shell ./scripts/prepare.sh)
 
-CRT0 = cmsis_boot/startup/startup_stm32f10x_md.o
+CRT0 = cmsis_boot/startup/startup_stm32f10x_cl.o
 SRCS = $(shell find -type f -name "*.c")
 OBJS = $(CRT0) $(SRCS:.c=.o)
 
