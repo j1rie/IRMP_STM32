@@ -54,9 +54,6 @@
 __IO uint8_t PrevXferComplete = 1;
 uint8_t PA9_state = 0;
 uint8_t buf[HID_OUT_BUFFER_SIZE-1];
-uint16_t VirtAddVarTab[NumbOfVar] = {	0x0000, 0x1111, 0x2222, 0x3333, 0x4444, \
-					0x5555, 0x6666, 0x7777, 0x8888, 0x9999, \
-					0xAAAA, 0xBBBB, 0xCCCC, 0xDDDD, 0xEEEE};
 uint32_t timestamp = 0;
 uint32_t AlarmValue = 0xFFFFFFFF;
 volatile unsigned int systicks = 0;
@@ -198,21 +195,21 @@ void toggle_LED(void)
 void Store_buf_to_Eeprom(uint8_t BufIdx, uint8_t TabNr)
 {
 	/* reverse order */
-	EE_WriteVariable(VirtAddVarTab[TabNr], ((buf[(BufIdx + 1)] << 8) | (buf[BufIdx])));
-	EE_WriteVariable(VirtAddVarTab[(TabNr + 1)], ((buf[(BufIdx + 3)] << 8) | (buf[(BufIdx + 2)])));
-	EE_WriteVariable(VirtAddVarTab[(TabNr + 2)], ((buf[(BufIdx + 5)] << 8) | (buf[(BufIdx + 4)])));
+	EE_WriteVariable(TabNr, ((buf[(BufIdx + 1)] << 8) | (buf[BufIdx])));
+	EE_WriteVariable(TabNr + 1, ((buf[(BufIdx + 3)] << 8) | (buf[(BufIdx + 2)])));
+	EE_WriteVariable(TabNr + 2, ((buf[(BufIdx + 5)] << 8) | (buf[(BufIdx + 4)])));
 }
 
 /* eeprom[TabNr ... (TabNr+2)] -> buf[0-5] */
 void Restore_Eeprom_to_buf(uint8_t TabNr)
 {
 	uint16_t EE_Data;
-	EE_ReadVariable(VirtAddVarTab[TabNr], &EE_Data);
+	EE_ReadVariable(TabNr, &EE_Data);
 	/* reverse order */
 	memcpy(&buf[0], &EE_Data, 2);
-	EE_ReadVariable(VirtAddVarTab[(TabNr + 1)], &EE_Data);
+	EE_ReadVariable(TabNr + 1, &EE_Data);
 	memcpy(&buf[2], &EE_Data, 2);
-	EE_ReadVariable(VirtAddVarTab[(TabNr + 2)], &EE_Data);
+	EE_ReadVariable(TabNr + 2, &EE_Data);
 	memcpy(&buf[4], &EE_Data, 2);
 }
 
