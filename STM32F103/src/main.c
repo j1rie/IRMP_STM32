@@ -194,7 +194,6 @@ void toggle_LED(void)
 /* buf[0 ... 5] -> eeprom[virt_addr ... virt_addr + 2] */
 void eeprom_store(uint8_t *buf, uint8_t virt_addr)
 {
-	/* reverse order */
 	EE_WriteVariable(virt_addr, (buf[1] << 8) | buf[0]);
 	EE_WriteVariable(virt_addr + 1, (buf[3] << 8) | buf[2]);
 	EE_WriteVariable(virt_addr + 2, (buf[5] << 8) | buf[4]);
@@ -203,16 +202,15 @@ void eeprom_store(uint8_t *buf, uint8_t virt_addr)
 /* eeprom[virt_addr ... virt_addr + 2] -> buf[0-5] */
 void eeprom_restore(uint8_t *buf, uint8_t virt_addr)
 {
+	uint8_t i;
 	uint16_t EE_Data;
-	/* reverse order */
-	EE_ReadVariable(virt_addr, &EE_Data);
-	memcpy(&buf[0], &EE_Data, 2);
 
-	EE_ReadVariable(virt_addr + 1, &EE_Data);
-	memcpy(&buf[2], &EE_Data, 2);
-
-	EE_ReadVariable(virt_addr + 2, &EE_Data);
-	memcpy(&buf[4], &EE_Data, 2);
+	for(i=0; i<3; i++) {
+		/* explicitly initialize variable, so we get a known state */
+		EE_Data = 0;
+		EE_ReadVariable(virt_addr + i, &EE_Data);
+		memcpy(&buf[2*i], &EE_Data, 2);
+	}
 }
 
 /*
