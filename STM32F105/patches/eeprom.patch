@@ -1,0 +1,23 @@
+diff -Nrup a/inc/eeprom.h b/inc/eeprom.h
+--- a/inc/eeprom.h	2009-08-04 17:25:52.000000000 +0200
++++ b/inc/eeprom.h	2014-11-26 09:46:08.000000000 +0100
+@@ -35,8 +35,8 @@
+ #endif
+ 
+ /* EEPROM start address in Flash */
+-#define EEPROM_START_ADDRESS    ((uint32_t)0x08010000) /* EEPROM emulation start address:
+-                                                  after 64KByte of used Flash memory */
++#define EEPROM_START_ADDRESS    ((uint32_t)0x0803F000) /* F105RC has 256k = 0x40000 Flash */
++                                                     /* 0x8040000 - 2 * 0x800 = 0x803F000 */
+ 
+ /* Pages 0 and 1 base and end addresses */
+ #define PAGE0_BASE_ADDRESS      ((uint32_t)(EEPROM_START_ADDRESS + 0x000))
+@@ -65,7 +65,7 @@
+ #define PAGE_FULL               ((uint8_t)0x80)
+ 
+ /* Variables' number */
+-#define NumbOfVar               ((uint8_t)0x03)
++#define NumbOfVar               ((uint8_t)0x0F)
+ 
+ /* Exported types ------------------------------------------------------------*/
+ /* Exported macro ------------------------------------------------------------*/

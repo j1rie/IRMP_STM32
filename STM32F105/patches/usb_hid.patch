@@ -1,0 +1,554 @@
+/*
+ *  Copyright (C) 2014 Joerg Riechardt
+ *
+ *  based on work by Uwe Becker - http://mikrocontroller.bplaced.net
+ *
+ *  This program is free software; you can redistribute it and/or modify
+ *  it under the terms of the GNU General Public License as published by
+ *  the Free Software Foundation; either version 2 of the License, or
+ *  (at your option) any later version.
+ */
+diff -Nrup a/inc/usb_conf.h b/inc/usb_conf.h
+--- a/inc/usb_conf.h	2012-03-22 15:44:38.000000000 +0100
++++ b/inc/usb_conf.h	2014-11-21 00:26:17.000000000 +0100
+@@ -30,6 +30,7 @@
+ #define __USB_CONF__H__
+ 
+ /* Includes ------------------------------------------------------------------*/
++ #include "stm32f10x.h"
+ #if defined (USE_STM322xG_EVAL)
+  #include "stm322xg_eval.h"
+  #include "stm322xg_eval_lcd.h"
+@@ -48,7 +49,7 @@
+  #include "stm3210c_eval_ioe.h"
+  #include "stm3210c_eval_spi_sd.h"
+ #else
+- #error "Missing define: Evaluation board (ie. USE_STM322xG_EVAL)"
++ //#error "Missing define: Evaluation board (ie. USE_STM322xG_EVAL)"
+ #endif
+ 
+ 
+@@ -77,7 +78,7 @@
+ *  when FS core is used.
+ *******************************************************************************/
+ #ifndef USE_USB_OTG_FS
+- //#define USE_USB_OTG_FS
++ #define USE_USB_OTG_FS
+ #endif /* USE_USB_OTG_FS */
+ 
+ #ifdef USE_USB_OTG_FS 
+@@ -179,12 +180,12 @@
+ /****************** USB OTG FS CONFIGURATION **********************************/
+ #ifdef USB_OTG_FS_CORE
+  #define RX_FIFO_FS_SIZE                          128
+- #define TX0_FIFO_FS_SIZE                          64
++ #define TX0_FIFO_FS_SIZE                          32
+  #define TX1_FIFO_FS_SIZE                         128
+- #define TX2_FIFO_FS_SIZE                          0
++ #define TX2_FIFO_FS_SIZE                          32
+  #define TX3_FIFO_FS_SIZE                          0
+ 
+- #define USB_OTG_FS_LOW_PWR_MGMT_SUPPORT
++ //#define USB_OTG_FS_LOW_PWR_MGMT_SUPPORT
+ // #define USB_OTG_FS_SOF_OUTPUT_ENABLED
+ #endif
+ 
+diff -Nrup a/inc/usbd_hid_core.h b/inc/usbd_hid_core.h
+--- a/inc/usbd_hid_core.h	2012-03-22 15:44:22.000000000 +0100
++++ b/inc/usbd_hid_core.h	2014-11-26 08:57:50.000000000 +0100
+@@ -45,9 +45,9 @@
+ /** @defgroup USBD_HID_Exported_Defines
+   * @{
+   */ 
+-#define USB_HID_CONFIG_DESC_SIZ       34
++#define USB_HID_CONFIG_DESC_SIZ       41
+ #define USB_HID_DESC_SIZ              9
+-#define HID_MOUSE_REPORT_DESC_SIZE    74
++#define HID_MOUSE_REPORT_DESC_SIZE    39
+ 
+ #define HID_DESCRIPTOR_TYPE           0x21
+ #define HID_REPORT_DESC               0x22
+@@ -90,6 +90,7 @@
+   */ 
+ 
+ extern USBD_Class_cb_TypeDef  USBD_HID_cb;
++extern uint8_t USB_HID_OUT_BUF[];
+ /**
+   * @}
+   */ 
+@@ -100,6 +101,7 @@ extern USBD_Class_cb_TypeDef  USBD_HID_c
+ uint8_t USBD_HID_SendReport (USB_OTG_CORE_HANDLE  *pdev, 
+                                  uint8_t *report,
+                                  uint16_t len);
++uint16_t USBD_HID_RecReport(void);                                 
+ /**
+   * @}
+   */ 
+diff -Nrup a/inc/usbd_usr.h b/inc/usbd_usr.h
+--- a/inc/usbd_usr.h	2012-03-22 15:44:22.000000000 +0100
++++ b/inc/usbd_usr.h	2014-11-21 00:09:17.000000000 +0100
+@@ -31,6 +31,7 @@
+ 
+ /* Includes ------------------------------------------------------------------*/
+ #include "usbd_core.h"
++#include "usb_hid.h"
+ 
+ 
+ /** @addtogroup USBD_USER
+diff -Nrup a/src/usb_bsp.c b/src/usb_bsp.c
+--- a/src/usb_bsp.c	2012-03-22 15:44:38.000000000 +0100
++++ b/src/usb_bsp.c	2014-11-21 19:18:26.969001600 +0100
+@@ -30,6 +30,9 @@
+ #include "usb_bsp.h"
+ #include "usbd_conf.h"
+ 
++extern USB_OTG_CORE_HANDLE           USB_OTG_dev;
++extern uint32_t USBD_OTG_ISR_Handler (USB_OTG_CORE_HANDLE *pdev);
++
+ /** @addtogroup STM32_USB_OTG_DEVICE_LIBRARY
+ * @{
+ */
+@@ -94,13 +97,16 @@
+ 
+ void USB_OTG_BSP_Init(USB_OTG_CORE_HANDLE *pdev)
+ {
++#if 0
+ #ifndef USE_STM3210C_EVAL
+   GPIO_InitTypeDef GPIO_InitStructure;    
+ #endif
+   EXTI_InitTypeDef EXTI_InitStructure;
+   NVIC_InitTypeDef NVIC_InitStructure; 
++#endif
+  
+-#ifdef USE_STM3210C_EVAL
++//#ifdef USE_STM3210C_EVAL
++#if 1
+ 
+   RCC_OTGFSCLKConfig(RCC_OTGFSCLKSource_PLLVCO_Div3);
+   RCC_AHBPeriphClockCmd(RCC_AHBPeriph_OTG_FS, ENABLE) ;
+@@ -247,7 +253,7 @@ void USB_OTG_BSP_Init(USB_OTG_CORE_HANDL
+   RCC_APB1PeriphResetCmd(RCC_APB1Periph_PWR, ENABLE);   
+   
+   /* Configure the Key button in EXTI mode */
+-  STM_EVAL_PBInit(Button_KEY, Mode_EXTI);
++  //STM_EVAL_PBInit(Button_KEY, Mode_EXTI);
+ #ifdef USB_OTG_FS_LOW_PWR_MGMT_SUPPORT
+   EXTI_ClearITPendingBit(EXTI_Line18);
+   
+@@ -288,7 +294,7 @@ void USB_OTG_BSP_Init(USB_OTG_CORE_HANDL
+   EXTI_ClearITPendingBit(EXTI_Line20);    
+ #endif   
+ 
+-  EXTI_ClearITPendingBit(KEY_BUTTON_EXTI_LINE);  
++  //EXTI_ClearITPendingBit(KEY_BUTTON_EXTI_LINE);  
+ }
+ /**
+ * @brief  USB_OTG_BSP_EnableInterrupt
+@@ -357,6 +363,12 @@ void USB_OTG_BSP_mDelay (const uint32_t
+ {
+   USB_OTG_BSP_uDelay(msec * 1000);   
+ }
++
++void OTG_FS_IRQHandler(void)
++{
++  USBD_OTG_ISR_Handler (&USB_OTG_dev);
++}
++
+ /**
+ * @}
+ */ 
+diff -Nrup a/src/usb_core.c b/src/usb_core.c
+--- a/src/usb_core.c	2012-03-22 15:44:24.000000000 +0100
++++ b/src/usb_core.c	2014-11-21 00:56:58.000000000 +0100
+@@ -199,7 +199,8 @@ void *USB_OTG_ReadPacket(USB_OTG_CORE_HA
+                          uint16_t len)
+ {
+   uint32_t i=0;
+-  uint32_t count32b = (len + 3) / 4;
++  uint32_t count32b = (len) / 4;
++  uint32_t count8b = (len) & 3;
+   
+   __IO uint32_t *fifo = pdev->regs.DFIFO[0];
+   
+@@ -208,6 +209,19 @@ void *USB_OTG_ReadPacket(USB_OTG_CORE_HA
+     *(__packed uint32_t *)dest = USB_OTG_READ_REG32(fifo);
+     
+   }
++  
++    if ( count8b )
++  {
++    count32b = USB_OTG_READ_REG32(fifo);
++    while ( count8b > 0 )
++    {
++      *dest = count32b;
++      count32b >>= 8;
++      dest++;
++      count8b--;
++    }
++  }
++  
+   return ((void *)dest);
+ }
+ 
+diff -Nrup a/src/usb_dcd_int.c b/src/usb_dcd_int.c
+--- a/src/usb_dcd_int.c	2012-03-22 15:44:24.000000000 +0100
++++ b/src/usb_dcd_int.c	2014-11-21 00:58:57.000000000 +0100
+@@ -674,6 +674,12 @@ static uint32_t DCD_WriteEmptyTxFifo(USB
+     
+     ep->xfer_buff  += len;
+     ep->xfer_count += len;
++
++    if( ep->xfer_count >= ep->xfer_len){
++      uint32_t fifoemptymsk = 1 << ep->num;
++      USB_OTG_MODIFY_REG32(&pdev->regs.DREGS->DIEPEMPMSK, fifoemptymsk, 0);
++      break;
++    }
+     
+     txstatus.d32 = USB_OTG_READ_REG32(&pdev->regs.INEP_REGS[epnum]->DTXFSTS);
+   }
+diff -Nrup a/src/usbd_desc.c b/src/usbd_desc.c
+--- a/src/usbd_desc.c	2012-03-22 15:44:38.000000000 +0100
++++ b/src/usbd_desc.c	2014-11-24 23:58:05.851392500 +0100
+@@ -63,7 +63,7 @@
+ #define USBD_PRODUCT_HS_STRING        "Joystick in HS mode"
+ #define USBD_SERIALNUMBER_HS_STRING   "00000000011B"
+ 
+-#define USBD_PRODUCT_FS_STRING        "Joystick in FS Mode"
++#define USBD_PRODUCT_FS_STRING        "STM32 IRMP HID-Device"
+ #define USBD_SERIALNUMBER_FS_STRING   "00000000011C"
+ 
+ #define USBD_CONFIGURATION_HS_STRING  "HID Config"
+@@ -216,7 +216,8 @@ uint8_t *  USBD_USR_ProductStrDescriptor
+ {
+  
+   
+-  if(speed == 0)
++  //if(speed == 0)
++  if(0)
+   {   
+     USBD_GetString (USBD_PRODUCT_HS_STRING, USBD_StrDesc, length);
+   }
+@@ -249,7 +250,8 @@ uint8_t *  USBD_USR_ManufacturerStrDescr
+ */
+ uint8_t *  USBD_USR_SerialStrDescriptor( uint8_t speed , uint16_t *length)
+ {
+-  if(speed  == USB_OTG_SPEED_HIGH)
++  //if(speed  == USB_OTG_SPEED_HIGH)
++  if(0)
+   {    
+     USBD_GetString (USBD_SERIALNUMBER_HS_STRING, USBD_StrDesc, length);
+   }
+@@ -269,7 +271,8 @@ uint8_t *  USBD_USR_SerialStrDescriptor(
+ */
+ uint8_t *  USBD_USR_ConfigStrDescriptor( uint8_t speed , uint16_t *length)
+ {
+-  if(speed  == USB_OTG_SPEED_HIGH)
++  //if(speed  == USB_OTG_SPEED_HIGH)
++  if(0)
+   {  
+     USBD_GetString (USBD_CONFIGURATION_HS_STRING, USBD_StrDesc, length);
+   }
+@@ -290,7 +293,8 @@ uint8_t *  USBD_USR_ConfigStrDescriptor(
+ */
+ uint8_t *  USBD_USR_InterfaceStrDescriptor( uint8_t speed , uint16_t *length)
+ {
+-  if(speed == 0)
++  //if(speed == 0)
++  if(0)
+   {
+     USBD_GetString (USBD_INTERFACE_HS_STRING, USBD_StrDesc, length);
+   }
+diff -Nrup a/src/usbd_hid_core.c b/src/usbd_hid_core.c
+--- a/src/usbd_hid_core.c	2012-03-22 15:44:22.000000000 +0100
++++ b/src/usbd_hid_core.c	2014-11-28 08:10:13.000000000 +0100
+@@ -50,6 +50,7 @@
+ #include "usbd_hid_core.h"
+ #include "usbd_desc.h"
+ #include "usbd_req.h"
++#include "usb_hid.h"
+ 
+ 
+ /** @addtogroup STM32_USB_OTG_DEVICE_LIBRARY
+@@ -106,6 +107,11 @@ static uint8_t  USBD_HID_Setup (void  *p
+ static uint8_t  *USBD_HID_GetCfgDesc (uint8_t speed, uint16_t *length);
+ 
+ static uint8_t  USBD_HID_DataIn (void  *pdev, uint8_t epnum);
++static uint8_t  USBD_HID_DataOut (void  *pdev, uint8_t epnum);
++
++static uint16_t USB_HID_RecData_Len;
++static uint8_t USB_HID_RecData_Ready;
++
+ /**
+   * @}
+   */ 
+@@ -122,7 +128,7 @@ USBD_Class_cb_TypeDef  USBD_HID_cb =
+   NULL, /*EP0_TxSent*/  
+   NULL, /*EP0_RxReady*/
+   USBD_HID_DataIn, /*DataIn*/
+-  NULL, /*DataOut*/
++  USBD_HID_DataOut, /*DataOut*/
+   NULL, /*SOF */
+   NULL,
+   NULL,      
+@@ -179,10 +185,10 @@ __ALIGN_BEGIN static uint8_t USBD_HID_Cf
+   USB_INTERFACE_DESCRIPTOR_TYPE,/*bDescriptorType: Interface descriptor type*/
+   0x00,         /*bInterfaceNumber: Number of Interface*/
+   0x00,         /*bAlternateSetting: Alternate setting*/
+-  0x01,         /*bNumEndpoints*/
++  0x02,         /*bNumEndpoints*/
+   0x03,         /*bInterfaceClass: HID*/
+-  0x01,         /*bInterfaceSubClass : 1=BOOT, 0=no boot*/
+-  0x02,         /*nInterfaceProtocol : 0=none, 1=keyboard, 2=mouse*/
++  0x00,         /*bInterfaceSubClass : 1=BOOT, 0=no boot*/
++  0x00,         /*nInterfaceProtocol : 0=none, 1=keyboard, 2=mouse*/
+   0,            /*iInterface: Index of string descriptor*/
+   /******************** Descriptor of Joystick Mouse HID ********************/
+   /* 18 */
+@@ -202,10 +208,19 @@ __ALIGN_BEGIN static uint8_t USBD_HID_Cf
+   
+   HID_IN_EP,     /*bEndpointAddress: Endpoint Address (IN)*/
+   0x03,          /*bmAttributes: Interrupt endpoint*/
+-  HID_IN_PACKET, /*wMaxPacketSize: 4 Byte max */
++  HID_IN_BUFFER_SIZE, /*wMaxPacketSize: 4 Byte max */
+   0x00,
+-  0x0A,          /*bInterval: Polling Interval (10 ms)*/
++  HID_IN_INTERVAL, /*bInterval: Polling Interval (10 ms)*/
+   /* 34 */
++  /* OUT Endpoint */
++  0x07,          /*bLength: Endpoint Descriptor size*/
++  USB_ENDPOINT_DESCRIPTOR_TYPE, /*bDescriptorType:*/
++  HID_OUT_EP,    /*bEndpointAddress: Endpoint Address (OUT)*/
++  0x03,          /*bmAttributes: Interrupt endpoint*/
++  HID_OUT_BUFFER_SIZE, /*wMaxPacketSize: 4 Byte max */
++  0x00,
++  HID_OUT_INTERVAL, /*bInterval: Polling Interval (10 ms)*/
++  /* 41 */
+ } ;
+ 
+ #ifdef USB_OTG_HS_INTERNAL_DMA_ENABLED
+@@ -236,6 +251,7 @@ __ALIGN_BEGIN static uint8_t USBD_HID_De
+ #endif /* USB_OTG_HS_INTERNAL_DMA_ENABLED */  
+ __ALIGN_BEGIN static uint8_t HID_MOUSE_ReportDesc[HID_MOUSE_REPORT_DESC_SIZE] __ALIGN_END =
+ {
++#if 0
+   0x05,   0x01,
+   0x09,   0x02,
+   0xA1,   0x01,
+@@ -282,6 +298,36 @@ __ALIGN_BEGIN static uint8_t HID_MOUSE_R
+   0x01,   0xb1,
+   
+   0x01,   0xc0
++#endif
++  0x06, 0xFF, 0xFF,      /* USAGE_PAGE (Vendor Page: 0xFF00) */
++  0x09, 0x01,            /* USAGE (Demo Kit)               */
++  0xA1, 0x01,            /* COLLECTION (Application)       */
++
++  /* common global */
++  0x15, 0x00,            /*     LOGICAL_MINIMUM (0)        */
++  0x26, 0xff, 0x00,      /*     LOGICAL_MAXIMUM (255)      */
++  0x75, 0x08,            /*     REPORT_SIZE (8)            */
++
++  /* STM32->PC */
++  0x85, 0x01,            /*     REPORT_ID (1)              */
++  0x09, 0x02,            /*     USAGE (2)                  */
++  0x95, HID_IN_BUFFER_SIZE-1, /* REPORT_COUNT              */
++  0x81, 0x02,            /*     INPUT (Data,Var,Abs,Vol)   */
++
++  /* STM32->PC */
++  0x85, 0x02,            /*     REPORT_ID (2)              */
++  0x09, 0x03,            /*     USAGE (3)                  */
++  0x95, HID_IN_BUFFER_SIZE-1, /* REPORT_COUNT              */
++  0x81, 0x02,            /*     INPUT (Data,Var,Abs,Vol)   */
++
++  /* PC->STM32 */
++  0x85, 0x03,            /*     REPORT_ID (3)              */
++  0x09, 0x04,            /*     USAGE (4)                  */
++  0x95, HID_OUT_BUFFER_SIZE-1, /* REPORT_COUNT             */
++  0x91, 0x02,            /*     OUTPUT (Data,Var,Abs,Vol)  */
++
++  /* 39 */
++  0xc0 	                 /*     END_COLLECTION	           */
+ }; 
+ 
+ /**
+@@ -302,18 +348,27 @@ __ALIGN_BEGIN static uint8_t HID_MOUSE_R
+ static uint8_t  USBD_HID_Init (void  *pdev, 
+                                uint8_t cfgidx)
+ {
++
++  USB_HID_RecData_Ready=0;
++  USB_HID_RecData_Len=0;
+   
+   /* Open EP IN */
+   DCD_EP_Open(pdev,
+               HID_IN_EP,
+-              HID_IN_PACKET,
++              HID_IN_BUFFER_SIZE,
+               USB_OTG_EP_INT);
+   
+   /* Open EP OUT */
+   DCD_EP_Open(pdev,
+               HID_OUT_EP,
+-              HID_OUT_PACKET,
++              HID_OUT_BUFFER_SIZE,
+               USB_OTG_EP_INT);
++
++  /* Prepare Out endpoint to receive next packet (PC->STM32) */
++  DCD_EP_PrepareRx(pdev,
++              HID_OUT_EP,
++              (uint8_t*)(USB_HID_OUT_BUF),
++              HID_OUT_BUFFER_SIZE);
+   
+   return USBD_OK;
+ }
+@@ -437,9 +492,23 @@ uint8_t USBD_HID_SendReport     (USB_OTG
+   {
+     DCD_EP_Tx (pdev, HID_IN_EP, report, len);
+   }
++  else return USBD_FAIL;  
++
+   return USBD_OK;
+ }
+ 
++uint16_t USBD_HID_RecReport(void)
++{
++  uint16_t ret_wert = 0;
++
++  if(USB_HID_RecData_Ready == 1) {
++    USB_HID_RecData_Ready = 0;
++    ret_wert = USB_HID_RecData_Len;
++  }
++
++  return(ret_wert);
++}
++
+ /**
+   * @brief  USBD_HID_GetCfgDesc 
+   *         return configuration descriptor
+@@ -470,6 +539,24 @@ static uint8_t  USBD_HID_DataIn (void  *
+   return USBD_OK;
+ }
+ 
++static uint8_t  USBD_HID_DataOut (void *pdev, uint8_t epnum)
++{
++  uint16_t data_cnt;
++ 
++  if (epnum == HID_OUT_EP)
++  {    
++    data_cnt = ((USB_OTG_CORE_HANDLE*)pdev)->dev.out_ep[epnum].xfer_count;
++    if (((USB_OTG_CORE_HANDLE*)pdev)->dev.device_status == USB_OTG_CONFIGURED )
++    {
++      USB_HID_RecData_Len = data_cnt;
++      USB_HID_RecData_Ready = 1;
++
++      DCD_EP_PrepareRx(pdev, HID_OUT_EP, (uint8_t*)(USB_HID_OUT_BUF), HID_OUT_BUFFER_SIZE);
++    }
++  }
++  return USBD_OK;
++}
++
+ /**
+   * @}
+   */ 
+diff -Nrup a/src/usbd_usr.c b/src/usbd_usr.c
+--- a/src/usbd_usr.c	2012-03-22 15:44:38.000000000 +0100
++++ b/src/usbd_usr.c	2014-11-27 00:06:24.000000000 +0100
+@@ -28,7 +28,7 @@
+ /* Includes ------------------------------------------------------------------*/
+ #include "usbd_usr.h"
+ #include "usbd_ioreq.h"
+-#include "lcd_log.h"
++//#include "lcd_log.h"
+ 
+ #include "usb_conf.h"
+ 
+@@ -123,6 +123,8 @@ USBD_Usr_cb_TypeDef USR_cb =
+ */
+ void USBD_USR_Init(void)
+ {  
++USB_HID_STATUS=USB_HID_DETACHED;
++#if 0
+   /* Initialize LEDs */
+   STM_EVAL_LEDInit(LED1);
+   STM_EVAL_LEDInit(LED2);
+@@ -165,6 +167,7 @@ void USBD_USR_Init(void)
+   LCD_DisplayStringLine( LCD_PIXEL_HEIGHT - 42, USER_INFORMATION1);
+   LCD_DisplayStringLine( LCD_PIXEL_HEIGHT - 30, USER_INFORMATION2);
+   LCD_SetTextColor(LCD_LOG_DEFAULT_COLOR);
++#endif
+   
+ }
+ 
+@@ -176,17 +179,19 @@ void USBD_USR_Init(void)
+ */
+ void USBD_USR_DeviceReset(uint8_t speed )
+ {
++ USB_HID_STATUS = USB_HID_DETACHED;
+  switch (speed)
+  {
+    case USB_OTG_SPEED_HIGH: 
+-     LCD_LOG_SetFooter ("     USB Device Library v1.1.0 [HS]" );
++     //LCD_LOG_SetFooter ("     USB Device Library v1.1.0 [HS]" );
+      break;
+ 
+   case USB_OTG_SPEED_FULL: 
+-     LCD_LOG_SetFooter ("     USB Device Library v1.1.0 [FS]" );
++     //LCD_LOG_SetFooter ("     USB Device Library v1.1.0 [FS]" );
+      break;
+  default:
+-     LCD_LOG_SetFooter ("     USB Device Library v1.1.0 [??]" );
++     //LCD_LOG_SetFooter ("     USB Device Library v1.1.0 [??]" );
++      ;
+      
+  }
+ }
+@@ -200,7 +205,8 @@ void USBD_USR_DeviceReset(uint8_t speed
+ */
+ void USBD_USR_DeviceConfigured (void)
+ {
+-  LCD_UsrLog("> HID Interface started.\n");
++  //LCD_UsrLog("> HID Interface started.\n");
++  USB_HID_STATUS = USB_HID_CONNECTED;
+ }
+ 
+ 
+@@ -212,7 +218,8 @@ void USBD_USR_DeviceConfigured (void)
+ */
+ void USBD_USR_DeviceConnected (void)
+ {
+-  LCD_UsrLog("> USB Device Connected.\n");
++  //LCD_UsrLog("> USB Device Connected.\n");
++  USB_HID_STATUS = USB_HID_DETACHED;
+ }
+ 
+ 
+@@ -224,7 +231,8 @@ void USBD_USR_DeviceConnected (void)
+ */
+ void USBD_USR_DeviceDisconnected (void)
+ {
+-  LCD_UsrLog("> USB Device Disconnected.\n");
++  //LCD_UsrLog("> USB Device Disconnected.\n");
++  USB_HID_STATUS = USB_HID_DETACHED;
+ }
+ 
+ /**
+@@ -235,7 +243,8 @@ void USBD_USR_DeviceDisconnected (void)
+ */
+ void USBD_USR_DeviceSuspended(void)
+ {
+-  LCD_UsrLog("> USB Device in Suspend Mode.\n");
++  //LCD_UsrLog("> USB Device in Suspend Mode.\n");
++  USB_HID_STATUS = USB_HID_DETACHED;
+   /* Users can do their application actions here for the USB-Reset */
+ }
+ 
+@@ -248,7 +257,8 @@ void USBD_USR_DeviceSuspended(void)
+ */
+ void USBD_USR_DeviceResumed(void)
+ {
+-    LCD_UsrLog("> USB Device in Idle Mode.\n");
++    //LCD_UsrLog("> USB Device in Idle Mode.\n");
++    USB_HID_STATUS = USB_HID_DETACHED;
+   /* Users can do their application actions here for the USB-Reset */
+ }
+ 
