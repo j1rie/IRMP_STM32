@@ -421,7 +421,7 @@ int main(void)
 
 			/* IR send command */
 			case 0xF4:
-				/* buf[2-7] -> sendIRData */
+				/* buf[1-6] -> sendIRData */
 				buf_to_IRData(buf, 1, &sendIRData);
 				/* 0|1: don't|do wait until send finished */
 				irsnd_send_data(&sendIRData, 1);
@@ -429,14 +429,14 @@ int main(void)
 				memset(buf, 0, sizeof(buf));
 				/* sendIRData -> buf[0-5] */
 				IRData_to_buf(&sendIRData);
-				/* timestamp -> buf[6-19] */
+				/* timestamp -> buf[6-9] */
 				uint32_to_buf(timestamp, 6);
 				break;
 
 			/* 4 halfwords in reverse order, little endian */
 			/* set systick alarm */
 			case 0xF3:
-				/* buf[2-5] -> AlarmValue */
+				/* buf[1-4] -> AlarmValue */
 				AlarmValue = (buf[1]<<24)|(buf[2]<<16)|(buf[3]<<8)|buf[4];
 				memset(buf, 0, sizeof(buf));
 				/* AlarmValue -> buf[0-5] */
@@ -455,7 +455,7 @@ int main(void)
 			}
 
 			/* send (modified) data (for verify) */
-			USB_HID_SendData(0x02, buf, 11);
+			USB_HID_SendData(0x02, buf, 10);
 			toggle_LED();
 		}
 
@@ -496,7 +496,7 @@ int main(void)
 						IRData_to_buf(&loopIRData);
 						/* timestamp -> buf[6-9] */
 						uint32_to_buf(timestamp, 6);
-						USB_HID_SendData(0x01, buf,11);
+						USB_HID_SendData(0x01, buf,10);
 					}
 				}
 			}
@@ -507,7 +507,7 @@ int main(void)
 			IRData_to_buf(&myIRData);
 			/* timestamp -> buf[6-9] */
 			uint32_to_buf(timestamp, 6);
-			USB_HID_SendData(0x01, buf, 11);
+			USB_HID_SendData(0x01, buf, 10);
 		}
 	}
 }
