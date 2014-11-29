@@ -339,7 +339,6 @@ int main(void)
 	/* read IR-data to send from eeprom: eeprom[6-8] -> send_buf[0], eeprom[9-11] -> send_buf[1], etc */
 	for (k = 0; k < SND_MAX; k++) {
 		eeprom_restore(send_buf[k], 6 + k * 3);
-		memcpy(send_buf[k], buf, sizeof(send_buf[k]));
 	}
 
 	while (1) {
