@@ -6,4 +6,7 @@ Ole Ernst <olebowle@gmx.com>
  for adapting coding style to kernel style
  for code cleanup
  for spotting a bug in Wakeup() after timer countdown 
-
+ for add missing brackets
+ for simplify EEPROM Emulation
+ for simplify EEPROM (re)store
+ for refine eeprom_restore
