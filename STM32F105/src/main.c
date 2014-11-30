@@ -77,9 +77,11 @@ void eeprom_restore(uint8_t *buf, uint8_t virt_addr)
 	uint16_t EE_Data;
 
 	for(i=0; i<3; i++) {
-		/* explicitly initialize variable, so we get a known state */
-		EE_Data = 0;
-		EE_ReadVariable(virt_addr + i, &EE_Data);
+		if (EE_ReadVariable(virt_addr + i, &EE_Data)) {
+			/* the variable was not found or no valid page was found */
+			EE_Data = 0;
+			/* TODO: notify about an error */
+		}
 		memcpy(&buf[2*i], &EE_Data, 2);
 	}
 }

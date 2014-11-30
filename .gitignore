@@ -17,3 +17,9 @@ STM32F103/usb_hid/*
 STM32F103/irmp/*
 IR/*
 STM32F103/ext_src/*
+STM32F105/cmsis/*
+STM32F105/cmsis_boot/*
+STM32F105/stm_lib/*
+STM32F105/usb_hid/*
+STM32F105/irmp/*
+STM32F105/ext_src/*
