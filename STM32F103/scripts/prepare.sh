@@ -116,6 +116,7 @@ patch -p1 -i ../patches/eeprom.patch
 cd ..
 cd cmsis_boot
 patch -p1 -i ../patches/stm32f10x_conf.patch
+patch -p1 -i ../patches/startup.patch
 cd ..
 
 ar='../ext_src/irmp.tar.gz'
