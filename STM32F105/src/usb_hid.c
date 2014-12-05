@@ -78,9 +78,9 @@ USB_HID_RXSTATUS_t USB_HID_ReceiveData(uint8_t *ptr)
 			ptr[n-1] = USB_HID_OUT_BUF[n];
 		}
 		else {
-			ptr[n-1] =0x00;
+			ptr[n-1] = 0x00;
 		}
-	}  
+	}
 
 	return(RX_READY);
 }

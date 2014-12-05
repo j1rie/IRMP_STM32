@@ -51,13 +51,13 @@
 
 #define SND_MAX 2
 
+uint8_t nn = 0;
 __IO uint8_t PrevXferComplete = 1;
-uint8_t PA9_state = 0;
 uint8_t buf[HID_OUT_BUFFER_SIZE-1];
-uint32_t timestamp = 0;
 uint32_t AlarmValue = 0xFFFFFFFF;
 volatile unsigned int systicks = 0;
 #ifdef ST_Link
+uint8_t PA9_state = 0;
 volatile unsigned int systicks2 = 0;
 #endif /* ST_Link */
 
@@ -186,12 +186,8 @@ void toggle_LED(void)
 	OUT_PORT->ODR ^= LED_PIN;
 }
 
-/*
- * eeprom: after writing 0xABCD into virtual address 0x6666, you have CDAB 6666 in flash
- * 2 halfwords in reverse order, little endian
- */
-
 /* buf[0 ... 5] -> eeprom[virt_addr ... virt_addr + 2] */
+/* buffer: 012345 -> arguments for Write: (10)(32)(54) -> eeprom: 01,23,45 */
 void eeprom_store(uint8_t *buf, uint8_t virt_addr)
 {
 	EE_WriteVariable(virt_addr, (buf[1] << 8) | buf[0]);
@@ -200,6 +196,7 @@ void eeprom_store(uint8_t *buf, uint8_t virt_addr)
 }
 
 /* eeprom[virt_addr ... virt_addr + 2] -> buf[0-5] */
+/* eeprom: 01,23,45 -> Read results: (10)(32)(54) -> memcpy 01|23|45 -> buffer: 012345 */
 void eeprom_restore(uint8_t *buf, uint8_t virt_addr)
 {
 	uint8_t i;
@@ -215,39 +212,6 @@ void eeprom_restore(uint8_t *buf, uint8_t virt_addr)
 	}
 }
 
-/*
- * IRData -> buf[0-5]
- * irmplircd expects dummy as first byte (Report ID),
- * so start with buf[0], adapt endianness for irmplircd
- */
-void IRData_to_buf(IRMP_DATA *IRData)
-{
-	buf[0] = IRData->protocol;
-	buf[2] = ((IRData->address) >> 8) & 0xFF;
-	buf[1] = (IRData->address) & 0xFF;
-	buf[4] = ((IRData->command) >> 8) & 0xFF;
-	buf[3] = (IRData->command) & 0xFF;
-	buf[5] = IRData->flags;
-}
-
-/* buf[BufIdx...(BufIdx+5)] -> IRData */
-void buf_to_IRData(uint8_t buf[6], uint8_t BufIdx, IRMP_DATA *IRData)
-{
-	IRData->protocol = buf[BufIdx];
-	IRData->address = ((buf[(BufIdx + 1)] << 8) | (buf[(BufIdx + 2)]));
-	IRData->command = ((buf[(BufIdx + 3)] << 8) | (buf[(BufIdx + 4)]));
-	IRData->flags = buf[(BufIdx + 5)];
-}
-
-/* buf[0-5] <-> IRData */
-uint8_t cmp_buf_IRData(uint8_t buf[6], IRMP_DATA *IRData)
-{
-	return	IRData->protocol == buf[0] && \
-		IRData->address == ((buf[1] << 8) | buf[2]) && \
-		IRData->command == ((buf[3] << 8) | buf[4]) && \
-		IRData->flags == buf[5];
-}
-
 void Systick_Init(void)
 {
 	/* 1ms */
@@ -261,7 +225,6 @@ void SysTick_Handler(void)
 #ifdef ST_Link
 	systicks2++;
 #endif /* ST_Link */
-	timestamp++;
 	if (i == 1000) {
 		if (AlarmValue)
 			AlarmValue--;
@@ -269,15 +232,6 @@ void SysTick_Handler(void)
 	} else {
 		i++;
 	}
-}
-
-/* Val -> buf[BufIdx...BufIdx+3] */
-void uint32_to_buf(uint32_t Val, uint8_t BufIdx)
-{
-	buf[BufIdx] = ((Val) >> 24) & 0xFF;
-	buf[BufIdx+1] = ((Val) >> 16) & 0xFF;
-	buf[BufIdx+2] = ((Val) >> 8) & 0xFF;
-	buf[BufIdx+3] = Val & 0xFF;
 }
 
 void Wakeup(void)
@@ -303,7 +257,7 @@ void store_new_wakeup(void)
 	delay_ms(5000);
 	if (irmp_get_data(&wakeup_IRData)) {
 		/* wakeup_IRData -> buf[0-5] */
-		IRData_to_buf(&wakeup_IRData);
+		memcpy(buf, &wakeup_IRData, sizeof(wakeup_IRData)-1);
 		/* set flags to 0 */
 		buf[5] = 0;
 		/* buf[0-5] -> eeprom[0-2] */
@@ -315,7 +269,7 @@ void store_new_wakeup(void)
 int main(void)
 {
 	uint8_t k, wakeup_buf[6], trigger_send_buf[6], send_buf[SND_MAX][6];
-	IRMP_DATA myIRData, loopIRData, sendIRData, lastIRData = { 0, 0, 0, 0};
+	IRMP_DATA myIRData, sendIRData, lastIRData = { 0, 0, 0, 0};
 
 #ifdef BlueLink_Remap
 	/* wait 5 seconds before disabling SWD, to make firmware update more easy */ /* TODO test this */
@@ -364,8 +318,6 @@ int main(void)
 			case 0xFF:
 				/* buf[1-6] -> eeprom[0-2] */
 				eeprom_store(&buf[1], 0);
-				memset(buf, 0, sizeof(buf));
-				/* eeprom[0-2] -> buf[0-5] */
 				eeprom_restore(wakeup_buf, 0);
 				break;
 
@@ -373,8 +325,6 @@ int main(void)
 			case 0xFE:
 				/* buf[1-6] -> eeprom[3-5] */
 				eeprom_store(&buf[1], 3);
-				memset(buf, 0, sizeof(buf));
-				/* eeprom[3-5] -> buf[0-5] */
 				eeprom_restore(trigger_send_buf, 3);
 				break;
 
@@ -382,8 +332,6 @@ int main(void)
 			case 0xFD:
 				/* buf[1-6] -> eeprom[6-8] */
 				eeprom_store(&buf[1], 6);
-				memset(buf, 0, sizeof(buf));
-				/* eeprom[6-8] -> buf[0-5] */
 				eeprom_restore(send_buf[0], 6);
 				break;
 
@@ -391,72 +339,57 @@ int main(void)
 			case 0xFC:
 				/* buf[1-6] -> eeprom[9-11] */
 				eeprom_store(&buf[1], 9);
-				memset(buf, 0, sizeof(buf));
-				/* eeprom[9-11] -> buf[0-5] */
 				eeprom_restore(send_buf[1], 9);
 				break;
 
 			/* get wakeup IRData */
 			case 0xFB:
-				memset(buf, 0, sizeof(buf));
 				memcpy(buf, wakeup_buf, sizeof(wakeup_buf));
 				break;
 
 			/* get trigger_send IRData */
 			case 0xFA:
-				memset(buf, 0, sizeof(buf));
 				memcpy(buf, trigger_send_buf, sizeof(trigger_send_buf));
 				break;
 
 			/* get send[0] IRData */
 			case 0xF9:
-				memset(buf, 0, sizeof(buf));
 				memcpy(buf, send_buf[0], sizeof(send_buf[0]));
 				break;
 
 			/* get send[1] IRData */
 			case 0xF8:
-				memset(buf, 0, sizeof(buf));
 				memcpy(buf, send_buf[1], sizeof(send_buf[1]));
 				break;
 
 			/* IR send command */
 			case 0xF4:
 				/* buf[1-6] -> sendIRData */
-				buf_to_IRData(buf, 1, &sendIRData);
+				memcpy(&sendIRData, &buf[1], sizeof(sendIRData));
 				/* 0|1: don't|do wait until send finished */
 				irsnd_send_data(&sendIRData, 1);
 				yellow_on();
-				memset(buf, 0, sizeof(buf));
-				/* sendIRData -> buf[0-5] */
-				IRData_to_buf(&sendIRData);
-				/* timestamp -> buf[6-9] */
-				uint32_to_buf(timestamp, 6);
+				memcpy(buf, &nn, 0); //?????
 				break;
 
-			/* 4 halfwords in reverse order, little endian */
 			/* set systick alarm */
 			case 0xF3:
 				/* buf[1-4] -> AlarmValue */
-				AlarmValue = (buf[1]<<24)|(buf[2]<<16)|(buf[3]<<8)|buf[4];
-				memset(buf, 0, sizeof(buf));
-				/* AlarmValue -> buf[0-5] */
-				uint32_to_buf(AlarmValue, 0);
+				memcpy(&AlarmValue, &buf[1], sizeof(AlarmValue));
 				break;
 
 			/* get systick alarm */
 			case 0xF2:
-				memset(buf, 0, sizeof(buf));
-				/* AlarmValue -> buf[0-5] */
-				uint32_to_buf(AlarmValue, 0);
+				/* AlarmValue -> buf[0-3] */
+				memcpy(buf, &AlarmValue, sizeof(AlarmValue));
 				break;
 
 			default:
 				break;
 			}
 
-			/* send (modified) data (for verify) */
-			USB_HID_SendData(0x02, buf, 10);
+			/* send data */
+			USB_HID_SendData(0x02, buf, 6);
 			toggle_LED();
 		}
 
@@ -464,51 +397,34 @@ int main(void)
 		if (irmp_get_data(&myIRData)) {
 			/* new IR-Data? */
 			/* omit flags */
-			if (!(	myIRData.protocol == lastIRData.protocol && \
-				myIRData.address == lastIRData.address && \
-				myIRData.command == lastIRData.command )) {
-
+			if (memcmp(&myIRData, &lastIRData, sizeof(myIRData)-1)) {
 				toggle_LED();
-				lastIRData.protocol = myIRData.protocol;
-				lastIRData.address = myIRData.address;
-				lastIRData.command = myIRData.command;
+				memcpy(&lastIRData, &myIRData, sizeof(myIRData)-1);
 			}
 
 			/* wakeup IR-data? */
-			if (cmp_buf_IRData(wakeup_buf, &myIRData))
+			if (!memcmp(wakeup_buf, &myIRData, sizeof(myIRData)))
 				Wakeup();
 
 			/* trigger send IR-data? */
-			if (cmp_buf_IRData(trigger_send_buf, &myIRData)) {
+			if (!memcmp(trigger_send_buf, &myIRData, sizeof(myIRData))) {
 				for (k=0; k < SND_MAX; k++) {
 					/* ?? 100 too small, 125 ok, RC5 is 114ms */
 					delay_ms(115);
 					/* send_buf[k] -> sendIRData */
-					buf_to_IRData(send_buf[k], 0, &sendIRData);
+					memcpy(send_buf[k], &sendIRData, sizeof(sendIRData));
 					/* 0|1: don't|do wait until send finished */
 					irsnd_send_data(&sendIRData, 1);
 					yellow_on();
 					/* ?? */
 					delay_ms(300);
-					/* receive sent by myself too, TODO */
-					if (irmp_get_data(&loopIRData)) {
-						memset(buf, 0, sizeof(buf));
-						/* loopIRData -> buf[0-5] */
-						IRData_to_buf(&loopIRData);
-						/* timestamp -> buf[6-9] */
-						uint32_to_buf(timestamp, 6);
-						USB_HID_SendData(0x01, buf,10);
-					}
 				}
 			}
 
 			/* send IR-data via USB-HID */
-			memset(buf, 0, sizeof(buf));
 			/* myIRData -> buf[0-5] */
-			IRData_to_buf(&myIRData);
-			/* timestamp -> buf[6-9] */
-			uint32_to_buf(timestamp, 6);
-			USB_HID_SendData(0x01, buf, 10);
+			memcpy(buf, &myIRData, sizeof(myIRData));
+			USB_HID_SendData(0x01, buf, 6);
 		}
 	}
 }
