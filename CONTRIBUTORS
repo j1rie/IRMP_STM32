@@ -10,3 +10,8 @@ Ole Ernst <olebowle@gmx.com>
  for simplify EEPROM Emulation
  for simplify EEPROM (re)store
  for refine eeprom_restore
+ for making startup compatibel with CooCox
+ for introducing packed struct in IRMP_DATA, 
+  which makes use of memcpy and memcmp possible
+ 
+ 
