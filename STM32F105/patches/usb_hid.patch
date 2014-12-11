@@ -551,4 +551,4 @@ diff -Nrup a/src/usbd_usr.c b/src/usbd_usr.c
 +    USB_HID_STATUS = USB_HID_DETACHED;
    /* Users can do their application actions here for the USB-Reset */
  }
- 
+ 
