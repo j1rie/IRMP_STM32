@@ -1,6 +1,6 @@
 diff -Nrup a/inc/eeprom.h b/inc/eeprom.h
 --- a/inc/eeprom.h	2009-08-04 17:25:52.000000000 +0200
-+++ b/inc/eeprom.h	2014-11-26 09:46:08.000000000 +0100
++++ b/inc/eeprom.h	2014-12-11 00:10:53.096103200 +0100
 @@ -35,8 +35,8 @@
  #endif
  
@@ -17,7 +17,7 @@ diff -Nrup a/inc/eeprom.h b/inc/eeprom.h
  
  /* Variables' number */
 -#define NumbOfVar               ((uint8_t)0x03)
-+#define NumbOfVar               ((uint8_t)0x0F)
++#define NumbOfVar ((uint8_t) (((MACRO_DEPTH + 1) * MACRO_SLOTS + WAKE_SLOTS) * SIZEOF_IR/2))
  
  /* Exported types ------------------------------------------------------------*/
  /* Exported macro ------------------------------------------------------------*/

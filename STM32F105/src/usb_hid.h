@@ -22,6 +22,8 @@
 #define	HID_IN_INTERVAL		1	/* (1...255) STM32->PC */
 #define	HID_OUT_INTERVAL	1	/* (1...255) PC->STM32 */
 
+#define REPORT_ID_IR		0x01
+#define REPORT_ID_CONFIG	0x02
 
 typedef enum {
 	USB_HID_NO_INIT =0,
