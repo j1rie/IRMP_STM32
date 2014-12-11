@@ -13,5 +13,5 @@ Ole Ernst <olebowle@gmx.com>
  for making startup compatibel with CooCox
  for introducing packed struct in IRMP_DATA, 
   which makes use of memcpy and memcmp possible
- 
+ for much better macro implementation including new protocol
  
