@@ -51,7 +51,6 @@
 
 #define SND_MAX 2
 
-uint8_t nn = 0;
 __IO uint8_t PrevXferComplete = 1;
 uint8_t buf[HID_OUT_BUFFER_SIZE-1];
 uint32_t AlarmValue = 0xFFFFFFFF;
@@ -369,7 +368,6 @@ int main(void)
 				/* 0|1: don't|do wait until send finished */
 				irsnd_send_data(&sendIRData, 1);
 				yellow_on();
-				memcpy(buf, &nn, 0); //?????
 				break;
 
 			/* set systick alarm */
@@ -416,8 +414,6 @@ int main(void)
 					/* 0|1: don't|do wait until send finished */
 					irsnd_send_data(&sendIRData, 1);
 					yellow_on();
-					/* ?? */
-					delay_ms(300);
 				}
 			}
 
