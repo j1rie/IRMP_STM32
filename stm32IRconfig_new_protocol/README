@@ -1,0 +1,8 @@
+configure and monitor STM32IR
+Usage:
+stm32IRconfig /dev/hidraw1
+program and read the eeprom (wakeup, macro)
+set and get the alarm
+send IR
+monitor (read) STM32IR, stop with ^C
+handy to get the codes of the remote controls buttons, in order to program the eeprom acordingly
