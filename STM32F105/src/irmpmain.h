@@ -2,6 +2,7 @@
 #define __IRMPMAIN_H
 
 #include "irmp.h"
+#include "irsnd.h"
 
 void IRMP_Init(void);
 uint32_t SysCtlClockGet(void);

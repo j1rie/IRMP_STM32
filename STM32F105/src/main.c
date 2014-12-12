@@ -13,7 +13,6 @@
 #include "stm32f10x.h"
 #include "usb_hid.h"
 #include "irmpmain.h"
-#include "irsndmain.h"
 #include "eeprom.h"
 
 #define BYTES_PER_QUERY	(HID_IN_BUFFER_SIZE - 4)
@@ -157,7 +156,6 @@ void store_new_wakeup(void)
 	uint8_t idx;
 	IRMP_DATA wakeup_IRData;
 	toggle_LED();
-	systicks = 0;
 	/* 5 seconds to press button on remote */
 	delay_ms(5000);
 	if (irmp_get_data(&wakeup_IRData)) {
@@ -167,14 +165,6 @@ void store_new_wakeup(void)
 		eeprom_store(idx, (uint8_t *) &wakeup_IRData);
 		toggle_LED();
 	}
-}
-
-void enable_ir_receiver(uint8_t enable)
-{
-GPIO_InitTypeDef GPIO_InitStructure;
-GPIO_InitStructure.GPIO_Pin = GPIO_Pin_6;
-GPIO_InitStructure.GPIO_Mode = enable ? GPIO_Mode_IN_FLOATING : GPIO_Mode_AIN;
-GPIO_Init(GPIOC, &GPIO_InitStructure);
 }
 
 int8_t get_handler(uint8_t *buf)
@@ -232,12 +222,8 @@ int8_t set_handler(uint8_t *buf)
 	uint8_t tmp[SIZEOF_IR];
 	switch ((enum command) buf[2]) {
 	case CMD_EMIT:
-		/* disable receiving of ir, since we don't want to rx what we txed*/
-		enable_ir_receiver(0);
+		delay_ms(130);
 		irsnd_send_data((IRMP_DATA *) &buf[3], 1);
-		delay_ms(300);
-		/* reenable receiving of ir */
-		enable_ir_receiver(1);
 		break;
 	case CMD_ALARM:
 		AlarmValue = *((uint32_t *) &buf[3]);
@@ -305,8 +291,6 @@ void transmit_macro(uint8_t macro)
 	uint8_t i, idx;
 	uint8_t buf[SIZEOF_IR];
 	uint8_t zeros[SIZEOF_IR] = {0};
-	/* disable receiving of ir, since we don't want to rx what we txed*/
-	enable_ir_receiver(0);
 	/* we start from 1, since we don't want to tx the trigger code of the macro*/
 	for (i=1; i < MACRO_DEPTH + 1; i++) {
 		idx = (MACRO_DEPTH + 1) * SIZEOF_IR/2 * macro + SIZEOF_IR/2 * i;
@@ -314,11 +298,11 @@ void transmit_macro(uint8_t macro)
 		/* first encounter of zero in macro means end of macro */
 		if (!memcmp(buf, &zeros, sizeof(zeros)))
 			break;
+		/* Depending on the protocol we need a pause between the trigger and the transmission
+		 * and between two transmissions. The highest known pause is 130 ms for Denon. */
+		delay_ms(130);
 		irsnd_send_data((IRMP_DATA *) buf, 1);
-		delay_ms(300); // ??
 	}
-	/* reenable receiving of ir */
-	enable_ir_receiver(1);
 }
 
 /* is received ir-code (trigger) in one of the macro-slots? transmit_macro if true */
@@ -342,7 +326,7 @@ int main(void)
 	LED_Switch_init();
 	USB_HID_Init();
 	IRMP_Init();
-	IRSND_Init();
+	irsnd_init();
 	FLASH_Unlock();
 	EE_Init();
 	Systick_Init();
@@ -353,7 +337,6 @@ int main(void)
 
 		/* wakeup reset pin pulled low? */
 		if (!GPIO_ReadInputDataBit(GPIOB, GPIO_Pin_8)) {
-			/* put wakeup IRData into buf and wakeup eeprom */
 			store_new_wakeup();
 		}
 
@@ -388,17 +371,19 @@ int main(void)
 
 		/* poll IR-data */
 		if (irmp_get_data(&myIRData)) {
-			if (!(myIRData.flags)) { // & IRMP_FLAG_REPETITION)) { //
+			if (!(myIRData.flags)) {
 				RepeatCounter = 0;
 			} else {
 				RepeatCounter++;
 			}
-			if ((RepeatCounter == 0) | ( RepeatCounter >= MIN_REPEATS))
+
+			if ((RepeatCounter == 0) || ( RepeatCounter >= MIN_REPEATS)) {
 				toggle_LED();
-
-			check_wakeups(&myIRData);
-
-			check_macros(&myIRData);
+				/* if macros are sent already, while the trigger IR data are still repeated,
+				 * the receiving device may crash */
+				check_macros(&myIRData);
+				check_wakeups(&myIRData);
+			}
 
 			/* send IR-data via USB-HID */
 			memcpy(buf, &myIRData, sizeof(myIRData));
