@@ -11,8 +11,8 @@
 #define __CONFIG_H
 
 /* MACRO_SLOTS x (MACRO_DEPTH + 1) + WAKE_SLOTS < 85
- * Eeprom page size = 1kB, 256 pairs of 16bit variable + address,
- * IRdata needs 3 variables, 256 / 3 = 85
+ * Eeprom page size = 1kB - 4, 255 pairs of 16bit variable + address,
+ * IRdata needs 3 variables, 255 / 3 = 85
  */
 #define MACRO_SLOTS	8
 #define MACRO_DEPTH	8

@@ -15,6 +15,7 @@
 #include "irmpmain.h"
 #include "eeprom.h"
 #include "st_link.h"
+#include "config.h"
 
 #define BYTES_PER_QUERY	(HID_IN_BUFFER_SIZE - 4)
 

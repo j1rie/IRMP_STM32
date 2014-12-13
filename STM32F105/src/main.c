@@ -14,6 +14,7 @@
 #include "usb_hid.h"
 #include "irmpmain.h"
 #include "eeprom.h"
+#include "config.h"
 
 #define BYTES_PER_QUERY	(HID_IN_BUFFER_SIZE - 4)
 
@@ -150,7 +151,6 @@ void Wakeup(void)
 	GPIO_WriteBit(GPIOB, GPIO_Pin_7, Bit_RESET);
 }
 
-/* put wakeup IRData into eeprom */
 void store_new_wakeup(void)
 {
 	uint8_t idx;
@@ -161,7 +161,7 @@ void store_new_wakeup(void)
 	if (irmp_get_data(&wakeup_IRData)) {
 		wakeup_IRData.flags = 0;
 		idx = (MACRO_DEPTH + 1) * SIZEOF_IR/2 * MACRO_SLOTS;
-		/* store wakeup-code learned by remote in first wakeup slot */
+		/* store received wakeup IRData in first wakeup slot */
 		eeprom_store(idx, (uint8_t *) &wakeup_IRData);
 		toggle_LED();
 	}
@@ -226,7 +226,7 @@ int8_t set_handler(uint8_t *buf)
 		irsnd_send_data((IRMP_DATA *) &buf[3], 1);
 		break;
 	case CMD_ALARM:
-		AlarmValue = *((uint32_t *) &buf[3]);
+		memcpy(&AlarmValue, &buf[3], sizeof(AlarmValue));
 		break;
 	case CMD_MACRO:
 		idx = (MACRO_DEPTH + 1) * SIZEOF_IR/2 * buf[3] + SIZEOF_IR/2 * buf[4];

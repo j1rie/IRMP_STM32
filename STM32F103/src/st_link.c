@@ -9,6 +9,7 @@
 
 #include "st_link.h"
 #include "stm32f10x.h"
+#include "config.h"
 
 #ifdef ST_Link
 uint8_t PA9_state = 0;
