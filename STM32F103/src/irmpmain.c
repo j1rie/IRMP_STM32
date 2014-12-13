@@ -47,8 +47,7 @@ void IRMP_Init(void)
 void TIM2_IRQHandler(void)
 {
 	TIM_ClearITPendingBit(TIM2, TIM_IT_Update);
-	/* uncomment, if you want to use only one timer for both irmp and irsnd */
-	//if (! irsnd_ISR()) { /* call irsnd ISR */
+	if (! irsnd_ISR()) { /* call irsnd ISR */
 		irmp_ISR(); /* if not busy call irmp ISR */
-	//}
+	}
 }

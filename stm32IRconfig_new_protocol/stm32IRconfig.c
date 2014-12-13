@@ -76,7 +76,7 @@ int main(int argc, const char **argv) {
 	outBuf[0] = 0x03; // Report ID
 	outBuf[1] = 0x00; // STAT_CMD
 	
-cont:   printf("program eeprom(p)\nget eeprom(g)\nset alarm(s)\nget alarm(a)\nsendIR(i)\nmonitor until ^C(m)\nexit(x)\n");
+cont:   printf("program eeprom(p)\nget eeprom(g)\nreset(r)\nset alarm(s)\nget alarm(a)\nsendIR(i)\nmonitor until ^C(m)\nexit(x)\n");
 	scanf("%s", &c);
 	
 	switch (c) {
@@ -118,7 +118,6 @@ prog:	    printf("set wakeup(w)\nset macro slot(m)\n");
 	    usleep(2000);
 	    read_stm32();
 	    if (inBuf[1] == 0x01) { // STAT_SUCCESS
-	    /*if (memcmp(&outBuf[2], &inBuf[1], 6) == 0) {*/
 		puts("*****************************OK********************************\n");
 	    } else {
 		puts("***************************ERROR*******************************\n");
@@ -155,6 +154,39 @@ get:	    printf("get wakeup(w)\nget macro slot(m)\n");
 	    read_stm32();
 	    break;
 
+	case 'r':
+reset:	    printf("reset wakeup(w)\nreset macro slot(m)\nreset alarm(a)\n");
+	    scanf("%s", &d);
+	    memset(&outBuf[2], 0, 15);
+	    idx = 2;
+	    outBuf[idx++] = 0x02; // ACC_RESET
+	    switch (d) {
+		case 'w':
+		    printf("enter slot number (starting with 0)\n");
+		    scanf("%"SCNd8"", &s);
+		    outBuf[idx++] = 0x05; // CMD_WAKE
+		    outBuf[idx++] = s;    // (s+1)-th slot
+		    break;
+		case 'm':
+		    printf("enter macro number (starting with 0)\n");
+		    scanf("%"SCNd8"", &m);
+		    outBuf[idx++] = 0x04; // CMD_MACRO
+		    outBuf[idx++] = m;    // (m+1)-th macro
+		    printf("enter slot number, 0 for trigger\n");
+		    scanf("%"SCNd8"", &s);
+		    outBuf[idx++] = s;    // (s+1)-th slot
+		    break;
+		case 'a':
+		    outBuf[idx++] = 0x03; // CMD_ALARM
+		    break;
+		default:
+		    goto reset;
+	    }
+	    write_stm32();
+	    usleep(2000);
+	    read_stm32();
+	    break;
+
 	case 's':
 	    memset(&outBuf[2], 0, 15);
 	    idx = 2;
@@ -167,7 +199,6 @@ get:	    printf("get wakeup(w)\nget macro slot(m)\n");
 	    usleep(2000);
 	    read_stm32();
 	    if (inBuf[1] == 0x01) { // STAT_SUCCESS
-	    /*if (memcmp(&outBuf[2], &inBuf[1], 14) == 0) {*/
 		puts("*****************************OK********************************\n");
 	    } else {
 		puts("***************************ERROR*******************************\n");
@@ -199,18 +230,8 @@ get:	    printf("get wakeup(w)\nget macro slot(m)\n");
 	    outBuf[idx++] = i & 0xFF;
 	    write_stm32();
 	    usleep(2000);
-//	    for (int n=0;n<1000;n++) { // enough for flags = 0x0e, 15 times (RC5)
 	    read_stm32();
-//	    usleep(1000);
-//	    }
-	    /*k = inBuf[2];
-	    inBuf[2] = inBuf[3];
-	    inBuf[3] = k;
-	    k = inBuf[4];
-	    inBuf[4] = inBuf[5];
-	    inBuf[5] = k;*/
 	    if (inBuf[1] == 0x01) { // STAT_SUCCESS
-	    /*if (memcmp(&outBuf[2], &inBuf[1], 5) == 0) {*/
 		puts("*****************************OK********************************\n");
 	    } else {
 		puts("***************************ERROR*******************************\n");

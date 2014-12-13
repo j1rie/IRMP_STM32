@@ -436,4 +436,4 @@ diff -Nrup a/src/usb_prop.c b/src/usb_prop.c
 +  if (wValue0 > 3) /* bugfix */
    {
      return NULL;
-   }
+   }
