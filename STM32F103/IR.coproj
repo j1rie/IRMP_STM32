@@ -87,40 +87,40 @@
     <File name="usb_hid/src/usb_desc.c" path="usb_hid/src/usb_desc.c" type="1"/>
     <File name="usb_hid/src/usb_core.c" path="usb_hid/src/usb_core.c" type="1"/>
     <File name="usb_hid/inc/usb_conf.h" path="usb_hid/inc/usb_conf.h" type="1"/>
-    <File name="usb_hid/inc/platform_config.h" path="usb_hid/inc/platform_config.h" type="1"/>
     <File name="stm_lib/inc/stm32f10x_tim.h" path="stm_lib/inc/stm32f10x_tim.h" type="1"/>
+    <File name="usb_hid/inc/platform_config.h" path="usb_hid/inc/platform_config.h" type="1"/>
     <File name="cmsis_boot" path="" type="2"/>
     <File name="irmp/irsnd.c" path="irmp/irsnd.c" type="1"/>
     <File name="usb_hid/inc/usb_regs.h" path="usb_hid/inc/usb_regs.h" type="1"/>
     <File name="src" path="" type="2"/>
     <File name="src/usb_hid.h" path="src/usb_hid.h" type="1"/>
     <File name="src/irmpmain.c" path="src/irmpmain.c" type="1"/>
-    <File name="usb_hid/inc/usb_core.h" path="usb_hid/inc/usb_core.h" type="1"/>
     <File name="stm_lib/src/stm32f10x_tim.c" path="stm_lib/src/stm32f10x_tim.c" type="1"/>
+    <File name="usb_hid/inc/usb_core.h" path="usb_hid/inc/usb_core.h" type="1"/>
     <File name="stm_lib/inc/stm32f10x_pwr.h" path="stm_lib/inc/stm32f10x_pwr.h" type="1"/>
     <File name="cmsis_boot/startup" path="" type="2"/>
     <File name="usb_hid/inc" path="" type="2"/>
     <File name="usb_hid/src/usb_istr.c" path="usb_hid/src/usb_istr.c" type="1"/>
     <File name="cmsis/core_cmFunc.h" path="cmsis/core_cmFunc.h" type="1"/>
-    <File name="usb_hid/inc/usb_int.h" path="usb_hid/inc/usb_int.h" type="1"/>
     <File name="stm_lib/src/misc.c" path="stm_lib/src/misc.c" type="1"/>
-    <File name="src/st_link.h" path="src/st_link.h" type="1"/>
+    <File name="usb_hid/inc/usb_int.h" path="usb_hid/inc/usb_int.h" type="1"/>
     <File name="cmsis_boot/stm32f10x.h" path="cmsis_boot/stm32f10x.h" type="1"/>
+    <File name="src/st_link_leds.h" path="src/st_link_leds.h" type="1"/>
     <File name="cmsis_boot/stm32f10x_conf.h" path="cmsis_boot/stm32f10x_conf.h" type="1"/>
     <File name="usb_hid/src/hw_config.c" path="usb_hid/src/hw_config.c" type="1"/>
+    <File name="src/st_link_leds.c" path="src/st_link_leds.c" type="1"/>
     <File name="usb_hid/inc/usb_lib.h" path="usb_hid/inc/usb_lib.h" type="1"/>
     <File name="stm_lib/inc/stm32f10x_flash.h" path="stm_lib/inc/stm32f10x_flash.h" type="1"/>
     <File name="usb_hid/inc/usb_istr.h" path="usb_hid/inc/usb_istr.h" type="1"/>
-    <File name="cmsis_boot/startup/startup_stm32f10x_md.s" path="cmsis_boot/startup/startup_stm32f10x_md.s" type="1"/>
     <File name="usb_hid/src/usb_mem.c" path="usb_hid/src/usb_mem.c" type="1"/>
+    <File name="cmsis_boot/startup/startup_stm32f10x_md.s" path="cmsis_boot/startup/startup_stm32f10x_md.s" type="1"/>
     <File name="src/usb_hid.c" path="src/usb_hid.c" type="1"/>
     <File name="irmp/irsnd.h" path="irmp/irsnd.h" type="1"/>
     <File name="usb_hid/inc/stm32_it.h" path="usb_hid/inc/stm32_it.h" type="1"/>
     <File name="usb_hid/src/usb_prop.c" path="usb_hid/src/usb_prop.c" type="1"/>
-    <File name="usb_hid/inc/usb_type.h" path="usb_hid/inc/usb_type.h" type="1"/>
     <File name="usb_hid/src/usb_regs.c" path="usb_hid/src/usb_regs.c" type="1"/>
+    <File name="usb_hid/inc/usb_type.h" path="usb_hid/inc/usb_type.h" type="1"/>
     <File name="usb_hid/src/usb_sil.c" path="usb_hid/src/usb_sil.c" type="1"/>
-    <File name="src/st_link.c" path="src/st_link.c" type="1"/>
     <File name="stm_lib/src/stm32f10x_usart.c" path="stm_lib/src/stm32f10x_usart.c" type="1"/>
     <File name="usb_hid/inc/usb_pwr.h" path="usb_hid/inc/usb_pwr.h" type="1"/>
     <File name="irmp/irmp.h" path="irmp/irmp.h" type="1"/>
@@ -130,20 +130,20 @@
     <File name="stm_lib/src/stm32f10x_gpio.c" path="stm_lib/src/stm32f10x_gpio.c" type="1"/>
     <File name="usb_hid/inc/usb_def.h" path="usb_hid/inc/usb_def.h" type="1"/>
     <File name="stm_lib/inc/stm32f10x_gpio.h" path="stm_lib/inc/stm32f10x_gpio.h" type="1"/>
-    <File name="stm_lib/inc/stm32f10x_usart.h" path="stm_lib/inc/stm32f10x_usart.h" type="1"/>
     <File name="usb_hid/inc/usb_prop.h" path="usb_hid/inc/usb_prop.h" type="1"/>
+    <File name="stm_lib/inc/stm32f10x_usart.h" path="stm_lib/inc/stm32f10x_usart.h" type="1"/>
     <File name="usb_hid/src/stm32_it.c" path="usb_hid/src/stm32_it.c" type="1"/>
-    <File name="stm_lib/src/eeprom.c" path="stm_lib/src/eeprom.c" type="1"/>
     <File name="cmsis_boot/system_stm32f10x.c" path="cmsis_boot/system_stm32f10x.c" type="1"/>
-    <File name="usb_hid/src/usb_pwr.c" path="usb_hid/src/usb_pwr.c" type="1"/>
+    <File name="stm_lib/src/eeprom.c" path="stm_lib/src/eeprom.c" type="1"/>
     <File name="stm_lib/inc/misc.h" path="stm_lib/inc/misc.h" type="1"/>
+    <File name="usb_hid/src/usb_pwr.c" path="usb_hid/src/usb_pwr.c" type="1"/>
     <File name="stm_lib/inc/eeprom.h" path="stm_lib/inc/eeprom.h" type="1"/>
     <File name="cmsis/core_cmInstr.h" path="cmsis/core_cmInstr.h" type="1"/>
     <File name="usb_hid/inc/usb_mem.h" path="usb_hid/inc/usb_mem.h" type="1"/>
     <File name="cmsis/core_cm3.h" path="cmsis/core_cm3.h" type="1"/>
     <File name="usb_hid" path="" type="2"/>
-    <File name="usb_hid/src/usb_init.c" path="usb_hid/src/usb_init.c" type="1"/>
     <File name="src/irmpmain.h" path="src/irmpmain.h" type="1"/>
+    <File name="usb_hid/src/usb_init.c" path="usb_hid/src/usb_init.c" type="1"/>
     <File name="stm_lib/src/stm32f10x_exti.c" path="stm_lib/src/stm32f10x_exti.c" type="1"/>
     <File name="stm_lib/src/stm32f10x_rcc.c" path="stm_lib/src/stm32f10x_rcc.c" type="1"/>
     <File name="usb_hid/inc/hw_config.h" path="usb_hid/inc/hw_config.h" type="1"/>
@@ -156,12 +156,12 @@
     <File name="stm_lib/inc/stm32f10x_exti.h" path="stm_lib/inc/stm32f10x_exti.h" type="1"/>
     <File name="stm_lib/src/stm32f10x_flash.c" path="stm_lib/src/stm32f10x_flash.c" type="1"/>
     <File name="cmsis_boot/system_stm32f10x.h" path="cmsis_boot/system_stm32f10x.h" type="1"/>
-    <File name="stm_lib/inc/stm32f10x_rcc.h" path="stm_lib/inc/stm32f10x_rcc.h" type="1"/>
     <File name="irmp/irmpprotocols.h" path="irmp/irmpprotocols.h" type="1"/>
+    <File name="stm_lib/inc/stm32f10x_rcc.h" path="stm_lib/inc/stm32f10x_rcc.h" type="1"/>
     <File name="irmp/irmpsystem.h" path="irmp/irmpsystem.h" type="1"/>
     <File name="irmp/irsndconfig.h" path="irmp/irsndconfig.h" type="1"/>
-    <File name="usb_hid/inc/usb_sil.h" path="usb_hid/inc/usb_sil.h" type="1"/>
     <File name="usb_hid/src/usb_int.c" path="usb_hid/src/usb_int.c" type="1"/>
+    <File name="usb_hid/inc/usb_sil.h" path="usb_hid/inc/usb_sil.h" type="1"/>
     <File name="irmp/irmpconfig.h" path="irmp/irmpconfig.h" type="1"/>
     <File name="src/config.h" path="src/config.h" type="1"/>
     <File name="usb_hid/src/usb_endp.c" path="usb_hid/src/usb_endp.c" type="1"/>
