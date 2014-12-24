@@ -77,7 +77,7 @@ void LED_Switch_init(void)
 	/* PB12 (blue LED) */
 	GPIO_InitStructure.GPIO_Pin = GPIO_Pin_12;
 	GPIO_InitStructure.GPIO_Mode = GPIO_Mode_Out_PP;
-	GPIO_InitStructure.GPIO_Speed = GPIO_Speed_50MHz;
+	GPIO_InitStructure.GPIO_Speed = GPIO_Speed_2MHz; //50MHz;
 	GPIO_Init(GPIOB, &GPIO_InitStructure);
 	/* Config PB7 (motherboard switch pin) */
 	GPIO_InitStructure.GPIO_Pin = GPIO_Pin_7;
@@ -164,6 +164,14 @@ void store_new_wakeup(void)
 		/* store received wakeup IRData in first wakeup slot */
 		eeprom_store(idx, (uint8_t *) &wakeup_IRData);
 		toggle_LED();
+	}
+}
+
+void wakeup_reset(void)
+{
+	/* wakeup reset pin pulled low? */
+	if (!GPIO_ReadInputDataBit(GPIOB, GPIO_Pin_8)) {
+		store_new_wakeup();
 	}
 }
 
@@ -322,8 +330,8 @@ int main(void)
 	IRMP_DATA myIRData;
 	int8_t ret;
 
-	LED_Switch_init();
 	USB_HID_Init();
+	LED_Switch_init();
 	IRMP_Init();
 	irsnd_init();
 	FLASH_Unlock();
@@ -334,10 +342,7 @@ int main(void)
 		if (!AlarmValue)
 			Wakeup();
 
-		/* wakeup reset pin pulled low? */
-		if (!GPIO_ReadInputDataBit(GPIOB, GPIO_Pin_8)) {
-			store_new_wakeup();
-		}
+		wakeup_reset();
 
 		/* test if USB is connected to PC and command is received */
 		if (USB_HID_GetStatus() == USB_HID_CONNECTED && USB_HID_ReceiveData(buf) == RX_READY && buf[0] == STAT_CMD) {

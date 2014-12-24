@@ -53,7 +53,7 @@
 #else
 	/* WARNING: further firmware updates will become difficult! */
 	#define RESET_PORT	GPIOA
-	#define WAKEUP_RESET_PIN GPIO_Pin_14 //
+	#define WAKEUP_RESET_PIN GPIO_Pin_14
 #endif /* ST_Link_LEDs */
 #endif /* WAKEUP_RESET */
 #endif /* BlueLink_Remap */

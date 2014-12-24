@@ -20,7 +20,7 @@ void LED_init(void)
 	GPIO_InitTypeDef GPIO_InitStructure;
 	GPIO_InitStructure.GPIO_Pin = GPIO_Pin_9;
 	GPIO_InitStructure.GPIO_Mode = GPIO_Mode_Out_PP;
-	GPIO_InitStructure.GPIO_Speed = GPIO_Speed_2MHz; //50MHz;
+	GPIO_InitStructure.GPIO_Speed = GPIO_Speed_2MHz;
 	GPIO_Init(GPIOA, &GPIO_InitStructure);
 }
 
@@ -29,7 +29,7 @@ void LED_deinit(void)
 	GPIO_InitTypeDef GPIO_InitStructure;
 	GPIO_InitStructure.GPIO_Pin = GPIO_Pin_9;
 	GPIO_InitStructure.GPIO_Mode = GPIO_Mode_IN_FLOATING;
-	GPIO_InitStructure.GPIO_Speed = GPIO_Speed_2MHz; //50MHz;
+	GPIO_InitStructure.GPIO_Speed = GPIO_Speed_2MHz;
 	GPIO_Init(GPIOA, &GPIO_InitStructure);
 	PA9_state = 0;
 }
@@ -37,20 +37,18 @@ void LED_deinit(void)
 /* red + yellow fast toggle */
 void fast_toggle(void)
 {
-#if 0 // causes strange problem, TODO find out why, related to check_wakeups, Wakeup
+//#if 0 // causes strange problem, TODO find out why, related to Wakeup
 	if (!PA9_state)
-		LED_init();
-	//systicks2 = 0;
-	//while (systicks2 <= 500) { //
-	uint8_t k;
-	for (k=0; k<5; k++) {
+		LED_init();  // => error! why???
+	systicks2 = 0;
+	while (systicks2 <= 500) {
 		GPIO_WriteBit(GPIOA, GPIO_Pin_9, Bit_SET);
 		delay_ms(50);
 		GPIO_WriteBit(GPIOA, GPIO_Pin_9, Bit_RESET);
 		delay_ms(50);
 	}
 	LED_deinit();
-#endif
+//#endif
 }
 
 /* red + yellow both on */
@@ -58,10 +56,8 @@ void both_on(void)
 {
 	if (!PA9_state)
 		LED_init();
-	//systicks2 = 0;
-	//while (systicks2 <= 500) { //
-	uint8_t k;
-	for (k=0; k<200; k++) {
+	systicks2 = 0;
+	while (systicks2 <= 500) {
 		GPIO_WriteBit(GPIOA, GPIO_Pin_9, Bit_SET);
 		delay_ms(1);
 		GPIO_WriteBit(GPIOA, GPIO_Pin_9, Bit_RESET);
@@ -73,9 +69,7 @@ void both_on(void)
 /* red on */
 void red_on(void)
 {
-
 	LED_init();
-
 	GPIO_WriteBit(GPIOA, GPIO_Pin_9, Bit_SET);
 	PA9_state = 1;
 }
@@ -83,14 +77,14 @@ void red_on(void)
 /* yellow short on */
 void yellow_short_on(void)
 {
-#if 0 // causes strange problem, TODO find out why, related to check_macros, transmit_macro
+//#if 0 // causes strange problem, TODO find out why, related to transmit_macro (and irsnd_send_data?)
 	if (!PA9_state)
-		LED_init();
+		LED_init();  // => error! why???
 	GPIO_WriteBit(GPIOA, GPIO_Pin_9, Bit_RESET);
 	delay_ms(130);
 	LED_deinit();
-#endif
-	delay_ms(130);
+//#endif
+	//delay_ms(130);
 }
 #else
 void fast_toggle(void) {}
@@ -109,5 +103,5 @@ void toggle_LED(void)
 		LED_deinit();
 	}
 #endif /* ST_Link_LEDs */
-	OUT_PORT->ODR ^= LED_PIN; // TODO make more readable
+	OUT_PORT->ODR ^= LED_PIN;
 }
