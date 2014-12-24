@@ -14,7 +14,7 @@
 #include "usb_hid.h"
 #include "irmpmain.h"
 #include "eeprom.h"
-#include "config.h"
+#include "config.h" /* CooCox workaround */
 
 #define BYTES_PER_QUERY	(HID_IN_BUFFER_SIZE - 4)
 
@@ -172,10 +172,9 @@ int8_t get_handler(uint8_t *buf)
 	/* number of valid bytes in buf, -1 signifies error */
 	int8_t ret = 3;
 	uint8_t idx;
-
 	switch ((enum command) buf[2]) {
 	case CMD_CAPS:
-		/* in first query we give informaton about slots and depth */
+		/* in first query we give information about slots and depth */
 		if (!buf[3]) {
 			buf[3] = MACRO_SLOTS;
 			buf[4] = MACRO_DEPTH;
@@ -191,7 +190,7 @@ int8_t get_handler(uint8_t *buf)
 		/* actually this is not true for the last transmission,
 		 * but it doesn't matter since it's NULL terminated
 		 */
-		ret = HID_IN_BUFFER_SIZE-1; //
+		ret = HID_IN_BUFFER_SIZE-1;
 		break;
 	case CMD_ALARM:
 		/* AlarmValue -> buf[3-6] */
@@ -364,7 +363,7 @@ int main(void)
 				buf[0] = STAT_SUCCESS;
 			}
 
-			/* send data */
+			/* send configuration data */
 			USB_HID_SendData(REPORT_ID_CONFIG, buf, ret);
 			toggle_LED();
 		}
@@ -377,7 +376,7 @@ int main(void)
 				RepeatCounter++;
 			}
 
-			if ((RepeatCounter == 0) || ( RepeatCounter >= MIN_REPEATS)) {
+			if (RepeatCounter == 0 || RepeatCounter >= MIN_REPEATS) {
 				toggle_LED();
 				/* if macros are sent already, while the trigger IR data are still repeated,
 				 * the receiving device may crash */
@@ -385,7 +384,7 @@ int main(void)
 				check_wakeups(&myIRData);
 			}
 
-			/* send IR-data via USB-HID */
+			/* send IR-data */
 			memcpy(buf, &myIRData, sizeof(myIRData));
 			USB_HID_SendData(REPORT_ID_IR, buf, sizeof(myIRData));
 		}
