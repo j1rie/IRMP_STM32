@@ -1,6 +1,6 @@
 
 PROJECTNAME=stm32IRconfig
-VERSION=0.0.13
+VERSION=0.0.14
 
 CC              = g++
 //PKG_CONFIG      = pkg-config

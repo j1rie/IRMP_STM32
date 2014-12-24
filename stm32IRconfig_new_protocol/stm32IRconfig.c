@@ -27,7 +27,7 @@ uint8_t inBuf[16];
 uint8_t outBuf[17];
 
 static bool open_stm32(const char *devicename) {
-	stm32fd = open(devicename, O_RDWR ); //  | O_NONBLOCK );
+	stm32fd = open(devicename, O_RDWR );
 	if (stm32fd == -1) {
 		printf("error opening stm32 device: %s\n",strerror(errno));
 		return false;
@@ -68,7 +68,7 @@ int main(int argc, const char **argv) {
 	
 	uint64_t i;
 	char c, d;
-	uint8_t s, m, l, idx;
+	uint8_t s, m, k, l, idx;
 	int retValm;
 	
 	open_stm32(argc>1 ? argv[1] : "/dev/hidraw2");
@@ -125,7 +125,7 @@ prog:	    printf("set wakeup(w)\nset macro slot(m)\n");
 	    break;
 	    
 	case 'g':
-get:	    printf("get wakeup(w)\nget macro slot(m)\n");
+get:	    printf("get wakeup(w)\nget macro slot(m)\nget caps(c)\n");
 	    scanf("%s", &d);
 	    memset(&outBuf[2], 0, 15);
 	    idx = 2;
@@ -146,13 +146,37 @@ get:	    printf("get wakeup(w)\nget macro slot(m)\n");
 		    scanf("%"SCNd8"", &s);
 		    outBuf[idx++] = s;    // (s+1)-th slot
 		    break;
+		case 'c':
+		    outBuf[idx++] = 0x01; // CMD_CAPS
+		    for (l = 0; l < 4; l++) {
+			outBuf[idx] = l;    // 0 slots, ++ protocols
+			write_stm32();
+			usleep(2000);
+			read_stm32();
+			if (!l) {
+			    printf("macro_slots: %u\n", inBuf[4]);
+			    printf("macro_depth: %u\n", inBuf[5]);
+			    printf("wake_slots: %u\n", inBuf[6]);
+			} else {
+			    printf("protocols: ");
+			    for (k = 4; k < 16; k++) { //17
+			    if (!inBuf[k]) {
+				printf("\n\n");
+				goto out;
+			    }
+			    printf("%u ", inBuf[k]);
+			    }
+			}
+			printf("\n\n");
+		    }
+		    break;
 		default:
 		    goto get;
 	    }
 	    write_stm32();
 	    usleep(2000);
 	    read_stm32();
-	    break;
+out:	    break;
 
 	case 'r':
 reset:	    printf("reset wakeup(w)\nreset macro slot(m)\nreset alarm(a)\n");
