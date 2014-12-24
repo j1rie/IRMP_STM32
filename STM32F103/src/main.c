@@ -14,8 +14,8 @@
 #include "usb_hid.h"
 #include "irmpmain.h"
 #include "eeprom.h"
-#include "st_link.h"
-#include "config.h"
+#include "st_link_leds.h"
+#include "config.h" /* CooCox workaround */
 
 #define BYTES_PER_QUERY	(HID_IN_BUFFER_SIZE - 4)
 
@@ -64,9 +64,9 @@ IRMP_NOKIA_PROTOCOL,
 __IO uint8_t PrevXferComplete = 1;
 uint32_t AlarmValue = 0xFFFFFFFF;
 volatile unsigned int systicks = 0;
-#ifdef ST_Link
+#ifdef ST_Link_LEDs
 volatile unsigned int systicks2 = 0;
-#endif /* ST_Link */
+#endif /* ST_Link_LEDs */
 
 void delay_ms(unsigned int msec)
 {
@@ -81,21 +81,44 @@ void LED_Switch_init(void)
 	RCC_APB2PeriphClockCmd(RCC_APB2Periph_GPIOA | RCC_APB2Periph_AFIO, ENABLE);
 	/* disable SWD, so pins are available */
 	GPIO_PinRemapConfig(GPIO_Remap_SWJ_Disable, ENABLE);
-#else
-	RCC_APB2PeriphClockCmd(RCC_APB2Periph_GPIOB, ENABLE);
-#endif /* BlueLink_Remap */
 	GPIO_InitStructure.GPIO_Pin = GPIO_Pin_13;
 	GPIO_InitStructure.GPIO_Mode = GPIO_Mode_Out_PP;
-	GPIO_InitStructure.GPIO_Speed = GPIO_Speed_50MHz;
+	GPIO_InitStructure.GPIO_Speed = GPIO_Speed_2MHz; //50MHz;
 	GPIO_Init(OUT_PORT, &GPIO_InitStructure);
 	GPIO_InitStructure.GPIO_Pin = GPIO_Pin_14;
 	GPIO_Init(OUT_PORT, &GPIO_InitStructure);
-	/* wakeup reset pin */
 #ifdef	WAKEUP_RESET
+	RCC_APB2PeriphClockCmd(RCC_APB2Periph_GPIOB, ENABLE);
 	GPIO_InitStructure.GPIO_Pin = WAKEUP_RESET_PIN;
 	GPIO_InitStructure.GPIO_Mode = GPIO_Mode_IPU;
-	GPIO_Init(OUT_PORT, &GPIO_InitStructure);
+	GPIO_Init(RESET_PORT, &GPIO_InitStructure);
 #endif /* WAKEUP_RESET */
+#else
+#ifdef ST_Link_LEDs
+	RCC_APB2PeriphClockCmd(RCC_APB2Periph_GPIOA, ENABLE);
+#endif /* ST_Link_LEDs */
+	RCC_APB2PeriphClockCmd(RCC_APB2Periph_GPIOB, ENABLE);
+	GPIO_InitStructure.GPIO_Pin = GPIO_Pin_13;
+	GPIO_InitStructure.GPIO_Mode = GPIO_Mode_Out_PP;
+	GPIO_InitStructure.GPIO_Speed = GPIO_Speed_2MHz; //50MHz;
+	GPIO_Init(OUT_PORT, &GPIO_InitStructure);
+	GPIO_InitStructure.GPIO_Pin = GPIO_Pin_14;
+	GPIO_Init(OUT_PORT, &GPIO_InitStructure);
+#ifdef	WAKEUP_RESET
+#ifndef ST_Link_LEDs
+	GPIO_InitStructure.GPIO_Pin = WAKEUP_RESET_PIN;
+	GPIO_InitStructure.GPIO_Mode = GPIO_Mode_IPU;
+	GPIO_Init(RESET_PORT, &GPIO_InitStructure);
+#else
+	RCC_APB2PeriphClockCmd(RCC_APB2Periph_AFIO, ENABLE);
+	/* disable SWD, so pins are available */
+	GPIO_PinRemapConfig(GPIO_Remap_SWJ_Disable, ENABLE);
+	GPIO_InitStructure.GPIO_Pin = WAKEUP_RESET_PIN;
+	GPIO_InitStructure.GPIO_Mode = GPIO_Mode_IPU;
+	GPIO_Init(RESET_PORT, &GPIO_InitStructure);
+#endif /* ST_Link_LEDs */
+#endif /* WAKEUP_RESET */
+#endif /* BlueLink_Remap */
 	/* start with LED on */
 	GPIO_WriteBit(OUT_PORT, LED_PIN, Bit_SET);
 }
@@ -111,19 +134,21 @@ void eeprom_store(uint8_t virt_addr, uint8_t *buf)
 
 /* eeprom[virt_addr ... virt_addr + 2] -> buf[0-5] */
 /* eeprom: 01,23,45 -> Read results: (10)(32)(54) -> memcpy 01|23|45 -> buffer: 012345 */
-void eeprom_restore(uint8_t *buf, uint8_t virt_addr)
+uint8_t eeprom_restore(uint8_t *buf, uint8_t virt_addr)
 {
-	uint8_t i;
+	uint8_t i, retVal = 0;
 	uint16_t EE_Data;
 
 	for(i=0; i<3; i++) {
 		if (EE_ReadVariable(virt_addr + i, &EE_Data)) {
 			/* the variable was not found or no valid page was found */
-			EE_Data = 0;
+			EE_Data = 0xFFFF;
 			/* TODO: notify about an error */
+			retVal = 1;
 		}
 		memcpy(&buf[2*i], &EE_Data, 2);
 	}
+	return retVal;
 }
 
 void Systick_Init(void)
@@ -136,9 +161,9 @@ void SysTick_Handler(void)
 {
 	static uint16_t i = 0;
 	systicks++;
-#ifdef ST_Link
+#ifdef ST_Link_LEDs
 	systicks2++;
-#endif /* ST_Link */
+#endif /* ST_Link_LEDs */
 	if (i == 1000) {
 		if (AlarmValue)
 			AlarmValue--;
@@ -157,7 +182,6 @@ void Wakeup(void)
 	GPIO_WriteBit(OUT_PORT, WAKEUP_PIN, Bit_SET);
 	delay_ms(500);
 	GPIO_WriteBit(OUT_PORT, WAKEUP_PIN, Bit_RESET);
-	/* both_on(); */
 	fast_toggle();
 }
 
@@ -177,15 +201,26 @@ void store_new_wakeup(void)
 	}
 }
 
+void wakeup_reset(void)
+#ifdef	WAKEUP_RESET
+{
+	/* wakeup reset pin pulled low? */
+	if (!GPIO_ReadInputDataBit(OUT_PORT, WAKEUP_RESET_PIN)) {
+		store_new_wakeup();
+	}
+}
+#else
+{}
+#endif /* WAKEUP_RESET */
+
 int8_t get_handler(uint8_t *buf)
 {
 	/* number of valid bytes in buf, -1 signifies error */
 	int8_t ret = 3;
 	uint8_t idx;
-
 	switch ((enum command) buf[2]) {
 	case CMD_CAPS:
-		/* in first query we give informaton about slots and depth */
+		/* in first query we give information about slots and depth */
 		if (!buf[3]) {
 			buf[3] = MACRO_SLOTS;
 			buf[4] = MACRO_DEPTH;
@@ -201,7 +236,7 @@ int8_t get_handler(uint8_t *buf)
 		/* actually this is not true for the last transmission,
 		 * but it doesn't matter since it's NULL terminated
 		 */
-		ret = HID_IN_BUFFER_SIZE-1; //
+		ret = HID_IN_BUFFER_SIZE-1;
 		break;
 	case CMD_ALARM:
 		/* AlarmValue -> buf[3-6] */
@@ -232,9 +267,8 @@ int8_t set_handler(uint8_t *buf)
 	uint8_t tmp[SIZEOF_IR];
 	switch ((enum command) buf[2]) {
 	case CMD_EMIT:
-		//delay_ms(130); // creates write errors in USB HID, why???
+		yellow_short_on();
 		irsnd_send_data((IRMP_DATA *) &buf[3], 1);
-		yellow_on();
 		break;
 	case CMD_ALARM:
 		memcpy(&AlarmValue, &buf[3], sizeof(AlarmValue));
@@ -291,9 +325,10 @@ void check_wakeups(IRMP_DATA *ir) {
 	uint8_t buf[SIZEOF_IR];
 	for (i=0; i < WAKE_SLOTS; i++) {
 		idx = (MACRO_DEPTH + 1) * SIZEOF_IR/2 * MACRO_SLOTS + SIZEOF_IR/2 * i;
-		eeprom_restore(buf, idx);
-		if (!memcmp(buf, ir, sizeof(ir)))
-			Wakeup();
+		if (!eeprom_restore(buf, idx)) {
+			if (!memcmp(buf, ir, sizeof(ir)))
+				Wakeup();
+		}
 	}
 }
 
@@ -311,9 +346,8 @@ void transmit_macro(uint8_t macro)
 			break;
 		/* Depending on the protocol we need a pause between the trigger and the transmission
 		 * and between two transmissions. The highest known pause is 130 ms for Denon. */
-		delay_ms(130);
+		yellow_short_on();
 		irsnd_send_data((IRMP_DATA *) buf, 1);
-		yellow_on();
 	}
 }
 
@@ -335,15 +369,9 @@ int main(void)
 	IRMP_DATA myIRData;
 	int8_t ret;
 
-#ifdef BlueLink_Remap
-	/* wait 5 seconds before disabling SWD, to make firmware update more easy */ /* TODO test this */
-	delay_ms(5000);
-#endif /* BlueLink_Remap */
-	LED_Switch_init();
-	LED_init();
-	/* red LED on */
-	/*GPIO_WriteBit(GPIOA, GPIO_Pin_9, Bit_SET);*/
 	USB_HID_Init();
+	LED_Switch_init();
+	red_on();
 	IRMP_Init();
 	irsnd_init();
 	FLASH_Unlock();
@@ -354,14 +382,9 @@ int main(void)
 		if (!AlarmValue)
 			Wakeup();
 
-#ifdef	WAKEUP_RESET
-		/* wakeup reset pin pulled low? */
-		if (!GPIO_ReadInputDataBit(OUT_PORT, WAKEUP_RESET_PIN)) {
-			store_new_wakeup();
-		}
-#endif /* WAKEUP_RESET */
+		wakeup_reset();
 
-		/* test if USB is connected to PC, sendtransfer is complete and command is received */
+		/* test if USB is connected to PC, sendtransfer is complete and configuration command is received */
 		if (USB_HID_GetStatus() == CONFIGURED && PrevXferComplete && USB_HID_ReceiveData(buf) == RX_READY && buf[0] == STAT_CMD) {
 
 			switch ((enum access) buf[1]) {
@@ -385,7 +408,7 @@ int main(void)
 				buf[0] = STAT_SUCCESS;
 			}
 
-			/* send data */
+			/* send configuration data */
 			USB_HID_SendData(REPORT_ID_CONFIG, buf, ret);
 			toggle_LED();
 		}
@@ -398,7 +421,7 @@ int main(void)
 				RepeatCounter++;
 			}
 
-			if ((RepeatCounter == 0) || ( RepeatCounter >= MIN_REPEATS)) {
+			if (RepeatCounter == 0 || RepeatCounter >= MIN_REPEATS) {
 				toggle_LED();
 				/* if macros are sent already, while the trigger IR data are still repeated,
 				 * the receiving device may crash */
@@ -406,7 +429,7 @@ int main(void)
 				check_wakeups(&myIRData);
 			}
 
-			/* send IR-data via USB-HID */
+			/* send IR-data */
 			memcpy(buf, &myIRData, sizeof(myIRData));
 			USB_HID_SendData(REPORT_ID_IR, buf, sizeof(myIRData));
 		}

@@ -7,16 +7,15 @@
  * (at your option) any later version.
  */
 
-#ifndef __LED_H
-#define __LED_H
+#ifndef __ST_LINK_LEDS_H
+#define __ST_LINK_LEDS_H
 
 extern volatile unsigned int systicks2;
-extern void delay_ms(unsigned int msec);
-void LED_init(void);
-void LED_deinit(void);
+void delay_ms(unsigned int msec);
 void fast_toggle(void);
 void both_on(void);
-void yellow_on(void);
+void red_on(void);
+void yellow_short_on(void);
 void toggle_LED(void);
 
-#endif /* __LED_H */
+#endif /* __ST_LINK_LEDS_H */

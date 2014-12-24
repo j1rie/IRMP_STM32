@@ -21,36 +21,40 @@
 
 #define MIN_REPEATS	2  // TODO make configurable & use Eeprom
 
-/* uncomment this, if you use a ST-Link */ /* atm you can't use WAKEUP_RESET & ST_Link */
-//#define ST_Link
+/* uncomment this, if you want to use the ST-Link LEDs */
+#define ST_Link_LEDs
 
-/*
- * only if you want to use CLK and DIO on the blue ST-Link Emulator with mistakenly connected Pins
+/* only if you want to use CLK and DIO on the blue ST-Link Emulator with mistakenly connected Pins
  * WARNING: further firmware updates will become difficult!
- * better use TMS and TCK instead, and leave this commented out
- */
-//#define BlueLink_Remap
+ * you have to flash with --reset, and pull RST low until short after flash command
+ * better use TMS and TCK instead, and leave this commented out */
+#define BlueLink_Remap
 
 /* for use of wakeup reset pin */
-#define WAKEUP_RESET
+/* TODO test WAKEUP_RESET & ST_Link_LEDs */
+//#define WAKEUP_RESET // -> NO ST_Link_LEDs!!
 
 #ifdef BlueLink_Remap
 	#define OUT_PORT	GPIOA
 	#define LED_PIN		GPIO_Pin_14
 	#define WAKEUP_PIN	GPIO_Pin_13
 #ifdef WAKEUP_RESET
-	#define WAKEUP_RESET_PIN	GPIO_Pin_6 /* TODO makes it possible to use another for remap */
+	#define RESET_PORT	GPIOB
+	#define WAKEUP_RESET_PIN GPIO_Pin_13
 #endif /* WAKEUP_RESET */
 #else
 	#define OUT_PORT	GPIOB
 	#define LED_PIN		GPIO_Pin_13
 	#define WAKEUP_PIN	GPIO_Pin_14
 #ifdef WAKEUP_RESET
-#ifndef ST_Link
-	#define WAKEUP_RESET_PIN GPIO_Pin_12 /* TODO take out IRsnd for WAKEUP_RESET & ST_Link */
+#ifndef ST_Link_LEDs
+	#define RESET_PORT	GPIOB
+	#define WAKEUP_RESET_PIN GPIO_Pin_12
 #else
-	#define WAKEUP_RESET_PIN GPIO_Pin_6
-#endif /* ST_Link */
+	/* WARNING: further firmware updates will become difficult! */
+	#define RESET_PORT	GPIOA
+	#define WAKEUP_RESET_PIN GPIO_Pin_14 //
+#endif /* ST_Link_LEDs */
 #endif /* WAKEUP_RESET */
 #endif /* BlueLink_Remap */
 
