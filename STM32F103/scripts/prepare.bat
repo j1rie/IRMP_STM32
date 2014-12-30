@@ -9,6 +9,7 @@ REM  *
 REM    NOTE: atm the paths are absolute! you need C:\IRMP_STM32-master !
 REM    TODO: implement relative paths
 REM 
+cd C:\IRMP_STM32-master\STM32F103\
 mkdir ext_src
 if exist C:\IRMP_STM32-master\STM32F103\ext_src\prepared goto EXIT
 if not exist C:\IRMP_STM32-master\STM32F103\ext_src\stsw-stm32010.zip powershell.exe -Command (new-object System.Net.WebClient).DownloadFile('http://www.st.com/st-web-ui/static/active/en/st_prod_software_internet/resource/technical/software/firmware/stsw-stm32010.zip','C:\IRMP_STM32-master\STM32F103\ext_src\stsw-stm32010.zip')
