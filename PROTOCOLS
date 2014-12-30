@@ -1,0 +1,43 @@
+= Protocol for IR Data =
+
+byte 0:	   0x01 (µC->PC) 
+byte 1:    protocol
+bytes 2+3: address
+bytes 4+5: command
+byte 6:    flags
+
+
+= Protocol for Configuration =
+
+byte 0: 0x03 (PC->µC) or 0x02 (µC->PC) 
+
+The PC sends obligatory bytes:
+
+byte 1: status: STAT_CMD (command PC->µC), STAT_SUCCESS (success report µC->PC), STAT_FAILURE (error report µC->PC)
+byte 2: access: ACC_GET (query value from µC), ACC_SET (set value in µC), ACC_RESET (reset value in µC)
+byte 3: command: CMD_EMIT (transmit IR data), CMD_CAPS (capabilities of µC), CMD_FW (firmware), CMD_ALARM (alarm timer), CMD_MACRO (macro), CMD_WAKE (wakeup)
+
+and optional bytes:
+
+byte 4, (5): possible arguments, e.g. number of macro (and content of macro)
+following bytes: for ACC_SET: value to be set
+
+
+The device answers with the 3 obligatory bytes, the first byte (status) is set to STAT_SUCCESS or STAT_FAILURE. More bytes may follow, e.g. for ACC_GET.
+
+Examples:
+Query the alarmtimer (in 60 seconds WakeUp):
+PC->µC: STAT_CMD ACC_GET CMD_ALARM
+µC->PC: STAT_SUCCESS ACC_GET CMD_ALARM 0x00 0x00 0x00 0x3C
+
+Set first (slot 0) wakeup IR data to 0x112233445566:
+PC->µC: STAT_CMD ACC_SET CMD_WAKE SLOT(0x00) 0x11 0x22 0x33 0x44 0x55 0x66
+µC->PC: STAT_SUCCESS ACC_SET CMD_WAKE
+
+Set third (slot 2) macro trigger (slot 0) to 0x112233445566:
+PC->µC: STAT_CMD ACC_SET CMD_MACRO 0x02 0x00 0x11 0x22 0x33 0x44 0x55 0x66
+µC->PC: STAT_SUCCESS ACC_SET CMD_MACRO
+
+Query the fourth (slot 4) IR data of the third (slot 2) macro:
+PC->µC: STAT_CMD ACC_GET CMD_MACRO 0x02 0x04
+µC->PC: STAT_SUCCESS ACC_GET CMD_MACRO 0x77 0x88 0x99 0xAA 0xBB 0xCC
