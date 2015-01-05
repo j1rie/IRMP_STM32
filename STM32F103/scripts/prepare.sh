@@ -106,18 +106,10 @@ cd src
 unzip -j $ar $path/Project/EEPROM_Emulation/src/eeprom.c
 
 cd ../..
-pwd
-cd usb_hid
-pwd
-patch -p1 -i ../patches/usb_hid.patch
-cd ..
-cd stm_lib
-patch -p1 -i ../patches/eeprom.patch
-cd ..
-cd cmsis_boot
-patch -p1 -i ../patches/stm32f10x_conf.patch
-patch -p1 -i ../patches/startup.patch
-cd ..
+patch -d usb_hid -p1 -i ../patches/usb_hid.patch
+patch -d stm_lib -p1 -i ../patches/eeprom.patch
+patch -d cmsis_boot -p1 -i ../patches/stm32f10x_conf.patch
+patch -d cmsis_boot -p1 -i ../patches/startup.patch
 
 ar='../ext_src/irmp.tar.gz'
 path="irmp"
