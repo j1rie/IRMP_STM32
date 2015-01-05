@@ -8,7 +8,7 @@ REM  * (at your option) any later version.
 REM  *
 cd /D %~dp0 
 cd ..
-set PWD=%CD%
+set PWD="%CD%"
 mkdir ext_src
 if exist %PWD%\ext_src\prepared goto EXIT
 if not exist %PWD%\ext_src\stsw-stm32010.zip powershell.exe -Command (new-object System.Net.WebClient).DownloadFile('http://www.st.com/st-web-ui/static/active/en/st_prod_software_internet/resource/technical/software/firmware/stsw-stm32010.zip','%PWD%\ext_src\stsw-stm32010.zip')
