@@ -6,14 +6,24 @@ REM  * it under the terms of the GNU General Public License as published by
 REM  * the Free Software Foundation; either version 2 of the License, or
 REM  * (at your option) any later version.
 REM  *
-cd /D %~dp0 
-cd ..
+
+REM go into the parent directory of the directory, in which the script is located
+cd /D %~dp0..\
+
+REM save directory 
 set PWD="%CD%"
+
+REM download
 mkdir ext_src
 if exist %PWD%\ext_src\prepared goto EXIT
 if not exist %PWD%\ext_src\stsw-stm32010.zip powershell.exe -Command (new-object System.Net.WebClient).DownloadFile('http://www.st.com/st-web-ui/static/active/en/st_prod_software_internet/resource/technical/software/firmware/stsw-stm32010.zip','%PWD%\ext_src\stsw-stm32010.zip')
 if not exist %PWD%\ext_src\stsw-stm32121.zip powershell.exe -Command (new-object System.Net.WebClient).DownloadFile('http://www.st.com/st-web-ui/static/active/en/st_prod_software_internet/resource/technical/software/firmware/stsw-stm32121.zip', '%PWD%\ext_src\stsw-stm32121.zip')
 REM if not exist %PWD%\ext_src\irmp.tar.gz powershell.exe -Command (new-object System.Net.WebClient).DownloadFile('http://www.mikrocontroller.net/svnbrowser/irmp/?view=tar', '%PWD%\ext_src\irmp.tar.gz')
+if not exist %PWD%\ext_src\patch.exe powershell.exe -Command (new-object -ComObject shell.application).Namespace('%PWD%\ext_src').copyhere((new-object -ComObject shell.application).Namespace('%PWD%\ext_src\patch-2.5.9-7-bin.zip\bin\patch.exe'))
+if not exist %PWD%\ext_src\Irmp.zip powershell.exe -Command (new-object System.Net.WebClient).DownloadFile('http://www.mikrocontroller.net/wikifiles/7/79/Irmp.zip','%PWD%\ext_src\Irmp.zip')
+if not exist %PWD%\ext_src\Irsnd.zip powershell.exe -Command (new-object System.Net.WebClient).DownloadFile('http://www.mikrocontroller.net/wikifiles/c/c7/Irsnd.zip','%PWD%\ext_src\Irsnd.zip')
+
+REM extract
 mkdir cmsis_boot\startup
 powershell.exe -Command (new-object -ComObject shell.application).Namespace('%PWD%\cmsis_boot').copyhere((new-object -ComObject shell.application).Namespace('%PWD%\ext_src\stsw-stm32121.zip\STM32_USB-FS-Device_Lib_V4.0.0\Libraries\CMSIS\Device\ST\STM32F10x\Include\stm32f10x.h'))
 powershell.exe -Command (new-object -ComObject shell.application).Namespace('%PWD%\cmsis_boot').copyhere((new-object -ComObject shell.application).Namespace('%PWD%\ext_src\stsw-stm32121.zip\STM32_USB-FS-Device_Lib_V4.0.0\Libraries\CMSIS\Device\ST\STM32F10x\Include\system_stm32f10x.h'))
@@ -77,9 +87,6 @@ powershell.exe -Command (new-object -ComObject shell.application).Namespace('%PW
 powershell.exe -Command (new-object -ComObject shell.application).Namespace('%PWD%\stm_lib\inc').copyhere((new-object -ComObject shell.application).Namespace('%PWD%\ext_src\stsw-stm32010.zip\STM32F10x_AN2594_FW_V3.1.0\Project\EEPROM_Emulation\inc\eeprom.h'))
 powershell.exe -Command (new-object -ComObject shell.application).Namespace('%PWD%\stm_lib\src').copyhere((new-object -ComObject shell.application).Namespace('%PWD%\ext_src\stsw-stm32010.zip\STM32F10x_AN2594_FW_V3.1.0\Project\EEPROM_Emulation\src\eeprom.c'))
 powershell.exe -Command (new-object System.Net.WebClient).DownloadFile('http://sourceforge.net/projects/gnuwin32/files/patch/2.5.9-7/patch-2.5.9-7-bin.zip/download', '%PWD%\ext_src\patch-2.5.9-7-bin.zip')
-if not exist %PWD%\ext_src\patch.exe powershell.exe -Command (new-object -ComObject shell.application).Namespace('%PWD%\ext_src').copyhere((new-object -ComObject shell.application).Namespace('%PWD%\ext_src\patch-2.5.9-7-bin.zip\bin\patch.exe'))
-if not exist %PWD%\ext_src\Irmp.zip powershell.exe -Command (new-object System.Net.WebClient).DownloadFile('http://www.mikrocontroller.net/wikifiles/7/79/Irmp.zip','%PWD%\ext_src\Irmp.zip')
-if not exist %PWD%\ext_src\Irsnd.zip powershell.exe -Command (new-object System.Net.WebClient).DownloadFile('http://www.mikrocontroller.net/wikifiles/c/c7/Irsnd.zip','%PWD%\ext_src\Irsnd.zip')
 mkdir ext_src\irmp
 mkdir irmp
 powershell.exe -Command (new-object -ComObject shell.application).Namespace('%PWD%\ext_src\irmp').copyhere((new-object -ComObject shell.application).Namespace('%PWD%\ext_src\Irmp.zip').Items())
@@ -102,10 +109,14 @@ REM powershell.exe -Command (new-object -ComObject shell.application).Namespace(
 copy %PWD%\ext_src\irmp\irsndconfig.h %PWD%\irmp\irsndconfig.h
 del /F /S /Q %PWD%\ext_src\irmp\
 rd /s /q ext_src\irmp
+
+REM patch
 %PWD%\ext_src\patch.exe -d usb_hid -p1 -i %PWD%\patches\usb_hid.patch --binary
 %PWD%\ext_src\patch.exe -d stm_lib -p1 -i %PWD%\patches\eeprom.patch --binary
 %PWD%\ext_src\patch.exe -d cmsis_boot -p1 -i %PWD%\patches\stm32f10x_conf.patch --binary
 %PWD%\ext_src\patch.exe -d cmsis_boot -p1 -i %PWD%\patches\startup.patch --binary
 %PWD%\ext_src\patch.exe -d irmp -p1 -i %PWD%\patches\irmp.patch --binary
+
+REM mark as prepared
 echo. > %PWD%\ext_src\prepared
 :EXIT
