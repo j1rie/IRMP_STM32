@@ -1,4 +1,9 @@
 #!/bin/bash
+# go into the parent directory of the directory, in which the script is located
+cd "$(dirname "$(readlink -e "$0")")"
+cd ..
+
+# download
 mkdir -p ext_src
 [[ -e ./ext_src/prepared ]] && exit 0
 cd ./ext_src
@@ -11,6 +16,7 @@ if [[ ! -s irmp.tar.gz ]]; then
 	wget "http://www.mikrocontroller.net/svnbrowser/irmp/?view=tar" -O irmp.tar.gz
 fi
 
+# extract
 cd ..
 ar2='../../ext_src/stsw-stm32121.zip'
 ar1='../ext_src/stsw-stm32121.zip'
@@ -104,12 +110,7 @@ unzip -j $ar $path/Project/EEPROM_Emulation/inc/eeprom.h
 cd ..
 cd src
 unzip -j $ar $path/Project/EEPROM_Emulation/src/eeprom.c
-
 cd ../..
-patch -d usb_hid -p1 -i ../patches/usb_hid.patch
-patch -d stm_lib -p1 -i ../patches/eeprom.patch
-patch -d cmsis_boot -p1 -i ../patches/stm32f10x_conf.patch
-patch -d cmsis_boot -p1 -i ../patches/startup.patch
 
 ar='../ext_src/irmp.tar.gz'
 path="irmp"
@@ -123,6 +124,14 @@ tar -xvf $ar --strip-components=1 $path/irmpsystem.h
 tar -xvf $ar --strip-components=1 $path/irsnd.c
 tar -xvf $ar --strip-components=1 $path/irsnd.h
 tar -xvf $ar --strip-components=1 $path/irsndconfig.h
-patch -p1 -i ../patches/irmp.patch
+cd ..
 
-touch ../ext_src/prepared
+# patch
+patch -d usb_hid -p1 -i ../patches/usb_hid.patch
+patch -d stm_lib -p1 -i ../patches/eeprom.patch
+patch -d cmsis_boot -p1 -i ../patches/stm32f10x_conf.patch
+patch -d cmsis_boot -p1 -i ../patches/startup.patch
+patch -d irmp -p1 -i ../patches/irmp.patch
+
+# mark as prepared
+touch ./ext_src/prepared

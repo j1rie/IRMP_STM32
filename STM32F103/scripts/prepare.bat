@@ -78,10 +78,6 @@ powershell.exe -Command (new-object -ComObject shell.application).Namespace('%PW
 powershell.exe -Command (new-object -ComObject shell.application).Namespace('%PWD%\stm_lib\src').copyhere((new-object -ComObject shell.application).Namespace('%PWD%\ext_src\stsw-stm32010.zip\STM32F10x_AN2594_FW_V3.1.0\Project\EEPROM_Emulation\src\eeprom.c'))
 powershell.exe -Command (new-object System.Net.WebClient).DownloadFile('http://sourceforge.net/projects/gnuwin32/files/patch/2.5.9-7/patch-2.5.9-7-bin.zip/download', '%PWD%\ext_src\patch-2.5.9-7-bin.zip')
 if not exist %PWD%\ext_src\patch.exe powershell.exe -Command (new-object -ComObject shell.application).Namespace('%PWD%\ext_src').copyhere((new-object -ComObject shell.application).Namespace('%PWD%\ext_src\patch-2.5.9-7-bin.zip\bin\patch.exe'))
-%PWD%\ext_src\patch.exe -d usb_hid -p1 -i %PWD%\patches\usb_hid.patch --binary
-%PWD%\ext_src\patch.exe -d stm_lib -p1 -i %PWD%\patches\eeprom.patch --binary
-%PWD%\ext_src\patch.exe -d cmsis_boot -p1 -i %PWD%\patches\stm32f10x_conf.patch --binary
-%PWD%\ext_src\patch.exe -d cmsis_boot -p1 -i %PWD%\patches\startup.patch --binary
 if not exist %PWD%\ext_src\Irmp.zip powershell.exe -Command (new-object System.Net.WebClient).DownloadFile('http://www.mikrocontroller.net/wikifiles/7/79/Irmp.zip','%PWD%\ext_src\Irmp.zip')
 if not exist %PWD%\ext_src\Irsnd.zip powershell.exe -Command (new-object System.Net.WebClient).DownloadFile('http://www.mikrocontroller.net/wikifiles/c/c7/Irsnd.zip','%PWD%\ext_src\Irsnd.zip')
 mkdir ext_src\irmp
@@ -106,6 +102,10 @@ REM powershell.exe -Command (new-object -ComObject shell.application).Namespace(
 copy %PWD%\ext_src\irmp\irsndconfig.h %PWD%\irmp\irsndconfig.h
 del /F /S /Q %PWD%\ext_src\irmp\
 rd /s /q ext_src\irmp
+%PWD%\ext_src\patch.exe -d usb_hid -p1 -i %PWD%\patches\usb_hid.patch --binary
+%PWD%\ext_src\patch.exe -d stm_lib -p1 -i %PWD%\patches\eeprom.patch --binary
+%PWD%\ext_src\patch.exe -d cmsis_boot -p1 -i %PWD%\patches\stm32f10x_conf.patch --binary
+%PWD%\ext_src\patch.exe -d cmsis_boot -p1 -i %PWD%\patches\startup.patch --binary
 %PWD%\ext_src\patch.exe -d irmp -p1 -i %PWD%\patches\irmp.patch --binary
 echo. > %PWD%\ext_src\prepared
 :EXIT
