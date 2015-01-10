@@ -198,19 +198,19 @@ void eeprom_store(uint8_t virt_addr, uint8_t *buf)
 
 /* eeprom[virt_addr ... virt_addr + 2] -> buf[0-5] */
 /* eeprom: 01,23,45 -> Read results: (10)(32)(54) -> memcpy 01|23|45 -> buffer: 012345 */
-void eeprom_restore(uint8_t *buf, uint8_t virt_addr)
+uint8_t eeprom_restore(uint8_t *buf, uint8_t virt_addr)
 {
-	uint8_t i;
+	uint8_t i, retVal = 0;
 	uint16_t EE_Data;
-
 	for(i=0; i<3; i++) {
 		if (EE_ReadVariable(virt_addr + i, &EE_Data)) {
 			/* the variable was not found or no valid page was found */
 			EE_Data = 0xFFFF;
-			/* TODO: notify about an error */
+			retVal = 1;
 		}
 		memcpy(&buf[2*i], &EE_Data, 2);
 	}
+	return retVal;
 }
 
 void Systick_Init(void)

@@ -233,12 +233,10 @@ uint8_t eeprom_restore(uint8_t *buf, uint8_t virt_addr)
 {
 	uint8_t i, retVal = 0;
 	uint16_t EE_Data;
-
 	for(i=0; i<3; i++) {
 		if (EE_ReadVariable(virt_addr + i, &EE_Data)) {
 			/* the variable was not found or no valid page was found */
 			EE_Data = 0xFFFF;
-			/* TODO: notify about an error */
 			retVal = 1;
 		}
 		memcpy(&buf[2*i], &EE_Data, 2);
