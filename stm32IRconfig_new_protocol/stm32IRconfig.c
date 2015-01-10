@@ -23,7 +23,7 @@
 #include <fcntl.h>
 
 static int stm32fd = -1;
-uint8_t inBuf[16];
+uint8_t inBuf[17];
 uint8_t outBuf[17];
 
 static bool open_stm32(const char *devicename) {
@@ -76,7 +76,7 @@ int main(int argc, const char **argv) {
 	outBuf[0] = 0x03; // Report ID
 	outBuf[1] = 0x00; // STAT_CMD
 	
-cont:   printf("program eeprom(p)\nget eeprom(g)\nreset(r)\nset alarm(s)\nget alarm(a)\nsendIR(i)\nmonitor until ^C(m)\nexit(x)\n");
+cont:   printf("program eeprom: wakeups and macros (p)\nget eeprom (wakeups, macros and capabilities) (g)\nreset (wakeups, macros and alarm) (r)\nset alarm (s)\nget alarm (a)\nsend IR (i)\nmonitor until ^C (m)\nexit (x)\n");
 	scanf("%s", &c);
 	
 	switch (c) {
@@ -159,7 +159,7 @@ get:	    printf("get wakeup(w)\nget macro slot(m)\nget caps(c)\n");
 			    printf("wake_slots: %u\n", inBuf[6]);
 			} else {
 			    printf("protocols: ");
-			    for (k = 4; k < 16; k++) { //17
+			    for (k = 4; k < 17; k++) {
 			    if (!inBuf[k]) {
 				printf("\n\n");
 				goto out;
