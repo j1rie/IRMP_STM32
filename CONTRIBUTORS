@@ -15,3 +15,5 @@ Ole Ernst <olebowle@gmx.com>
   which makes use of memcpy and memcmp possible
  for much better macro implementation including new protocol
  
+Michael Kipp <myscha@web.de>
+ for suggesting automatic sync of supported_protocols 

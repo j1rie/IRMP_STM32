@@ -21,4 +21,10 @@
 
 #define MIN_REPEATS	2  // TODO make configurable & use Eeprom
 
+#define OUT_PORT	GPIOB
+#define LED_PIN		GPIO_Pin_12 // blue LED
+#define WAKEUP_PIN	GPIO_Pin_7
+#define RESET_PORT	GPIOB
+#define WAKEUP_RESET_PIN GPIO_Pin_8
+
 #endif /* __CONFIG_H */

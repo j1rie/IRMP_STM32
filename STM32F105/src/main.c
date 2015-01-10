@@ -39,24 +39,119 @@ enum __attribute__ ((__packed__)) status {
 	STAT_FAILURE
 };
 
-/* keep in sync with ir{mp,snd}config.h */
 const char supported_protocols[] = {
+#if IRMP_SUPPORT_SIRCS_PROTOCOL==1
 IRMP_SIRCS_PROTOCOL,
+#endif
+#if IRMP_SUPPORT_NEC_PROTOCOL==1
 IRMP_NEC_PROTOCOL,
+#endif
+#if IRMP_SUPPORT_SAMSUNG_PROTOCOL==1
 IRMP_SAMSUNG_PROTOCOL,
+#endif
+#if IRMP_SUPPORT_KASEIKYO_PROTOCOL==1
 IRMP_KASEIKYO_PROTOCOL,
+#endif
+#if IRMP_SUPPORT_JVC_PROTOCOL==1
 IRMP_JVC_PROTOCOL,
+#endif
+#if IRMP_SUPPORT_NEC16_PROTOCOL==1
 IRMP_NEC16_PROTOCOL,
+#endif
+#if IRMP_SUPPORT_NEC42_PROTOCOL==1
 IRMP_NEC42_PROTOCOL,
+#endif
+#if IRMP_SUPPORT_MATSUSHITA_PROTOCOL==1
 IRMP_MATSUSHITA_PROTOCOL,
+#endif
+#if IRMP_SUPPORT_DENON_PROTOCOL==1
 IRMP_DENON_PROTOCOL,
+#endif
+#if IRMP_SUPPORT_RC5_PROTOCOL==1
 IRMP_RC5_PROTOCOL,
+#endif
+#if IRMP_SUPPORT_RC6_PROTOCOL==1
 IRMP_RC6_PROTOCOL,
 IRMP_RC6A_PROTOCOL,
+#endif
+#if IRMP_SUPPORT_IR60_PROTOCOL==1
 IRMP_IR60_PROTOCOL,
+#endif
+#if IRMP_SUPPORT_GRUNDIG_PROTOCOL==1
 IRMP_GRUNDIG_PROTOCOL,
+#endif
+#if IRMP_SUPPORT_SIEMENS_PROTOCOL==1
 IRMP_SIEMENS_PROTOCOL,
+#endif
+#if IRMP_SUPPORT_NOKIA_PROTOCOL==1
 IRMP_NOKIA_PROTOCOL,
+#endif
+#if IRMP_SUPPORT_BOSE_PROTOCOL==1
+IRMP_BOSE_PROTOCOL,
+#endif
+#if IRMP_KATHREIN_PROTOCOL==1
+IRMP_KATHREIN_PROTOCOL,
+#endif
+#if IRMP_SUPPORT_NUBERT_PROTOCOL==1
+IRMP_NUBERT_PROTOCOL,
+#endif
+#if IRMP_SUPPORT_SPEAKER_PROTOCOL==1
+IRMP_SPEAKER_PROTOCOL,
+#endif
+#if IRMP_SUPPORT_BANG_OLUFSEN_PROTOCOL==1
+IRMP_BANG_OLUFSEN_PROTOCOL,
+#endif
+#if IRMP_SUPPORT_RECS80_PROTOCOL==1
+IRMP_RECS80_PROTOCOL,
+#endif
+#if IRMP_SUPPORT_RECS80EXT_PROTOCOL==1
+IRMP_RECS80EXT_PROTOCOL,
+#endif
+#if IRMP_SUPPORT_THOMSON_PROTOCOL==1
+IRMP_THOMSON_PROTOCOL,
+#endif
+#if IRMP_SUPPORT_NIKON_PROTOCOL==1
+IRMP_NIKON_PROTOCOL,
+#endif
+#if IRMP_SUPPORT_NETBOX_PROTOCOL==1
+IRMP_NETBOX_PROTOCOL,
+#endif
+#if IRMP_SUPPORT_ORTEK_PROTOCOL==1
+IRMP_ORTEK_PROTOCOL,
+#endif
+#if IRMP_SUPPORT_TELEFUNKEN_PROTOCOL==1
+IRMP_TELEFUNKEN_PROTOCOL,
+#endif
+#if IRMP_SUPPORT_FDC_PROTOCOL==1
+IRMP_FDC_PROTOCOL,
+#endif
+#if IRMP_SUPPORT_RCCAR_PROTOCOL==1
+IRMP_RCCAR_PROTOCOL,
+#endif
+#if IRMP_SUPPORT_ROOMBA_PROTOCOL==1
+IRMP_ROOMBA_PROTOCOL,
+#endif
+#if IRMP_SUPPORT_RUWIDO_PROTOCOL==1
+IRMP_RUWIDO_PROTOCOL,
+#endif
+#if IRMP_SUPPORT_A1TVBOX_PROTOCOL==1
+IRMP_A1TVBOX_PROTOCOL,
+#endif
+#if IRMP_SUPPORT_LEGO_PROTOCOL==1
+IRMP_LEGO_PROTOCOL,
+#endif
+#if IRMP_SUPPORT_RCMM_PROTOCOL==1
+IRMP_RCMM_PROTOCOL,
+#endif
+#if IRMP_SUPPORT_LGAIR_PROTOCOL==1
+IRMP_LGAIR_PROTOCOL,
+#endif
+#if IRMP_SUPPORT_SAMSUNG48_PROTOCOL==1
+IRMP_SAMSUNG48_PROTOCOL,
+#endif
+#if IRMP_SUPPORT_RADIO1_PROTOCOL==1
+IRMP_RADIO1_PROTOCOL,
+#endif
 0
 };
 
@@ -74,25 +169,22 @@ void LED_Switch_init(void)
 {
 	GPIO_InitTypeDef GPIO_InitStructure;
 	RCC_APB2PeriphClockCmd(RCC_APB2Periph_GPIOB, ENABLE);
-	/* PB12 (blue LED) */
-	GPIO_InitStructure.GPIO_Pin = GPIO_Pin_12;
+	GPIO_InitStructure.GPIO_Pin = LED_PIN;
 	GPIO_InitStructure.GPIO_Mode = GPIO_Mode_Out_PP;
-	GPIO_InitStructure.GPIO_Speed = GPIO_Speed_2MHz; //50MHz;
-	GPIO_Init(GPIOB, &GPIO_InitStructure);
-	/* Config PB7 (motherboard switch pin) */
-	GPIO_InitStructure.GPIO_Pin = GPIO_Pin_7;
-	GPIO_Init(GPIOB, &GPIO_InitStructure);
-	/* wakeup reset pin */
-	GPIO_InitStructure.GPIO_Pin = GPIO_Pin_8;
+	GPIO_InitStructure.GPIO_Speed = GPIO_Speed_2MHz;
+	GPIO_Init(OUT_PORT, &GPIO_InitStructure);
+	GPIO_InitStructure.GPIO_Pin = WAKEUP_PIN;
+	GPIO_Init(OUT_PORT, &GPIO_InitStructure);
+	GPIO_InitStructure.GPIO_Pin = WAKEUP_RESET_PIN;
 	GPIO_InitStructure.GPIO_Mode = GPIO_Mode_IPU;
-	GPIO_Init(GPIOB, &GPIO_InitStructure);
+	GPIO_Init(RESET_PORT, &GPIO_InitStructure);
 	/* start with LED on */
-	GPIO_WriteBit(GPIOB, GPIO_Pin_12, Bit_SET);
+	GPIO_WriteBit(OUT_PORT, LED_PIN, Bit_SET);
 }
 
 void toggle_LED(void)
 {
-	GPIOB->ODR ^= GPIO_Pin_12;
+	OUT_PORT->ODR ^= LED_PIN;
 }
 
 /* buf[0 ... 5] -> eeprom[virt_addr ... virt_addr + 2] */
@@ -114,7 +206,7 @@ void eeprom_restore(uint8_t *buf, uint8_t virt_addr)
 	for(i=0; i<3; i++) {
 		if (EE_ReadVariable(virt_addr + i, &EE_Data)) {
 			/* the variable was not found or no valid page was found */
-			EE_Data = 0;
+			EE_Data = 0xFFFF;
 			/* TODO: notify about an error */
 		}
 		memcpy(&buf[2*i], &EE_Data, 2);
@@ -145,10 +237,10 @@ void Wakeup(void)
 	AlarmValue = 0xFFFFFFFF;
 	/* USB wakeup */
 	USB_OTG_ActiveRemoteWakeup(&USB_OTG_dev);
-	/* motherboard switch: PB7 short high */
-	GPIO_WriteBit(GPIOB, GPIO_Pin_7, Bit_SET);
+	/* motherboard switch: WAKEUP_PIN short high */
+	GPIO_WriteBit(OUT_PORT, WAKEUP_PIN, Bit_SET);
 	delay_ms(500);
-	GPIO_WriteBit(GPIOB, GPIO_Pin_7, Bit_RESET);
+	GPIO_WriteBit(OUT_PORT, WAKEUP_PIN, Bit_RESET);
 }
 
 void store_new_wakeup(void)
@@ -170,7 +262,7 @@ void store_new_wakeup(void)
 void wakeup_reset(void)
 {
 	/* wakeup reset pin pulled low? */
-	if (!GPIO_ReadInputDataBit(GPIOB, GPIO_Pin_8)) {
+	if (!GPIO_ReadInputDataBit(RESET_PORT, WAKEUP_RESET_PIN)) {
 		store_new_wakeup();
 	}
 }
