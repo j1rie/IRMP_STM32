@@ -354,7 +354,7 @@ int8_t reset_handler(uint8_t *buf)
 	/* number of valid bytes in buf, -1 signifies error */
 	int8_t ret = 3;
 	uint8_t idx;
-	uint8_t zeros[SIZEOF_IR] = {0};
+	uint8_t zeros[SIZEOF_IR] = {0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF};
 	switch ((enum command) buf[2]) {
 	case CMD_ALARM:
 		AlarmValue = 0xFFFFFFFF;
@@ -389,7 +389,7 @@ void transmit_macro(uint8_t macro)
 {
 	uint8_t i, idx;
 	uint8_t buf[SIZEOF_IR];
-	uint8_t zeros[SIZEOF_IR] = {0};
+	uint8_t zeros[SIZEOF_IR] = {0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF}; //{0};
 	/* we start from 1, since we don't want to tx the trigger code of the macro*/
 	for (i=1; i < MACRO_DEPTH + 1; i++) {
 		idx = (MACRO_DEPTH + 1) * SIZEOF_IR/2 * macro + SIZEOF_IR/2 * i;
@@ -421,6 +421,8 @@ int main(void)
 	uint8_t buf[HID_OUT_BUFFER_SIZE-1], RepeatCounter = 0;
 	IRMP_DATA myIRData;
 	int8_t ret;
+	/* first wakeup slot empty? */
+	uint8_t learn_wakeup = eeprom_restore(buf, (MACRO_DEPTH + 1) * SIZEOF_IR/2 * MACRO_SLOTS);
 
 	USB_HID_Init();
 	LED_Switch_init();
@@ -467,6 +469,12 @@ int main(void)
 
 		/* poll IR-data */
 		if (irmp_get_data(&myIRData)) {
+			if (learn_wakeup) {
+				/* store received wakeup IRData in first wakeup slot */
+				eeprom_store((MACRO_DEPTH + 1) * SIZEOF_IR/2 * MACRO_SLOTS, (uint8_t *) &myIRData);
+				learn_wakeup = 0;
+			}
+
 			if (!(myIRData.flags)) {
 				RepeatCounter = 0;
 			} else {
