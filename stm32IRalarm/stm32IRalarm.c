@@ -94,28 +94,27 @@ int main(int argc, char *argv[]) {
 
 	open_stm32(dvalue != NULL ? dvalue : "/dev/hidraw2");
         outBuf[0] = 0x03; // Report ID
-//	outBuf[1] = 0xFE; // seems necessary
+	outBuf[1] = 0x00; // STAT_CMD
 
 	if (svalue != NULL) {
-	    outBuf[1] = 0xF3;
+	    outBuf[2] = 0x01; // ACC_SET
+	    outBuf[3] = 0x03; // CMD_ALARM
 	    setalarm = strtoul(svalue, NULL, 0);
-	    memset(&outBuf[3], 0, 14);
-	    outBuf[5] = setalarm & 0xFF;
-	    outBuf[4] = (setalarm>>8) & 0xFF;
-	    outBuf[3] = (setalarm>>16) & 0xFF;
-	    outBuf[2] = (setalarm>>24) & 0xFF;
+	    //memset(&outBuf[3], 0, 14);
+	    memcpy(&outBuf[4], &setalarm, sizeof(setalarm));
 	    write_stm32();
 	    usleep(2000);
 	    read_stm32(); /* necessary to avoid, that echo is read by first alarm read */
 	}
 
 	if (aflag) {
-	    memset(&outBuf[3], 0, 14);
-	    outBuf[1] = 0xF2;
+	    //memset(&outBuf[3], 0, 14);
+	    outBuf[2] = 0x00; // ACC_GET
+	    outBuf[3] = 0x03; // CMD_ALARM
 	    write_stm32();
 	    usleep(2000);
 	    read_stm32();
-	    alarm = ( (inBuf[1] << 24) + (inBuf[2] << 16) + (inBuf[3] << 8) + inBuf[4] );
+	    alarm = *((uint32_t *)&inBuf[4]);
 	    printf("\tSTM32alarm: %"PRIu16" days %d hours %d minutes %d seconds\n", alarm/60/60/24, (alarm/60/60) % 24, (alarm/60) % 60, alarm % 60);
 	    wakeup = time(NULL);
 	    wakeup += alarm;

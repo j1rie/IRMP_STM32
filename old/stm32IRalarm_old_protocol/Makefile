@@ -1,6 +1,6 @@
 
 PROJECTNAME=stm32IRalarm
-VERSION=0.0.8
+VERSION=0.0.7
 
 CC              = g++
 //PKG_CONFIG      = pkg-config
