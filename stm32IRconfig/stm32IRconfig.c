@@ -116,9 +116,9 @@ prog:	    printf("set wakeup(w)\nset macro slot(m)\n");
 	    outBuf[idx++] = i & 0xFF;
 	    write_stm32();
 	    usleep(2000);
-pr:	    read_stm32();
-	    if (inBuf[0] == 0x01)
-		goto pr;
+	    read_stm32();
+	    while (inBuf[0] == 0x01)
+		read_stm32();
 	    if (inBuf[1] == 0x01) { // STAT_SUCCESS
 		puts("*****************************OK********************************\n");
 	    } else {
@@ -177,9 +177,9 @@ get:	    printf("get wakeup(w)\nget macro slot(m)\nget caps(c)\n");
 	    }
 	    write_stm32();
 	    usleep(2000);
-gr:	    read_stm32();
-	    if (inBuf[0] == 0x01)
-		goto gr;
+	    read_stm32();
+	    while (inBuf[0] == 0x01)
+		read_stm32();
 	    if (inBuf[1] == 0x01) { // STAT_SUCCESS
 		puts("*****************************OK********************************\n");
 	    } else {
@@ -217,9 +217,9 @@ reset:	    printf("reset wakeup(w)\nreset macro slot(m)\nreset alarm(a)\n");
 	    }
 	    write_stm32();
 	    usleep(2000);
-rr:	    read_stm32();
-	    if (inBuf[0] == 0x01)
-		goto rr;
+	    read_stm32();
+	    while (inBuf[0] == 0x01)
+		read_stm32();
 	    if (inBuf[1] == 0x01) { // STAT_SUCCESS
 		puts("*****************************OK********************************\n");
 	    } else {
@@ -237,9 +237,9 @@ rr:	    read_stm32();
 	    memcpy(&outBuf[idx++], &i, 4);
 	    write_stm32();
 	    usleep(2000);
-sr:	    read_stm32();
-	    if (inBuf[0] == 0x01)
-		goto sr;
+	    read_stm32();
+	    while (inBuf[0] == 0x01)
+		read_stm32();
 	    if (inBuf[1] == 0x01) { // STAT_SUCCESS
 		puts("*****************************OK********************************\n");
 	    } else {
@@ -254,9 +254,9 @@ sr:	    read_stm32();
 	    outBuf[idx++] = 0x03; // CMD_ALARM
 	    write_stm32();
 	    usleep(2000);
-ar:	    read_stm32();
-	    if (inBuf[0] == 0x01)
-		goto ar;
+	    read_stm32();
+	    while (inBuf[0] == 0x01)
+		read_stm32();
 	    if (inBuf[1] == 0x01) { // STAT_SUCCESS
 		puts("*****************************OK********************************\n");
 	    } else {
@@ -279,9 +279,9 @@ ar:	    read_stm32();
 	    outBuf[idx++] = i & 0xFF;
 	    write_stm32();
 	    usleep(2000);
-ir:	    read_stm32();
-	    if (inBuf[0] == 0x01)
-		goto ir;
+	    read_stm32();
+	    while (inBuf[0] == 0x01)
+		read_stm32();
 	    if (inBuf[1] == 0x01) { // STAT_SUCCESS
 		puts("*****************************OK********************************\n");
 	    } else {
