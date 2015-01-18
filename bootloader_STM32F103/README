@@ -1,0 +1,11 @@
+These patches are against Tormod Volden's unify_platforms  branch of his maple-bootloader github repository, date 13.1.2015. [1]
+
+One is for the developer board, one for the red ST-Link emulator and one for the blue „remapped“ ST-Link emulator.
+
+A pulldown resistor from USBD+ to the USB disconnect pin of 220 ohm needs to be added.
+A pullup resistor of 1,5 kohm is already present.
+
+In case the opendrain disconnect pin is reset, the disconnect pin is drawn to ground and the pulldown pulls USBD+ close to ground.
+In case the disconnect pin is set, the disconnect pin is open and the pullup draws USBD+ to VDD.
+
+[1] https://github.com/tormodvolden/maple-bootloader/tree/unify_platforms
