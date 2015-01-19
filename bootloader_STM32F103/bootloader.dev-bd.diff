@@ -1,0 +1,102 @@
+diff -Nru maple-bootloader-unify_platforms.orig/Makefile maple-bootloader-unify_platforms.dev-bd/Makefile
+--- maple-bootloader-unify_platforms.orig/Makefile	2014-05-14 15:45:50.000000000 +0200
++++ maple-bootloader-unify_platforms.dev-bd/Makefile	2015-01-19 22:12:28.399958880 +0100
+@@ -17,7 +17,7 @@
+ ST_USB = usb_lib
+ 
+ # Optimization level [0,1,2,3,s]
+-OPT ?= 0
++OPT ?= s
+ DEBUG = 
+ #DEBUG = dwarf-2
+ 
+diff -Nru maple-bootloader-unify_platforms.orig/common.h maple-bootloader-unify_platforms.dev-bd/common.h
+--- maple-bootloader-unify_platforms.orig/common.h	2014-05-14 15:45:50.000000000 +0200
++++ maple-bootloader-unify_platforms.dev-bd/common.h	2015-01-19 22:12:28.400958880 +0100
+@@ -38,6 +38,7 @@
+ #include "stm32f10x_type.h"
+ #include "cortexm3_macro.h"
+ #include "usb.h"
++#include "dfu.h"
+ 
+ typedef void (*FuncPtr)(void);
+ 
+diff -Nru maple-bootloader-unify_platforms.orig/config.h maple-bootloader-unify_platforms.dev-bd/config.h
+--- maple-bootloader-unify_platforms.orig/config.h	2014-05-14 15:45:50.000000000 +0200
++++ maple-bootloader-unify_platforms.dev-bd/config.h	2015-01-19 22:20:38.972930561 +0100
+@@ -35,17 +35,17 @@
+ 
+ #ifdef MAPLE
+ 
+-# define LED_BANK GPIOA
+-# define LED_RCC_APB2ENR_GPIO RCC_APB2ENR_GPIOA
+-# define LED      5
++# define LED_BANK GPIOB
++# define LED_RCC_APB2ENR_GPIO RCC_APB2ENR_GPIOB
++# define LED      13 // toggle LED
+ 
+ # define BUTTON_BANK GPIOC
+ # define BUTTON_RCC_APB2ENR_GPIO RCC_APB2ENR_GPIOC
+ # define BUTTON      9
+ 
+-# define USB_DISC_BANK GPIOC
+-# define USB_DISC_RCC_APB2ENR_GPIO RCC_APB2ENR_GPIOC
+-# define USB_DISC      12
++# define USB_DISC_BANK GPIOA
++# define USB_DISC_RCC_APB2ENR_GPIO RCC_APB2ENR_GPIOA
++# define USB_DISC      3
+ 
+ #elif defined MAPLE_MINI
+ 
+@@ -73,7 +73,7 @@
+ 
+ #define USER_CODE_RAM     ((u32)0x20000C00)
+ #define RAM_END           ((u32)0x20005000)
+-#define USER_CODE_FLASH   ((u32)0x08005000)
++#define USER_CODE_FLASH   ((u32)0x08002000)
+ #define FLASH_END         ((u32)0x08020000)
+ 
+ #define VEND_ID0 0xAF
+diff -Nru maple-bootloader-unify_platforms.orig/hardware.c maple-bootloader-unify_platforms.dev-bd/hardware.c
+--- maple-bootloader-unify_platforms.orig/hardware.c	2014-05-14 15:45:50.000000000 +0200
++++ maple-bootloader-unify_platforms.dev-bd/hardware.c	2015-01-19 22:12:28.400958880 +0100
+@@ -177,7 +177,7 @@
+     flashLock();
+     usbDsbISR();
+     nvicDisableInterrupts();
+-    setPin(USB_DISC_BANK, USB_DISC); // disconnect usb from host
++    resetPin(USB_DISC_BANK, USB_DISC); // disconnect usb from host
+     systemReset(); // resets clocks and periphs, not core regs
+ 
+ 
+diff -Nru maple-bootloader-unify_platforms.orig/main.c maple-bootloader-unify_platforms.dev-bd/main.c
+--- maple-bootloader-unify_platforms.orig/main.c	2014-05-14 15:45:50.000000000 +0200
++++ maple-bootloader-unify_platforms.dev-bd/main.c	2015-01-19 22:18:42.849937264 +0100
+@@ -38,13 +38,13 @@
+     setupCLK();
+     setupLED();
+     setupUSB();
+-    setupBUTTON();
++    //setupBUTTON();
+     setupFLASH();
+ 
+     strobePin(LED_BANK, LED, STARTUP_BLINKS, BLINK_FAST);
+ 
+     /* wait for host to upload program or halt bootloader */
+-    bool no_user_jump = !checkUserCode(USER_CODE_FLASH) && !checkUserCode(USER_CODE_RAM) || readPin(BUTTON_BANK, BUTTON);
++    bool no_user_jump = !checkUserCode(USER_CODE_FLASH) && !checkUserCode(USER_CODE_RAM);
+     int delay_count = 0;
+ 
+     while ((delay_count++ < BOOTLOADER_WAIT)
+diff -Nru maple-bootloader-unify_platforms.orig/usb.c maple-bootloader-unify_platforms.dev-bd/usb.c
+--- maple-bootloader-unify_platforms.orig/usb.c	2014-05-14 15:45:50.000000000 +0200
++++ maple-bootloader-unify_platforms.dev-bd/usb.c	2015-01-19 22:12:28.401958880 +0100
+@@ -63,6 +63,8 @@
+ 
+     /* initialize the usb application */
+     resetPin(USB_DISC_BANK, USB_DISC);  /* present ourselves to the host */
++    strobePin(LED_BANK, LED, 1, BLINK_SLOW); // pull USBDP down for 1 blink
++    setPin(USB_DISC_BANK, USB_DISC);
+     usbAppInit();
+ }
+ 
