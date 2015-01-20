@@ -41,7 +41,7 @@ static void read_stm32() {
 	int retVal;
 	retVal = read(stm32fd, inBuf, sizeof(inBuf));
 	if (retVal < 0) {
-	    //printf("read error\n");
+	    printf("read error\n");
         } else {
                 printf("read %d bytes:\n\t", retVal);
                 for (i = 0; i < retVal; i++)
@@ -62,6 +62,19 @@ static void write_stm32() {
                         printf("%02hhx ", outBuf[i]);
                 puts("\n");
         }
+}
+
+void write_and_check() {
+        write_stm32();
+        usleep(2000);
+        read_stm32();
+        while (inBuf[0] == 0x01)
+		read_stm32();
+	if (inBuf[1] == 0x01) { // STAT_SUCCESS
+		puts("*****************************OK********************************\n");
+	} else {
+		puts("***************************ERROR*******************************\n");
+	}
 }
 
 int main(int argc, const char **argv) {
@@ -114,16 +127,7 @@ prog:	    printf("set wakeup(w)\nset macro slot(m)\n");
 	    outBuf[idx++] = (i>>8) & 0xFF;
 	    outBuf[idx++] = (i>>16) & 0xFF;
 	    outBuf[idx++] = i & 0xFF;
-	    write_stm32();
-	    usleep(2000);
-	    read_stm32();
-	    while (inBuf[0] == 0x01)
-		read_stm32();
-	    if (inBuf[1] == 0x01) { // STAT_SUCCESS
-		puts("*****************************OK********************************\n");
-	    } else {
-		puts("***************************ERROR*******************************\n");
-	    }
+	    write_and_check();
 	    break;
 	    
 	case 'g':
@@ -155,6 +159,8 @@ get:	    printf("get wakeup(w)\nget macro slot(m)\nget caps(c)\n");
 			write_stm32();
 			usleep(2000);
 			read_stm32();
+			while (inBuf[0] == 0x01)
+			    read_stm32();
 			if (!l) {
 			    printf("macro_slots: %u\n", inBuf[4]);
 			    printf("macro_depth: %u\n", inBuf[5]);
@@ -175,16 +181,7 @@ get:	    printf("get wakeup(w)\nget macro slot(m)\nget caps(c)\n");
 		default:
 		    goto get;
 	    }
-	    write_stm32();
-	    usleep(2000);
-	    read_stm32();
-	    while (inBuf[0] == 0x01)
-		read_stm32();
-	    if (inBuf[1] == 0x01) { // STAT_SUCCESS
-		puts("*****************************OK********************************\n");
-	    } else {
-		puts("***************************ERROR*******************************\n");
-	    }
+	    write_and_check();
 out:	    break;
 
 	case 'r':
@@ -215,16 +212,7 @@ reset:	    printf("reset wakeup(w)\nreset macro slot(m)\nreset alarm(a)\n");
 		default:
 		    goto reset;
 	    }
-	    write_stm32();
-	    usleep(2000);
-	    read_stm32();
-	    while (inBuf[0] == 0x01)
-		read_stm32();
-	    if (inBuf[1] == 0x01) { // STAT_SUCCESS
-		puts("*****************************OK********************************\n");
-	    } else {
-		puts("***************************ERROR*******************************\n");
-	    }
+	    write_and_check();
 	    break;
 
 	case 's':
@@ -235,16 +223,7 @@ reset:	    printf("reset wakeup(w)\nreset macro slot(m)\nreset alarm(a)\n");
 	    printf("enter alarm\n");
 	    scanf("%"SCNx64"", &i);
 	    memcpy(&outBuf[idx++], &i, 4);
-	    write_stm32();
-	    usleep(2000);
-	    read_stm32();
-	    while (inBuf[0] == 0x01)
-		read_stm32();
-	    if (inBuf[1] == 0x01) { // STAT_SUCCESS
-		puts("*****************************OK********************************\n");
-	    } else {
-		puts("***************************ERROR*******************************\n");
-	    }
+	    write_and_check();
 	    break;
 	    
 	case 'a':
@@ -252,16 +231,7 @@ reset:	    printf("reset wakeup(w)\nreset macro slot(m)\nreset alarm(a)\n");
 	    idx = 2;
 	    outBuf[idx++] = 0x00; // ACC_GET
 	    outBuf[idx++] = 0x03; // CMD_ALARM
-	    write_stm32();
-	    usleep(2000);
-	    read_stm32();
-	    while (inBuf[0] == 0x01)
-		read_stm32();
-	    if (inBuf[1] == 0x01) { // STAT_SUCCESS
-		puts("*****************************OK********************************\n");
-	    } else {
-		puts("***************************ERROR*******************************\n");
-	    }
+	    write_and_check();
 	    break;	    
 	    
 	case 'i':
@@ -277,16 +247,7 @@ reset:	    printf("reset wakeup(w)\nreset macro slot(m)\nreset alarm(a)\n");
 	    outBuf[idx++] = (i>>8) & 0xFF;
 	    outBuf[idx++] = (i>>16) & 0xFF;
 	    outBuf[idx++] = i & 0xFF;
-	    write_stm32();
-	    usleep(2000);
-	    read_stm32();
-	    while (inBuf[0] == 0x01)
-		read_stm32();
-	    if (inBuf[1] == 0x01) { // STAT_SUCCESS
-		puts("*****************************OK********************************\n");
-	    } else {
-		puts("***************************ERROR*******************************\n");
-	    }
+	    write_and_check();
 	    break;
 	    
 	case 'm':
