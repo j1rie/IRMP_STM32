@@ -12,6 +12,8 @@
 
 extern volatile unsigned int systicks2;
 void delay_ms(unsigned int msec);
+//void LED_init(void);
+void LED_deinit(void);
 void fast_toggle(void);
 void both_on(void);
 void red_on(void);

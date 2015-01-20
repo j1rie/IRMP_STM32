@@ -87,21 +87,9 @@ void yellow_short_on(void)
 	//delay_ms(130);
 }
 #else
+void LED_deinit(void) {}
 void fast_toggle(void) {}
 void both_on(void) {}
 void red_on(void) {}
 void yellow_short_on(void) {delay_ms(130);}
 #endif /* ST_Link_LEDs */
-
-/* toggle red and external LED */
-void toggle_LED(void)
-{
-#ifdef ST_Link_LEDs
-	if (!PA9_state) {
-		red_on();
-	} else {
-		LED_deinit();
-	}
-#endif /* ST_Link_LEDs */
-	OUT_PORT->ODR ^= LED_PIN;
-}

@@ -115,6 +115,7 @@ REM patch
 %PWD%\ext_src\patch.exe -d stm_lib -p1 -i %PWD%\patches\eeprom.patch --binary
 %PWD%\ext_src\patch.exe -d cmsis_boot -p1 -i %PWD%\patches\stm32f10x_conf.patch --binary
 %PWD%\ext_src\patch.exe -d cmsis_boot -p1 -i %PWD%\patches\startup.patch --binary
+%PWD%\ext_src\patch.exe -d cmsis_boot -p1 -i %PWD%\patches\system.patch --binary
 %PWD%\ext_src\patch.exe -d irmp -p1 -i %PWD%\patches\irmp.patch --binary
 
 REM mark as prepared

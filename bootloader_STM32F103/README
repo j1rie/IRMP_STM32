@@ -9,5 +9,7 @@ You find a scheme in [2].
 In case the opendrain disconnect pin is reset, the disconnect pin is drawn to ground and the pulldown pulls USBD+ close to ground.
 In case the disconnect pin is set, the disconnect pin is open and the pullup draws USBD+ to VDD.
 
+The firmware, which gets loaded by the bootloader, needs to be adapted (vector table and linker) and has to release the USB_DISC_PIN again.
+
 [1] https://github.com/tormodvolden/maple-bootloader/tree/unify_platforms
 [2] https://github.com/EvvGC/Hardware/blob/master/EvvGC%20v1.3/EvvGC%20vpre1.3ce2.pdf?raw=true

@@ -160,6 +160,7 @@ __IO uint8_t PrevXferComplete = 1;
 uint32_t AlarmValue = 0xFFFFFFFF;
 volatile unsigned int systicks = 0;
 #ifdef ST_Link_LEDs
+extern uint8_t PA9_state;
 volatile unsigned int systicks2 = 0;
 #endif /* ST_Link_LEDs */
 
@@ -172,50 +173,35 @@ void delay_ms(unsigned int msec)
 void LED_Switch_init(void)
 {
 	GPIO_InitTypeDef GPIO_InitStructure;
-#ifdef BlueLink_Remap
+	RCC_APB2PeriphClockCmd(RCC_APB2Periph_GPIOB, ENABLE);
+#ifdef ST_Link
 	RCC_APB2PeriphClockCmd(RCC_APB2Periph_GPIOA | RCC_APB2Periph_AFIO, ENABLE);
 	/* disable SWD, so pins are available */
 	GPIO_PinRemapConfig(GPIO_Remap_SWJ_Disable, ENABLE);
-	GPIO_InitStructure.GPIO_Pin = GPIO_Pin_13;
+#endif /* ST_Link */
+	GPIO_InitStructure.GPIO_Pin = LED_PIN;
 	GPIO_InitStructure.GPIO_Mode = GPIO_Mode_Out_PP;
-	GPIO_InitStructure.GPIO_Speed = GPIO_Speed_2MHz; //50MHz;
+	GPIO_InitStructure.GPIO_Speed = GPIO_Speed_2MHz;
 	GPIO_Init(OUT_PORT, &GPIO_InitStructure);
-	GPIO_InitStructure.GPIO_Pin = GPIO_Pin_14;
+	GPIO_InitStructure.GPIO_Pin = WAKEUP_PIN;
 	GPIO_Init(OUT_PORT, &GPIO_InitStructure);
-#ifdef	WAKEUP_RESET
-	RCC_APB2PeriphClockCmd(RCC_APB2Periph_GPIOB, ENABLE);
 	GPIO_InitStructure.GPIO_Pin = WAKEUP_RESET_PIN;
 	GPIO_InitStructure.GPIO_Mode = GPIO_Mode_IPU;
 	GPIO_Init(RESET_PORT, &GPIO_InitStructure);
-#endif /* WAKEUP_RESET */
-#else
-#ifdef ST_Link_LEDs
-	RCC_APB2PeriphClockCmd(RCC_APB2Periph_GPIOA, ENABLE);
-#endif /* ST_Link_LEDs */
-	RCC_APB2PeriphClockCmd(RCC_APB2Periph_GPIOB, ENABLE);
-	GPIO_InitStructure.GPIO_Pin = GPIO_Pin_13;
-	GPIO_InitStructure.GPIO_Mode = GPIO_Mode_Out_PP;
-	GPIO_InitStructure.GPIO_Speed = GPIO_Speed_2MHz; //50MHz;
-	GPIO_Init(OUT_PORT, &GPIO_InitStructure);
-	GPIO_InitStructure.GPIO_Pin = GPIO_Pin_14;
-	GPIO_Init(OUT_PORT, &GPIO_InitStructure);
-#ifdef	WAKEUP_RESET
-#ifndef ST_Link_LEDs
-	GPIO_InitStructure.GPIO_Pin = WAKEUP_RESET_PIN;
-	GPIO_InitStructure.GPIO_Mode = GPIO_Mode_IPU;
-	GPIO_Init(RESET_PORT, &GPIO_InitStructure);
-#else
-	RCC_APB2PeriphClockCmd(RCC_APB2Periph_AFIO, ENABLE);
-	/* disable SWD, so pins are available */
-	GPIO_PinRemapConfig(GPIO_Remap_SWJ_Disable, ENABLE);
-	GPIO_InitStructure.GPIO_Pin = WAKEUP_RESET_PIN;
-	GPIO_InitStructure.GPIO_Mode = GPIO_Mode_IPU;
-	GPIO_Init(RESET_PORT, &GPIO_InitStructure);
-#endif /* ST_Link_LEDs */
-#endif /* WAKEUP_RESET */
-#endif /* BlueLink_Remap */
 	/* start with LED on */
 	GPIO_WriteBit(OUT_PORT, LED_PIN, Bit_SET);
+}
+
+void toggle_LED(void)
+{
+#ifdef ST_Link_LEDs
+	if (!PA9_state) {
+		red_on();
+	} else {
+		LED_deinit();
+	}
+#endif /* ST_Link_LEDs */
+	OUT_PORT->ODR ^= LED_PIN;
 }
 
 /* buf[0 ... 5] -> eeprom[virt_addr ... virt_addr + 2] */
@@ -295,16 +281,12 @@ void store_new_wakeup(void)
 }
 
 void wakeup_reset(void)
-#ifdef	WAKEUP_RESET
 {
 	/* wakeup reset pin pulled low? */
-	if (!GPIO_ReadInputDataBit(OUT_PORT, WAKEUP_RESET_PIN)) {
+	if (!GPIO_ReadInputDataBit(RESET_PORT, WAKEUP_RESET_PIN)) {
 		store_new_wakeup();
 	}
 }
-#else
-{}
-#endif /* WAKEUP_RESET */
 
 int8_t get_handler(uint8_t *buf)
 {
@@ -393,7 +375,7 @@ int8_t reset_handler(uint8_t *buf)
 	/* number of valid bytes in buf, -1 signifies error */
 	int8_t ret = 3;
 	uint8_t idx;
-	uint8_t zeros[SIZEOF_IR] = {0};
+	uint8_t zeros[SIZEOF_IR] = {0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF};
 	switch ((enum command) buf[2]) {
 	case CMD_ALARM:
 		AlarmValue = 0xFFFFFFFF;
@@ -413,7 +395,8 @@ int8_t reset_handler(uint8_t *buf)
 }
 
 /* is received ir-code in one of the wakeup-slots? wakeup if true */
-void check_wakeups(IRMP_DATA *ir) {
+void check_wakeups(IRMP_DATA *ir)
+{
 	uint8_t i, idx;
 	uint8_t buf[SIZEOF_IR];
 	for (i=0; i < WAKE_SLOTS; i++) {
@@ -429,7 +412,7 @@ void transmit_macro(uint8_t macro)
 {
 	uint8_t i, idx;
 	uint8_t buf[SIZEOF_IR];
-	uint8_t zeros[SIZEOF_IR] = {0};
+	uint8_t zeros[SIZEOF_IR] = {0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF};
 	/* we start from 1, since we don't want to tx the trigger code of the macro*/
 	for (i=1; i < MACRO_DEPTH + 1; i++) {
 		idx = (MACRO_DEPTH + 1) * SIZEOF_IR/2 * macro + SIZEOF_IR/2 * i;
@@ -446,7 +429,8 @@ void transmit_macro(uint8_t macro)
 }
 
 /* is received ir-code (trigger) in one of the macro-slots? transmit_macro if true */
-void check_macros(IRMP_DATA *ir) {
+void check_macros(IRMP_DATA *ir)
+{
 	uint8_t i, idx;
 	uint8_t buf[SIZEOF_IR];
 	for (i=0; i < MACRO_SLOTS; i++) {
@@ -457,15 +441,31 @@ void check_macros(IRMP_DATA *ir) {
 	}
 }
 
+void USB_DISC_release(void)
+{
+#ifdef Bootloader
+	GPIO_InitTypeDef GPIO_InitStructure;
+	RCC_APB2PeriphClockCmd(USB_DISC_RCC_APB2Periph, ENABLE);
+	GPIO_InitStructure.GPIO_Pin = USB_DISC_PIN;
+	GPIO_InitStructure.GPIO_Mode = GPIO_Mode_Out_OD;
+	GPIO_InitStructure.GPIO_Speed = GPIO_Speed_2MHz;
+	GPIO_Init(OUT_PORT, &GPIO_InitStructure);
+	GPIO_WriteBit(USB_DISC_PORT, USB_DISC_PIN, Bit_SET);
+#endif
+}
+
 int main(void)
 {
 	uint8_t buf[HID_OUT_BUFFER_SIZE-1], RepeatCounter = 0;
 	IRMP_DATA myIRData;
 	int8_t ret;
+	/* first wakeup slot empty? */
+	uint8_t learn_wakeup = eeprom_restore(buf, (MACRO_DEPTH + 1) * SIZEOF_IR/2 * MACRO_SLOTS);
 
 	USB_HID_Init();
 	LED_Switch_init();
 	red_on();
+	USB_DISC_release();
 	IRMP_Init();
 	irsnd_init();
 	FLASH_Unlock();
@@ -509,6 +509,12 @@ int main(void)
 
 		/* poll IR-data */
 		if (irmp_get_data(&myIRData)) {
+			if (learn_wakeup) {
+				/* store received wakeup IRData in first wakeup slot */
+				eeprom_store((MACRO_DEPTH + 1) * SIZEOF_IR/2 * MACRO_SLOTS, (uint8_t *) &myIRData);
+				learn_wakeup = 0;
+			}
+
 			if (!(myIRData.flags)) {
 				RepeatCounter = 0;
 			} else {

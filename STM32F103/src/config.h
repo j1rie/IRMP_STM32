@@ -21,41 +21,58 @@
 
 #define MIN_REPEATS	2  // TODO make configurable & use Eeprom
 
+/* in case you use the bootloader at 0x8000000, and this firmware at 0x8002000 */
+#define Bootloader
+
+/* uncomment this, if you use a ST-Link */
+//#define ST_Link
+
 /* uncomment this, if you want to use the ST-Link LEDs */
-#define ST_Link_LEDs
+//#define ST_Link_LEDs
+
+#ifdef ST_Link_LEDs
+	#define ST_Link
+#endif /* ST_Link_LEDs */
 
 /* only if you want to use CLK and DIO on the blue ST-Link Emulator with mistakenly connected Pins
  * WARNING: further firmware updates will become difficult!
  * you have to flash with --reset, and pull RST low until short after flash command
- * better use TMS and TCK instead, and leave this commented out */
-#define BlueLink_Remap
+ * better use TMS and TCK instead, and leave this commented out
+ * OR use the bootloader and avoid the hassle */
+//#define BlueLink_Remap
 
-/* for use of wakeup reset pin */
-/* TODO test WAKEUP_RESET & ST_Link_LEDs */
-//#define WAKEUP_RESET // -> NO ST_Link_LEDs!!
+#ifdef BlueLink_Remap
+	#define ST_Link
+#endif /* BlueLink_Remap */
+
+/* B11 IRMP (irmpconfig.h), B6 IRSND (irsndconfig.h) , B10 Logging (irmp.c) */
 
 #ifdef BlueLink_Remap
 	#define OUT_PORT	GPIOA
 	#define LED_PIN		GPIO_Pin_14
 	#define WAKEUP_PIN	GPIO_Pin_13
-#ifdef WAKEUP_RESET
 	#define RESET_PORT	GPIOB
-	#define WAKEUP_RESET_PIN GPIO_Pin_13
-#endif /* WAKEUP_RESET */
-#else
+	#define WAKEUP_RESET_PIN GPIO_Pin_14
+	#define USB_DISC_PORT GPIOB
+	#define USB_DISC_RCC_APB2Periph RCC_APB2Periph_GPIOB /* TODO use concat */
+	#define USB_DISC_PIN  GPIO_Pin_13
+#else /* red ST-Link, blue ST-Link without remap and developer board */
 	#define OUT_PORT	GPIOB
 	#define LED_PIN		GPIO_Pin_13
 	#define WAKEUP_PIN	GPIO_Pin_14
-#ifdef WAKEUP_RESET
-#ifndef ST_Link_LEDs
-	#define RESET_PORT	GPIOB
-	#define WAKEUP_RESET_PIN GPIO_Pin_12
-#else
-	/* WARNING: further firmware updates will become difficult! */
+#ifdef ST_Link /* red and blue ST-Link without remap */
 	#define RESET_PORT	GPIOA
 	#define WAKEUP_RESET_PIN GPIO_Pin_14
-#endif /* ST_Link_LEDs */
-#endif /* WAKEUP_RESET */
+	#define USB_DISC_PORT GPIOA
+	#define USB_DISC_RCC_APB2Periph RCC_APB2Periph_GPIOA /* TODO use concat */
+	#define USB_DISC_PIN  GPIO_Pin_13
+#else /* developer board */
+	#define RESET_PORT	GPIOB
+	#define WAKEUP_RESET_PIN GPIO_Pin_12
+	#define USB_DISC_PORT GPIOA
+	#define USB_DISC_RCC_APB2Periph RCC_APB2Periph_GPIOA /* TODO use concat */
+	#define USB_DISC_PIN  GPIO_Pin_3
+#endif /* ST_Link */
 #endif /* BlueLink_Remap */
 
 #endif /* __CONFIG_H */
