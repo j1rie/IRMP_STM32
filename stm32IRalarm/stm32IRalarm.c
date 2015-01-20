@@ -100,11 +100,12 @@ int main(int argc, char *argv[]) {
 	    outBuf[2] = 0x01; // ACC_SET
 	    outBuf[3] = 0x03; // CMD_ALARM
 	    setalarm = strtoul(svalue, NULL, 0);
-	    //memset(&outBuf[3], 0, 14);
 	    memcpy(&outBuf[4], &setalarm, sizeof(setalarm));
 	    write_stm32();
 	    usleep(2000);
 	    read_stm32(); /* necessary to avoid, that echo is read by first alarm read */
+	    while (inBuf[0] == 0x01)
+		read_stm32();
 	}
 
 	if (aflag) {
@@ -114,6 +115,8 @@ int main(int argc, char *argv[]) {
 	    write_stm32();
 	    usleep(2000);
 	    read_stm32();
+	    while (inBuf[0] == 0x01)
+		read_stm32();
 	    alarm = *((uint32_t *)&inBuf[4]);
 	    printf("\tSTM32alarm: %"PRIu16" days %d hours %d minutes %d seconds\n", alarm/60/60/24, (alarm/60/60) % 24, (alarm/60) % 60, alarm % 60);
 	    wakeup = time(NULL);
