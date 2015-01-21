@@ -21,6 +21,8 @@
 
 #define MIN_REPEATS	2  // TODO make configurable & use Eeprom
 
+/* B11 IRMP (irmpconfig.h), B6 IRSND (irsndconfig.h) , B10 Logging (irmp.c) */
+
 #define OUT_PORT	GPIOB
 #define LED_PIN		GPIO_Pin_12 // blue LED
 #define WAKEUP_PIN	GPIO_Pin_7

@@ -374,7 +374,8 @@ int8_t reset_handler(uint8_t *buf)
 }
 
 /* is received ir-code in one of the wakeup-slots? wakeup if true */
-void check_wakeups(IRMP_DATA *ir) {
+void check_wakeups(IRMP_DATA *ir)
+{
 	uint8_t i, idx;
 	uint8_t buf[SIZEOF_IR];
 	for (i=0; i < WAKE_SLOTS; i++) {
@@ -405,7 +406,8 @@ void transmit_macro(uint8_t macro)
 }
 
 /* is received ir-code (trigger) in one of the macro-slots? transmit_macro if true */
-void check_macros(IRMP_DATA *ir) {
+void check_macros(IRMP_DATA *ir)
+{
 	uint8_t i, idx;
 	uint8_t buf[SIZEOF_IR];
 	for (i=0; i < MACRO_SLOTS; i++) {
