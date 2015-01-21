@@ -178,6 +178,8 @@ void LED_Switch_init(void)
 	RCC_APB2PeriphClockCmd(RCC_APB2Periph_GPIOA | RCC_APB2Periph_AFIO, ENABLE);
 	/* disable SWD, so pins are available */
 	GPIO_PinRemapConfig(GPIO_Remap_SWJ_Disable, ENABLE);
+	/* start with wakeup switch off */
+	GPIO_WriteBit(OUT_PORT, WAKEUP_PIN, Bit_RESET);
 #endif /* ST_Link */
 	GPIO_InitStructure.GPIO_Pin = LED_PIN;
 	GPIO_InitStructure.GPIO_Mode = GPIO_Mode_Out_PP;
@@ -261,7 +263,7 @@ void Wakeup(void)
 	GPIO_WriteBit(OUT_PORT, WAKEUP_PIN, Bit_SET);
 	delay_ms(500);
 	GPIO_WriteBit(OUT_PORT, WAKEUP_PIN, Bit_RESET);
-	//fast_toggle(); // prob
+	fast_toggle(); // prob
 }
 
 void store_new_wakeup(void)
@@ -422,8 +424,8 @@ void transmit_macro(uint8_t macro)
 			break;
 		/* Depending on the protocol we need a pause between the trigger and the transmission
 		 * and between two transmissions. The highest known pause is 130 ms for Denon. */
-		//yellow_short_on(); // prob
-		delay_ms(130);
+		yellow_short_on(); // prob
+		//delay_ms(130);
 		irsnd_send_data((IRMP_DATA *) buf, 1); // prob?
 	}
 }
