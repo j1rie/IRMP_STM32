@@ -449,7 +449,7 @@ void USB_DISC_release(void)
 	GPIO_InitStructure.GPIO_Pin = USB_DISC_PIN;
 	GPIO_InitStructure.GPIO_Mode = GPIO_Mode_Out_OD;
 	GPIO_InitStructure.GPIO_Speed = GPIO_Speed_2MHz;
-	GPIO_Init(OUT_PORT, &GPIO_InitStructure);
+	GPIO_Init(USB_DISC_PORT, &GPIO_InitStructure);
 	GPIO_WriteBit(USB_DISC_PORT, USB_DISC_PIN, Bit_SET);
 #endif
 }
