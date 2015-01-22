@@ -21,33 +21,30 @@
 
 #define MIN_REPEATS	2  // TODO make configurable & use Eeprom
 
+/* remap is now used on all ST-Links, so
+ * you have to flash with --reset, and pull RST low until short after the flash command
+ * better use the bootloader and avoid the hassle */
+
 /* in case you use the bootloader at 0x8000000, and this firmware at 0x8002000 */
 #define Bootloader
 
-/* uncomment this, if you use a ST-Link */
-//#define ST_Link
+/* uncomment this, if you use the blue ST-Link */
+//#define BlueLink
 
-/* uncomment this, if you want to use the ST-Link LEDs */
+/* uncomment this, if you use the red ST-Link */
+//#define RedLink
+
+/* uncomment this, if you want to use the ST-Link LEDs
+ * might be removed, if the former problems don't reoccur */
 //#define ST_Link_LEDs
 
-#ifdef ST_Link_LEDs
+#if defined(BlueLink) || defined(RedLink) || defined(ST_Link_LEDs)
 	#define ST_Link
-#endif /* ST_Link_LEDs */
-
-/* only if you want to use CLK and DIO on the blue ST-Link Emulator with mistakenly connected Pins
- * WARNING: further firmware updates will become difficult!
- * you have to flash with --reset, and pull RST low until short after flash command
- * better use TMS and TCK instead, and leave this commented out
- * OR use the bootloader and avoid the hassle */
-//#define BlueLink_Remap
-
-#ifdef BlueLink_Remap
-	#define ST_Link
-#endif /* BlueLink_Remap */
+#endif
 
 /* B11 IRMP (irmpconfig.h), B6 IRSND (irsndconfig.h) , B10 Logging (irmp.c) */
 
-#ifdef BlueLink_Remap
+#ifdef BlueLink /* blue ST-Link */
 	#define OUT_PORT	GPIOA
 	#define LED_PIN		GPIO_Pin_14
 	#define WAKEUP_PIN	GPIO_Pin_13
@@ -56,11 +53,11 @@
 	#define USB_DISC_PORT GPIOB
 	#define USB_DISC_RCC_APB2Periph RCC_APB2Periph_GPIOB /* TODO use concat */
 	#define USB_DISC_PIN  GPIO_Pin_13
-#else /* red ST-Link, blue ST-Link without remap and developer board */
+#else /* red ST-Link and developer board */
 	#define OUT_PORT	GPIOB
 	#define LED_PIN		GPIO_Pin_13
 	#define WAKEUP_PIN	GPIO_Pin_14
-#ifdef ST_Link /* red and blue ST-Link without remap */
+#ifdef RedLink /* red ST-Link */
 	#define RESET_PORT	GPIOA
 	#define WAKEUP_RESET_PIN GPIO_Pin_14
 	#define USB_DISC_PORT GPIOA
@@ -69,10 +66,10 @@
 #else /* developer board */
 	#define RESET_PORT	GPIOB
 	#define WAKEUP_RESET_PIN GPIO_Pin_12
-	#define USB_DISC_PORT GPIOA
-	#define USB_DISC_RCC_APB2Periph RCC_APB2Periph_GPIOA /* TODO use concat */
-	#define USB_DISC_PIN  GPIO_Pin_3
+	#define USB_DISC_PORT GPIOB
+	#define USB_DISC_RCC_APB2Periph RCC_APB2Periph_GPIOB /* TODO use concat */
+	#define USB_DISC_PIN  GPIO_Pin_15
 #endif /* ST_Link */
-#endif /* BlueLink_Remap */
+#endif /* BlueLink */
 
 #endif /* __CONFIG_H */

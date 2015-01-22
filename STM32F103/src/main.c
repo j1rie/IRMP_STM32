@@ -178,6 +178,7 @@ void LED_Switch_init(void)
 	RCC_APB2PeriphClockCmd(RCC_APB2Periph_GPIOA | RCC_APB2Periph_AFIO, ENABLE);
 	/* disable SWD, so pins are available */
 	GPIO_PinRemapConfig(GPIO_Remap_SWJ_Disable, ENABLE);
+	//RCC_APB2PeriphClockCmd(RCC_APB2Periph_AFIO, DISABLE); // test this
 	/* start with wakeup switch off */
 	GPIO_WriteBit(OUT_PORT, WAKEUP_PIN, Bit_RESET);
 #endif /* ST_Link */
@@ -263,7 +264,7 @@ void Wakeup(void)
 	GPIO_WriteBit(OUT_PORT, WAKEUP_PIN, Bit_SET);
 	delay_ms(500);
 	GPIO_WriteBit(OUT_PORT, WAKEUP_PIN, Bit_RESET);
-	fast_toggle(); // prob
+	fast_toggle();
 }
 
 void store_new_wakeup(void)
@@ -344,8 +345,8 @@ int8_t set_handler(uint8_t *buf)
 	uint8_t tmp[SIZEOF_IR];
 	switch ((enum command) buf[2]) {
 	case CMD_EMIT:
-		yellow_short_on(); // OK
-		irsnd_send_data((IRMP_DATA *) &buf[3], 1); // OK
+		yellow_short_on();
+		irsnd_send_data((IRMP_DATA *) &buf[3], 1);
 		break;
 	case CMD_ALARM:
 		memcpy(&AlarmValue, &buf[3], sizeof(AlarmValue));
@@ -424,9 +425,8 @@ void transmit_macro(uint8_t macro)
 			break;
 		/* Depending on the protocol we need a pause between the trigger and the transmission
 		 * and between two transmissions. The highest known pause is 130 ms for Denon. */
-		yellow_short_on(); // prob
-		//delay_ms(130);
-		irsnd_send_data((IRMP_DATA *) buf, 1); // prob?
+		yellow_short_on();
+		irsnd_send_data((IRMP_DATA *) buf, 1);
 	}
 }
 

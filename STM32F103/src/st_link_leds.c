@@ -34,12 +34,28 @@ void LED_deinit(void)
 	PA9_state = 0;
 }
 
+/* red on */
+void red_on(void)
+{
+	LED_init();
+	GPIO_WriteBit(GPIOA, GPIO_Pin_9, Bit_SET);
+	PA9_state = 1;
+}
+
+void restore(void)
+{
+	if (!PA9_state) {
+		LED_deinit();
+	} else {
+		red_on();
+	}
+}
+
 /* red + yellow fast toggle */
 void fast_toggle(void)
 {
-//#if 0 // causes strange problem, TODO find out why, related to Wakeup
 	if (!PA9_state)
-		LED_init();  // => error! why???
+		LED_init();
 	systicks2 = 0;
 	while (systicks2 <= 500) {
 		GPIO_WriteBit(GPIOA, GPIO_Pin_9, Bit_SET);
@@ -47,8 +63,17 @@ void fast_toggle(void)
 		GPIO_WriteBit(GPIOA, GPIO_Pin_9, Bit_RESET);
 		delay_ms(50);
 	}
-	LED_deinit();
-//#endif
+	restore();
+}
+
+/* yellow short on */
+void yellow_short_on(void)
+{
+	if (!PA9_state)
+		LED_init();
+	GPIO_WriteBit(GPIOA, GPIO_Pin_9, Bit_RESET);
+	delay_ms(130);
+	restore();
 }
 
 /* red + yellow both on */
@@ -63,28 +88,7 @@ void both_on(void)
 		GPIO_WriteBit(GPIOA, GPIO_Pin_9, Bit_RESET);
 		delay_ms(1);
 	}
-	LED_deinit();
-}
-
-/* red on */
-void red_on(void)
-{
-	LED_init();
-	GPIO_WriteBit(GPIOA, GPIO_Pin_9, Bit_SET);
-	PA9_state = 1;
-}
-
-/* yellow short on */
-void yellow_short_on(void)
-{
-//#if 0 // causes strange problem, TODO find out why, related to transmit_macro (and irsnd_send_data?)
-	if (!PA9_state)
-		LED_init();  // => error! why???
-	GPIO_WriteBit(GPIOA, GPIO_Pin_9, Bit_RESET);
-	delay_ms(130);
-	LED_deinit();
-//#endif
-	//delay_ms(130);
+	restore();
 }
 #else
 void LED_deinit(void) {}
