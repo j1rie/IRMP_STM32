@@ -221,7 +221,7 @@ void Systick_Init(void)
 
 void SysTick_Handler(void)
 {
-	static uint16_t i = 0;
+	static uint_fast16_t i = 0;
 	systicks++;
 	if (i == 1000) {
 		if (AlarmValue)
