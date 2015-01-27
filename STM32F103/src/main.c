@@ -159,10 +159,10 @@ IRMP_RADIO1_PROTOCOL,
 __IO uint8_t PrevXferComplete = 1;
 uint32_t AlarmValue = 0xFFFFFFFF;
 volatile unsigned int systicks = 0;
-#ifdef ST_Link_LEDs
+#ifdef ST_Link
 extern uint8_t PA9_state;
 volatile unsigned int systicks2 = 0;
-#endif /* ST_Link_LEDs */
+#endif /* ST_Link */
 
 void delay_ms(unsigned int msec)
 {
@@ -178,7 +178,6 @@ void LED_Switch_init(void)
 	RCC_APB2PeriphClockCmd(RCC_APB2Periph_GPIOA | RCC_APB2Periph_AFIO, ENABLE);
 	/* disable SWD, so pins are available */
 	GPIO_PinRemapConfig(GPIO_Remap_SWJ_Disable, ENABLE);
-	//RCC_APB2PeriphClockCmd(RCC_APB2Periph_AFIO, DISABLE); // test this
 	/* start with wakeup switch off */
 	GPIO_WriteBit(OUT_PORT, WAKEUP_PIN, Bit_RESET);
 #endif /* ST_Link */
@@ -197,13 +196,13 @@ void LED_Switch_init(void)
 
 void toggle_LED(void)
 {
-#ifdef ST_Link_LEDs
+#ifdef ST_Link
 	if (!PA9_state) {
 		red_on();
 	} else {
 		LED_deinit();
 	}
-#endif /* ST_Link_LEDs */
+#endif /* ST_Link */
 	OUT_PORT->ODR ^= LED_PIN;
 }
 
@@ -241,11 +240,11 @@ void Systick_Init(void)
 
 void SysTick_Handler(void)
 {
-	static uint16_t i = 0;
+	static uint_fast16_t i = 0;
 	systicks++;
-#ifdef ST_Link_LEDs
+#ifdef ST_Link
 	systicks2++;
-#endif /* ST_Link_LEDs */
+#endif /* ST_Link */
 	if (i == 1000) {
 		if (AlarmValue)
 			AlarmValue--;

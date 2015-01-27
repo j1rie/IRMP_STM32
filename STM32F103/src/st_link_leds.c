@@ -11,7 +11,7 @@
 #include "stm32f10x.h"
 #include "config.h" /* CooCox workaround */
 
-#ifdef ST_Link_LEDs
+#ifdef ST_Link
 /* red + {red|yellow} LEDs on PA9 on ST-Link Emus) */
 uint8_t PA9_state = 0;
 
@@ -96,4 +96,4 @@ void fast_toggle(void) {}
 void both_on(void) {}
 void red_on(void) {}
 void yellow_short_on(void) {delay_ms(130);}
-#endif /* ST_Link_LEDs */
+#endif /* ST_Link */

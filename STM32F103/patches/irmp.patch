@@ -52,18 +52,6 @@ diff -Nrup a/irmpconfig.h b/irmpconfig.h
  #endif
  
  /*---------------------------------------------------------------------------------------------------------------------------------------------------
-diff -Nrup a/irmpsystem.h b/irmpsystem.h
---- a/irmpsystem.h	2014-12-05 19:20:24.000000000 +0100
-+++ b/irmpsystem.h	2014-12-05 19:20:56.000000000 +0100
-@@ -128,7 +128,7 @@ typedef unsigned short
- #  define FALSE                         0
- #endif
- 
--typedef struct
-+typedef struct __attribute__ ((__packed__))
- {
-   uint8_t                               protocol;                                   // protocol, i.e. NEC_PROTOCOL
-   uint16_t                              address;                                    // address
 diff -Nrup a/irsndconfig.h b/irsndconfig.h
 --- a/irsndconfig.h	2014-09-15 13:46:02.000000000 +0200
 +++ b/irsndconfig.h	2014-11-05 19:57:24.766585900 +0100

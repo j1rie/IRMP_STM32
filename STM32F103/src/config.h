@@ -32,13 +32,9 @@
 //#define BlueLink
 
 /* uncomment this, if you use the red ST-Link */
-//#define RedLink
+#define RedLink
 
-/* uncomment this, if you want to use the ST-Link LEDs
- * might be removed, if the former problems don't reoccur */
-//#define ST_Link_LEDs
-
-#if defined(BlueLink) || defined(RedLink) || defined(ST_Link_LEDs)
+#if defined(BlueLink) || defined(RedLink)
 	#define ST_Link
 #endif
 
