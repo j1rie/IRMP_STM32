@@ -1,6 +1,6 @@
-diff -Nru maple-bootloader-unify_platforms.orig/Makefile maple-bootloader-unify_platforms.dev-bd/Makefile
+diff -Nru maple-bootloader-unify_platforms.orig/Makefile maple-bootloader-unify_platforms.dev/Makefile
 --- maple-bootloader-unify_platforms.orig/Makefile	2014-05-14 15:45:50.000000000 +0200
-+++ maple-bootloader-unify_platforms.dev-bd/Makefile	2015-01-19 22:12:28.399958880 +0100
++++ maple-bootloader-unify_platforms.dev/Makefile	2015-01-19 22:12:28.399958880 +0100
 @@ -17,7 +17,7 @@
  ST_USB = usb_lib
  
@@ -10,9 +10,9 @@ diff -Nru maple-bootloader-unify_platforms.orig/Makefile maple-bootloader-unify_
  DEBUG = 
  #DEBUG = dwarf-2
  
-diff -Nru maple-bootloader-unify_platforms.orig/common.h maple-bootloader-unify_platforms.dev-bd/common.h
+diff -Nru maple-bootloader-unify_platforms.orig/common.h maple-bootloader-unify_platforms.dev/common.h
 --- maple-bootloader-unify_platforms.orig/common.h	2014-05-14 15:45:50.000000000 +0200
-+++ maple-bootloader-unify_platforms.dev-bd/common.h	2015-01-19 22:12:28.400958880 +0100
++++ maple-bootloader-unify_platforms.dev/common.h	2015-01-19 22:12:28.400958880 +0100
 @@ -38,6 +38,7 @@
  #include "stm32f10x_type.h"
  #include "cortexm3_macro.h"
@@ -21,9 +21,9 @@ diff -Nru maple-bootloader-unify_platforms.orig/common.h maple-bootloader-unify_
  
  typedef void (*FuncPtr)(void);
  
-diff -Nru maple-bootloader-unify_platforms.orig/config.h maple-bootloader-unify_platforms.dev-bd/config.h
+diff -Nru maple-bootloader-unify_platforms.orig/config.h maple-bootloader-unify_platforms.dev/config.h
 --- maple-bootloader-unify_platforms.orig/config.h	2014-05-14 15:45:50.000000000 +0200
-+++ maple-bootloader-unify_platforms.dev-bd/config.h	2015-01-19 22:20:38.972930561 +0100
++++ maple-bootloader-unify_platforms.dev/config.h	2015-01-27 18:57:16.782625781 +0100
 @@ -35,17 +35,17 @@
  
  #ifdef MAPLE
@@ -42,9 +42,9 @@ diff -Nru maple-bootloader-unify_platforms.orig/config.h maple-bootloader-unify_
 -# define USB_DISC_BANK GPIOC
 -# define USB_DISC_RCC_APB2ENR_GPIO RCC_APB2ENR_GPIOC
 -# define USB_DISC      12
-+# define USB_DISC_BANK GPIOA
-+# define USB_DISC_RCC_APB2ENR_GPIO RCC_APB2ENR_GPIOA
-+# define USB_DISC      3
++# define USB_DISC_BANK GPIOB
++# define USB_DISC_RCC_APB2ENR_GPIO RCC_APB2ENR_GPIOB
++# define USB_DISC      15
  
  #elif defined MAPLE_MINI
  
@@ -57,9 +57,9 @@ diff -Nru maple-bootloader-unify_platforms.orig/config.h maple-bootloader-unify_
  #define FLASH_END         ((u32)0x08020000)
  
  #define VEND_ID0 0xAF
-diff -Nru maple-bootloader-unify_platforms.orig/hardware.c maple-bootloader-unify_platforms.dev-bd/hardware.c
+diff -Nru maple-bootloader-unify_platforms.orig/hardware.c maple-bootloader-unify_platforms.dev/hardware.c
 --- maple-bootloader-unify_platforms.orig/hardware.c	2014-05-14 15:45:50.000000000 +0200
-+++ maple-bootloader-unify_platforms.dev-bd/hardware.c	2015-01-19 22:12:28.400958880 +0100
++++ maple-bootloader-unify_platforms.dev/hardware.c	2015-01-19 22:12:28.400958880 +0100
 @@ -177,7 +177,7 @@
      flashLock();
      usbDsbISR();
@@ -69,9 +69,9 @@ diff -Nru maple-bootloader-unify_platforms.orig/hardware.c maple-bootloader-unif
      systemReset(); // resets clocks and periphs, not core regs
  
  
-diff -Nru maple-bootloader-unify_platforms.orig/main.c maple-bootloader-unify_platforms.dev-bd/main.c
+diff -Nru maple-bootloader-unify_platforms.orig/main.c maple-bootloader-unify_platforms.dev/main.c
 --- maple-bootloader-unify_platforms.orig/main.c	2014-05-14 15:45:50.000000000 +0200
-+++ maple-bootloader-unify_platforms.dev-bd/main.c	2015-01-19 22:18:42.849937264 +0100
++++ maple-bootloader-unify_platforms.dev/main.c	2015-01-19 22:18:42.849937264 +0100
 @@ -38,13 +38,13 @@
      setupCLK();
      setupLED();
@@ -88,9 +88,9 @@ diff -Nru maple-bootloader-unify_platforms.orig/main.c maple-bootloader-unify_pl
      int delay_count = 0;
  
      while ((delay_count++ < BOOTLOADER_WAIT)
-diff -Nru maple-bootloader-unify_platforms.orig/usb.c maple-bootloader-unify_platforms.dev-bd/usb.c
+diff -Nru maple-bootloader-unify_platforms.orig/usb.c maple-bootloader-unify_platforms.dev/usb.c
 --- maple-bootloader-unify_platforms.orig/usb.c	2014-05-14 15:45:50.000000000 +0200
-+++ maple-bootloader-unify_platforms.dev-bd/usb.c	2015-01-19 22:12:28.401958880 +0100
++++ maple-bootloader-unify_platforms.dev/usb.c	2015-01-19 22:12:28.401958880 +0100
 @@ -63,6 +63,8 @@
  
      /* initialize the usb application */
@@ -99,4 +99,16 @@ diff -Nru maple-bootloader-unify_platforms.orig/usb.c maple-bootloader-unify_pla
 +    setPin(USB_DISC_BANK, USB_DISC);
      usbAppInit();
  }
+ 
+diff -Nru maple-bootloader-unify_platforms.orig/usb_descriptor.c maple-bootloader-unify_platforms.dev/usb_descriptor.c
+--- maple-bootloader-unify_platforms.orig/usb_descriptor.c	2014-05-14 15:45:50.000000000 +0200
++++ maple-bootloader-unify_platforms.dev/usb_descriptor.c	2015-01-27 18:32:50.331710435 +0100
+@@ -176,7 +176,7 @@
+     0x03,
+     'D', 0, 'F', 0, 'U', 0, ' ', 0, 'P', 0, 'r', 0, 'o', 0, 'g', 0, 'r', 0,
+     'a', 0, 'm', 0, ' ', 0, 'F', 0, 'L', 0, 'A', 0, 'S', 0, 'H', 0, ' ', 0,
+-    '0', 0, 'x', 0, '0', 0, '8', 0, '0', 0, '0', 0, '5', 0, '0', 0, '0', 0,
++    '0', 0, 'x', 0, '0', 0, '8', 0, '0', 0, '0', 0, '2', 0, '0', 0, '0', 0,
+     '0', 0
+ };
  

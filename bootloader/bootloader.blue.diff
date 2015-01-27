@@ -198,3 +198,15 @@ diff -Nru maple-bootloader-unify_platforms.orig/usb.c maple-bootloader-unify_pla
      usbAppInit();
  }
  
+diff -Nru maple-bootloader-unify_platforms.orig/usb_descriptor.c maple-bootloader-unify_platforms.blue-rmp/usb_descriptor.c
+--- maple-bootloader-unify_platforms.orig/usb_descriptor.c	2014-05-14 15:45:50.000000000 +0200
++++ maple-bootloader-unify_platforms.blue-rmp/usb_descriptor.c	2015-01-20 00:16:58.886527631 +0100
+@@ -176,7 +176,7 @@
+     0x03,
+     'D', 0, 'F', 0, 'U', 0, ' ', 0, 'P', 0, 'r', 0, 'o', 0, 'g', 0, 'r', 0,
+     'a', 0, 'm', 0, ' ', 0, 'F', 0, 'L', 0, 'A', 0, 'S', 0, 'H', 0, ' ', 0,
+-    '0', 0, 'x', 0, '0', 0, '8', 0, '0', 0, '0', 0, '5', 0, '0', 0, '0', 0,
++    '0', 0, 'x', 0, '0', 0, '8', 0, '0', 0, '0', 0, '2', 0, '0', 0, '0', 0,
+     '0', 0
+ };
+ 
