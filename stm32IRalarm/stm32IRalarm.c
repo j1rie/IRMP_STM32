@@ -1,7 +1,7 @@
 /**********************************************************************************************************  
     stm32config: set alarm to and get alarm from STM32IR
 
-    Copyright (C) 2014 Joerg Riechardt
+    Copyright (C) 2014-2015 Joerg Riechardt
 
     This program is free software; you can redistribute it and/or modify
     it under the terms of the GNU General Public License as published by

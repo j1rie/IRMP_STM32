@@ -1,5 +1,5 @@
 REM  *
-REM  * Copyright (C) 2014 Joerg Riechardt
+REM  * Copyright (C) 2014-2015 Joerg Riechardt
 REM  *
 REM  * This program is free software; you can redistribute it and/or modify
 REM  * it under the terms of the GNU General Public License as published by

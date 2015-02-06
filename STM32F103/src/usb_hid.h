@@ -1,5 +1,5 @@
 /*
- *  Copyright (C) 2014 Joerg Riechardt
+ *  Copyright (C) 2014-2015 Joerg Riechardt
  *
  *  based on work by Uwe Becker - http://mikrocontroller.bplaced.net
  *
