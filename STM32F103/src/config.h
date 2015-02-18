@@ -25,7 +25,8 @@
  * you have to flash with --reset, and pull RST low until short after the flash command
  * better use the bootloader and avoid the hassle */
 
-/* in case you use the bootloader at 0x8000000, and this firmware at 0x8002000 */
+/* in case you use the bootloader at 0x8000000, and this firmware at 0x8002000
+ * rom in the linker script resp. IROM1 in CooCox -> Configuration -> Link has to be adapted */
 #define Bootloader
 
 /* uncomment this, if you use the blue ST-Link */
