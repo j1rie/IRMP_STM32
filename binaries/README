@@ -1,3 +1,6 @@
 The bootloaders are compiled with gcc-arm-none-eabi-4_8-2014q3-20140805-linux.
 The firmwares are compiled with gcc-arm-none-eabi-4_8-2014q3-20140805-win32.
 See https://launchpad.net/gcc-arm-embedded/+download
+
+If you want to use gcc-4.9, you have to compile with -O0 or -O3, and for the 
+bootloader you have to leave USER_CODE_FLASH at 0x08005000.
