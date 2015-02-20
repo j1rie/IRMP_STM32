@@ -381,7 +381,7 @@ void check_wakeups(IRMP_DATA *ir)
 	for (i=0; i < WAKE_SLOTS; i++) {
 		idx = (MACRO_DEPTH + 1) * SIZEOF_IR/2 * MACRO_SLOTS + SIZEOF_IR/2 * i;
 		eeprom_restore(buf, idx);
-		if (!memcmp(buf, ir, sizeof(ir)))
+		if (!memcmp(buf, ir, sizeof(buf)))
 			Wakeup();
 	}
 }
@@ -413,7 +413,7 @@ void check_macros(IRMP_DATA *ir)
 	for (i=0; i < MACRO_SLOTS; i++) {
 		idx = (MACRO_DEPTH + 1) * SIZEOF_IR/2 * i;
 		eeprom_restore(buf, idx);
-		if (!memcmp(buf, ir, sizeof(ir)))
+		if (!memcmp(buf, ir, sizeof(buf)))
 			transmit_macro(i);
 	}
 }
