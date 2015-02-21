@@ -444,7 +444,7 @@ void check_macros(IRMP_DATA *ir)
 
 void USB_DISC_release(void)
 {
-#ifdef Bootloader
+#ifdef Bootloader || defined(Bootloader3k)
 	GPIO_InitTypeDef GPIO_InitStructure;
 	RCC_APB2PeriphClockCmd(USB_DISC_RCC_APB2Periph, ENABLE);
 	GPIO_InitStructure.GPIO_Pin = USB_DISC_PIN;
@@ -452,6 +452,19 @@ void USB_DISC_release(void)
 	GPIO_InitStructure.GPIO_Speed = GPIO_Speed_2MHz;
 	GPIO_Init(USB_DISC_PORT, &GPIO_InitStructure);
 	GPIO_WriteBit(USB_DISC_PORT, USB_DISC_PIN, Bit_SET);
+#endif
+}
+
+void USB_DISC_drain(void)
+{
+#ifdef Bootloader || defined(Bootloader3k)
+	GPIO_InitTypeDef GPIO_InitStructure;
+	RCC_APB2PeriphClockCmd(USB_DISC_RCC_APB2Periph, ENABLE);
+	GPIO_InitStructure.GPIO_Pin = USB_DISC_PIN;
+	GPIO_InitStructure.GPIO_Mode = GPIO_Mode_Out_OD;
+	GPIO_InitStructure.GPIO_Speed = GPIO_Speed_2MHz;
+	GPIO_Init(USB_DISC_PORT, &GPIO_InitStructure);
+	GPIO_WriteBit(USB_DISC_PORT, USB_DISC_PIN, Bit_RESET);
 #endif
 }
 
@@ -463,6 +476,8 @@ int main(void)
 	/* first wakeup slot empty? */
 	uint8_t learn_wakeup = eeprom_restore(buf, (MACRO_DEPTH + 1) * SIZEOF_IR/2 * MACRO_SLOTS);
 
+	USB_DISC_drain();
+	//delay_ms(150);
 	USB_HID_Init();
 	LED_Switch_init();
 	red_on();

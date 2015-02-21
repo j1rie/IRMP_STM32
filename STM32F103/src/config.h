@@ -29,6 +29,9 @@
  * rom in the linker script resp. IROM1 in CooCox -> Configuration -> Link needs to be adapted */
 //#define Bootloader
 
+/* in case the bootloader jumps to 0x8003000 */
+#define Bootloader3k
+
 /* uncomment this, if you use the blue ST-Link */
 //#define BlueLink
 

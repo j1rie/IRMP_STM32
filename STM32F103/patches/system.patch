@@ -1,6 +1,6 @@
 diff -Nru a/system_stm32f10x.c b/system_stm32f10x.c
 --- a/system_stm32f10x.c	2013-01-21 19:27:28.000000000 +0100
-+++ b/system_stm32f10x.c	2015-02-21 16:10:57.121617500 +0100
++++ b/system_stm32f10x.c	2015-02-21 18:58:59.762751000 +0100
 @@ -69,6 +69,7 @@
    */
  
@@ -9,12 +9,14 @@ diff -Nru a/system_stm32f10x.c b/system_stm32f10x.c
  
  /**
    * @}
-@@ -131,8 +132,12 @@
+@@ -131,8 +132,14 @@
  /*!< Uncomment the following line if you need to relocate your vector Table in
       Internal SRAM. */ 
  /* #define VECT_TAB_SRAM */
 +#if defined(Bootloader)
 +#define VECT_TAB_OFFSET  0x2000
++#elif defined(Bootloader3k)
++#define VECT_TAB_OFFSET  0x3000
 +#else
  #define VECT_TAB_OFFSET  0x0 /*!< Vector Table base offset field. 
                                    This value must be a multiple of 0x200. */
