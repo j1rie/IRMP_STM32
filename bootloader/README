@@ -12,7 +12,7 @@ In case the disconnect pin is set, the disconnect pin is open and the pullup dra
 The firmware, which gets loaded by the bootloader, needs to be adapted (vector table and linker) and has to release the USB_DISC_PIN again.
 So in config.h Bootloader needs to be defined.
 
-For gcc-4.9 use the *.3k.diff files and define Bootloader3k in config.h and compile the firmware with "make bootloader3k=1".
+For gcc-4.9 use the *.3k.diff files and for the firmware define Bootloader3k in config.h and compile the firmware with "make bootloader3k=1".
 
 [1] https://github.com/tormodvolden/maple-bootloader/tree/unify_platforms
 [2] https://github.com/EvvGC/Hardware/blob/master/EvvGC%20v1.3/EvvGC%20vpre1.3ce2.pdf?raw=true
