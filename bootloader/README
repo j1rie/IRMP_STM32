@@ -10,13 +10,8 @@ In case the opendrain disconnect pin is reset, the disconnect pin is drawn to gr
 In case the disconnect pin is set, the disconnect pin is open and the pullup draws USBDP to VDD.
 
 The firmware, which gets loaded by the bootloader, needs to be adapted (vector table and linker) and has to release the USB_DISC_PIN again.
+So in config.h Bootloader needs to be defined.
 
 [1] https://github.com/tormodvolden/maple-bootloader/tree/unify_platforms
 [2] https://github.com/EvvGC/Hardware/blob/master/EvvGC%20v1.3/EvvGC%20vpre1.3ce2.pdf?raw=true
 
-
-For gcc-4.9 use the *.5k.diff files.
-In config.h Bootloader5k needs to be defined.
-
-For gcc-4.8 use the files without *.5k.*.
-In config.h Bootloader needs to be defined.
