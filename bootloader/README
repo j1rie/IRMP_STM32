@@ -13,3 +13,10 @@ The firmware, which gets loaded by the bootloader, needs to be adapted (vector t
 
 [1] https://github.com/tormodvolden/maple-bootloader/tree/unify_platforms
 [2] https://github.com/EvvGC/Hardware/blob/master/EvvGC%20v1.3/EvvGC%20vpre1.3ce2.pdf?raw=true
+
+
+For gcc-4.9 use the *.5k.diff files.
+In config.h Bootloader5k needs to be defined.
+
+For gcc-4.8 use the files without *.5k.*.
+In config.h Bootloader needs to be defined.

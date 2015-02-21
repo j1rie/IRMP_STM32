@@ -1,0 +1,2 @@
+If you want to use gcc-4.9, you have to compile with -O0 or -O3 instead of -Os.
+For gcc-4.8 leave -Os.
