@@ -24,8 +24,15 @@ SRCS = $(shell find -type f -name "*.c")
 OBJS = $(CRT0) $(SRCS:.c=.o)
 
 CFLAGS = -Wall -ffunction-sections -fno-builtin $(ARCH) $(COMMON) $(INCLUDES) $(DEFINES)
+ifdef Bootloader
+LDFLAGS = -nostartfiles -Wl,-Map=$(TARGET).map,--gc-sections,--entry=main,-Tscripts/arm-gcc-link-bootloader.ld $(ARCH) $(COMMONOC)
+else
+ifdef Bootloader5k
+LDFLAGS = -nostartfiles -Wl,-Map=$(TARGET).map,--gc-sections,--entry=main,-Tscripts/arm-gcc-link-bootloader5k.ld $(ARCH) $(COMMONOC)
+else
 LDFLAGS = -nostartfiles -Wl,-Map=$(TARGET).map,--gc-sections,--entry=main,-Tscripts/arm-gcc-link.ld $(ARCH) $(COMMON)
-
+endif
+endif
 $(TARGET).bin: $(TARGET).elf
 	$(OBJCP) -O binary $< $@
 
