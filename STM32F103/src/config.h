@@ -26,11 +26,8 @@
  * better use the bootloader and avoid the hassle */
 
 /* in case you use the bootloader at 0x8000000, and the bootloader jumps to this firmware at 0x8002000
- * rom in the linker script resp. IROM1 in CooCox -> Configuration -> Link has to be adapted */
+ * rom in the linker script resp. IROM1 in CooCox -> Configuration -> Link needs to be adapted */
 //#define Bootloader
-
-/* in case the bootloader jumps to 0x8005000 */
-//#define Bootloader5k
 
 /* uncomment this, if you use the blue ST-Link */
 //#define BlueLink

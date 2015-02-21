@@ -444,7 +444,7 @@ void check_macros(IRMP_DATA *ir)
 
 void USB_DISC_release(void)
 {
-#if defined(Bootloader) || defined(Bootloader5k)
+#ifdef Bootloader
 	GPIO_InitTypeDef GPIO_InitStructure;
 	RCC_APB2PeriphClockCmd(USB_DISC_RCC_APB2Periph, ENABLE);
 	GPIO_InitStructure.GPIO_Pin = USB_DISC_PIN;
