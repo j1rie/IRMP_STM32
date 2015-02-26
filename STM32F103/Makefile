@@ -25,9 +25,11 @@ OBJS = $(CRT0) $(SRCS:.c=.o)
 
 CFLAGS = -Wall -ffunction-sections -fno-builtin $(ARCH) $(COMMON) $(INCLUDES) $(DEFINES)
 ifdef Bootloader
+DEFINES += -DBootloader
 LDFLAGS = -nostartfiles -Wl,-Map=$(TARGET).map,--gc-sections,--entry=main,-Tscripts/arm-gcc-link-bootloader.ld $(ARCH) $(COMMONOC)
 else
 ifdef Bootloader3k
+DEFINES += -DBootloader3k
 LDFLAGS = -nostartfiles -Wl,-Map=$(TARGET).map,--gc-sections,--entry=main,-Tscripts/arm-gcc-link-bootloader3k.ld $(ARCH) $(COMMONOC)
 else
 LDFLAGS = -nostartfiles -Wl,-Map=$(TARGET).map,--gc-sections,--entry=main,-Tscripts/arm-gcc-link.ld $(ARCH) $(COMMON)
