@@ -10,7 +10,7 @@ In case the opendrain disconnect pin is reset, the disconnect pin is drawn to gr
 In case the disconnect pin is set, the disconnect pin is open and the pullup draws USBDP to VDD.
 
 The firmware, which gets loaded by the bootloader, needs to be adapted (vector table and linker) and has to release the USB_DISC_PIN again.
-So in config.h Bootloader needs to be defined.
+So in config.h Bootloader needs to be defined, and compile the firmware with "make Bootloader=1" (gcc 4.8).
 
 For gcc-4.9 use the *.3k.diff files and for the firmware define Bootloader3k in config.h and compile the firmware with "make Bootloader3k=1".
 
