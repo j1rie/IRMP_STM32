@@ -1,6 +1,6 @@
 diff -Nru maple-bootloader-unify_platforms.orig/common.h maple-bootloader-unify_platforms.blue.3k/common.h
 --- maple-bootloader-unify_platforms.orig/common.h	2014-05-14 15:45:50.000000000 +0200
-+++ maple-bootloader-unify_platforms.blue.3k/common.h	2015-01-19 22:16:24.000000000 +0100
++++ maple-bootloader-unify_platforms.blue.3k/common.h	2015-01-19 22:12:28.000000000 +0100
 @@ -38,6 +38,7 @@
  #include "stm32f10x_type.h"
  #include "cortexm3_macro.h"
@@ -176,13 +176,22 @@ diff -Nru maple-bootloader-unify_platforms.orig/main.c maple-bootloader-unify_pl
  
 diff -Nru maple-bootloader-unify_platforms.orig/usb.c maple-bootloader-unify_platforms.blue.3k/usb.c
 --- maple-bootloader-unify_platforms.orig/usb.c	2014-05-14 15:45:50.000000000 +0200
-+++ maple-bootloader-unify_platforms.blue.3k/usb.c	2015-01-19 22:16:24.000000000 +0100
-@@ -63,6 +63,8 @@
++++ maple-bootloader-unify_platforms.blue.3k/usb.c	2015-02-26 16:51:28.733108813 +0100
+@@ -50,7 +50,7 @@
+ #endif
+ 
+     /* preset pin to high */
+-    setPin(USB_DISC_BANK, USB_DISC);
++    //setPin(USB_DISC_BANK, USB_DISC);
+ 
+     /* Setup GPIO Pin as OD out */
+     rwmVal  = GET_REG(USB_DISC_GPIO_CR);
+@@ -62,7 +62,7 @@
+     pRCC->APB1ENR |= RCC_APB1ENR_USB;
  
      /* initialize the usb application */
-     resetPin(USB_DISC_BANK, USB_DISC);  /* present ourselves to the host */
-+    strobePin(LED_BANK, LED, 1, BLINK_SLOW); // pull USBDP down for 1 blink
-+    setPin(USB_DISC_BANK, USB_DISC);
+-    resetPin(USB_DISC_BANK, USB_DISC);  /* present ourselves to the host */
++    setPin(USB_DISC_BANK, USB_DISC);  /* present ourselves to the host */
      usbAppInit();
  }
  

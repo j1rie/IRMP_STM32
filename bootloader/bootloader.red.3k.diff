@@ -1,6 +1,6 @@
-diff -Nru maple-bootloader-unify_platforms.orig/common.h maple-bootloader-unify_platforms.red.3k/common.h
+diff -Nrup maple-bootloader-unify_platforms.orig/common.h maple-bootloader-unify_platforms.red.3k/common.h
 --- maple-bootloader-unify_platforms.orig/common.h	2014-05-14 15:45:50.000000000 +0200
-+++ maple-bootloader-unify_platforms.red.3k/common.h	2015-01-13 03:54:10.000000000 +0100
++++ maple-bootloader-unify_platforms.red.3k/common.h	2015-01-19 22:12:28.000000000 +0100
 @@ -38,6 +38,7 @@
  #include "stm32f10x_type.h"
  #include "cortexm3_macro.h"
@@ -9,7 +9,7 @@ diff -Nru maple-bootloader-unify_platforms.orig/common.h maple-bootloader-unify_
  
  typedef void (*FuncPtr)(void);
  
-diff -Nru maple-bootloader-unify_platforms.orig/config.h maple-bootloader-unify_platforms.red.3k/config.h
+diff -Nrup maple-bootloader-unify_platforms.orig/config.h maple-bootloader-unify_platforms.red.3k/config.h
 --- maple-bootloader-unify_platforms.orig/config.h	2014-05-14 15:45:50.000000000 +0200
 +++ maple-bootloader-unify_platforms.red.3k/config.h	2015-02-21 19:39:20.637322502 +0100
 @@ -37,15 +37,19 @@
@@ -45,10 +45,10 @@ diff -Nru maple-bootloader-unify_platforms.orig/config.h maple-bootloader-unify_
  #define FLASH_END         ((u32)0x08020000)
  
  #define VEND_ID0 0xAF
-diff -Nru maple-bootloader-unify_platforms.orig/dfu.c maple-bootloader-unify_platforms.red.3k/dfu.c
+diff -Nrup maple-bootloader-unify_platforms.orig/dfu.c maple-bootloader-unify_platforms.red.3k/dfu.c
 --- maple-bootloader-unify_platforms.orig/dfu.c	2014-05-14 15:45:50.000000000 +0200
-+++ maple-bootloader-unify_platforms.red.3k/dfu.c	2015-01-20 02:23:07.000000000 +0100
-@@ -398,8 +398,10 @@
++++ maple-bootloader-unify_platforms.red.3k/dfu.c	2015-02-26 16:56:33.153126760 +0100
+@@ -398,8 +398,10 @@ void dfuFinishUpload() {
              if (code_copy_lock == BEGINNING) {
                  code_copy_lock = MIDDLE;
                  strobePin(LED_BANK, LED, 2, 0x1000);
@@ -59,10 +59,10 @@ diff -Nru maple-bootloader-unify_platforms.orig/dfu.c maple-bootloader-unify_pla
                  code_copy_lock = END;
              }
          }
-diff -Nru maple-bootloader-unify_platforms.orig/hardware.c maple-bootloader-unify_platforms.red.3k/hardware.c
+diff -Nrup maple-bootloader-unify_platforms.orig/hardware.c maple-bootloader-unify_platforms.red.3k/hardware.c
 --- maple-bootloader-unify_platforms.orig/hardware.c	2014-05-14 15:45:50.000000000 +0200
 +++ maple-bootloader-unify_platforms.red.3k/hardware.c	2015-01-21 15:33:29.000000000 +0100
-@@ -101,7 +101,24 @@
+@@ -101,7 +101,24 @@ void setupLED(void) {
      /* Setup APB2 for LED GPIO bank */
      rwmVal =  GET_REG(RCC_APB2ENR);
      rwmVal |= LED_RCC_APB2ENR_GPIO;
@@ -87,7 +87,7 @@ diff -Nru maple-bootloader-unify_platforms.orig/hardware.c maple-bootloader-unif
  
  #if (LED < 8)
  # define LED_GPIO_CR GPIO_CRL(LED_BANK)
-@@ -111,6 +128,14 @@
+@@ -111,6 +128,14 @@ void setupLED(void) {
  # define LED_CR_PORT (LED - 8)
  #endif
  
@@ -102,7 +102,7 @@ diff -Nru maple-bootloader-unify_platforms.orig/hardware.c maple-bootloader-unif
      /* Setup GPIO Pin as PP Out */
      rwmVal =  GET_REG(LED_GPIO_CR);
      rwmVal &= ~(0xF << (LED_CR_PORT * 4));
-@@ -118,6 +143,14 @@
+@@ -118,6 +143,14 @@ void setupLED(void) {
      SET_REG(LED_GPIO_CR, rwmVal);
  
      setPin(LED_BANK, LED);
@@ -117,7 +117,7 @@ diff -Nru maple-bootloader-unify_platforms.orig/hardware.c maple-bootloader-unif
  }
  
  void setupBUTTON(void) {
-@@ -177,7 +210,7 @@
+@@ -177,7 +210,7 @@ void jumpToUser(u32 usrAddr) {
      flashLock();
      usbDsbISR();
      nvicDisableInterrupts();
@@ -126,9 +126,9 @@ diff -Nru maple-bootloader-unify_platforms.orig/hardware.c maple-bootloader-unif
      systemReset(); // resets clocks and periphs, not core regs
  
  
-diff -Nru maple-bootloader-unify_platforms.orig/hardware.h maple-bootloader-unify_platforms.red.3k/hardware.h
+diff -Nrup maple-bootloader-unify_platforms.orig/hardware.h maple-bootloader-unify_platforms.red.3k/hardware.h
 --- maple-bootloader-unify_platforms.orig/hardware.h	2014-05-14 15:45:50.000000000 +0200
-+++ maple-bootloader-unify_platforms.red.3k/hardware.h	2015-01-17 04:03:02.000000000 +0100
++++ maple-bootloader-unify_platforms.red.3k/hardware.h	2015-02-26 16:56:42.047127285 +0100
 @@ -35,6 +35,10 @@
  #define GPIOA ((u32)0x40010800)
  #define GPIOB ((u32)0x40010C00)
@@ -148,10 +148,10 @@ diff -Nru maple-bootloader-unify_platforms.orig/hardware.h maple-bootloader-unif
  
  #define FLASH_ACR     (FLASH + 0x00)
  #define FLASH_KEYR    (FLASH + 0x04)
-diff -Nru maple-bootloader-unify_platforms.orig/main.c maple-bootloader-unify_platforms.red.3k/main.c
+diff -Nrup maple-bootloader-unify_platforms.orig/main.c maple-bootloader-unify_platforms.red.3k/main.c
 --- maple-bootloader-unify_platforms.orig/main.c	2014-05-14 15:45:50.000000000 +0200
-+++ maple-bootloader-unify_platforms.red.3k/main.c	2015-01-20 03:13:58.000000000 +0100
-@@ -38,19 +38,20 @@
++++ maple-bootloader-unify_platforms.red.3k/main.c	2015-02-26 16:56:53.197127942 +0100
+@@ -38,19 +38,20 @@ int main() {
      setupCLK();
      setupLED();
      setupUSB();
@@ -174,7 +174,7 @@ diff -Nru maple-bootloader-unify_platforms.orig/main.c maple-bootloader-unify_pl
  
          if (dfuUploadStarted()) {
              dfuFinishUpload(); // systemHardReset from DFU once done
-@@ -64,6 +65,7 @@
+@@ -64,6 +65,7 @@ int main() {
      } else {
          // some sort of fault occurred, hard reset
          strobePin(LED_BANK, LED, 5, BLINK_FAST);
@@ -182,22 +182,31 @@ diff -Nru maple-bootloader-unify_platforms.orig/main.c maple-bootloader-unify_pl
          systemHardReset();
      }
  
-diff -Nru maple-bootloader-unify_platforms.orig/usb.c maple-bootloader-unify_platforms.red.3k/usb.c
+diff -Nrup maple-bootloader-unify_platforms.orig/usb.c maple-bootloader-unify_platforms.red.3k/usb.c
 --- maple-bootloader-unify_platforms.orig/usb.c	2014-05-14 15:45:50.000000000 +0200
-+++ maple-bootloader-unify_platforms.red.3k/usb.c	2015-01-17 04:40:37.000000000 +0100
-@@ -63,6 +63,8 @@
++++ maple-bootloader-unify_platforms.red.3k/usb.c	2015-02-26 16:56:48.032127638 +0100
+@@ -50,7 +50,7 @@ void setupUSB(void) {
+ #endif
+ 
+     /* preset pin to high */
+-    setPin(USB_DISC_BANK, USB_DISC);
++    //setPin(USB_DISC_BANK, USB_DISC);
+ 
+     /* Setup GPIO Pin as OD out */
+     rwmVal  = GET_REG(USB_DISC_GPIO_CR);
+@@ -62,7 +62,7 @@ void setupUSB(void) {
+     pRCC->APB1ENR |= RCC_APB1ENR_USB;
  
      /* initialize the usb application */
-     resetPin(USB_DISC_BANK, USB_DISC);  /* present ourselves to the host */
-+    strobePin(LED_BANK, LED, 1, BLINK_SLOW); // pull USBDP down for 1 blink
-+    setPin(USB_DISC_BANK, USB_DISC);
+-    resetPin(USB_DISC_BANK, USB_DISC);  /* present ourselves to the host */
++    setPin(USB_DISC_BANK, USB_DISC);  /* present ourselves to the host */
      usbAppInit();
  }
  
-diff -Nru maple-bootloader-unify_platforms.orig/usb_descriptor.c maple-bootloader-unify_platforms.red.3k/usb_descriptor.c
+diff -Nrup maple-bootloader-unify_platforms.orig/usb_descriptor.c maple-bootloader-unify_platforms.red.3k/usb_descriptor.c
 --- maple-bootloader-unify_platforms.orig/usb_descriptor.c	2014-05-14 15:45:50.000000000 +0200
 +++ maple-bootloader-unify_platforms.red.3k/usb_descriptor.c	2015-02-21 19:39:29.610321984 +0100
-@@ -176,7 +176,7 @@
+@@ -176,7 +176,7 @@ u8 u8_usbStringAlt1[0x3A] = {
      0x03,
      'D', 0, 'F', 0, 'U', 0, ' ', 0, 'P', 0, 'r', 0, 'o', 0, 'g', 0, 'r', 0,
      'a', 0, 'm', 0, ' ', 0, 'F', 0, 'L', 0, 'A', 0, 'S', 0, 'H', 0, ' ', 0,
