@@ -27,7 +27,7 @@
 
 /* in case you use the bootloader at 0x8000000, and the bootloader jumps to this firmware at 0x8002000
  * rom in the linker script resp. IROM1 in CooCox -> Configuration -> Link needs to be adapted */
-#define Bootloader
+//#define Bootloader
 
 /* in case the bootloader jumps to 0x8003000 */
 //#define Bootloader3k
