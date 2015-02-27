@@ -28,12 +28,7 @@ ifdef Bootloader
 DEFINES += -DBootloader
 LDFLAGS = -nostartfiles -Wl,-Map=$(TARGET).map,--gc-sections,--entry=main,-Tscripts/arm-gcc-link-bootloader.ld $(ARCH) $(COMMONOC)
 else
-ifdef Bootloader3k
-DEFINES += -DBootloader3k
-LDFLAGS = -nostartfiles -Wl,-Map=$(TARGET).map,--gc-sections,--entry=main,-Tscripts/arm-gcc-link-bootloader3k.ld $(ARCH) $(COMMONOC)
-else
 LDFLAGS = -nostartfiles -Wl,-Map=$(TARGET).map,--gc-sections,--entry=main,-Tscripts/arm-gcc-link.ld $(ARCH) $(COMMON)
-endif
 endif
 $(TARGET).bin: $(TARGET).elf
 	$(OBJCP) -O binary $< $@

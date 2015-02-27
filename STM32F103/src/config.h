@@ -21,17 +21,6 @@
 
 #define MIN_REPEATS	2  // TODO make configurable & use Eeprom
 
-/* remap is now used on all ST-Links, so
- * you have to flash with --reset, and pull RST low until short after the flash command
- * better use the bootloader and avoid the hassle */
-
-/* in case you use the bootloader at 0x8000000, and the bootloader jumps to this firmware at 0x8002000
- * rom in the linker script resp. IROM1 in CooCox -> Configuration -> Link needs to be adapted */
-//#define Bootloader
-
-/* in case the bootloader jumps to 0x8003000 */
-//#define Bootloader3k
-
 /* uncomment this, if you use the blue ST-Link */
 //#define BlueLink
 

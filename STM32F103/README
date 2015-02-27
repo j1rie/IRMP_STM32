@@ -1,4 +1,4 @@
-If you want to use gcc-4.9, you have to compile with -O0 instead of -Os. -O3 may or may not work.
+If you want to use gcc-4.9, you have to compile with -O0 instead of -Os. -O3 does not work atm.
 For gcc-4.8 leave -Os.
 
-If the firmware shall be used with the bootloader, compile with "make Bootloader=1".// or "make Bootloader3k=1" .
+If the firmware shall be used with the bootloader, compile with "make Bootloader=1".

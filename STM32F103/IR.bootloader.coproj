@@ -17,6 +17,7 @@
           <Define name="STM32F10X_MD"/>
           <Define name="USE_STDPERIPH_DRIVER"/>
           <Define name="__ASSEMBLY__"/>
+          <Define name="Bootloader"/>
         </DefinedSymbols>
       </Compile>
       <Link useDefault="0">
