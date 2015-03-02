@@ -1,7 +1,7 @@
 /**********************************************************************************************************  
     stm32config: configure and monitor STM32IR
 
-    Copyright (C) 2014-2015 Jörg Riechardt
+    Copyright (C) 2014 Jörg Riechardt
 
     This program is free software; you can redistribute it and/or modify
     it under the terms of the GNU General Public License as published by
@@ -89,7 +89,7 @@ int main(int argc, const char **argv) {
 	outBuf[0] = 0x03; // Report ID
 	outBuf[1] = 0x00; // STAT_CMD
 	
-cont:   printf("program eeprom: wakeups and macros (p)\nget eeprom (wakeups, macros and capabilities) (g)\nreset (wakeups, macros and alarm) (r)\nset alarm (s)\nget alarm (a)\nsend IR (i)\nmonitor until ^C (m)\nexit (x)\n");
+cont:   printf("program eeprom: wakeups and macros (p)\nprogram eeprom: wakeups and macros with remote(P)\nget eeprom (wakeups, macros and capabilities) (g)\nreset (wakeups, macros and alarm) (r)\nset alarm (s)\nget alarm (a)\nsend IR (i)\nmonitor until ^C (m)\nexit (x)\n");
 	scanf("%s", &c);
 	
 	switch (c) {
@@ -127,6 +127,44 @@ prog:	    printf("set wakeup(w)\nset macro slot(m)\n");
 	    outBuf[idx++] = (i>>8) & 0xFF;
 	    outBuf[idx++] = (i>>16) & 0xFF;
 	    outBuf[idx++] = i & 0xFF;
+	    write_and_check();
+	    break;
+
+	case 'P':
+Prog:	    printf("set wakeup(w)\nset macro slot(m) with remote\n");
+	    scanf("%s", &d);
+	    memset(&outBuf[2], 0, 15);
+	    idx = 2;
+	    outBuf[idx++] = 0x01; // ACC_SET
+	    switch (d) {
+		case 'w':
+		    printf("enter slot number (starting with 0)\n");
+		    scanf("%"SCNd8"", &s);
+		    outBuf[idx++] = 0x05; // CMD_WAKE
+		    outBuf[idx++] = s;    // (s+1)-th slot
+		    break;
+		case 'm':
+		    printf("enter macro number (starting with 0)\n");
+		    scanf("%"SCNd8"", &m);
+		    outBuf[idx++] = 0x04; // CMD_MACRO
+		    outBuf[idx++] = m;    // (m+1)-th macro
+		    printf("enter slot number, 0 for trigger\n");
+		    scanf("%"SCNd8"", &s);
+		    outBuf[idx++] = s;    // (s+1)-th slot
+		    break;
+		default:
+		    goto Prog;
+	    }
+	    printf("enter IRData by pressing a button on the remote control\n");
+	    read_stm32();
+    	    //while (inBuf[0] == 0x02)
+		//read_stm32();
+	    outBuf[idx++] = inBuf[1];
+	    outBuf[idx++] = inBuf[2];
+	    outBuf[idx++] = inBuf[3];
+	    outBuf[idx++] = inBuf[4];
+	    outBuf[idx++] = inBuf[5];
+	    outBuf[idx++] = inBuf[6];
 	    write_and_check();
 	    break;
 	    
