@@ -89,13 +89,13 @@ int main(int argc, const char **argv) {
 	outBuf[0] = 0x03; // Report ID
 	outBuf[1] = 0x00; // STAT_CMD
 	
-cont:   printf("program eeprom: wakeups and macros (p)\nprogram eeprom: wakeups and macros with remote(P)\nget eeprom (wakeups, macros and capabilities) (g)\nreset (wakeups, macros and alarm) (r)\nset alarm (s)\nget alarm (a)\nsend IR (i)\nmonitor until ^C (m)\nexit (x)\n");
+cont:   printf("program eeprom: wakeups and macros (p)\nprogram eeprom: wakeups and macros with remote control(P)\nget eeprom (wakeups, macros and capabilities) (g)\nreset (wakeups, macros and alarm) (r)\nset alarm (s)\nget alarm (a)\nsend IR (i)\nmonitor until ^C (m)\nexit (x)\n");
 	scanf("%s", &c);
 	
 	switch (c) {
 	
 	case 'p':
-prog:	    printf("set wakeup(w)\nset macro slot(m)\n");
+prog:	    printf("set wakeup(w)\nset macro(m)\n");
 	    scanf("%s", &d);
 	    memset(&outBuf[2], 0, 15);
 	    idx = 2;
@@ -131,7 +131,7 @@ prog:	    printf("set wakeup(w)\nset macro slot(m)\n");
 	    break;
 
 	case 'P':
-Prog:	    printf("set wakeup(w)\nset macro slot(m) with remote\n");
+Prog:	    printf("set wakeup with remote control(w)\nset macro with remote control(m)\n");
 	    scanf("%s", &d);
 	    memset(&outBuf[2], 0, 15);
 	    idx = 2;
@@ -157,8 +157,6 @@ Prog:	    printf("set wakeup(w)\nset macro slot(m) with remote\n");
 	    }
 	    printf("enter IRData by pressing a button on the remote control\n");
 	    read_stm32();
-    	    //while (inBuf[0] == 0x02)
-		//read_stm32();
 	    outBuf[idx++] = inBuf[1];
 	    outBuf[idx++] = inBuf[2];
 	    outBuf[idx++] = inBuf[3];
