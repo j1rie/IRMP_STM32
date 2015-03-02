@@ -18,6 +18,6 @@ Ole Ernst <olebowle@gmx.com>
 Michael Kipp <myscha@web.de>
  for suggesting automatic sync of supported_protocols 
  
-Manuel Reimer
+Manuel Reimer <manuel.reimer@gmx.de>
  for making the maple bootloader compile with gcc 4.9 and -Os
  
