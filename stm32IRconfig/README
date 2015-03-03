@@ -9,3 +9,5 @@ set and get the alarm
 send IR
 monitor (read) STM32IR, stop with ^C
 handy to get the codes of the remote controls buttons, in order to program the eeprom acordingly
+
+put the udev rule into your udev rules directory, then you don't need to give a device, just run ./stm32IRconfig

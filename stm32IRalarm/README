@@ -14,3 +14,5 @@ stm32IRalarm -d /dev/hidraw0 -s $2
 
 commands.conf:
 stm32IRalarm -d /dev/hidraw2 -a
+
+put the udev rule into your udev rules directory, then you don't need to give a device
