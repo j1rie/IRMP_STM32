@@ -1,7 +1,7 @@
 /**********************************************************************************************************  
     stm32config: set alarm to and get alarm from STM32IR
 
-    Copyright (C) 2014-2015 Joerg Riechardt
+    Copyright (C) 2014 Joerg Riechardt
 
     This program is free software; you can redistribute it and/or modify
     it under the terms of the GNU General Public License as published by
@@ -92,7 +92,7 @@ int main(int argc, char *argv[]) {
 	    }
 	}
 
-	open_stm32(dvalue != NULL ? dvalue : "/dev/hidraw2");
+	open_stm32(dvalue != NULL ? dvalue : "/dev/irmp_stm32");
         outBuf[0] = 0x03; // Report ID
 	outBuf[1] = 0x00; // STAT_CMD
 

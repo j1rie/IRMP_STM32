@@ -84,7 +84,7 @@ int main(int argc, const char **argv) {
 	uint8_t s, m, k, l, idx;
 	int retValm;
 	
-	open_stm32(argc>1 ? argv[1] : "/dev/hidraw2");
+	open_stm32(argc>1 ? argv[1] : "/dev/irmp_stm32");
 	
 	outBuf[0] = 0x03; // Report ID
 	outBuf[1] = 0x00; // STAT_CMD
