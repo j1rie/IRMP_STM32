@@ -10,3 +10,5 @@ send IR
 monitor (read) STM32IR, stop with ^C
 
 put the udev rule into your udev rules directory, then you don't need to give a device, just run ./stm32IRconfig
+the irmplircd@.service is tested on opensuse 13.2
+passing on %k is not really needed, you could use irmp_stm32 as well

@@ -1,0 +1,9 @@
+[Unit]
+Description=Start irmplircd
+BindsTo=dev-%i.device
+
+[Service]
+Type=simple
+#ExecStart=/z/irmplircd/irmplircd.sh
+ExecStart=/z/irmplircd/irmplircd -t /z/irmplircd/irmp_stm32.map /dev/%I -f
+#foreground!!!

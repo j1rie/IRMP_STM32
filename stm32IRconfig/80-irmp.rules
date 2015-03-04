@@ -1,2 +1,3 @@
-KERNEL=="hidraw*", ATTRS{idVendor}=="0483", ATTRS{idProduct}=="5750", SYMLINK+="irmp_stm32", RUN+="/bin/mkdir /var/run/lirc", RUN+="/usr/bin/irmplircd -t /etc/irmp_stm32.map /dev/%k -f"
-# for opensuse 13.2 -f is crucial! running in background does not work!
+KERNEL=="hidraw*", ATTRS{idVendor}=="0483", ATTRS{idProduct}=="5750", SYMLINK+="irmp_stm32", RUN+="/bin/mkdir /var/run/lirc", RUN+="/usr/bin/systemctl --no-block start irmplircd@%k.service"
+#KERNEL=="hidraw*", ATTRS{idVendor}=="0483", ATTRS{idProduct}=="5750", SYMLINK+="irmp_stm32", RUN+="/bin/mkdir /var/run/lirc"
+#, RUN+="/usr/bin/irmplircd -t /etc/irmp_stm32.map /dev/%k"
