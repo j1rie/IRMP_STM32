@@ -6,10 +6,10 @@ After=dev-irmp_stm32.device
 
 [Service]
 Type=simple
-ExecStart=/z/irmplircd/irmplircd -t /z/irmplircd/irmp_stm32.map /dev/irmp_stm32 -f
+ExecStart=/usr/bin/irmplircd -t /etc/irmp_stm32.map /dev/irmp_stm32 -f
 #Type=forked
-#ExecStart=/z/irmplircd/irmplircd -t /z/irmplircd/irmp_stm32.map /dev/irmp_stm32 –-daemon –pidfile=/run/.../irmplircd.pid
-#PIDFILE=/run/.../irmplircd.pid
+#ExecStart=/usr/bin/irmplircd -t /etc/irmp_stm32.map /dev/irmp_stm32
+#PIDFILE=/run/irmplircd.pid
 
 [Install]
 WantedBy=dev-irmp_stm32.device
