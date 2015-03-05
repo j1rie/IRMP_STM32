@@ -1,0 +1,15 @@
+[Unit]
+Description=Start irmplircd on irmp_stm32 device
+BindsTo=dev-irmp_stm32.device
+#Wants=dev-irmp_stm32.device
+After=dev-irmp_stm32.device
+
+[Service]
+Type=simple
+ExecStart=/z/irmplircd/irmplircd -t /z/irmplircd/irmp_stm32.map /dev/irmp_stm32 -f
+#Type=forked
+#ExecStart=/z/irmplircd/irmplircd -t /z/irmplircd/irmp_stm32.map /dev/irmp_stm32 –-daemon –pidfile=/run/.../irmplircd.pid
+#PIDFILE=/run/.../irmplircd.pid
+
+[Install]
+WantedBy=dev-irmp_stm32.device
