@@ -6,7 +6,7 @@ One is for the developer board, one for the red ST-Link emulator and one for the
 
 A pulldown resistor from USBDP to the USB disconnect pin of 220 ohm needs to be added.
 A pullup resistor of 1,5 kohm is already present.
-You find a scheme in [2].
+You find a scheme in [4].
 
 In case the opendrain disconnect pin is reset, the disconnect pin is drawn to ground and the pulldown pulls USBDP close to ground.
 In case the disconnect pin is set, the disconnect pin is open and the pullup draws USBDP to VDD.
