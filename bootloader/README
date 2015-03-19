@@ -2,9 +2,9 @@ This patch is against Tormod Volden's unify_platforms branch of his maple-bootlo
 A patch for gcc-4.9 with -Os is added [2].
 For convenience a fork with the patch applied is in [3].
 
-For the developer board compile with make PLATFORM=Dev Small=1,
-for the red ST-Link emulator compile with make PLATFORM=Red Small=1
-and for the blue ST-Link emulator compile with make PLATFORM=Blue Small=1.
+For the developer board compile with 'make PLATFORM=Dev',
+for the red ST-Link emulator compile with 'make PLATFORM=Red'
+and for the blue ST-Link emulator compile with 'make PLATFORM=Blue'.
 
 A pulldown resistor from USBDP to the USB disconnect pin of 220 ohm needs to be added.
 A pullup resistor of 1,5 kohm is already present.

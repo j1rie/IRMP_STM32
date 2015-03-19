@@ -1,23 +1,21 @@
 diff -Nrup maple-bootloader-unify_platforms.orig/Makefile maple-bootloader-unify_platforms.uni/Makefile
 --- maple-bootloader-unify_platforms.orig/Makefile	2015-03-18 21:07:26.000000000 +0100
-+++ maple-bootloader-unify_platforms.uni/Makefile	2015-03-19 01:03:20.137146806 +0100
-@@ -17,13 +17,18 @@ ST_LIB = stm32_lib
++++ maple-bootloader-unify_platforms.uni/Makefile	2015-03-19 13:07:43.088335570 +0100
+@@ -17,13 +17,16 @@ ST_LIB = stm32_lib
  ST_USB = usb_lib
  
  # Optimization level [0,1,2,3,s]
-+ifdef Small
-+CFLAGS = -DSmall
-+OPT = s
-+else
- OPT ?= 0
-+endif
+-OPT ?= 0
++OPT ?= s
  DEBUG = 
  #DEBUG = dwarf-2
  
  INCDIRS = ./$(ST_LIB) ./$(ST_USB)
  
--CFLAGS = $(DEBUG)
-+CFLAGS += $(DEBUG)
+ CFLAGS = $(DEBUG)
++ifneq ($(OPT),s)
++CFLAGS += -DUCF5k
++endif
  CFLAGS += -O$(OPT)
  CFLAGS += -ffunction-sections -fdata-sections
  CFLAGS += -Wall -Wimplicit
@@ -34,8 +32,8 @@ diff -Nrup maple-bootloader-unify_platforms.orig/common.h maple-bootloader-unify
  
 diff -Nrup maple-bootloader-unify_platforms.orig/config.h maple-bootloader-unify_platforms.uni/config.h
 --- maple-bootloader-unify_platforms.orig/config.h	2015-03-18 21:07:26.000000000 +0100
-+++ maple-bootloader-unify_platforms.uni/config.h	2015-03-19 00:40:19.096639435 +0100
-@@ -61,6 +61,52 @@
++++ maple-bootloader-unify_platforms.uni/config.h	2015-03-19 13:21:00.568368540 +0100
+@@ -61,6 +61,49 @@
  # define USB_DISC_RCC_APB2ENR_GPIO RCC_APB2ENR_GPIOB
  # define USB_DISC      9
  
@@ -49,7 +47,6 @@ diff -Nrup maple-bootloader-unify_platforms.orig/config.h maple-bootloader-unify
 +# define LED2      14
 +# define REMAP
 +# define PullDown
-+# define Small
 +# define LEDx2
 +# define NoButton
 +# define USB_DISC_BANK GPIOB
@@ -62,7 +59,6 @@ diff -Nrup maple-bootloader-unify_platforms.orig/config.h maple-bootloader-unify
 +# define LED_RCC_APB2ENR_GPIO RCC_APB2ENR_GPIOB
 +# define LED      13
 +# define PullDown
-+# define Small
 +# define NoButton
 +# define USB_DISC_BANK GPIOB
 +# define USB_DISC_RCC_APB2ENR_GPIO RCC_APB2ENR_GPIOB
@@ -78,7 +74,6 @@ diff -Nrup maple-bootloader-unify_platforms.orig/config.h maple-bootloader-unify
 +# define LED2      13
 +# define REMAP
 +# define PullDown
-+# define Small
 +# define LEDx2
 +# define NoButton
 +# define USB_DISC_BANK GPIOA
@@ -88,11 +83,11 @@ diff -Nrup maple-bootloader-unify_platforms.orig/config.h maple-bootloader-unify
  #else
  # error "Unknown platform"
  #endif
-@@ -73,7 +119,11 @@
+@@ -73,7 +116,11 @@
  
  #define USER_CODE_RAM     ((u32)0x20000C00)
  #define RAM_END           ((u32)0x20005000)
-+#ifdef Small
++#ifndef UCF5k
 +#define USER_CODE_FLASH   ((u32)0x08002000)
 +#else
  #define USER_CODE_FLASH   ((u32)0x08005000)
@@ -299,12 +294,12 @@ diff -Nrup maple-bootloader-unify_platforms.orig/usb.c maple-bootloader-unify_pl
  
 diff -Nrup maple-bootloader-unify_platforms.orig/usb_descriptor.c maple-bootloader-unify_platforms.uni/usb_descriptor.c
 --- maple-bootloader-unify_platforms.orig/usb_descriptor.c	2015-03-18 21:07:26.000000000 +0100
-+++ maple-bootloader-unify_platforms.uni/usb_descriptor.c	2015-03-19 00:39:10.545378161 +0100
++++ maple-bootloader-unify_platforms.uni/usb_descriptor.c	2015-03-19 13:10:33.143033277 +0100
 @@ -176,7 +176,11 @@ u8 u8_usbStringAlt1[0x3A] = {
      0x03,
      'D', 0, 'F', 0, 'U', 0, ' ', 0, 'P', 0, 'r', 0, 'o', 0, 'g', 0, 'r', 0,
      'a', 0, 'm', 0, ' ', 0, 'F', 0, 'L', 0, 'A', 0, 'S', 0, 'H', 0, ' ', 0,
-+#ifdef Small
++#ifndef UCF5k
 +    '0', 0, 'x', 0, '0', 0, '8', 0, '0', 0, '0', 0, '2', 0, '0', 0, '0', 0,
 +#else
      '0', 0, 'x', 0, '0', 0, '8', 0, '0', 0, '0', 0, '5', 0, '0', 0, '0', 0,
