@@ -1,0 +1,314 @@
+diff -Nrup maple-bootloader-unify_platforms.orig/Makefile maple-bootloader-unify_platforms.uni/Makefile
+--- maple-bootloader-unify_platforms.orig/Makefile	2015-03-18 21:07:26.000000000 +0100
++++ maple-bootloader-unify_platforms.uni/Makefile	2015-03-19 01:03:20.137146806 +0100
+@@ -17,13 +17,18 @@ ST_LIB = stm32_lib
+ ST_USB = usb_lib
+ 
+ # Optimization level [0,1,2,3,s]
++ifdef Small
++CFLAGS = -DSmall
++OPT = s
++else
+ OPT ?= 0
++endif
+ DEBUG = 
+ #DEBUG = dwarf-2
+ 
+ INCDIRS = ./$(ST_LIB) ./$(ST_USB)
+ 
+-CFLAGS = $(DEBUG)
++CFLAGS += $(DEBUG)
+ CFLAGS += -O$(OPT)
+ CFLAGS += -ffunction-sections -fdata-sections
+ CFLAGS += -Wall -Wimplicit
+diff -Nrup maple-bootloader-unify_platforms.orig/common.h maple-bootloader-unify_platforms.uni/common.h
+--- maple-bootloader-unify_platforms.orig/common.h	2015-03-18 21:07:26.000000000 +0100
++++ maple-bootloader-unify_platforms.uni/common.h	2015-02-26 16:59:12.000000000 +0100
+@@ -38,6 +38,7 @@
+ #include "stm32f10x_type.h"
+ #include "cortexm3_macro.h"
+ #include "usb.h"
++#include "dfu.h"
+ 
+ typedef void (*FuncPtr)(void);
+ 
+diff -Nrup maple-bootloader-unify_platforms.orig/config.h maple-bootloader-unify_platforms.uni/config.h
+--- maple-bootloader-unify_platforms.orig/config.h	2015-03-18 21:07:26.000000000 +0100
++++ maple-bootloader-unify_platforms.uni/config.h	2015-03-19 00:40:19.096639435 +0100
+@@ -61,6 +61,52 @@
+ # define USB_DISC_RCC_APB2ENR_GPIO RCC_APB2ENR_GPIOB
+ # define USB_DISC      9
+ 
++#elif defined Blue
++
++# define LED_BANK GPIOA
++# define LED_RCC_APB2ENR_GPIO RCC_APB2ENR_GPIOA
++# define LED      9
++# define LED2_BANK GPIOA
++# define LED2_RCC_APB2ENR_GPIO RCC_APB2ENR_GPIOA
++# define LED2      14
++# define REMAP
++# define PullDown
++# define Small
++# define LEDx2
++# define NoButton
++# define USB_DISC_BANK GPIOB
++# define USB_DISC_RCC_APB2ENR_GPIO RCC_APB2ENR_GPIOB
++# define USB_DISC      13
++
++#elif defined Dev
++
++# define LED_BANK GPIOB
++# define LED_RCC_APB2ENR_GPIO RCC_APB2ENR_GPIOB
++# define LED      13
++# define PullDown
++# define Small
++# define NoButton
++# define USB_DISC_BANK GPIOB
++# define USB_DISC_RCC_APB2ENR_GPIO RCC_APB2ENR_GPIOB
++# define USB_DISC      15
++
++#elif defined Red
++
++# define LED_BANK GPIOA
++# define LED_RCC_APB2ENR_GPIO RCC_APB2ENR_GPIOA
++# define LED      9
++# define LED2_BANK GPIOB
++# define LED2_RCC_APB2ENR_GPIO RCC_APB2ENR_GPIOB
++# define LED2      13
++# define REMAP
++# define PullDown
++# define Small
++# define LEDx2
++# define NoButton
++# define USB_DISC_BANK GPIOA
++# define USB_DISC_RCC_APB2ENR_GPIO RCC_APB2ENR_GPIOA
++# define USB_DISC      13
++
+ #else
+ # error "Unknown platform"
+ #endif
+@@ -73,7 +119,11 @@
+ 
+ #define USER_CODE_RAM     ((u32)0x20000C00)
+ #define RAM_END           ((u32)0x20005000)
++#ifdef Small
++#define USER_CODE_FLASH   ((u32)0x08002000)
++#else
+ #define USER_CODE_FLASH   ((u32)0x08005000)
++#endif
+ #define FLASH_END         ((u32)0x08020000)
+ 
+ #define VEND_ID0 0xAF
+diff -Nrup maple-bootloader-unify_platforms.orig/dfu.c maple-bootloader-unify_platforms.uni/dfu.c
+--- maple-bootloader-unify_platforms.orig/dfu.c	2015-03-18 21:07:26.000000000 +0100
++++ maple-bootloader-unify_platforms.uni/dfu.c	2015-03-18 21:41:49.637049626 +0100
+@@ -398,8 +398,14 @@ void dfuFinishUpload() {
+             if (code_copy_lock == BEGINNING) {
+                 code_copy_lock = MIDDLE;
+                 strobePin(LED_BANK, LED, 2, 0x1000);
++#ifdef LEDx2
++                strobePin(LED2_BANK, LED2, 2, 0x1000);                
++#endif
+                 dfuCopyBufferToExec();
+                 strobePin(LED_BANK, LED, 2, 0x500);
++#ifdef LEDx2
++                strobePin(LED2_BANK, LED2, 2, 0x500);                
++#endif
+                 code_copy_lock = END;
+             }
+         }
+diff -Nrup maple-bootloader-unify_platforms.orig/hardware.c maple-bootloader-unify_platforms.uni/hardware.c
+--- maple-bootloader-unify_platforms.orig/hardware.c	2015-03-18 21:07:26.000000000 +0100
++++ maple-bootloader-unify_platforms.uni/hardware.c	2015-03-19 00:01:29.719927906 +0100
+@@ -101,7 +101,24 @@ void setupLED(void) {
+     /* Setup APB2 for LED GPIO bank */
+     rwmVal =  GET_REG(RCC_APB2ENR);
+     rwmVal |= LED_RCC_APB2ENR_GPIO;
++#ifdef REMAP    
++    rwmVal |= RCC_APB2ENR_AFIOEN; /* enable AFIO clock */
++#endif    
+     SET_REG(RCC_APB2ENR, rwmVal);
++    
++#ifdef REMAP
++    /* disable SWJ */
++    rwmVal =  GET_REG(AFIO_MAPR);
++    rwmVal &= ~AFIO_MAPR_SWJ_CFG;
++    rwmVal |= AFIO_MAPR_SWJ_CFG_DISABLE;
++    SET_REG(AFIO_MAPR, rwmVal);
++#endif        
++#ifdef LEDx2
++    /* Setup APB2 for LED2 GPIO bank */
++    rwmVal =  GET_REG(RCC_APB2ENR);
++    rwmVal |= LED2_RCC_APB2ENR_GPIO;
++    SET_REG(RCC_APB2ENR, rwmVal);
++#endif
+ 
+ #if (LED < 8)
+ # define LED_GPIO_CR GPIO_CRL(LED_BANK)
+@@ -111,6 +128,16 @@ void setupLED(void) {
+ # define LED_CR_PORT (LED - 8)
+ #endif
+ 
++#ifdef LEDx2
++#if (LED2 < 8)
++# define LED2_GPIO_CR GPIO_CRL(LED2_BANK)
++# define LED2_CR_PORT (LED2)
++#else
++# define LED2_GPIO_CR GPIO_CRH(LED2_BANK)
++# define LED2_CR_PORT (LED2 - 8)
++#endif
++#endif
++
+     /* Setup GPIO Pin as PP Out */
+     rwmVal =  GET_REG(LED_GPIO_CR);
+     rwmVal &= ~(0xF << (LED_CR_PORT * 4));
+@@ -118,9 +145,20 @@ void setupLED(void) {
+     SET_REG(LED_GPIO_CR, rwmVal);
+ 
+     setPin(LED_BANK, LED);
++    
++#ifdef LEDx2
++    /* Setup GPIO Pin as PP Out */
++    rwmVal =  GET_REG(LED2_GPIO_CR);
++    rwmVal &= ~(0xF << (LED2_CR_PORT * 4));
++    rwmVal |= (0x1 << (LED2_CR_PORT * 4));
++    SET_REG(LED2_GPIO_CR, rwmVal);
++
++    setPin(LED2_BANK, LED2);    
++#endif
+ }
+ 
+ void setupBUTTON(void) {
++#ifndef NoButton
+     u32 rwmVal; /* read-write-modify place holder var */
+ 
+     /* Setup APB2 for button GPIO bank */
+@@ -141,6 +179,7 @@ void setupBUTTON(void) {
+     rwmVal &= ~(0xF << (BUTTON_CR_PORT * 4));
+     rwmVal |= (0x4 << (BUTTON_CR_PORT * 4));
+     SET_REG(BUTTON_GPIO_CR, rwmVal);
++#endif
+ }
+ 
+ void setupFLASH() {
+@@ -177,7 +216,11 @@ void jumpToUser(u32 usrAddr) {
+     flashLock();
+     usbDsbISR();
+     nvicDisableInterrupts();
++#ifdef PullDown
++    resetPin(USB_DISC_BANK, USB_DISC); // disconnect usb from host
++#else
+     setPin(USB_DISC_BANK, USB_DISC); // disconnect usb from host
++#endif
+     systemReset(); // resets clocks and periphs, not core regs
+ 
+ 
+diff -Nrup maple-bootloader-unify_platforms.orig/hardware.h maple-bootloader-unify_platforms.uni/hardware.h
+--- maple-bootloader-unify_platforms.orig/hardware.h	2015-03-18 21:07:26.000000000 +0100
++++ maple-bootloader-unify_platforms.uni/hardware.h	2015-03-18 22:00:36.930315023 +0100
+@@ -35,6 +35,10 @@
+ #define GPIOA ((u32)0x40010800)
+ #define GPIOB ((u32)0x40010C00)
+ #define GPIOC ((u32)0x40011000)
++#define AFIO  ((u32)0x40010000)
++#define AFIO_MAPR (AFIO + 0x04)
++#define AFIO_MAPR_SWJ_CFG (0x7<<24)
++#define AFIO_MAPR_SWJ_CFG_DISABLE (0x4<<24)
+ 
+ #define RCC_CR      RCC
+ #define RCC_CFGR    (RCC + 0x04)
+@@ -46,6 +50,7 @@
+ #define RCC_APB2ENR_GPIOB 0x00000008
+ #define RCC_APB2ENR_GPIOC 0x00000010
+ #define RCC_APB1ENR_USB 0x00800000
++#define RCC_APB2ENR_AFIOEN 0x00000001
+ 
+ #define FLASH_ACR     (FLASH + 0x00)
+ #define FLASH_KEYR    (FLASH + 0x04)
+diff -Nrup maple-bootloader-unify_platforms.orig/main.c maple-bootloader-unify_platforms.uni/main.c
+--- maple-bootloader-unify_platforms.orig/main.c	2015-03-18 21:07:26.000000000 +0100
++++ maple-bootloader-unify_platforms.uni/main.c	2015-03-18 21:50:41.157687998 +0100
+@@ -38,20 +38,32 @@ int main() {
+     setupCLK();
+     setupLED();
+     setupUSB();
++#ifndef NoButton
+     setupBUTTON();
++#endif
+     setupFLASH();
+ 
+     strobePin(LED_BANK, LED, STARTUP_BLINKS, BLINK_FAST);
++#ifdef LEDx2
++    strobePin(LED2_BANK, LED2, STARTUP_BLINKS, BLINK_FAST);    
++#endif
+ 
+     /* wait for host to upload program or halt bootloader */
++#ifdef NoButton
++    bool no_user_jump = !checkUserCode(USER_CODE_FLASH) && !checkUserCode(USER_CODE_RAM);
++#else    
+     bool no_user_jump = !checkUserCode(USER_CODE_FLASH) && !checkUserCode(USER_CODE_RAM) || readPin(BUTTON_BANK, BUTTON);
++#endif
+     int delay_count = 0;
+ 
+     while ((delay_count++ < BOOTLOADER_WAIT)
+             || no_user_jump) {
+ 
+         strobePin(LED_BANK, LED, 1, BLINK_SLOW);
++#ifdef LEDx2
++        strobePin(LED2_BANK, LED2, 1, BLINK_SLOW);        
+ 
++#endif
+         if (dfuUploadStarted()) {
+             dfuFinishUpload(); // systemHardReset from DFU once done
+         }
+@@ -64,6 +76,9 @@ int main() {
+     } else {
+         // some sort of fault occurred, hard reset
+         strobePin(LED_BANK, LED, 5, BLINK_FAST);
++#ifdef LEDx2
++        strobePin(LED2_BANK, LED2, 5, BLINK_FAST);        
++#endif
+         systemHardReset();
+     }
+ 
+diff -Nrup maple-bootloader-unify_platforms.orig/usb.c maple-bootloader-unify_platforms.uni/usb.c
+--- maple-bootloader-unify_platforms.orig/usb.c	2015-03-18 21:07:26.000000000 +0100
++++ maple-bootloader-unify_platforms.uni/usb.c	2015-03-18 21:59:04.960343451 +0100
+@@ -50,7 +50,9 @@ void setupUSB(void) {
+ #endif
+ 
+     /* preset pin to high */
++#ifndef PullDown
+     setPin(USB_DISC_BANK, USB_DISC);
++#endif
+ 
+     /* Setup GPIO Pin as OD out */
+     rwmVal  = GET_REG(USB_DISC_GPIO_CR);
+@@ -62,7 +64,11 @@ void setupUSB(void) {
+     pRCC->APB1ENR |= RCC_APB1ENR_USB;
+ 
+     /* initialize the usb application */
++#ifdef PullDown
++    setPin(USB_DISC_BANK, USB_DISC);  /* present ourselves to the host */
++#else
+     resetPin(USB_DISC_BANK, USB_DISC);  /* present ourselves to the host */
++#endif
+     usbAppInit();
+ }
+ 
+diff -Nrup maple-bootloader-unify_platforms.orig/usb_descriptor.c maple-bootloader-unify_platforms.uni/usb_descriptor.c
+--- maple-bootloader-unify_platforms.orig/usb_descriptor.c	2015-03-18 21:07:26.000000000 +0100
++++ maple-bootloader-unify_platforms.uni/usb_descriptor.c	2015-03-19 00:39:10.545378161 +0100
+@@ -176,7 +176,11 @@ u8 u8_usbStringAlt1[0x3A] = {
+     0x03,
+     'D', 0, 'F', 0, 'U', 0, ' ', 0, 'P', 0, 'r', 0, 'o', 0, 'g', 0, 'r', 0,
+     'a', 0, 'm', 0, ' ', 0, 'F', 0, 'L', 0, 'A', 0, 'S', 0, 'H', 0, ' ', 0,
++#ifdef Small
++    '0', 0, 'x', 0, '0', 0, '8', 0, '0', 0, '0', 0, '2', 0, '0', 0, '0', 0,
++#else
+     '0', 0, 'x', 0, '0', 0, '8', 0, '0', 0, '0', 0, '5', 0, '0', 0, '0', 0,
++#endif    
+     '0', 0
+ };
+ 
