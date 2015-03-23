@@ -1,6 +1,4 @@
-This patch is against Tormod Volden's unify_platforms branch of his maple-bootloader github repository, checked out on 13.1.2015. [1]
-A patch for gcc-4.9 with -Os is added [2].
-For convenience a fork with the patch applied is in [3].
+The bootloader is in [1]. The necessary patch is already applied.
 
 For the developer board compile with 'make PLATFORM=Dev',
 for the red ST-Link emulator compile with 'make PLATFORM=Red'
@@ -8,7 +6,7 @@ and for the blue ST-Link emulator compile with 'make PLATFORM=Blue'.
 
 A pulldown resistor from USBDP to the USB disconnect pin of 220 ohm needs to be added.
 A pullup resistor of 1,5 kohm is already present.
-You find a scheme in [4].
+You find a scheme in [2].
 
 In case the opendrain disconnect pin is reset, the disconnect pin is drawn to ground and the pulldown pulls USBDP close to ground.
 In case the disconnect pin is set, the disconnect pin is open and the pullup draws USBDP to VDD.
@@ -16,7 +14,9 @@ In case the disconnect pin is set, the disconnect pin is open and the pullup dra
 The firmware, which gets loaded by the bootloader, needs to be adapted (vector table and linker) and has to release the USB_DISC_PIN again.
 Compile the firmware with "make Bootloader=1".
 
-[1] https://github.com/tormodvolden/maple-bootloader/tree/unify_platforms
-[2] https://github.com/j1rie/maple-bootloader/commit/69ed54ad186bb0c65aec1dbd46d89a416dd0e0d6
-[3] https://github.com/j1rie/maple-bootloader/tree/unify_platforms
-[4] https://github.com/EvvGC/Hardware/blob/master/EvvGC%20v1.3/EvvGC%20vpre1.3ce2.pdf?raw=true
+Once the bootloader is flashed, you flash the new firmware like this:
+First run /path/FlashDFUSe.sh /path/newFirmware.bin,
+then connect the ST-Link.
+
+[1] https://github.com/j1rie/maple-bootloader/tree/unify_platforms
+[2] https://github.com/EvvGC/Hardware/blob/master/EvvGC%20v1.3/EvvGC%20vpre1.3ce2.pdf?raw=true
