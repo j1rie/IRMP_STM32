@@ -9,7 +9,7 @@ PLATFORM ?= STM32F103C8
 CROSS_COMPILE ?= arm-none-eabi-
 AS = $(CROSS_COMPILE)as
 CC = $(CROSS_COMPILE)gcc
-LD = $(CROSS_COMPILE)gcc
+LD = $(CC)
 OBJCP = $(CROSS_COMPILE)objcopy
 
 ARCH = -mcpu=cortex-m3 -mthumb
