@@ -44,4 +44,4 @@ clean:
 	rm -f $(OBJS) $(TARGET).{bin,elf,map}
 
 distclean: clean
-	rm -rf ext
+	rm -rf cmsis cmsis_boot ext_src irmp stm_lib usb_hid
