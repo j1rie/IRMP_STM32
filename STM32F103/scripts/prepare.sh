@@ -128,7 +128,6 @@ cd ..
 
 # patch
 patch -d usb_hid -p1 -i ../patches/usb_hid.patch
-patch -d usb_hid -p1 -i ../patches/usb_hid_gcc49_fix.patch
 patch -d stm_lib -p1 -i ../patches/eeprom.patch
 patch -d cmsis_boot -p1 -i ../patches/stm32f10x_conf.patch
 patch -d cmsis_boot -p1 -i ../patches/startup.patch
