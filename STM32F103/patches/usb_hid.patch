@@ -2,7 +2,6 @@
  *  Copyright (C) 2014 Joerg Riechardt
  *
  *  inspired by work from Andrew Kambaroff - http://sysmagazine.com/posts/208026 
- *  Fixes for GCC 4.9 by Manuel Reimer <manuel.reimer@gmx.de>
  *
  *  This program is free software; you can redistribute it and/or modify
  *  it under the terms of the GNU General Public License as published by

@@ -5,19 +5,19 @@ Ole Ernst <olebowle@gmx.com>
  for Makefile
  for adapting coding style to kernel style
  for code cleanup
- for spotting a bug in Wakeup() after timer countdown 
+ for spotting a bug in Wakeup() after timer countdown
  for add missing brackets
  for simplify EEPROM Emulation
  for simplify EEPROM (re)store
  for refine eeprom_restore
  for making startup compatibel with CooCox
- for introducing packed struct in IRMP_DATA, 
+ for introducing packed struct in IRMP_DATA,
   which makes use of memcpy and memcmp possible
  for much better macro implementation including new protocol
- 
+
 Michael Kipp <myscha@web.de>
- for suggesting automatic sync of supported_protocols 
- 
+ for suggesting automatic sync of supported_protocols
+
 Manuel Reimer <manuel.reimer@gmx.de>
  for making the maple bootloader compile with gcc 4.9 and -Os
- 
+ for making the IRMP_STM32 firmware compatible with gcc 4.9 and -Os
