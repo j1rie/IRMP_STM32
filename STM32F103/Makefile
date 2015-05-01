@@ -1,3 +1,5 @@
+-include Make.config
+
 TARGET ?= IR
 PLATFORM ?= STM32F103C8
 #STM32F103C8

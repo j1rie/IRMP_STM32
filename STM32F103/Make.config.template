@@ -1,0 +1,23 @@
+#
+# User defined Makefile options for the IRMP_STM32 firmware
+#
+# Copy this file to 'Make.config' and change the parameters as necessary.
+#
+
+### Specify the target board here.
+### Default is to build a firmware for the STM32F103 development board.
+### Red --> Build for the "Red" ST-Link board or one of the ST-Link "USB-sticks"
+### Blue --> Build for the "Blue" ST-Link board
+#Platform=Red
+#Platform=Blue
+
+### Enable this if your firmware is meant to run on a board with the Maple
+### bootloader installed.
+#Bootloader=1
+
+### If you enable the following option, your firmware will be able to drive the
+### "active" pin of the mainboard power button directly. It is recommended
+### to add a 220 ohms resistor between board pin and the mainboard connector.
+### Default is to build a firmware which is meant to drive the power button via
+### an opto-coupler added between STM32 board and mainboard.
+#SimpleCircuit=1
