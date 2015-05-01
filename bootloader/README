@@ -1,8 +1,8 @@
 The bootloader is in [1]. The necessary patch is already applied.
 
-For the developer board compile with 'make PLATFORM=Dev',
-for the red ST-Link emulator compile with 'make PLATFORM=Red'
-and for the blue ST-Link emulator compile with 'make PLATFORM=Blue'.
+For the developer board compile with 'make Platform=Dev',
+for the red ST-Link emulator compile with 'make Platform=Red'
+and for the blue ST-Link emulator compile with 'make Platform=Blue'.
 
 A pulldown resistor from USBDP to the USB disconnect pin of 220 ohm needs to be added.
 A pullup resistor of 1,5 kohm is already present.
