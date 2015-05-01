@@ -179,16 +179,24 @@ void LED_Switch_init(void)
 	/* disable SWD, so pins are available */
 	GPIO_PinRemapConfig(GPIO_Remap_SWJ_Disable, ENABLE);
 	/* start with wakeup switch off */
+#ifdef SimpleCircuit
+	GPIO_WriteBit(OUT_PORT, WAKEUP_PIN, Bit_SET);
+#else
 	GPIO_WriteBit(OUT_PORT, WAKEUP_PIN, Bit_RESET);
+#endif /* SimpleCircuit */
 #endif /* ST_Link */
 	GPIO_InitStructure.GPIO_Pin = LED_PIN;
 	GPIO_InitStructure.GPIO_Mode = GPIO_Mode_Out_PP;
 	GPIO_InitStructure.GPIO_Speed = GPIO_Speed_2MHz;
 	GPIO_Init(OUT_PORT, &GPIO_InitStructure);
 	GPIO_InitStructure.GPIO_Pin = WAKEUP_PIN;
+#ifdef SimpleCircuit
+	GPIO_InitStructure.GPIO_Mode = GPIO_Mode_Out_OD;
+#endif /* SimpleCircuit */
 	GPIO_Init(OUT_PORT, &GPIO_InitStructure);
 	GPIO_InitStructure.GPIO_Pin = WAKEUP_RESET_PIN;
 	GPIO_InitStructure.GPIO_Mode = GPIO_Mode_IPU;
+
 	GPIO_Init(RESET_PORT, &GPIO_InitStructure);
 	/* start with LED on */
 	GPIO_WriteBit(OUT_PORT, LED_PIN, Bit_SET);
@@ -260,9 +268,17 @@ void Wakeup(void)
 	/* USB wakeup */
 	Resume(RESUME_START);
 	/* motherboard switch: WAKEUP_PIN short high */
-	GPIO_WriteBit(OUT_PORT, WAKEUP_PIN, Bit_SET);
-	delay_ms(500);
+#ifdef SimpleCircuit
 	GPIO_WriteBit(OUT_PORT, WAKEUP_PIN, Bit_RESET);
+#else
+	GPIO_WriteBit(OUT_PORT, WAKEUP_PIN, Bit_SET);
+#endif /* SimpleCircuit */
+	delay_ms(500);
+#ifdef SimpleCircuit
+	GPIO_WriteBit(OUT_PORT, WAKEUP_PIN, Bit_SET);
+#else
+	GPIO_WriteBit(OUT_PORT, WAKEUP_PIN, Bit_RESET);
+#endif /* SimpleCircuit */
 	fast_toggle();
 }
 
