@@ -1,3 +1,5 @@
+-include Make.config
+
 TARGET ?= IR
 PLATFORM ?= STM32F103C8
 #STM32F103C8
@@ -32,12 +34,25 @@ OBJS = src/irmpmain.o src/st_link_leds.o src/usb_hid.o src/main.o\
        usb_hid/src/usb_sil.o
 
 CFLAGS = -Wall -ffunction-sections -fno-builtin $(ARCH) $(COMMON) $(INCLUDES) $(DEFINES)
+
 ifdef Bootloader
 DEFINES += -DBootloader
 LDFLAGS = -nostartfiles -Wl,-Map=$(TARGET).map,--gc-sections,--entry=main,-Tscripts/arm-gcc-link-bootloader.ld $(ARCH) $(COMMONOC)
 else
 LDFLAGS = -nostartfiles -Wl,-Map=$(TARGET).map,--gc-sections,--entry=main,-Tscripts/arm-gcc-link.ld $(ARCH) $(COMMON)
 endif
+
+ifdef SimpleCircuit
+DEFINES += -DSimpleCircuit
+endif
+
+ifeq ($(Platform), Blue)
+DEFINES += -DBlueLink
+endif
+ifeq ($(Platform), Red)
+DEFINES += -DRedLink
+endif
+
 $(TARGET).bin: $(TARGET).elf
 	$(OBJCP) -O binary $< $@
 
@@ -51,8 +66,10 @@ prepare:
 flash: $(TARGET).bin
 	stm32flash -v -w $(TARGET).bin /dev/ttyUSB0
 
-clean:
+clean-objects:
 	rm -f $(OBJS) $(TARGET).{bin,elf,map}
+
+clean: clean-objects
 	rm -rf cmsis cmsis_boot irmp stm_lib usb_hid ext_src/prepared
 
 distclean: clean
