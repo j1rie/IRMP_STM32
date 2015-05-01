@@ -17,7 +17,10 @@
 
 ### If you enable the following option, your firmware will be able to drive the
 ### "active" pin of the mainboard power button directly. It is recommended
-### to add a 220 ohms resistor between board pin and the mainboard connector.
+### to add a 220 ohms resistor between the wakeup pin and the active pin of the 
+### mainboard connector.
+### Please be careful and check it out, if this works for your motherboard, too.
+### Warning: This might possibly damage your motherboard or the IRMP_STM32 device!
 ### Default is to build a firmware which is meant to drive the power button via
 ### an opto-coupler added between STM32 board and mainboard.
 #SimpleCircuit=1
