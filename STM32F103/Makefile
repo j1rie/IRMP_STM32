@@ -32,12 +32,21 @@ OBJS = src/irmpmain.o src/st_link_leds.o src/usb_hid.o src/main.o\
        usb_hid/src/usb_sil.o
 
 CFLAGS = -Wall -ffunction-sections -fno-builtin $(ARCH) $(COMMON) $(INCLUDES) $(DEFINES)
+
 ifdef Bootloader
 DEFINES += -DBootloader
 LDFLAGS = -nostartfiles -Wl,-Map=$(TARGET).map,--gc-sections,--entry=main,-Tscripts/arm-gcc-link-bootloader.ld $(ARCH) $(COMMONOC)
 else
 LDFLAGS = -nostartfiles -Wl,-Map=$(TARGET).map,--gc-sections,--entry=main,-Tscripts/arm-gcc-link.ld $(ARCH) $(COMMON)
 endif
+
+ifeq ($(Platform), Blue)
+DEFINES += -DBlueLink
+endif
+ifeq ($(Platform), Red)
+DEFINES += -DRedLink
+endif
+
 $(TARGET).bin: $(TARGET).elf
 	$(OBJCP) -O binary $< $@
 
