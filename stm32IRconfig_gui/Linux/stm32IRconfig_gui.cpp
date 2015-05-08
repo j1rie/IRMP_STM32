@@ -502,9 +502,9 @@ MainWindow::MainWindow(FXApp *app)
 	connected_device = NULL;
 
 	// create horizontal frame with two vertical frames
-	FXHorizontalFrame *hf1 = new FXHorizontalFrame(this, LAYOUT_FILL_Y|LAYOUT_FILL_X,0,0,0,0, 0,0,0,0);
+	FXHorizontalFrame *hf1 = new FXHorizontalFrame(this, LAYOUT_FILL_Y|LAYOUT_FILL_X,0,0,0,0, 0,0,0,0, 2,0);
 	FXVerticalFrame *vf1 = new FXVerticalFrame(hf1, LAYOUT_FILL_Y|LAYOUT_FILL_X,0,0,0,0, 0,0,0,0);
-	FXVerticalFrame *vf2 = new FXVerticalFrame(hf1, LAYOUT_FILL_Y|LAYOUT_FILL_X/*,0,0,0,0, 0,0,0,0*/);
+	FXVerticalFrame *vf2 = new FXVerticalFrame(hf1, LAYOUT_FILL_Y|LAYOUT_FILL_X,0,0,0,0, 0/*,0,0,0*/);
 
 	// second vertical frame for map_text21
 	new FXLabel(vf2, "map                                    ");
@@ -583,10 +583,10 @@ MainWindow::MainWindow(FXApp *app)
 	flag1_text->setVisibleRows(1);
 
 	// horizontal frame for alarm Group Box, select listboxes, Output Group Box and map group box
-	FXHorizontalFrame *hf14 = new FXHorizontalFrame(vf1, LAYOUT_FILL_X,0,0,0,0, 0,0,0,0);
+	FXHorizontalFrame *hf14 = new FXHorizontalFrame(vf1, LAYOUT_FILL_X,0,0,0,0, 0,0,0,0, 0,0);
 	// two vertical frames, left for map, right for everything else 
-	FXVerticalFrame *vf141 = new FXVerticalFrame(hf14, LAYOUT_FILL_Y|LAYOUT_FILL_X,0,0,0,0, 0,0,0,0);
-	FXVerticalFrame *vf142 = new FXVerticalFrame(hf14, LAYOUT_FILL_Y|LAYOUT_FILL_X/*,0,0,0,0, 0,0,0,0*/);
+	FXVerticalFrame *vf141 = new FXVerticalFrame(hf14, LAYOUT_FILL_Y|LAYOUT_FILL_X,0,0,0,0, 0,0,0,0, 0,0);
+	FXVerticalFrame *vf142 = new FXVerticalFrame(hf14, LAYOUT_FILL_Y|LAYOUT_FILL_X,0,0,0,0, 0/*,0,0,0*/);
 	// horizontal frame for alarm Group Box and select listboxes
 	FXHorizontalFrame *hf143 = new FXHorizontalFrame(vf141, LAYOUT_FILL_X/*,0,0,0,0, 0,0,0,0*/);
 	//alarm Group Box
@@ -626,6 +626,7 @@ MainWindow::MainWindow(FXApp *app)
 	save_button = new FXButton(gb142, "save", NULL, this, ID_SAVE, BUTTON_NORMAL|LAYOUT_FILL_X);
 	append_button = new FXButton(gb142, "append", NULL, this, ID_APPEND, BUTTON_NORMAL|LAYOUT_FILL_X);
 	apply_button = new FXButton(gb142, "apply", NULL, this, ID_APPLY, BUTTON_NORMAL|LAYOUT_FILL_X);
+	new FXLabel(gb142, "Key");
 	FXVerticalFrame *innerVF9 = new FXVerticalFrame(gb142, LAYOUT_FILL_X|LAYOUT_FILL_Y, 0,0,0,0, 0,0,0,0);
 	map_text = new FXText(new FXHorizontalFrame(innerVF9,LAYOUT_FILL_X|FRAME_SUNKEN|FRAME_THICK, 0,0,0,0, 0,0,0,0), NULL, 0, LAYOUT_FILL_X);
 	map_text->setVisibleRows(1);
@@ -698,10 +699,10 @@ MainWindow::MainWindow(FXApp *app)
 	input_text->setHelpText("debug messages");
 	clear_button->setHelpText("clear debug messages");
 	open_button->setHelpText("open translation map");
-	map_text->setHelpText("translated received IR");
+	map_text->setHelpText("key (translated received IR)");
 	save_button->setHelpText("save translation map");
 	map_text21->setHelpText("editable translation map");
-	append_button->setHelpText("append received IR and translated received IR to translation map");
+	append_button->setHelpText("append received IR and key to translation map");
 	apply_button->setHelpText("apply changes in translation map for translation");
 
 	// disable buttons
@@ -725,6 +726,7 @@ MainWindow::MainWindow(FXApp *app)
 	storedShadowColor = read_cont_button->getShadowColor();
 	storedBaseColor = read_cont_button->getBaseColor();
 	storedBackColor = read_cont_button->getBackColor();
+
 }
 
 MainWindow::~MainWindow()
@@ -783,13 +785,13 @@ MainWindow::onConnect(FXObject *sender, FXSelector sel, void *ptr)
 	s = "Protocols: ";
 	s += protocols;
 	connected_label2->setText(s);
-	for(int i = 0; i < macroslots; i++) {
+	for(int i = 0; i < wakeupslots; i++) {
 		FXString s;
 		s = "wakeupslot";
 		s += FXStringVal(i,10);
 		wslistbox->appendItem(s);	
 	}
-	wslistbox->setNumVisible(macroslots);
+	wslistbox->setNumVisible(wakeupslots);
 	for(int i = 0; i < macrodepth; i++) {
 		FXString s;
 		s = "macro";
@@ -831,6 +833,58 @@ MainWindow::onConnect(FXObject *sender, FXSelector sel, void *ptr)
 	disconnect_button->enable();
 	input_text->setText("");
 	output_text->setText("");
+
+	//list wakeups and alarm
+	FXString u;
+	for(int i = 0; i < wakeupslots; i++) {
+		FXString s;
+		FXString t;
+		t += FXStringVal(i,10);
+		s = "3 0 0 5 "; // Report_ID STAT_CMD ACC_GET CMD_WAKE
+		s += t;
+		output_text->setText(s);
+		Write_and_Check();
+		s = "wakeup: ";
+		t.format("%02hhx", buf[4]);
+		s += t;
+		t.format("%02hhx", buf[6]);
+		s += t;
+		t.format("%02hhx", buf[5]);
+		s += t;
+		t.format("%02hhx", buf[8]);
+		s += t;
+		t.format("%02hhx", buf[7]);
+		s += t;
+		t.format("%02hhx", buf[9]);
+		s += t;
+		s += "\n";
+		if(!(s == "wakeup: ffffffffffff\n")) {
+			u += s;
+		}
+	}
+	output_text->setText("3 0 0 3"); // Report_ID STAT_CMD ACC_GET CMD_ALARM
+	Write_and_Check();
+	unsigned int alarm = *((uint32_t *)&buf[4]);
+	FXString t;	
+	s = "alarm: ";
+	t.format("%"PRIu16"", alarm/60/60/24);
+	s += t;
+	s += " days, ";
+	t.format("%d", (alarm/60/60) % 24);
+	s += t;
+	s += " hours, ";
+	t.format("%d", (alarm/60) % 60);
+	s += t;
+	s += " minutes, ";
+	t.format("%d", alarm % 60);
+	s += t;
+	s += " seconds\n";
+	onClear(NULL, 0, NULL);
+	output_text->setText("");
+	input_text->appendText(u);
+	input_text->setBottomLine(INT_MAX);
+	input_text->appendText(s);
+	input_text->setBottomLine(INT_MAX);
 
 	hid_set_nonblocking(connected_device, 1);
 
@@ -1656,9 +1710,7 @@ MainWindow::onOpen(FXObject *sender, FXSelector sel, void *ptr)
 	long loaded = 0;
 	FXint size = 0;
 	FXint n = 0;
-	FXFileDialog open(this,"Open a map file");  // TODO include libpng
-	/* If you compile FOX as static [non-DLL], make sure the FOXDLL and FOXDLL_EXPORTS are NOT defined.
-	 * Now, the libpng may also have to be recompiled without DLL linkage. define PNG_STATIC and ZLIB_STATIC */
+	FXFileDialog open(this,"Open a map file");
 	open.setPatternList(patterns);
 	open.setCurrentPattern(1);
 	if(open.execute()){
@@ -1731,7 +1783,9 @@ MainWindow::onSave(FXObject *sender, FXSelector sel, void *ptr){
 		if(!saveFile(file)){
 			getApp()->beep();
 			FXMessageBox::error(this,MBOX_OK,tr("Error Saving File"),tr("Unable to save file: %s"),file.text());
+			return 1;
 		}
+		onApply(NULL, 0, NULL);
 		FXString u;
 		u = "saved: ";
 		u += file;
@@ -1954,7 +2008,5 @@ int main(int argc, char **argv)
 }
 
 /* TODO
- ** remove dependency to libpng and zlib or static
- * debug message at beginning about wakeups and alarm timer
- * play with layout
+ * Windows: remove need for libpng13.dll and zlib1.dll!
  */
