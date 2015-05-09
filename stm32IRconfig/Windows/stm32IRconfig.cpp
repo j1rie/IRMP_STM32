@@ -27,8 +27,6 @@
 	#include <unistd.h>
 #endif
 
-#pragma comment (lib, "Setupapi.lib")
-
 hid_device *handle;
 unsigned char inBuf[17];
 unsigned char outBuf[17];
