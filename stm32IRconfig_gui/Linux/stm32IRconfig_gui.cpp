@@ -702,8 +702,8 @@ MainWindow::MainWindow(FXApp *app)
 	map_text->setHelpText("key (translated received IR)");
 	save_button->setHelpText("save translation map");
 	map_text21->setHelpText("editable translation map");
-	append_button->setHelpText("append received IR and key to translation map");
-	apply_button->setHelpText("apply changes in translation map for translation");
+	append_button->setHelpText("add received IR and key to translation map");
+	apply_button->setHelpText("apply changes in translation map");
 
 	// disable buttons
 	output_button->disable();
@@ -1129,7 +1129,8 @@ MainWindow::onReadIR(FXObject *sender, FXSelector sel, void *ptr)
 			}
 		}
 		if(k > 1)
-		s += "WARNING: multiple entries!\n";
+			s += "WARNING: multiple entries!";
+		s += "\n";
 		input_text->appendText(s);
 		input_text->setBottomLine(INT_MAX);		
 	}
@@ -2064,6 +2065,7 @@ int main(int argc, char **argv)
 }
 
 /* TODO
+ * set alarm 0 crashes
  * Windows: remove the need for libpng1x.dll and zlib1.dll!
  * This was introduced by usage of FXFileDialog. We don't need to see icons during file open/save anyway.
  */
