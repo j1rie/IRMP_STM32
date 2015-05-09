@@ -788,28 +788,52 @@ MainWindow::onConnect(FXObject *sender, FXSelector sel, void *ptr)
 	for(int i = 0; i < wakeupslots; i++) {
 		FXString s;
 		s = "wakeupslot";
+#if (FOX_MINOR >= 7)
+		FXString t;
+		t.fromInt(i,10);
+		s += t;
+#else
 		s += FXStringVal(i,10);
+#endif
 		wslistbox->appendItem(s);	
 	}
 	wslistbox->setNumVisible(wakeupslots);
 	for(int i = 0; i < macrodepth; i++) {
 		FXString s;
 		s = "macro";
+#if (FOX_MINOR >= 7)
+		FXString t;
+		t.fromInt(i,10);
+		s += t;
+#else
 		s += FXStringVal(i,10);
+#endif
 		mnlistbox->appendItem(s);	
 	}
 	mnlistbox->setNumVisible(macrodepth);
 	for(int i = 0; i < macroslots; i++) {
 		FXString s;
 		s = "macroslot";
+#if (FOX_MINOR >= 7)
+		FXString t;
+		t.fromInt(i,10);
+		s += t;
+#else
 		s += FXStringVal(i,10);
+#endif
 		mslistbox->appendItem(s);	
 	}
 	mslistbox->setNumVisible(macroslots);
 	for(int i = 1; i < 10; i++) {
 		FXString s;
 		s = "";
+#if (FOX_MINOR >= 7)
+		FXString t;
+		t.fromInt(i,10);
+		s += t;
+#else
 		s += FXStringVal(i,10);
+#endif
 		repeatlistbox->appendItem(s);	
 	}
 	repeatlistbox->setNumVisible(9);
@@ -839,7 +863,11 @@ MainWindow::onConnect(FXObject *sender, FXSelector sel, void *ptr)
 	for(int i = 0; i < wakeupslots; i++) {
 		FXString s;
 		FXString t;
-		t += FXStringVal(i,10);
+#if (FOX_MINOR >= 7)
+		t.fromInt(i,10);
+#else
+		t = FXStringVal(i,10);
+#endif
 		s = "3 0 0 5 "; // Report_ID STAT_CMD ACC_GET CMD_WAKE
 		s += t;
 		output_text->setText(s);
@@ -1483,7 +1511,12 @@ MainWindow::onGcaps(FXObject *sender, FXSelector sel, void *ptr)
 	int read;
 	for(int i = 0; i < 4; i++) {
 		s = "3 0 0 1 "; // Report_ID STAT_CMD ACC_GET CMD_CAPS
+#if (FOX_MINOR >= 7)
+		t.fromInt(i,10);
+		s += t;
+#else
 		s += FXStringVal(i,10);
+#endif
 		s += " ";
 		output_text->setText(s);
 
@@ -1584,16 +1617,27 @@ long
 MainWindow::onAset(FXObject *sender, FXSelector sel, void *ptr)
 {
 	unsigned int setalarm = 0;
+#if (FOX_MINOR >= 7)
+	setalarm += 60 * 60 * 24 * days_text->getText().toInt();
+	setalarm += 60 * 60 * hours_text->getText().toInt();
+	setalarm += 60 * minutes_text->getText().toInt();
+	setalarm += seconds_text->getText().toInt();
+#else
 	setalarm += 60 * 60 * 24 * FXIntVal(days_text->getText(), 10); // TODO protect against overflow!
 	setalarm += 60 * 60 * FXIntVal(hours_text->getText(), 10);
 	setalarm += 60 * FXIntVal(minutes_text->getText(), 10);
 	setalarm += FXIntVal(seconds_text->getText(), 10);
+#endif
 
 	FXString s;
 	FXString t;
 	const char *z = " ";
 	s = "3 0 1 3 "; // Report_ID STAT_CMD ACC_SET CMD_ALARM
+#if (FOX_MINOR >= 7)
+	t.fromInt(setalarm,16);
+#else
 	t = FXStringVal(setalarm, 16);
+#endif
 	int len = t.length();
 	for (int i = 0; i < 8 - len; i++) {
 		t.prepend("0");
@@ -1756,7 +1800,11 @@ MainWindow::onOpen(FXObject *sender, FXSelector sel, void *ptr)
 		u += v;
 		u += "\n";
 		u += "opened size: ";
+#if (FOX_MINOR >= 7)
+		v.fromInt(size, 10);
+#else
 		v = FXStringVal(size, 10);
+#endif
 		u += v;
 		u += "\n";
 		input_text->appendText(u);
@@ -1836,7 +1884,11 @@ MainWindow::saveFile(const FXString& file){
 			FXString u;
 			FXString v;
 			u = "saved size: ";
+#if (FOX_MINOR >= 7)
+			v.fromInt(size, 10);
+#else
 			v = FXStringVal(size, 10);
+#endif
 			u += v;
 			//u += file;
 			u += "\n";
@@ -1900,7 +1952,11 @@ MainWindow::onApply(FXObject *sender, FXSelector sel, void *ptr){
 		v = map[i*2+1];
 		u += v;
 		u += " ";
+#if (FOX_MINOR >= 7)
+		v.fromInt(mapbeg[i], 10);
+#else
 		v = FXStringVal(mapbeg[i],10);
+#endif
 		u += v;
 		u += "\n";
 	}
@@ -2008,5 +2064,6 @@ int main(int argc, char **argv)
 }
 
 /* TODO
- * Windows: remove need for libpng13.dll and zlib1.dll!
+ * Windows: remove the need for libpng1x.dll and zlib1.dll!
+ * This was introduced by usage of FXFileDialog. We don't need to see icons during file open/save anyway.
  */

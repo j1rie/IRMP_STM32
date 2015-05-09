@@ -1,3 +1,14 @@
+Old way: 
 Get hidapi-externals from https://github.com/downloads/signal11/hidapi/hidapi-externals.zip
 Put the content of this folder into the directory hidapi, which has to be parallel to
 hidapi-externals, so that both are in the same parent directory.
+
+New way:
+Build with libs fox-1.6.50, libpng-1.6.17 and zlib-1.2.8.
+Those need to be in the folder hidapi-externals.
+For directory structure see hidapi-externals.zip as a template.
+Put the content of this folder into the directory hidapi, which has to be parallel to
+hidapi-externals, so that both are in the same parent directory.
+
+Hope to make it work with fox-1.7.51, too.
+
