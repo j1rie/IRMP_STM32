@@ -1,0 +1,2 @@
+built with fox-1.6.37, libpng-1.2.8 and zlib-1.2.3
+If Windows complains about MSVCR120.dll, you need to install vcredist_x86.exe from Microsoft.
