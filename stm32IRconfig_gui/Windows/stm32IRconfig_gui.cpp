@@ -1114,22 +1114,22 @@ MainWindow::onReadIR(FXObject *sender, FXSelector sel, void *ptr)
 		t += address1_text->getText();
 		t += command1_text->getText();
 		t += "00";
-		s = "translated: ";
+		s = "translated:";
 		map_text21->killHighlight();
 		map_text->killHighlight();
 		map_text->setText("");
 		for(int i = 0; i < active_lines; i++) {
 			if(map[i*2] == t) {
-				s += map[i*2+1];
 				s += " ";
+				s += map[i*2+1];
 				map_text->setText(map[i*2+1]);
 				map_text->setHighlight(0, map_text->getLength());
 				k++;
-				map_text21->setHighlight(mapbeg[i], 12);
+				map_text21->setHighlight(mapbeg[i], mapbeg[i+1] - mapbeg[i] - 1);
 			}
 		}
 		if(k > 1)
-			s += "WARNING: multiple entries!";
+			s += ", WARNING: multiple entries!";
 		s += "\n";
 		input_text->appendText(s);
 		input_text->setBottomLine(INT_MAX);		
@@ -1624,11 +1624,18 @@ MainWindow::onAset(FXObject *sender, FXSelector sel, void *ptr)
 	setalarm += 60 * minutes_text->getText().toInt();
 	setalarm += seconds_text->getText().toInt();
 #else
-	setalarm += 60 * 60 * 24 * FXIntVal(days_text->getText(), 10); // TODO protect against overflow!
+	setalarm += 60 * 60 * 24 * FXIntVal(days_text->getText(), 10);
 	setalarm += 60 * 60 * FXIntVal(hours_text->getText(), 10);
 	setalarm += 60 * FXIntVal(minutes_text->getText(), 10);
 	setalarm += FXIntVal(seconds_text->getText(), 10);
 #endif
+	if(setalarm < 2) {
+		setalarm = 2;
+		FXString u;
+		u = "set alarm to 2 in order to prevent device or program hangup\n";
+		input_text->appendText(u);
+		input_text->setBottomLine(INT_MAX);
+	}
 
 	FXString s;
 	FXString t;
@@ -1758,6 +1765,7 @@ MainWindow::onOpen(FXObject *sender, FXSelector sel, void *ptr)
 	FXFileDialog open(this,"Open a map file");
 	open.setPatternList(patterns);
 	open.setCurrentPattern(1);
+	open.showImages(0);
 	if(open.execute()){
 		map_text21->setText(NULL,0);
 		FXString file=open.getFilename();
@@ -1823,6 +1831,7 @@ MainWindow::onSave(FXObject *sender, FXSelector sel, void *ptr){
 	FXString file;
 	save.setPatternList(patterns);
 	save.setCurrentPattern(1);
+	save.showImages(0);
 	if(save.execute()){
 		file=save.getFilename();
 		//file += (patterns[save.getCurrentPattern()] == "map Files (*.map)") ? ".map" : ""; // TODO?
@@ -1929,20 +1938,19 @@ MainWindow::onApply(FXObject *sender, FXSelector sel, void *ptr){
 	char *str = (char*) malloc(sz+1);
 	strcpy(str, d);
 	char *token = strtok(str, delim);
+	memset(mapbeg, 0, sizeof(mapbeg));
+	int count = 1;
 	while (token) {
 		map[i++] = token;
+		count += map[i-1].length() + 1;
+		if(!(i%2))
+			mapbeg[(i+1)/2] = count;
 		token = strtok(NULL, delim);
 	}
 	free(str);
 	active_lines = i / 2;
 
 	// fill mapbeg[]
-	int beg;
-	for(int i = 0; i < active_lines; i++) {
-		map_text21->findText(map[2*i], &beg);
-		mapbeg[i] = beg;
-	}
-
 	FXString u;
 	FXString v;
 	u = "map mapbeg: \n";
@@ -2063,9 +2071,3 @@ int main(int argc, char **argv)
 	app.run();
 	return 0;
 }
-
-/* TODO
- * set alarm 0 crashes
- * Windows: remove the need for libpng1x.dll and zlib1.dll!
- * This was introduced by usage of FXFileDialog. We don't need to see icons during file open/save anyway.
- */
