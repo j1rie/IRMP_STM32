@@ -15,9 +15,15 @@
 ### bootloader installed.
 #Bootloader=1
 
+### Enable this to only use the learned wakeup code to *start* the computer via
+### power button. If this is enabled, then the learned wakeup code is just
+### handled the same way as any other code on your remote, and does not operate
+### the power button, as soon as USB activity is detected (PC is booted up).
+#OnlyPowerUp=1
+
 ### If you enable the following option, your firmware will be able to drive the
 ### "active" pin of the mainboard power button directly. It is recommended
-### to add a 220 ohms resistor between the wakeup pin and the active pin of the 
+### to add a 220 ohms resistor between the wakeup pin and the active pin of the
 ### mainboard connector.
 ### Please be careful and check it out, if this works for your motherboard, too.
 ### Warning: This might possibly damage your motherboard or the IRMP_STM32 device!

@@ -163,6 +163,9 @@ volatile unsigned int systicks = 0;
 extern uint8_t PA9_state;
 volatile unsigned int systicks2 = 0;
 #endif /* ST_Link */
+#ifdef OnlyPowerUp
+volatile unsigned int sof_timeout = 0;
+#endif /* OnlyPowerUp */
 
 void delay_ms(unsigned int msec)
 {
@@ -253,6 +256,10 @@ void SysTick_Handler(void)
 #ifdef ST_Link
 	systicks2++;
 #endif /* ST_Link */
+#ifdef OnlyPowerUp
+	if (sof_timeout != 100) // Only count up to 100
+		sof_timeout++;
+#endif /* OnlyPowerUp */
 	if (i == 1000) {
 		if (AlarmValue)
 			AlarmValue--;
@@ -261,6 +268,12 @@ void SysTick_Handler(void)
 		i++;
 	}
 }
+
+#ifdef OnlyPowerUp
+void SOF_Callback(void) {
+	sof_timeout = 0;
+}
+#endif /* OnlyPowerUp */
 
 void Wakeup(void)
 {
@@ -415,6 +428,11 @@ int8_t reset_handler(uint8_t *buf)
 /* is received ir-code in one of the wakeup-slots? wakeup if true */
 void check_wakeups(IRMP_DATA *ir)
 {
+#ifdef OnlyPowerUp
+	if (sof_timeout != 100) // There is bus activity -> No Wakeup
+		return;
+#endif /* OnlyPowerUp */
+
 	uint8_t i, idx;
 	uint8_t buf[SIZEOF_IR];
 	for (i=0; i < WAKE_SLOTS; i++) {

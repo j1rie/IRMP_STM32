@@ -46,6 +46,10 @@ ifdef SimpleCircuit
 DEFINES += -DSimpleCircuit
 endif
 
+ifdef OnlyPowerUp
+DEFINES += -DOnlyPowerUp -DSOF_CALLBACK
+endif
+
 ifeq ($(Platform), Blue)
 DEFINES += -DBlueLink
 endif
