@@ -10,11 +10,7 @@
  *  it under the terms of the GNU General Public License as published by
  *  the Free Software Foundation; either version 2 of the License, or
  *  (at your option) any later version.
- *
- *
- * If the device is unavailable because of wakeup triggered (by alarm timer or wakeup button on remote was pressed), it is  
- * not possible to send configuration data to it or receive IR data from it. This is a feature ;-) .
- * If you want to set already existing wakeup codes for other functions too, you need to press the button long enough */
+ */
 
 #include <fx.h>
 
@@ -381,9 +377,9 @@ private:
 	hid_device *connected_device;
 	size_t getDataFromTextField(FXTextField *tf, char *buf, size_t len);
 	unsigned char buf[17];
-	uint8_t ReadIRcontActive = 0;
-	uint8_t ReadIRActive = 0;
-	uint8_t BackColor = 0;
+	uint8_t ReadIRcontActive;
+	uint8_t ReadIRActive;
+	uint8_t BackColor;
 	int wakeupslots;
 	int macrodepth;
 	int macroslots;
@@ -391,9 +387,9 @@ private:
 	FXColor storedShadowColor;
 	FXColor storedBaseColor;
 	FXColor storedBackColor;
-	int RepeatCounter = 0;
+	int RepeatCounter;
 	FXString map[200];
-	int mapbeg[200];
+	int mapbeg[100];
 	int active_lines;
 
 protected:
@@ -727,6 +723,17 @@ MainWindow::MainWindow(FXApp *app)
 	storedBaseColor = read_cont_button->getBaseColor();
 	storedBackColor = read_cont_button->getBackColor();
 
+	// initialize
+	ReadIRcontActive = 0;
+	ReadIRActive = 0;
+	BackColor = 0;
+	RepeatCounter = 0;
+	active_lines = 0;
+	wakeupslots = 0;
+	macrodepth = 0;
+	macroslots = 0;
+	protocols = "";
+
 }
 
 MainWindow::~MainWindow()
@@ -1032,6 +1039,13 @@ MainWindow::Read()
 	
 	if (res < 0) {
 		FXMessageBox::error(this, MBOX_OK, "Error Reading", "Could not read from device. Error reported was: %ls", hid_error(connected_device));
+#ifndef _WIN32
+		onDisconnect(NULL, 0, NULL); // prevent endless loop in linux
+		onRescan(NULL, 0, NULL);
+		onConnect(NULL, 0, NULL);
+		if(ReadIRcontActive)
+			onReadIRcont(NULL, 0, NULL);
+#endif
 		input_text->appendText("read error\n");
 		input_text->setBottomLine(INT_MAX);
 		return -1;
@@ -1114,22 +1128,22 @@ MainWindow::onReadIR(FXObject *sender, FXSelector sel, void *ptr)
 		t += address1_text->getText();
 		t += command1_text->getText();
 		t += "00";
-		s = "translated: ";
+		s = "translated:";
 		map_text21->killHighlight();
 		map_text->killHighlight();
 		map_text->setText("");
 		for(int i = 0; i < active_lines; i++) {
 			if(map[i*2] == t) {
-				s += map[i*2+1];
 				s += " ";
+				s += map[i*2+1];
 				map_text->setText(map[i*2+1]);
 				map_text->setHighlight(0, map_text->getLength());
 				k++;
-				map_text21->setHighlight(mapbeg[i], 12);
+				map_text21->setHighlight(mapbeg[i], mapbeg[i+1] - mapbeg[i] - 1);
 			}
 		}
 		if(k > 1)
-			s += "WARNING: multiple entries!";
+			s += ", WARNING: multiple entries!";
 		s += "\n";
 		input_text->appendText(s);
 		input_text->setBottomLine(INT_MAX);		
@@ -1217,6 +1231,10 @@ MainWindow::Write()
 		FXMessageBox::error(this, MBOX_OK, "Error Writing", "Could not write to device. Error reported was: %ls", hid_error(connected_device));
 		input_text->appendText("write error\n");
 		input_text->setBottomLine(INT_MAX);
+#ifndef _WIN32
+		if(ReadIRcontActive) // prevent endless loop in linux
+			onReadIRcont(NULL, 0, NULL);
+#endif
 		return -1;
 	} else {
 		s.format("Sent %d bytes:\n", res);
@@ -1618,17 +1636,22 @@ long
 MainWindow::onAset(FXObject *sender, FXSelector sel, void *ptr)
 {
 	unsigned int setalarm = 0;
+	FXString u = "";
 #if (FOX_MINOR >= 7)
 	setalarm += 60 * 60 * 24 * days_text->getText().toInt();
 	setalarm += 60 * 60 * hours_text->getText().toInt();
 	setalarm += 60 * minutes_text->getText().toInt();
 	setalarm += seconds_text->getText().toInt();
 #else
-	setalarm += 60 * 60 * 24 * FXIntVal(days_text->getText(), 10); // TODO protect against overflow!
+	setalarm += 60 * 60 * 24 * FXIntVal(days_text->getText(), 10);
 	setalarm += 60 * 60 * FXIntVal(hours_text->getText(), 10);
 	setalarm += 60 * FXIntVal(minutes_text->getText(), 10);
 	setalarm += FXIntVal(seconds_text->getText(), 10);
 #endif
+	if(setalarm < 2) {
+		setalarm = 2;
+		u = "set alarm to 2 in order to prevent device or program hangup\n";
+	 }
 
 	FXString s;
 	FXString t;
@@ -1657,6 +1680,9 @@ MainWindow::onAset(FXObject *sender, FXSelector sel, void *ptr)
 	output_text->setText(s);
 
 	Write_and_Check();
+
+	input_text->appendText(u);
+	input_text->setBottomLine(INT_MAX);
 	
 	return 1;
 }
@@ -1758,6 +1784,7 @@ MainWindow::onOpen(FXObject *sender, FXSelector sel, void *ptr)
 	FXFileDialog open(this,"Open a map file");
 	open.setPatternList(patterns);
 	open.setCurrentPattern(1);
+	open.showImages(0);
 	if(open.execute()){
 		map_text21->setText(NULL,0);
 		FXString file=open.getFilename();
@@ -1823,6 +1850,7 @@ MainWindow::onSave(FXObject *sender, FXSelector sel, void *ptr){
 	FXString file;
 	save.setPatternList(patterns);
 	save.setCurrentPattern(1);
+	save.showImages(0);
 	if(save.execute()){
 		file=save.getFilename();
 		//file += (patterns[save.getCurrentPattern()] == "map Files (*.map)") ? ".map" : ""; // TODO?
@@ -1920,7 +1948,7 @@ MainWindow::onAppend(FXObject *sender, FXSelector sel, void *ptr){
 
 long
 MainWindow::onApply(FXObject *sender, FXSelector sel, void *ptr){
-	// fill map[]
+	// fill map[] and mapbeg[]
 	const char *delim = " \t\r\n"; // Space, Tab, CR and LF
 	FXString data = map_text21->getText();
 	const FXchar *d = data.text();
@@ -1929,19 +1957,17 @@ MainWindow::onApply(FXObject *sender, FXSelector sel, void *ptr){
 	char *str = (char*) malloc(sz+1);
 	strcpy(str, d);
 	char *token = strtok(str, delim);
+	memset(mapbeg, 0, sizeof(mapbeg));
+	int count = 1;
 	while (token) {
 		map[i++] = token;
+		count += map[i-1].length() + 1;
+		if(!(i%2))
+			mapbeg[(i+1)/2] = count;
 		token = strtok(NULL, delim);
 	}
 	free(str);
 	active_lines = i / 2;
-
-	// fill mapbeg[]
-	int beg;
-	for(int i = 0; i < active_lines; i++) {
-		map_text21->findText(map[2*i], &beg);
-		mapbeg[i] = beg;
-	}
 
 	FXString u;
 	FXString v;
@@ -2063,9 +2089,3 @@ int main(int argc, char **argv)
 	app.run();
 	return 0;
 }
-
-/* TODO
- * set alarm 0 crashes
- * Windows: remove the need for libpng1x.dll and zlib1.dll!
- * This was introduced by usage of FXFileDialog. We don't need to see icons during file open/save anyway.
- */

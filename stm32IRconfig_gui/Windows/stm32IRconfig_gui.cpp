@@ -10,11 +10,7 @@
  *  it under the terms of the GNU General Public License as published by
  *  the Free Software Foundation; either version 2 of the License, or
  *  (at your option) any later version.
- *
- *
- * If the device is unavailable because of wakeup triggered (by alarm timer or wakeup button on remote was pressed), it is  
- * not possible to send configuration data to it or receive IR data from it. This is a feature ;-) .
- * If you want to set already existing wakeup codes for other functions too, you need to press the button long enough */
+ */
 
 #include <fx.h>
 
@@ -381,9 +377,9 @@ private:
 	hid_device *connected_device;
 	size_t getDataFromTextField(FXTextField *tf, char *buf, size_t len);
 	unsigned char buf[17];
-	uint8_t ReadIRcontActive = 0;
-	uint8_t ReadIRActive = 0;
-	uint8_t BackColor = 0;
+	uint8_t ReadIRcontActive;
+	uint8_t ReadIRActive;
+	uint8_t BackColor;
 	int wakeupslots;
 	int macrodepth;
 	int macroslots;
@@ -391,9 +387,9 @@ private:
 	FXColor storedShadowColor;
 	FXColor storedBaseColor;
 	FXColor storedBackColor;
-	int RepeatCounter = 0;
+	int RepeatCounter;
 	FXString map[200];
-	int mapbeg[200];
+	int mapbeg[100];
 	int active_lines;
 
 protected:
@@ -727,6 +723,17 @@ MainWindow::MainWindow(FXApp *app)
 	storedBaseColor = read_cont_button->getBaseColor();
 	storedBackColor = read_cont_button->getBackColor();
 
+	// initialize
+	ReadIRcontActive = 0;
+	ReadIRActive = 0;
+	BackColor = 0;
+	RepeatCounter = 0;
+	active_lines = 0;
+	wakeupslots = 0;
+	macrodepth = 0;
+	macroslots = 0;
+	protocols = "";
+
 }
 
 MainWindow::~MainWindow()
@@ -1032,6 +1039,13 @@ MainWindow::Read()
 	
 	if (res < 0) {
 		FXMessageBox::error(this, MBOX_OK, "Error Reading", "Could not read from device. Error reported was: %ls", hid_error(connected_device));
+#ifndef _WIN32
+		onDisconnect(NULL, 0, NULL); // prevent endless loop in linux
+		onRescan(NULL, 0, NULL);
+		onConnect(NULL, 0, NULL);
+		if(ReadIRcontActive)
+			onReadIRcont(NULL, 0, NULL);
+#endif
 		input_text->appendText("read error\n");
 		input_text->setBottomLine(INT_MAX);
 		return -1;
@@ -1217,6 +1231,10 @@ MainWindow::Write()
 		FXMessageBox::error(this, MBOX_OK, "Error Writing", "Could not write to device. Error reported was: %ls", hid_error(connected_device));
 		input_text->appendText("write error\n");
 		input_text->setBottomLine(INT_MAX);
+#ifndef _WIN32
+		if(ReadIRcontActive) // prevent endless loop in linux
+			onReadIRcont(NULL, 0, NULL);
+#endif
 		return -1;
 	} else {
 		s.format("Sent %d bytes:\n", res);
@@ -1618,6 +1636,7 @@ long
 MainWindow::onAset(FXObject *sender, FXSelector sel, void *ptr)
 {
 	unsigned int setalarm = 0;
+	FXString u = "";
 #if (FOX_MINOR >= 7)
 	setalarm += 60 * 60 * 24 * days_text->getText().toInt();
 	setalarm += 60 * 60 * hours_text->getText().toInt();
@@ -1631,11 +1650,8 @@ MainWindow::onAset(FXObject *sender, FXSelector sel, void *ptr)
 #endif
 	if(setalarm < 2) {
 		setalarm = 2;
-		FXString u;
 		u = "set alarm to 2 in order to prevent device or program hangup\n";
-		input_text->appendText(u);
-		input_text->setBottomLine(INT_MAX);
-	}
+	 }
 
 	FXString s;
 	FXString t;
@@ -1664,6 +1680,9 @@ MainWindow::onAset(FXObject *sender, FXSelector sel, void *ptr)
 	output_text->setText(s);
 
 	Write_and_Check();
+
+	input_text->appendText(u);
+	input_text->setBottomLine(INT_MAX);
 	
 	return 1;
 }
@@ -1929,7 +1948,7 @@ MainWindow::onAppend(FXObject *sender, FXSelector sel, void *ptr){
 
 long
 MainWindow::onApply(FXObject *sender, FXSelector sel, void *ptr){
-	// fill map[]
+	// fill map[] and mapbeg[]
 	const char *delim = " \t\r\n"; // Space, Tab, CR and LF
 	FXString data = map_text21->getText();
 	const FXchar *d = data.text();
@@ -1950,7 +1969,6 @@ MainWindow::onApply(FXObject *sender, FXSelector sel, void *ptr){
 	free(str);
 	active_lines = i / 2;
 
-	// fill mapbeg[]
 	FXString u;
 	FXString v;
 	u = "map mapbeg: \n";
