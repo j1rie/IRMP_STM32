@@ -257,7 +257,8 @@ void SysTick_Handler(void)
 	systicks2++;
 #endif /* ST_Link */
 #ifdef OnlyPowerUp
-	if (sof_timeout != 100) // Only count up to 100
+	/* Only count up to 100 */
+	if (sof_timeout != 100)
 		sof_timeout++;
 #endif /* OnlyPowerUp */
 	if (i == 1000) {
@@ -429,7 +430,8 @@ int8_t reset_handler(uint8_t *buf)
 void check_wakeups(IRMP_DATA *ir)
 {
 #ifdef OnlyPowerUp
-	if (sof_timeout != 100) // There is bus activity -> No Wakeup
+	/* There is bus activity -> No Wakeup */
+	if (sof_timeout != 100)
 		return;
 #endif /* OnlyPowerUp */
 
