@@ -22,5 +22,5 @@ Manuel Reimer <manuel.reimer@gmx.de>
  for making the maple bootloader compile with gcc 4.9 and -Os
  for making the IRMP_STM32 firmware compatible with gcc 4.9 and -Os
  for implementing SimpleCircuit mode to drive powerbutton directly
- for implementing OnlyPowerUp mode to only operate powerbutton if powered down
+ for fixing wakeup to only operate when wakeup is needed
  for Make.config.template/Make.config support

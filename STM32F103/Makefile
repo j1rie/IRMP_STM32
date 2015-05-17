@@ -17,7 +17,7 @@ OBJCP = $(CROSS_COMPILE)objcopy
 ARCH = -mcpu=cortex-m3 -mthumb
 COMMON = -g -Os -flto
 INCLUDES = -Icmsis -Icmsis_boot -Istm_lib/inc -Iusb_hid/inc -Iirmp -Isrc
-DEFINES = -D$(PLATFORM) -DSTM32F10X_MD -DUSE_STDPERIPH_DRIVER
+DEFINES = -D$(PLATFORM) -DSTM32F10X_MD -DUSE_STDPERIPH_DRIVER -DSOF_CALLBACK
 
 OBJS = src/irmpmain.o src/st_link_leds.o src/usb_hid.o src/main.o\
        irmp/irmp.o irmp/irsnd.o\
@@ -44,10 +44,6 @@ endif
 
 ifdef SimpleCircuit
 DEFINES += -DSimpleCircuit
-endif
-
-ifdef OnlyPowerUp
-DEFINES += -DOnlyPowerUp -DSOF_CALLBACK
 endif
 
 ifeq ($(Platform), Blue)
