@@ -257,7 +257,6 @@ void SysTick_Handler(void)
 #endif /* ST_Link */
 	if (sof_timeout != SOF_TIMEOUT)
 		sof_timeout++;
-
 	if (i == 1000) {
 		if (AlarmValue)
 			AlarmValue--;
@@ -272,6 +271,11 @@ void SysTick_Handler(void)
 void SOF_Callback(void)
 {
 	sof_timeout = 0;
+}
+
+uint8_t host_running(void)
+{
+	return (sof_timeout != SOF_TIMEOUT);
 }
 
 void Wakeup(void)
@@ -427,8 +431,7 @@ int8_t reset_handler(uint8_t *buf)
 /* is received ir-code in one of the wakeup-slots? wakeup if true */
 void check_wakeups(IRMP_DATA *ir)
 {
-	/* There is bus activity -> No Wakeup */
-	if (sof_timeout != 100)
+	if(host_running())
 		return;
 
 	uint8_t i, idx;
