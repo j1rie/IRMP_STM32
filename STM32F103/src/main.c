@@ -433,7 +433,6 @@ void check_wakeups(IRMP_DATA *ir)
 {
 	if(host_running())
 		return;
-
 	uint8_t i, idx;
 	uint8_t buf[SIZEOF_IR];
 	for (i=0; i < WAKE_SLOTS; i++) {
@@ -509,7 +508,7 @@ int main(void)
 	Systick_Init();
 
 	while (1) {
-		if (!AlarmValue)
+		if (!AlarmValue && !host_running())
 			Wakeup();
 
 		wakeup_reset();
