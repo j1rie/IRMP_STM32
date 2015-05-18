@@ -18,7 +18,8 @@
 #include "config.h" /* CooCox workaround */
 
 #define BYTES_PER_QUERY	(HID_IN_BUFFER_SIZE - 4)
-#define SOF_TIMEOUT 100
+/* the standard USB timeout for suspend is no SOF within 3ms */
+#define SOF_TIMEOUT 3
 
 enum __attribute__ ((__packed__)) access {
 	ACC_GET,
