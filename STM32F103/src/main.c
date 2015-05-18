@@ -18,6 +18,7 @@
 #include "config.h" /* CooCox workaround */
 
 #define BYTES_PER_QUERY	(HID_IN_BUFFER_SIZE - 4)
+#define SOF_TIMEOUT 100
 
 enum __attribute__ ((__packed__)) access {
 	ACC_GET,
@@ -254,9 +255,7 @@ void SysTick_Handler(void)
 #ifdef ST_Link
 	systicks2++;
 #endif /* ST_Link */
-
-	/* Only count up to 100 */
-	if (sof_timeout != 100)
+	if (sof_timeout != SOF_TIMEOUT)
 		sof_timeout++;
 
 	if (i == 1000) {
@@ -268,8 +267,10 @@ void SysTick_Handler(void)
 	}
 }
 
-void SOF_Callback(void) {
-	/* Reset the counter with every "StartOfFrame" event */
+/* Reset the counter with every "StartOfFrame" event,
+ * sent by active host at fullspeed every 1ms */
+void SOF_Callback(void)
+{
 	sof_timeout = 0;
 }
 
