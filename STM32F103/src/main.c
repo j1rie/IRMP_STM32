@@ -280,10 +280,11 @@ uint8_t host_running(void)
 
 void Wakeup(void)
 {
-	AlarmValue = 0xFFFFFFFF;
+	if(!AlarmValue)
+		AlarmValue = 0xFFFFFFFF;
 	/* USB wakeup */
 	Resume(RESUME_START);
-	/* motherboard switch: WAKEUP_PIN short high */
+	/* motherboard switch: WAKEUP_PIN short high (resp. low in case of SimpleCircuit) */
 #ifdef SimpleCircuit
 	GPIO_WriteBit(OUT_PORT, WAKEUP_PIN, Bit_RESET);
 #else
