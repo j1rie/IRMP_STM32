@@ -18,6 +18,7 @@
           <Define name="USE_STDPERIPH_DRIVER"/>
           <Define name="__ASSEMBLY__"/>
           <Define name="Bootloader"/>
+          <Define name="SOF_CALLBACK"/>
         </DefinedSymbols>
       </Compile>
       <Link useDefault="0">
