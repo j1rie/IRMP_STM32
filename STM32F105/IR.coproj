@@ -16,6 +16,7 @@
           <Define name="STM32F10X_CL"/>
           <Define name="USE_STDPERIPH_DRIVER"/>
           <Define name="__ASSEMBLY__"/>
+          <Define name="SOF_CALLBACK"/>
         </DefinedSymbols>
       </Compile>
       <Link useDefault="0">
@@ -134,8 +135,8 @@
     <File name="usb_hid/inc/usb_bsp.h" path="usb_hid/inc/usb_bsp.h" type="1"/>
     <File name="irmp/irmp.c" path="irmp/irmp.c" type="1"/>
     <File name="usb_hid/src/usb_dcd.c" path="usb_hid/src/usb_dcd.c" type="1"/>
-    <File name="usb_hid/inc/usbd_ioreq.h" path="usb_hid/inc/usbd_ioreq.h" type="1"/>
     <File name="stm_lib/src" path="" type="2"/>
+    <File name="usb_hid/inc/usbd_ioreq.h" path="usb_hid/inc/usbd_ioreq.h" type="1"/>
     <File name="usb_hid/inc/usbd_hid_core.h" path="usb_hid/inc/usbd_hid_core.h" type="1"/>
     <File name="irmp" path="" type="2"/>
     <File name="cmsis" path="" type="2"/>

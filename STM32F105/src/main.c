@@ -17,6 +17,8 @@
 #include "config.h" /* CooCox workaround */
 
 #define BYTES_PER_QUERY	(HID_IN_BUFFER_SIZE - 4)
+/* the standard USB timeout for suspend is no SOF within 3ms */
+#define SOF_TIMEOUT 3
 
 enum __attribute__ ((__packed__)) access {
 	ACC_GET,
@@ -158,6 +160,7 @@ IRMP_RADIO1_PROTOCOL,
 extern USB_OTG_CORE_HANDLE USB_OTG_dev;
 uint32_t AlarmValue = 0xFFFFFFFF;
 volatile unsigned int systicks = 0;
+volatile unsigned int sof_timeout = 0;
 
 void delay_ms(unsigned int msec)
 {
@@ -169,11 +172,20 @@ void LED_Switch_init(void)
 {
 	GPIO_InitTypeDef GPIO_InitStructure;
 	RCC_APB2PeriphClockCmd(RCC_APB2Periph_GPIOB, ENABLE);
+	/* start with wakeup switch off */
+#ifdef SimpleCircuit
+	GPIO_WriteBit(OUT_PORT, WAKEUP_PIN, Bit_SET);
+#else
+	GPIO_WriteBit(OUT_PORT, WAKEUP_PIN, Bit_RESET);
+#endif /* SimpleCircuit */
 	GPIO_InitStructure.GPIO_Pin = LED_PIN;
 	GPIO_InitStructure.GPIO_Mode = GPIO_Mode_Out_PP;
 	GPIO_InitStructure.GPIO_Speed = GPIO_Speed_2MHz;
 	GPIO_Init(OUT_PORT, &GPIO_InitStructure);
 	GPIO_InitStructure.GPIO_Pin = WAKEUP_PIN;
+#ifdef SimpleCircuit
+	GPIO_InitStructure.GPIO_Mode = GPIO_Mode_Out_OD;
+#endif /* SimpleCircuit */
 	GPIO_Init(OUT_PORT, &GPIO_InitStructure);
 	GPIO_InitStructure.GPIO_Pin = WAKEUP_RESET_PIN;
 	GPIO_InitStructure.GPIO_Mode = GPIO_Mode_IPU;
@@ -223,6 +235,8 @@ void SysTick_Handler(void)
 {
 	static uint_fast16_t i = 0;
 	systicks++;
+	if (sof_timeout != SOF_TIMEOUT)
+		sof_timeout++;
 	if (i == 1000) {
 		if (AlarmValue)
 			AlarmValue--;
@@ -232,15 +246,34 @@ void SysTick_Handler(void)
 	}
 }
 
+/* Reset the counter with every "StartOfFrame" event,
+ * sent by active host at fullspeed every 1ms */
+void SOF_Callback(void)
+{
+	sof_timeout = 0;
+}
+
+uint8_t host_running(void)
+{
+	return (sof_timeout != SOF_TIMEOUT);
+}
+
 void Wakeup(void)
 {
-	AlarmValue = 0xFFFFFFFF;
 	/* USB wakeup */
 	USB_OTG_ActiveRemoteWakeup(&USB_OTG_dev);
 	/* motherboard switch: WAKEUP_PIN short high */
-	GPIO_WriteBit(OUT_PORT, WAKEUP_PIN, Bit_SET);
-	delay_ms(500);
+#ifdef SimpleCircuit
 	GPIO_WriteBit(OUT_PORT, WAKEUP_PIN, Bit_RESET);
+#else
+	GPIO_WriteBit(OUT_PORT, WAKEUP_PIN, Bit_SET);
+#endif /* SimpleCircuit */
+	delay_ms(500);
+#ifdef SimpleCircuit
+	GPIO_WriteBit(OUT_PORT, WAKEUP_PIN, Bit_SET);
+#else
+	GPIO_WriteBit(OUT_PORT, WAKEUP_PIN, Bit_RESET);
+#endif /* SimpleCircuit */
 }
 
 void store_new_wakeup(void)
@@ -376,6 +409,8 @@ int8_t reset_handler(uint8_t *buf)
 /* is received ir-code in one of the wakeup-slots? wakeup if true */
 void check_wakeups(IRMP_DATA *ir)
 {
+	if(host_running())
+		return;
 	uint8_t i, idx;
 	uint8_t buf[SIZEOF_IR];
 	for (i=0; i < WAKE_SLOTS; i++) {
@@ -390,7 +425,7 @@ void transmit_macro(uint8_t macro)
 {
 	uint8_t i, idx;
 	uint8_t buf[SIZEOF_IR];
-	uint8_t zeros[SIZEOF_IR] = {0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF}; //{0};
+	uint8_t zeros[SIZEOF_IR] = {0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF};
 	/* we start from 1, since we don't want to tx the trigger code of the macro*/
 	for (i=1; i < MACRO_DEPTH + 1; i++) {
 		idx = (MACRO_DEPTH + 1) * SIZEOF_IR/2 * macro + SIZEOF_IR/2 * i;
@@ -435,12 +470,15 @@ int main(void)
 	Systick_Init();
 
 	while (1) {
-		if (!AlarmValue)
-			Wakeup();
+		if (!AlarmValue) {
+			AlarmValue = 0xFFFFFFFF;
+			if(!host_running())
+				Wakeup();
+		}
 
 		wakeup_reset();
 
-		/* test if USB is connected to PC and command is received */
+		/* test if USB is connected to PC and configuration command is received */
 		if (USB_HID_GetStatus() == USB_HID_CONNECTED && USB_HID_ReceiveData(buf) == RX_READY && buf[0] == STAT_CMD) {
 
 			switch ((enum access) buf[1]) {

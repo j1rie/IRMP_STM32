@@ -9,13 +9,13 @@ PLATFORM ?= STM32F105RC
 CROSS_COMPILE ?= arm-none-eabi-
 AS = $(CROSS_COMPILE)as
 CC = $(CROSS_COMPILE)gcc
-LD = $(CROSS_COMPILE)gcc
+LD = $(CC)
 OBJCP = $(CROSS_COMPILE)objcopy
 
 ARCH = -mcpu=cortex-m3 -mthumb
 COMMON = -g -Os -flto
 INCLUDES = -Icmsis -Icmsis_boot -Istm_lib/inc -Iusb_hid/inc -Iirmp -Isrc
-DEFINES = -D$(PLATFORM) -DSTM32F10X_CL -DUSE_STDPERIPH_DRIVER
+DEFINES = -D$(PLATFORM) -DSTM32F10X_CL -DUSE_STDPERIPH_DRIVER -DSOF_CALLBACK
 
 DONT_CARE := $(shell ./scripts/prepare.sh)
 
@@ -25,6 +25,10 @@ OBJS = $(CRT0) $(SRCS:.c=.o)
 
 CFLAGS = -Wall -ffunction-sections -fno-builtin $(ARCH) $(COMMON) $(INCLUDES) $(DEFINES)
 LDFLAGS = -nostartfiles -Wl,-Map=$(TARGET).map,--gc-sections,--entry=main,-Tscripts/arm-gcc-link.ld $(ARCH) $(COMMON)
+
+ifdef SimpleCircuit
+DEFINES += -DSimpleCircuit
+endif
 
 $(TARGET).bin: $(TARGET).elf
 	$(OBJCP) -O binary $< $@
