@@ -1,5 +1,5 @@
 /*
- *  Copyright (C) 2014 Joerg Riechardt
+ *  Copyright (C) 2014-2015 Joerg Riechardt
  *
  *  based on work by Uwe Becker - http://mikrocontroller.bplaced.net
  *
@@ -97,7 +97,7 @@ diff -Nrup a/inc/usbd_usr.h b/inc/usbd_usr.h
  /** @addtogroup USBD_USER
 diff -Nrup a/src/usb_bsp.c b/src/usb_bsp.c
 --- a/src/usb_bsp.c	2012-03-22 15:44:38.000000000 +0100
-+++ b/src/usb_bsp.c	2014-11-21 19:18:26.969001600 +0100
++++ b/src/usb_bsp.c	2014-11-21 19:18:26.000000000 +0100
 @@ -30,6 +30,9 @@
  #include "usb_bsp.h"
  #include "usbd_conf.h"
@@ -208,7 +208,7 @@ diff -Nrup a/src/usb_dcd_int.c b/src/usb_dcd_int.c
    }
 diff -Nrup a/src/usbd_desc.c b/src/usbd_desc.c
 --- a/src/usbd_desc.c	2012-03-22 15:44:38.000000000 +0100
-+++ b/src/usbd_desc.c	2014-11-24 23:58:05.851392500 +0100
++++ b/src/usbd_desc.c	2014-11-24 23:58:05.000000000 +0100
 @@ -63,7 +63,7 @@
  #define USBD_PRODUCT_HS_STRING        "Joystick in HS mode"
  #define USBD_SERIALNUMBER_HS_STRING   "00000000011B"
@@ -260,7 +260,7 @@ diff -Nrup a/src/usbd_desc.c b/src/usbd_desc.c
    }
 diff -Nrup a/src/usbd_hid_core.c b/src/usbd_hid_core.c
 --- a/src/usbd_hid_core.c	2012-03-22 15:44:22.000000000 +0100
-+++ b/src/usbd_hid_core.c	2014-11-28 08:10:13.000000000 +0100
++++ b/src/usbd_hid_core.c	2015-05-19 16:30:07.000000000 +0200
 @@ -50,6 +50,7 @@
  #include "usbd_hid_core.h"
  #include "usbd_desc.h"
@@ -269,11 +269,12 @@ diff -Nrup a/src/usbd_hid_core.c b/src/usbd_hid_core.c
  
  
  /** @addtogroup STM32_USB_OTG_DEVICE_LIBRARY
-@@ -106,6 +107,11 @@ static uint8_t  USBD_HID_Setup (void  *p
+@@ -106,6 +107,12 @@ static uint8_t  USBD_HID_Setup (void  *p
  static uint8_t  *USBD_HID_GetCfgDesc (uint8_t speed, uint16_t *length);
  
  static uint8_t  USBD_HID_DataIn (void  *pdev, uint8_t epnum);
 +static uint8_t  USBD_HID_DataOut (void  *pdev, uint8_t epnum);
++static uint8_t  SOF_Callback (void  *pdev);
 +
 +static uint16_t USB_HID_RecData_Len;
 +static uint8_t USB_HID_RecData_Ready;
@@ -281,16 +282,18 @@ diff -Nrup a/src/usbd_hid_core.c b/src/usbd_hid_core.c
  /**
    * @}
    */ 
-@@ -122,7 +128,7 @@ USBD_Class_cb_TypeDef  USBD_HID_cb =
+@@ -122,8 +129,8 @@ USBD_Class_cb_TypeDef  USBD_HID_cb =
    NULL, /*EP0_TxSent*/  
    NULL, /*EP0_RxReady*/
    USBD_HID_DataIn, /*DataIn*/
 -  NULL, /*DataOut*/
+-  NULL, /*SOF */
 +  USBD_HID_DataOut, /*DataOut*/
-   NULL, /*SOF */
++  SOF_Callback, /*SOF */
    NULL,
    NULL,      
-@@ -179,10 +185,10 @@ __ALIGN_BEGIN static uint8_t USBD_HID_Cf
+   USBD_HID_GetCfgDesc,
+@@ -179,10 +186,10 @@ __ALIGN_BEGIN static uint8_t USBD_HID_Cf
    USB_INTERFACE_DESCRIPTOR_TYPE,/*bDescriptorType: Interface descriptor type*/
    0x00,         /*bInterfaceNumber: Number of Interface*/
    0x00,         /*bAlternateSetting: Alternate setting*/
@@ -304,7 +307,7 @@ diff -Nrup a/src/usbd_hid_core.c b/src/usbd_hid_core.c
    0,            /*iInterface: Index of string descriptor*/
    /******************** Descriptor of Joystick Mouse HID ********************/
    /* 18 */
-@@ -202,10 +208,19 @@ __ALIGN_BEGIN static uint8_t USBD_HID_Cf
+@@ -202,10 +209,19 @@ __ALIGN_BEGIN static uint8_t USBD_HID_Cf
    
    HID_IN_EP,     /*bEndpointAddress: Endpoint Address (IN)*/
    0x03,          /*bmAttributes: Interrupt endpoint*/
@@ -326,7 +329,7 @@ diff -Nrup a/src/usbd_hid_core.c b/src/usbd_hid_core.c
  } ;
  
  #ifdef USB_OTG_HS_INTERNAL_DMA_ENABLED
-@@ -236,6 +251,7 @@ __ALIGN_BEGIN static uint8_t USBD_HID_De
+@@ -236,6 +252,7 @@ __ALIGN_BEGIN static uint8_t USBD_HID_De
  #endif /* USB_OTG_HS_INTERNAL_DMA_ENABLED */  
  __ALIGN_BEGIN static uint8_t HID_MOUSE_ReportDesc[HID_MOUSE_REPORT_DESC_SIZE] __ALIGN_END =
  {
@@ -334,7 +337,7 @@ diff -Nrup a/src/usbd_hid_core.c b/src/usbd_hid_core.c
    0x05,   0x01,
    0x09,   0x02,
    0xA1,   0x01,
-@@ -282,6 +298,36 @@ __ALIGN_BEGIN static uint8_t HID_MOUSE_R
+@@ -282,6 +299,36 @@ __ALIGN_BEGIN static uint8_t HID_MOUSE_R
    0x01,   0xb1,
    
    0x01,   0xc0
@@ -371,7 +374,7 @@ diff -Nrup a/src/usbd_hid_core.c b/src/usbd_hid_core.c
  }; 
  
  /**
-@@ -302,18 +348,27 @@ __ALIGN_BEGIN static uint8_t HID_MOUSE_R
+@@ -302,18 +349,27 @@ __ALIGN_BEGIN static uint8_t HID_MOUSE_R
  static uint8_t  USBD_HID_Init (void  *pdev, 
                                 uint8_t cfgidx)
  {
@@ -401,7 +404,7 @@ diff -Nrup a/src/usbd_hid_core.c b/src/usbd_hid_core.c
    
    return USBD_OK;
  }
-@@ -437,9 +492,23 @@ uint8_t USBD_HID_SendReport     (USB_OTG
+@@ -437,9 +493,23 @@ uint8_t USBD_HID_SendReport     (USB_OTG
    {
      DCD_EP_Tx (pdev, HID_IN_EP, report, len);
    }
@@ -425,7 +428,7 @@ diff -Nrup a/src/usbd_hid_core.c b/src/usbd_hid_core.c
  /**
    * @brief  USBD_HID_GetCfgDesc 
    *         return configuration descriptor
-@@ -470,6 +539,24 @@ static uint8_t  USBD_HID_DataIn (void  *
+@@ -470,6 +540,34 @@ static uint8_t  USBD_HID_DataIn (void  *
    return USBD_OK;
  }
  
@@ -445,6 +448,16 @@ diff -Nrup a/src/usbd_hid_core.c b/src/usbd_hid_core.c
 +    }
 +  }
 +  return USBD_OK;
++}
++
++extern volatile unsigned int sof_timeout;
++
++/* Reset the counter with every "StartOfFrame" event,
++ * sent by active host at fullspeed every 1ms */
++static uint8_t  SOF_Callback (void  *pdev)
++{
++	sof_timeout = 0;
++	return USBD_OK;
 +}
 +
  /**

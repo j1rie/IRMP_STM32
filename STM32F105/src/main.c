@@ -246,13 +246,6 @@ void SysTick_Handler(void)
 	}
 }
 
-/* Reset the counter with every "StartOfFrame" event,
- * sent by active host at fullspeed every 1ms */
-void SOF_Callback(void)
-{
-	sof_timeout = 0;
-}
-
 uint8_t host_running(void)
 {
 	return (sof_timeout != SOF_TIMEOUT);
