@@ -17,11 +17,19 @@ COMMON = -g -Os -flto
 INCLUDES = -Icmsis -Icmsis_boot -Istm_lib/inc -Iusb_hid/inc -Iirmp -Isrc
 DEFINES = -D$(PLATFORM) -DSTM32F10X_CL -DUSE_STDPERIPH_DRIVER -DSOF_CALLBACK
 
-DONT_CARE := $(shell ./scripts/prepare.sh)
-
-CRT0 = cmsis_boot/startup/startup_stm32f10x_cl.o
-SRCS = $(shell find -type f -name "*.c")
-OBJS = $(CRT0) $(SRCS:.c=.o)
+OBJS = src/irmpmain.o src/usb_hid.o src/main.o\
+       irmp/irmp.o irmp/irsnd.o\
+       cmsis_boot/startup/startup_stm32f10x_cl.o cmsis_boot/system_stm32f10x.o\
+       stm_lib/src/misc.o\
+       stm_lib/src/stm32f10x_flash.o stm_lib/src/stm32f10x_gpio.o\
+       stm_lib/src/stm32f10x_rcc.o\
+       stm_lib/src/stm32f10x_tim.o stm_lib/src/stm32f10x_usart.o\
+       stm_lib/src/eeprom.o\
+       usb_hid/src/usb_bsp.o usb_hid/src/usb_core.o usb_hid/src/usb_dcd.o\
+       usb_hid/src/usb_dcd_int.o usb_hid/src/usbd_core.o\
+       usb_hid/src/usbd_desc.o\
+       usb_hid/src/usbd_hid_core.o usb_hid/src/usbd_ioreq.o\
+       usb_hid/src/usbd_req.o usb_hid/src/usbd_usr.o\
 
 CFLAGS = -Wall -ffunction-sections -fno-builtin $(ARCH) $(COMMON) $(INCLUDES) $(DEFINES)
 LDFLAGS = -nostartfiles -Wl,-Map=$(TARGET).map,--gc-sections,--entry=main,-Tscripts/arm-gcc-link.ld $(ARCH) $(COMMON)
@@ -33,15 +41,21 @@ endif
 $(TARGET).bin: $(TARGET).elf
 	$(OBJCP) -O binary $< $@
 
-$(TARGET).elf: $(OBJS)
-	$(LD) $(LDFLAGS) $^ -o $@
+$(TARGET).elf: prepare $(OBJS)
+	$(LD) $(LDFLAGS) $(OBJS) -o $@
 
-.PHONY: flash clean distclean
+.PHONY: prepare flash clean distclean
+prepare:
+	@./scripts/prepare.sh
+
 flash: $(TARGET).bin
 	stm32flash -v -w $(TARGET).bin /dev/ttyUSB0
 
-clean:
+clean-objects:
 	rm -f $(OBJS) $(TARGET).{bin,elf,map}
 
+clean: clean-objects
+	rm -rf cmsis cmsis_boot irmp stm_lib usb_hid ext_src/prepared
+
 distclean: clean
-	rm -rf ext
+	rm -rf ext_src
