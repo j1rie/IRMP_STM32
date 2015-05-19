@@ -1,8 +1,6 @@
 Thanks to:
 
 Ole Ernst <olebowle@gmx.com>
- for prepare.sh
- for Makefile
  for adapting coding style to kernel style
  for code cleanup
  for spotting a bug in Wakeup() after timer countdown
@@ -13,7 +11,6 @@ Ole Ernst <olebowle@gmx.com>
  for making startup compatibel with CooCox
  for introducing packed struct in IRMP_DATA,
   which makes use of memcpy and memcmp possible
- for much better macro implementation including new protocol
 
 Michael Kipp <myscha@web.de>
  for suggesting automatic sync of supported_protocols
