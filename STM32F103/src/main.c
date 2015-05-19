@@ -181,13 +181,13 @@ void LED_Switch_init(void)
 	RCC_APB2PeriphClockCmd(RCC_APB2Periph_GPIOA | RCC_APB2Periph_AFIO, ENABLE);
 	/* disable SWD, so pins are available */
 	GPIO_PinRemapConfig(GPIO_Remap_SWJ_Disable, ENABLE);
+#endif /* ST_Link */
 	/* start with wakeup switch off */
 #ifdef SimpleCircuit
 	GPIO_WriteBit(OUT_PORT, WAKEUP_PIN, Bit_SET);
 #else
 	GPIO_WriteBit(OUT_PORT, WAKEUP_PIN, Bit_RESET);
 #endif /* SimpleCircuit */
-#endif /* ST_Link */
 	GPIO_InitStructure.GPIO_Pin = LED_PIN;
 	GPIO_InitStructure.GPIO_Mode = GPIO_Mode_Out_PP;
 	GPIO_InitStructure.GPIO_Speed = GPIO_Speed_2MHz;
@@ -199,7 +199,6 @@ void LED_Switch_init(void)
 	GPIO_Init(OUT_PORT, &GPIO_InitStructure);
 	GPIO_InitStructure.GPIO_Pin = WAKEUP_RESET_PIN;
 	GPIO_InitStructure.GPIO_Mode = GPIO_Mode_IPU;
-
 	GPIO_Init(RESET_PORT, &GPIO_InitStructure);
 	/* start with LED on */
 	GPIO_WriteBit(OUT_PORT, LED_PIN, Bit_SET);
