@@ -15,7 +15,7 @@ OBJCP = $(CROSS_COMPILE)objcopy
 ARCH = -mcpu=cortex-m3 -mthumb
 COMMON = -g -Os -flto
 INCLUDES = -Icmsis -Icmsis_boot -Istm_lib/inc -Iusb_hid/inc -Iirmp -Isrc
-DEFINES = -D$(PLATFORM) -DSTM32F10X_CL -DUSE_STDPERIPH_DRIVER -DSOF_CALLBACK
+DEFINES = -D$(PLATFORM) -DSTM32F10X_CL -DUSE_STDPERIPH_DRIVER
 
 OBJS = src/irmpmain.o src/usb_hid.o src/main.o\
        irmp/irmp.o irmp/irsnd.o\

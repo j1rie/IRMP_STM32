@@ -208,7 +208,16 @@ diff -Nrup a/src/usb_dcd_int.c b/src/usb_dcd_int.c
    }
 diff -Nrup a/src/usbd_desc.c b/src/usbd_desc.c
 --- a/src/usbd_desc.c	2012-03-22 15:44:38.000000000 +0100
-+++ b/src/usbd_desc.c	2014-11-24 23:58:05.000000000 +0100
++++ b/src/usbd_desc.c	2015-05-19 21:28:44.022937300 +0200
+@@ -55,7 +55,7 @@
+   */ 
+ 
+ #define USBD_VID                     0x0483
+-#define USBD_PID                     0x5710
++#define USBD_PID                     0x5750
+ 
+ #define USBD_LANGID_STRING            0x409
+ #define USBD_MANUFACTURER_STRING      "STMicroelectronics"
 @@ -63,7 +63,7 @@
  #define USBD_PRODUCT_HS_STRING        "Joystick in HS mode"
  #define USBD_SERIALNUMBER_HS_STRING   "00000000011B"
@@ -260,7 +269,7 @@ diff -Nrup a/src/usbd_desc.c b/src/usbd_desc.c
    }
 diff -Nrup a/src/usbd_hid_core.c b/src/usbd_hid_core.c
 --- a/src/usbd_hid_core.c	2012-03-22 15:44:22.000000000 +0100
-+++ b/src/usbd_hid_core.c	2015-05-19 16:30:07.000000000 +0200
++++ b/src/usbd_hid_core.c	2015-05-19 21:48:54.614116500 +0200
 @@ -50,6 +50,7 @@
  #include "usbd_hid_core.h"
  #include "usbd_desc.h"
@@ -450,13 +459,13 @@ diff -Nrup a/src/usbd_hid_core.c b/src/usbd_hid_core.c
 +  return USBD_OK;
 +}
 +
-+extern volatile unsigned int sof_timeout;
++//extern volatile unsigned int sof_timeout;
 +
 +/* Reset the counter with every "StartOfFrame" event,
 + * sent by active host at fullspeed every 1ms */
 +static uint8_t  SOF_Callback (void  *pdev)
 +{
-+	sof_timeout = 0;
++	//sof_timeout = 0;
 +	return USBD_OK;
 +}
 +
