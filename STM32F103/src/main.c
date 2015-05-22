@@ -279,6 +279,9 @@ uint8_t host_running(void)
 
 void Wakeup(void)
 {
+	AlarmValue = 0xFFFFFFFF;
+	if(host_running())
+		return;
 	/* USB wakeup */
 	Resume(RESUME_START);
 	/* motherboard switch: WAKEUP_PIN short high (resp. low in case of SimpleCircuit) */
@@ -506,11 +509,8 @@ int main(void)
 	Systick_Init();
 
 	while (1) {
-		if (!AlarmValue) {
-			AlarmValue = 0xFFFFFFFF;
-			if(!host_running())
-				Wakeup();
-		}
+		if (!AlarmValue)
+			Wakeup();
 
 		wakeup_reset();
 
