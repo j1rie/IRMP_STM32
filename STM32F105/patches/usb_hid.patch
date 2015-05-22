@@ -459,13 +459,13 @@ diff -Nrup a/src/usbd_hid_core.c b/src/usbd_hid_core.c
 +  return USBD_OK;
 +}
 +
-+//extern volatile unsigned int sof_timeout;
++extern volatile unsigned int sof_timeout;
 +
 +/* Reset the counter with every "StartOfFrame" event,
 + * sent by active host at fullspeed every 1ms */
 +static uint8_t  SOF_Callback (void  *pdev)
 +{
-+	//sof_timeout = 0;
++	sof_timeout = 0;
 +	return USBD_OK;
 +}
 +

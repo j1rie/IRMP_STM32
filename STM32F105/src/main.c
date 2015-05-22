@@ -17,7 +17,7 @@
 #include "config.h" /* CooCox workaround */
 
 #define BYTES_PER_QUERY	(HID_IN_BUFFER_SIZE - 4)
-//#define SOF_TIMEOUT 100
+#define SOF_TIMEOUT 100
 
 enum __attribute__ ((__packed__)) access {
 	ACC_GET,
@@ -159,7 +159,7 @@ IRMP_RADIO1_PROTOCOL,
 extern USB_OTG_CORE_HANDLE USB_OTG_dev;
 uint32_t AlarmValue = 0xFFFFFFFF;
 volatile unsigned int systicks = 0;
-//volatile unsigned int sof_timeout = 0;
+volatile unsigned int sof_timeout = 0;
 
 void delay_ms(unsigned int msec)
 {
@@ -234,8 +234,8 @@ void SysTick_Handler(void)
 {
 	static uint_fast16_t i = 0;
 	systicks++;
-	//if (sof_timeout != SOF_TIMEOUT)
-		//sof_timeout++;
+	if (sof_timeout != SOF_TIMEOUT)
+		sof_timeout++;
 	if (i == 1000) {
 		if (AlarmValue)
 			AlarmValue--;
@@ -245,20 +245,16 @@ void SysTick_Handler(void)
 	}
 }
 
-/* Reset the counter with every "StartOfFrame" event,
- * sent by active host at fullspeed every 1ms */
-/*void SOF_Callback(void)
-{
-	sof_timeout = 0;
-}*/
-
-/*uint8_t host_running(void)
+uint8_t host_running(void)
 {
 	return (sof_timeout != SOF_TIMEOUT);
-}*/
+}
 
 void Wakeup(void)
 {
+	AlarmValue = 0xFFFFFFFF;
+	if(host_running())
+		return;
 	/* USB wakeup */
 	USB_OTG_ActiveRemoteWakeup(&USB_OTG_dev);
 	/* motherboard switch: WAKEUP_PIN short high (resp. low in case of SimpleCircuit) */
@@ -408,8 +404,8 @@ int8_t reset_handler(uint8_t *buf)
 /* is received ir-code in one of the wakeup-slots? wakeup if true */
 void check_wakeups(IRMP_DATA *ir)
 {
-	//if(host_running())
-		//return;
+	if(host_running())
+		return;
 	uint8_t i, idx;
 	uint8_t buf[SIZEOF_IR];
 	for (i=0; i < WAKE_SLOTS; i++) {
@@ -469,11 +465,8 @@ int main(void)
 	Systick_Init();
 
 	while (1) {
-		if (!AlarmValue) {
-			AlarmValue = 0xFFFFFFFF;
-			//if(!host_running())
-				Wakeup();
-		}
+		if (!AlarmValue)
+			Wakeup();
 
 		wakeup_reset();
 
