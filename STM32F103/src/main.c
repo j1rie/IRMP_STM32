@@ -569,5 +569,13 @@ int main(void)
 			memcpy(buf, &myIRData, sizeof(myIRData));
 			USB_HID_SendData(REPORT_ID_IR, buf, sizeof(myIRData));
 		}
+
+		/* debug */
+		/*if (sof_timeout > 2) {
+			memset(buf, 0, sizeof(buf));
+			buf[0] = 0x0f;
+			buf[1] = sof_timeout;
+			USB_HID_SendData(REPORT_ID_CONFIG, buf, sizeof(buf));
+		}*/
 	}
 }
