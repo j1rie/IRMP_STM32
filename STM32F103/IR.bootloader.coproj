@@ -19,6 +19,7 @@
           <Define name="__ASSEMBLY__"/>
           <Define name="Bootloader"/>
           <Define name="SOF_CALLBACK"/>
+          <Define name="SimpleCircuit"/>
         </DefinedSymbols>
       </Compile>
       <Link useDefault="0">

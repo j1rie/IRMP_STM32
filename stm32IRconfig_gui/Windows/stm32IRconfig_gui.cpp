@@ -391,6 +391,8 @@ private:
 	FXString map[200];
 	int mapbeg[100];
 	int active_lines;
+	int max;
+	int count;
 
 protected:
 	MainWindow() {};
@@ -517,7 +519,7 @@ MainWindow::MainWindow(FXApp *app)
 	disconnect_button->disable();
 	rescan_button = new FXButton(buttonVF11, "Re-Scan devices", NULL, this, ID_RESCAN, BUTTON_NORMAL|LAYOUT_FILL_X);
 	connected_label = new FXLabel(vf1, "Disconnected");
-	connected_label2 = new FXLabel(vf1, "");
+	connected_label2 = new FXLabel(vf1, "Protocols:");
 	
 	// horizontal frame of group boxes
 	FXHorizontalFrame *hf12 = new FXHorizontalFrame(vf1, LAYOUT_FILL_X|PACK_UNIFORM_WIDTH);	//
@@ -733,6 +735,8 @@ MainWindow::MainWindow(FXApp *app)
 	macrodepth = 0;
 	macroslots = 0;
 	protocols = "";
+	max = 0;
+	count = 0;
 
 }
 
@@ -779,11 +783,12 @@ MainWindow::onConnect(FXObject *sender, FXSelector sel, void *ptr)
 	connected_device =  hid_open_path(device_info->path);
 	
 	if (!connected_device) {
-		FXMessageBox::error(this, MBOX_OK, "Device Error", "Unable To Connect to Device");
+		FXMessageBox::error(this, MBOX_OK, "Device Error oC", "Unable To Connect to Device");
 		return -1;
 	}
 
-	onGcaps(NULL, 0, NULL);
+	if(onGcaps(NULL, 0, NULL) == -1)
+		return -1;
 	FXString s;
 	s.format("Connected to: %04hx:%04hx -", device_info->vendor_id, device_info->product_id);
 	s += FXString(" ") + device_info->manufacturer_string;
@@ -934,8 +939,10 @@ MainWindow::onDisconnect(FXObject *sender, FXSelector sel, void *ptr)
 	hid_close(connected_device);
 	connected_device = NULL;
 	connected_label->setText("Disconnected");
-	connected_label2->setText("");
+	connected_label2->setText("Protocols:");
 	protocols = "";
+	max = 0;
+	count = 0;
 	wslistbox->clearItems();
 	mnlistbox->clearItems();
 	mslistbox->clearItems();
@@ -1028,8 +1035,8 @@ MainWindow::Read()
 	memset(buf, 0, sizeof(buf));
 	FXString s;
 	if (!connected_device) { //TODO this helps, but where is the error message?!
-		FXMessageBox::error(this, MBOX_OK, "Device Error", "Unable To Connect to Device");
-		s = "Unable To Connect to Device\n";//
+		FXMessageBox::error(this, MBOX_OK, "Device Error R", "Unable To Connect to Device");
+		s = "Unable To Connect to Device R\n";//
 		input_text->appendText(s);
 		input_text->setBottomLine(INT_MAX);
 		return -1;
@@ -1039,13 +1046,13 @@ MainWindow::Read()
 	
 	if (res < 0) {
 		FXMessageBox::error(this, MBOX_OK, "Error Reading", "Could not read from device. Error reported was: %ls", hid_error(connected_device));
-#ifndef _WIN32
+//#ifndef _WIN32
 		onDisconnect(NULL, 0, NULL); // prevent endless loop in linux
 		onRescan(NULL, 0, NULL);
-		onConnect(NULL, 0, NULL);
+		onConnect(NULL, 0, NULL); // prevent endless loop if no device read possible // doesn't help, hangs than at device_info->manufacturer_string
 		if(ReadIRcontActive)
 			onReadIRcont(NULL, 0, NULL);
-#endif
+//#endif
 		input_text->appendText("read error\n");
 		input_text->setBottomLine(INT_MAX);
 		return -1;
@@ -1070,34 +1077,36 @@ MainWindow::Read()
 long
 MainWindow::onReadIR(FXObject *sender, FXSelector sel, void *ptr)
 {
+	FXString s;
+	FXString t;
+
 	if(Read() <= 0)
 		return 0;
 
-	if	(ReadIRcontActive) {
-		if (!buf[6]) {
-			RepeatCounter = 0;
-		} else {
-			RepeatCounter++;
-			FXString u;
-			u.format("RepeatCounter: %d \n", RepeatCounter);
-			input_text->appendText(u);
-			input_text->setBottomLine(INT_MAX);
-		}
-		if (RepeatCounter == 0 || RepeatCounter >= (repeatlistbox->getCurrentItem() + 1)) {
-			if (BackColor == 0) {
-				read_cont_button->setBackColor(FXRGB(255,23,23));
-				BackColor = 1;
+	if (buf[0] == 1) { // REPORT_ID_IR
+		// Repeat Counter
+		if	(ReadIRcontActive) {
+			if (!buf[6]) {
+				RepeatCounter = 0;
 			} else {
-				read_cont_button->setBackColor(FXRGB(255,127,127));
-				BackColor = 0;
+				RepeatCounter++;
+				FXString u;
+				u.format("RepeatCounter: %d \n", RepeatCounter);
+				input_text->appendText(u);
+				input_text->setBottomLine(INT_MAX);
+			}
+			if (RepeatCounter == 0 || RepeatCounter >= (repeatlistbox->getCurrentItem() + 1)) {
+				if (BackColor == 0) {
+					read_cont_button->setBackColor(FXRGB(255,23,23));
+					BackColor = 1;
+				} else {
+					read_cont_button->setBackColor(FXRGB(255,127,127));
+					BackColor = 0;
+				}
 			}
 		}
-	}
 
-	// show received IR
-	FXString s;
-	FXString t;
-	if (buf[0] == 1) {		
+		// show received IR
 		s = "";
 		t.format("%02hhx", buf[1]);
 		s += t;
@@ -1147,6 +1156,43 @@ MainWindow::onReadIR(FXObject *sender, FXSelector sel, void *ptr)
 		s += "\n";
 		input_text->appendText(s);
 		input_text->setBottomLine(INT_MAX);		
+	}
+
+	//debug
+	if (buf[0] == 2) { // REPORT_ID_CONFIG
+		if (buf[1] == 0x0f) {
+			if (buf[2] == max)
+				count++;
+			if (buf[2] > max) {
+				max = buf[2];
+				count = 1;
+			}
+			s = "DEBUG: sof_timeout: ";
+#if (FOX_MINOR >= 7)
+			t.fromInt(buf[2],10);
+			s += t;
+#else
+			s += FXStringVal(buf[2],10);
+#endif
+			s += "   max: ";
+#if (FOX_MINOR >= 7)
+			t.fromInt(max,10);
+			s += t;
+#else
+			s += FXStringVal(max,10);
+#endif
+			s += "   ";
+#if (FOX_MINOR >= 7)
+			t.fromInt(count,10);
+			s += t;
+#else
+			s += FXStringVal(count,10);
+#endif
+			s += " times\n";
+			input_text->appendText(s);
+			input_text->setBottomLine(INT_MAX);
+
+		}
 	}
 
 	return 1;
@@ -1219,8 +1265,8 @@ MainWindow::Write()
 	getDataFromTextField(output_text, bufw, sizeof(bufw));
 
 	if (!connected_device) { //TODO this helps, but where is the error message?!
-		FXMessageBox::error(this, MBOX_OK, "Device Error", "Unable To Connect to Device");
-		s = "Unable To Connect to Device\n";//
+		FXMessageBox::error(this, MBOX_OK, "Device Error W", "Unable To Connect to Device");
+		s = "Unable To Connect to Device W\n";//
 		input_text->appendText(s);
 		input_text->setBottomLine(INT_MAX);
 		return -1;
@@ -1231,10 +1277,10 @@ MainWindow::Write()
 		FXMessageBox::error(this, MBOX_OK, "Error Writing", "Could not write to device. Error reported was: %ls", hid_error(connected_device));
 		input_text->appendText("write error\n");
 		input_text->setBottomLine(INT_MAX);
-#ifndef _WIN32
+//#ifndef _WIN32
 		if(ReadIRcontActive) // prevent endless loop in linux
 			onReadIRcont(NULL, 0, NULL);
-#endif
+//#endif
 		return -1;
 	} else {
 		s.format("Sent %d bytes:\n", res);
@@ -1258,7 +1304,7 @@ MainWindow::Write_and_Check()
 	int read;
 	s = "";
     if(Write() == -1) {
-		s += "Write(): -1\n";
+		s += "W&C Write(): -1\n";
 		input_text->appendText(s);
 		input_text->setBottomLine(INT_MAX);
 		return -1;
@@ -1268,7 +1314,7 @@ MainWindow::Write_and_Check()
 
 	read = Read();
     if(read  == -1) {
-		s += "first Read(): -1\n";
+		s += "W&C first Read(): -1\n";
 		input_text->appendText(s);
 		input_text->setBottomLine(INT_MAX);
 		return -1;
@@ -1277,7 +1323,7 @@ MainWindow::Write_and_Check()
     while (buf[0] == 0x01 || read == 0) {
 		read = Read();
 		if(read == -1) {
-			s += "loop Read(): -1\n";
+			s += "W&C loop Read(): -1\n";
 			input_text->appendText(s);
 			input_text->setBottomLine(INT_MAX);
 			return -1;
@@ -1540,7 +1586,7 @@ MainWindow::onGcaps(FXObject *sender, FXSelector sel, void *ptr)
 		output_text->setText(s);
 
   	 	if(Write() == -1) {
-			t = "Write(): -1\n";
+			t = "onGcaps Write(): -1\n";
 			input_text->appendText(t);
 			input_text->setBottomLine(INT_MAX);
 			return -1;
@@ -1550,7 +1596,7 @@ MainWindow::onGcaps(FXObject *sender, FXSelector sel, void *ptr)
 		
 		read = Read();
 		if(read == -1) {
-			t = "first Read(): -1\n";
+			t = "onGcaps first Read(): -1\n";
 			input_text->appendText(t);
 			input_text->setBottomLine(INT_MAX);
 			return -1;
@@ -1559,7 +1605,7 @@ MainWindow::onGcaps(FXObject *sender, FXSelector sel, void *ptr)
   	 	while (buf[0] == 0x01 || read == 0) {
 			read = Read();
 			if(read == -1) {
-				t = "loop Read(): -1\n";
+				t = "onGcaps loop Read(): -1\n";
 				input_text->appendText(t);
 				input_text->setBottomLine(INT_MAX);
 				return -1;
@@ -1784,7 +1830,6 @@ MainWindow::onOpen(FXObject *sender, FXSelector sel, void *ptr)
 	FXFileDialog open(this,"Open a map file");
 	open.setPatternList(patterns);
 	open.setCurrentPattern(1);
-	open.showImages(0);
 	if(open.execute()){
 		map_text21->setText(NULL,0);
 		FXString file=open.getFilename();
@@ -1850,7 +1895,6 @@ MainWindow::onSave(FXObject *sender, FXSelector sel, void *ptr){
 	FXString file;
 	save.setPatternList(patterns);
 	save.setCurrentPattern(1);
-	save.showImages(0);
 	if(save.execute()){
 		file=save.getFilename();
 		//file += (patterns[save.getCurrentPattern()] == "map Files (*.map)") ? ".map" : ""; // TODO?
@@ -1958,7 +2002,7 @@ MainWindow::onApply(FXObject *sender, FXSelector sel, void *ptr){
 	strcpy(str, d);
 	char *token = strtok(str, delim);
 	memset(mapbeg, 0, sizeof(mapbeg));
-	int count = 1;
+	int count = 0;
 	while (token) {
 		map[i++] = token;
 		count += map[i-1].length() + 1;
@@ -2089,3 +2133,7 @@ int main(int argc, char **argv)
 	app.run();
 	return 0;
 }
+
+/* TODO
+ * linux: enter file name in open/save dialog does not work
+ */
