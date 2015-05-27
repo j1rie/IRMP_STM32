@@ -18,7 +18,8 @@
 #include "config.h" /* CooCox workaround */
 
 #define BYTES_PER_QUERY	(HID_IN_BUFFER_SIZE - 4)
-#define SOF_TIMEOUT 100
+/* after plugging in, it takes some time, until SOF's are being sent to the device */
+#define SOF_TIMEOUT 500
 
 enum __attribute__ ((__packed__)) access {
 	ACC_GET,
@@ -569,13 +570,5 @@ int main(void)
 			memcpy(buf, &myIRData, sizeof(myIRData));
 			USB_HID_SendData(REPORT_ID_IR, buf, sizeof(myIRData));
 		}
-
-		/* debug */
-		/*if (sof_timeout > 2) {
-			memset(buf, 0, sizeof(buf));
-			buf[0] = 0x0f;
-			buf[1] = sof_timeout;
-			USB_HID_SendData(REPORT_ID_CONFIG, buf, sizeof(buf));
-		}*/
 	}
 }
