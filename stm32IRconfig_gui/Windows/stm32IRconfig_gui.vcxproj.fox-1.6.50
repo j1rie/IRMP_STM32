@@ -109,6 +109,7 @@
   </ItemDefinitionGroup>
   <ItemGroup>
     <ClCompile Include="hid.c" />
+    <ClCompile Include="icons.cpp" />
     <ClCompile Include="stm32IRconfig_gui.cpp" />
   </ItemGroup>
   <ItemGroup>
