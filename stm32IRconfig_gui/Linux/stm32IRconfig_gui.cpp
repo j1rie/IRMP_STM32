@@ -1034,9 +1034,11 @@ MainWindow::Read()
 {
 	memset(buf, 0, sizeof(buf));
 	FXString s;
-	if (!connected_device) { //TODO this helps, but where is the error message?!
+	if (!connected_device) {
 		FXMessageBox::error(this, MBOX_OK, "Device Error R", "Unable To Connect to Device");
-		s = "Unable To Connect to Device R\n";//
+		getApp()->removeTimeout(this, ID_TIMER);
+		ReadIRcontActive = 0;
+		s = "Unable To Connect to Device R\n"; //
 		input_text->appendText(s);
 		input_text->setBottomLine(INT_MAX);
 		return -1;
@@ -1046,13 +1048,8 @@ MainWindow::Read()
 	
 	if (res < 0) {
 		FXMessageBox::error(this, MBOX_OK, "Error Reading", "Could not read from device. Error reported was: %ls", hid_error(connected_device));
-//#ifndef _WIN32
-		onDisconnect(NULL, 0, NULL); // prevent endless loop in linux
+		onDisconnect(NULL, 0, NULL);
 		onRescan(NULL, 0, NULL);
-		onConnect(NULL, 0, NULL); // prevent endless loop if no device read possible // doesn't help, hangs than at device_info->manufacturer_string
-		if(ReadIRcontActive)
-			onReadIRcont(NULL, 0, NULL);
-//#endif
 		input_text->appendText("read error\n");
 		input_text->setBottomLine(INT_MAX);
 		return -1;
@@ -1158,43 +1155,6 @@ MainWindow::onReadIR(FXObject *sender, FXSelector sel, void *ptr)
 		input_text->setBottomLine(INT_MAX);		
 	}
 
-	//debug
-	if (buf[0] == 2) { // REPORT_ID_CONFIG
-		if (buf[1] == 0x0f) {
-			if (buf[2] == max)
-				count++;
-			if (buf[2] > max) {
-				max = buf[2];
-				count = 1;
-			}
-			s = "DEBUG: sof_timeout: ";
-#if (FOX_MINOR >= 7)
-			t.fromInt(buf[2],10);
-			s += t;
-#else
-			s += FXStringVal(buf[2],10);
-#endif
-			s += "   max: ";
-#if (FOX_MINOR >= 7)
-			t.fromInt(max,10);
-			s += t;
-#else
-			s += FXStringVal(max,10);
-#endif
-			s += "   ";
-#if (FOX_MINOR >= 7)
-			t.fromInt(count,10);
-			s += t;
-#else
-			s += FXStringVal(count,10);
-#endif
-			s += " times\n";
-			input_text->appendText(s);
-			input_text->setBottomLine(INT_MAX);
-
-		}
-	}
-
 	return 1;
 }
 
@@ -1277,10 +1237,8 @@ MainWindow::Write()
 		FXMessageBox::error(this, MBOX_OK, "Error Writing", "Could not write to device. Error reported was: %ls", hid_error(connected_device));
 		input_text->appendText("write error\n");
 		input_text->setBottomLine(INT_MAX);
-//#ifndef _WIN32
-		if(ReadIRcontActive) // prevent endless loop in linux
-			onReadIRcont(NULL, 0, NULL);
-//#endif
+		onDisconnect(NULL, 0, NULL);
+		onRescan(NULL, 0, NULL);
 		return -1;
 	} else {
 		s.format("Sent %d bytes:\n", res);
