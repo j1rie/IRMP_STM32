@@ -21,8 +21,6 @@
 #include "FXArray.h"
 #include "icons.h"
 
-//#include "resource.h"
-
 // Headers needed for sleeping.
 #ifdef _WIN32
 	#include <windows.h>
@@ -31,7 +29,6 @@
 #endif
 
 #ifdef _WIN32
-	// Thanks Microsoft, but I know how to use strncpy().
 	#pragma warning(disable:4996)
 #endif
 
@@ -245,8 +242,8 @@ FXIMPLEMENT(MainWindow, FXMainWindow, MainWindowMap, ARRAYNUMBER(MainWindowMap))
 MainWindow::MainWindow(FXApp *app)
 	: FXMainWindow(app, "IRMP STM32 Configuration", NULL, NULL, DECOR_ALL, 275, 50, 730, 950)  // for 1280x1024
 {
-	this->setIcon(new FXGIFIcon(app,Icon));
-	this->setMiniIcon(new FXICOIcon(app,MiniIcon));
+	this->setIcon(new FXGIFIcon(app,Icon)); // for taskbar
+	this->setMiniIcon(new FXICOIcon(app,MiniIcon)); // for titlebar
 	devices = NULL;
 	connected_device = NULL;
 
@@ -393,7 +390,7 @@ MainWindow::MainWindow(FXApp *app)
 	// horizontal frame for Input Group Box
 	FXHorizontalFrame *hf16 = new FXHorizontalFrame(vf1, LAYOUT_FILL_X|LAYOUT_FILL_Y); //
 	// Input Group Box
-	FXGroupBox *gb16 = new FXGroupBox(hf16, "debug messages", FRAME_GROOVE|LAYOUT_FILL_X|LAYOUT_FILL_Y); //STM32<->PC
+	FXGroupBox *gb16 = new FXGroupBox(hf16, "debug messages", FRAME_GROOVE|LAYOUT_FILL_X|LAYOUT_FILL_Y);
 	FXVerticalFrame *innerVF16 = new FXVerticalFrame(gb16, LAYOUT_FILL_X|LAYOUT_FILL_Y);
 	input_text = new FXText(new FXHorizontalFrame(innerVF16,LAYOUT_FILL_X|LAYOUT_FILL_Y|FRAME_SUNKEN|FRAME_THICK, 0,0,0,0, 0,0,0,0), NULL, 0, LAYOUT_FILL_X|LAYOUT_FILL_Y);
 	input_text->setEditable(false);
