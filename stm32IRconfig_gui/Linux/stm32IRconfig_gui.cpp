@@ -122,7 +122,6 @@ private:
 	FXListBox* repeatlistbox;
 	FXText *map_text;
 	FXStatusBar *statusbar;
-	
 	struct hid_device_info *devices;
 	hid_device *connected_device;
 	size_t getDataFromTextField(FXTextField *tf, char *buf, size_t len);
@@ -1669,7 +1668,6 @@ MainWindow::saveFile(const FXString& file){
 			v = FXStringVal(size, 10);
 #endif
 			u += v;
-			//u += file;
 			u += "\n";
 			input_text->appendText(u);
 			input_text->setBottomLine(INT_MAX);
@@ -1841,5 +1839,5 @@ int main(int argc, char **argv)
 }
 
 /* TODO
- * linux: enter file name in open/save dialog does not work
+ * linux: enter file name in open/save dialog does not work on some systems
  */
