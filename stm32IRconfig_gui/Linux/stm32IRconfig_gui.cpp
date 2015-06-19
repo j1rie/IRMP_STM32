@@ -1837,7 +1837,3 @@ int main(int argc, char **argv)
 	app.run();
 	return 0;
 }
-
-/* TODO
- * linux: enter file name in open/save dialog does not work on some systems
- */
