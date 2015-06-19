@@ -17,9 +17,8 @@
 
 ### If you enable the following option, your firmware will be able to drive the
 ### "active" pin of the mainboard power button directly. It is recommended
-### to add a 1 kohms resistor between the wakeup pin and the active pin of the
-### mainboards power button connector. If your motherboard does not start with
-### 1 kohm, you could try lower values.
+### to add a 220 ohms resistor between the wakeup pin and the active pin of the
+### mainboards power button connector.
 ### Check it out, if this works for your motherboard, too (it probably will).
 ### Please be careful and don't damage your motherboard!
 ### Default is to build a firmware which is meant to drive the power button via
