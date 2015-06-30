@@ -27,6 +27,9 @@
 /* uncomment this, if you use the red ST-Link */
 //#define RedLink
 
+/* uncomment this in order to pull down the "active" pin of the mainboard power button connector directly */
+//#define SimpleCircuit
+
 #if defined(BlueLink) || defined(RedLink)
 	#define ST_Link
 #endif
