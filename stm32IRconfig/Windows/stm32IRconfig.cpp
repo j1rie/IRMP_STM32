@@ -92,7 +92,7 @@ int main(int argc, char* argv[])
 	uint64_t i;
 	char c, d;
 	uint8_t s, m, k, l, idx;
-	int retValm;
+	int retValm, jump_to_firmware;
 
 #ifdef WIN32
 	UNREFERENCED_PARAMETER(argc);
@@ -215,8 +215,8 @@ get:		printf("get wakeup(w)\nget macro slot(m)\nget caps(c)\n");
 			break;
 		case 'c':
 			outBuf[idx++] = 0x01; // CMD_CAPS
-			for (l = 0; l < 13; l++) {
-				outBuf[idx] = l;	// 0 slots, ++ protocols
+			for (l = 0;; l++) {
+				outBuf[idx] = l;
 				write_stm32();
 				#ifdef WIN32
 				Sleep(2);
@@ -226,22 +226,22 @@ get:		printf("get wakeup(w)\nget macro slot(m)\nget caps(c)\n");
 				read_stm32();
 				while (inBuf[0] == 0x01)
 					read_stm32();
-				if (!l) {
+				if (!l) { // first query for slots and depth
 					printf("macro_slots: %u\n", inBuf[4]);
 					printf("macro_depth: %u\n", inBuf[5]);
 					printf("wakeup_slots: %u\n", inBuf[6]);
 				} else {
-					if(l<7) {
+					if(!jump_to_firmware) { // queries for supported_protocols
 						printf("protocols: ");
 						for (k = 4; k < 17; k++) {
 							if (!inBuf[k]) {
 								printf("\n\n");
-								l = 6;
+								jump_to_firmware = 1;
 								goto again;
 							}
 							printf("%u ", inBuf[k]);
 						}
-					} else {
+					} else { // queries for firmware
 					    printf("firmware: ");
 					    for (k = 4; k < 17; k++) {
 						if (!inBuf[k]) {

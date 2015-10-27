@@ -1288,7 +1288,9 @@ MainWindow::onGcaps(FXObject *sender, FXSelector sel, void *ptr)
 	FXString s;
 	FXString t;
 	int read;
-	for(int i = 0; i < 13; i++) { // 6 queries for supported_protocols and 6 queries for firmware, should be enough
+	int jump_to_firmware;
+	jump_to_firmware = 0;
+	for(int i = 0;; i++) {
 		s = "3 0 0 1 "; // Report_ID STAT_CMD ACC_GET CMD_CAPS
 #if (FOX_MINOR >= 7)
 		t.fromInt(i,10);
@@ -1337,21 +1339,21 @@ MainWindow::onGcaps(FXObject *sender, FXSelector sel, void *ptr)
 			t.format("wakeup_slots: %u", buf[6]);
 			s += t;
 		} else {
-			if (i < 7) { // max. 6 queries for supported_protocols
+			if (!jump_to_firmware) { // queries for supported_protocols
 				s = "protocols: ";
 				for (int k = 4; k < 17; k++) {
 					if (!buf[k]) { // NULL termination
 						s += "\n";
 						input_text->appendText(s);
 						input_text->setBottomLine(INT_MAX);
-						i = 6; // next loop for firmware
+						jump_to_firmware = 1;
 						goto again;
 					}
 					t.format("%u ", buf[k]);
 					protocols += t;  // TODO line break ?
 					s += t;
 				}
-			} else { // max. 6 queries for firmware
+			} else { // queries for firmware
 				s = "firmware: ";
 				for (int k = 4; k < 17; k++) {
 					if (!buf[k]) { // NULL termination

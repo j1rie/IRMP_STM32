@@ -335,15 +335,15 @@ int8_t get_handler(uint8_t *buf)
 		idx = BYTES_PER_QUERY * (buf[3] - 1);
 		if (idx < sizeof(supported_protocols)) {
 			strncpy((char *) &buf[3], &supported_protocols[idx], BYTES_PER_QUERY);
+			/* actually this is not true for the last transmission,
+			 * but it doesn't matter since it's NULL terminated
+			 */
 			ret = HID_IN_BUFFER_SIZE-1;
 			break;
 		}
-		/* actually this is not true for the last transmission,
-		 * but it doesn't matter since it's NULL terminated
-		 */
-		if (idx >= sizeof(firmware) + 6 * BYTES_PER_QUERY) // reserve 6 * BYTES_PER_QUERY for supported protocols
+		if (idx >= sizeof(firmware) + (sizeof(supported_protocols) / BYTES_PER_QUERY + 1) * BYTES_PER_QUERY)
 			return -1;
-		strncpy((char *) &buf[3], &firmware[idx - 6 * BYTES_PER_QUERY], BYTES_PER_QUERY);
+		strncpy((char *) &buf[3], &firmware[idx - (sizeof(supported_protocols) / BYTES_PER_QUERY + 1) * BYTES_PER_QUERY], BYTES_PER_QUERY);
 		ret = HID_IN_BUFFER_SIZE-1;
 		break;
 	case CMD_ALARM:
