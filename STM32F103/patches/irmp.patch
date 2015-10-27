@@ -1,6 +1,6 @@
 diff -Nrup a/irmpconfig.h b/irmpconfig.h
---- a/irmpconfig.h	2015-04-23 14:48:55.000000000 +0200
-+++ b/irmpconfig.h	2015-05-06 21:13:49.524290721 +0200
+--- a/irmpconfig.h	2015-09-21 14:46:25.000000000 +0200
++++ b/irmpconfig.h	2015-10-03 15:28:01.000000000 +0200
 @@ -56,17 +56,17 @@
  #define IRMP_SUPPORT_KASEIKYO_PROTOCOL          1       // Kaseikyo             >= 10000                 ~250 bytes
  
@@ -30,7 +30,7 @@ diff -Nrup a/irmpconfig.h b/irmpconfig.h
  
  // exotic protocols, enable here!               Enable  Remarks                 F_INTERRUPTS            Program Space
  #define IRMP_SUPPORT_BOSE_PROTOCOL              0       // BOSE                 >= 10000                 ~150 bytes
-@@ -124,9 +124,9 @@
+@@ -128,9 +128,9 @@
   * Change hardware pin here for ARM STM32
   *---------------------------------------------------------------------------------------------------------------------------------------------------
   */
@@ -44,8 +44,8 @@ diff -Nrup a/irmpconfig.h b/irmpconfig.h
  /*---------------------------------------------------------------------------------------------------------------------------------------------------
   * Change hardware pin here for Stellaris ARM Cortex M4
 diff -Nrup a/irsndconfig.h b/irsndconfig.h
---- a/irsndconfig.h	2015-04-23 14:48:55.000000000 +0200
-+++ b/irsndconfig.h	2015-05-06 21:11:40.000000000 +0200
+--- a/irsndconfig.h	2015-09-21 14:46:25.000000000 +0200
++++ b/irsndconfig.h	2015-10-03 15:28:01.000000000 +0200
 @@ -47,17 +47,17 @@
  #define IRSND_SUPPORT_KASEIKYO_PROTOCOL         1       // Kaseikyo             >= 10000                 ~300 bytes
  

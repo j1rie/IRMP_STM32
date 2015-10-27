@@ -1,6 +1,6 @@
 -include Make.config
 
-TARGET ?= IR
+TARGET = Dev
 PLATFORM ?= STM32F103C8
 #STM32F103C8
 #	MD PL - medium density performance line
@@ -35,23 +35,34 @@ OBJS = src/irmpmain.o src/st_link_leds.o src/usb_hid.o src/main.o\
 
 CFLAGS = -Wall -ffunction-sections -fno-builtin $(ARCH) $(COMMON) $(INCLUDES) $(DEFINES)
 
+ifeq ($(Platform), Blue)
+DEFINES += -DBlueLink
+TARGET = Blue
+endif
+ifeq ($(Platform), Red)
+DEFINES += -DRedLink
+TARGET = Red
+endif
+
+ifdef SimpleCircuit
+DEFINES += -DSimpleCircuit
+TARGET := $(TARGET)_SC
+endif
+
+DATE := $(shell date +"%F")
+TARGET := $(DATE)_$(TARGET)
+
+DEFINES += -DFW_STR=\"$(TARGET)\"
+
 ifdef Bootloader
 DEFINES += -DBootloader
+TARGET := $(TARGET)_BL
 LDFLAGS = -nostartfiles -Wl,-Map=$(TARGET).map,--gc-sections,--entry=main,-Tscripts/arm-gcc-link-bootloader.ld $(ARCH) $(COMMONOC)
 else
 LDFLAGS = -nostartfiles -Wl,-Map=$(TARGET).map,--gc-sections,--entry=main,-Tscripts/arm-gcc-link.ld $(ARCH) $(COMMON)
 endif
 
-ifdef SimpleCircuit
-DEFINES += -DSimpleCircuit
-endif
-
-ifeq ($(Platform), Blue)
-DEFINES += -DBlueLink
-endif
-ifeq ($(Platform), Red)
-DEFINES += -DRedLink
-endif
+TARGET := $(TARGET)-jrie
 
 $(TARGET).bin: $(TARGET).elf
 	$(OBJCP) -O binary $< $@
@@ -59,7 +70,8 @@ $(TARGET).bin: $(TARGET).elf
 $(TARGET).elf: prepare $(OBJS)
 	$(LD) $(LDFLAGS) $(OBJS) -o $@
 
-.PHONY: prepare flash clean distclean
+.PHONY: prepare flash clean-objects clean distclean
+
 prepare:
 	@./scripts/prepare.sh
 

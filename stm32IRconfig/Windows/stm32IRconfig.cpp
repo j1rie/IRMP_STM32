@@ -215,32 +215,45 @@ get:		printf("get wakeup(w)\nget macro slot(m)\nget caps(c)\n");
 			break;
 		case 'c':
 			outBuf[idx++] = 0x01; // CMD_CAPS
-			for (l = 0; l < 4; l++) {
-			outBuf[idx] = l;	// 0 slots, ++ protocols
-			write_stm32();
-			#ifdef WIN32
-			Sleep(2);
-			#else
-			usleep(2000);
-			#endif
-			read_stm32();
-			while (inBuf[0] == 0x01)
+			for (l = 0; l < 13; l++) {
+				outBuf[idx] = l;	// 0 slots, ++ protocols
+				write_stm32();
+				#ifdef WIN32
+				Sleep(2);
+				#else
+				usleep(2000);
+				#endif
 				read_stm32();
-			if (!l) {
-				printf("macro_slots: %u\n", inBuf[4]);
-				printf("macro_depth: %u\n", inBuf[5]);
-				printf("wakeup_slots: %u\n", inBuf[6]);
-			} else {
-				printf("protocols: ");
-				for (k = 4; k < 17; k++) {
-					if (!inBuf[k]) {
-					printf("\n\n");
-					goto out;
+				while (inBuf[0] == 0x01)
+					read_stm32();
+				if (!l) {
+					printf("macro_slots: %u\n", inBuf[4]);
+					printf("macro_depth: %u\n", inBuf[5]);
+					printf("wakeup_slots: %u\n", inBuf[6]);
+				} else {
+					if(l<7) {
+						printf("protocols: ");
+						for (k = 4; k < 17; k++) {
+							if (!inBuf[k]) {
+								printf("\n\n");
+								l = 6;
+								goto again;
+							}
+							printf("%u ", inBuf[k]);
+						}
+					} else {
+					    printf("firmware: ");
+					    for (k = 4; k < 17; k++) {
+						if (!inBuf[k]) {
+								printf("\n\n");
+								goto out;
+						}
+						printf("%c", inBuf[k]);
+					    }
 					}
-				printf("%u ", inBuf[k]);
 				}
-			}
-			printf("\n\n");
+				printf("\n\n");
+again:		;
 			}
 			break;
 		default:

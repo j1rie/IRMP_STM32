@@ -19,6 +19,9 @@
 #define WAKE_SLOTS	8
 #define SIZEOF_IR	6
 
+/* uncomment this for CooCox */
+//#define FW_STR "2015-10-26_Blue_SC_BL-jrie"
+
 #define MIN_REPEATS	2  // TODO make configurable & use Eeprom
 
 /* uncomment this, if you use the blue ST-Link */

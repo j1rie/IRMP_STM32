@@ -246,7 +246,7 @@ diff -Nrup a/src/stm32_it.c b/src/stm32_it.c
  * Function Name  : USB_FS_WKUP_IRQHandler
 diff -Nrup a/src/usb_desc.c b/src/usb_desc.c
 --- a/src/usb_desc.c	2013-01-21 18:27:28.000000000 +0100
-+++ b/src/usb_desc.c	2015-06-04 18:06:38.721687318 +0200
++++ b/src/usb_desc.c	2015-10-26 05:30:02.172637000 +0100
 @@ -49,10 +49,10 @@ const uint8_t CustomHID_DeviceDescriptor
      0x00,                       /*bDeviceSubClass*/
      0x00,                       /*bDeviceProtocol*/
@@ -335,19 +335,26 @@ diff -Nrup a/src/usb_desc.c b/src/usb_desc.c
  
      0xc0 	          /*     END_COLLECTION	             */
    }; /* CustomHID_ReportDescriptor */
-@@ -270,9 +296,9 @@ const uint8_t CustomHID_StringProduct[CU
+@@ -270,14 +296,16 @@ const uint8_t CustomHID_StringProduct[CU
    {
      CUSTOMHID_SIZ_STRING_PRODUCT,          /* bLength */
      USB_STRING_DESCRIPTOR_TYPE,        /* bDescriptorType */
 -    'S', 0, 'T', 0, 'M', 0, '3', 0, '2', 0, ' ', 0, 'C', 0,
 -    'u', 0, 's', 0, 't', 0, 'm', 0, ' ', 0, 'H', 0, 'I', 0,
 -    'D', 0
++    /* Product: "STM32 IRMP HID-Device" */
 +    'S', 0, 'T', 0, 'M', 0, '3', 0, '2', 0, ' ', 0, 'I', 0,
 +    'R', 0, 'M', 0, 'P', 0, ' ', 0, 'H', 0, 'I', 0, 'D', 0,
 +    '-', 0, 'D', 0, 'e', 0, 'v', 0, 'i', 0, 'c', 0, 'e', 0
    };
  uint8_t CustomHID_StringSerial[CUSTOMHID_SIZ_STRING_SERIAL] =
    {
+     CUSTOMHID_SIZ_STRING_SERIAL,           /* bLength */
+     USB_STRING_DESCRIPTOR_TYPE,        /* bDescriptorType */
++    /* Serial: "STM32" */
+     'S', 0, 'T', 0, 'M', 0,'3', 0,'2', 0
+   };
+ 
 diff -Nrup a/src/usb_endp.c b/src/usb_endp.c
 --- a/src/usb_endp.c	2013-01-21 18:27:28.000000000 +0100
 +++ b/src/usb_endp.c	2015-05-19 17:39:23.000000000 +0200

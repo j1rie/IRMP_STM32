@@ -19,6 +19,8 @@
 #define WAKE_SLOTS	8
 #define SIZEOF_IR	6
 
+#define FW_STR "2015-10-26_F105-jrie"
+
 #define MIN_REPEATS	2  // TODO make configurable & use Eeprom
 
 /* B11 IRMP (irmpconfig.h), B6 IRSND (irsndconfig.h) , B10 Logging (irmp.c) */

@@ -97,6 +97,7 @@ private:
 	FXButton *apply_button;
 	FXLabel *connected_label;
 	FXLabel *connected_label2;
+	FXLabel *connected_label3;
 	FXTextField *output_text;
 	FXTextField *protocol_text;
 	FXTextField *address_text;
@@ -133,6 +134,7 @@ private:
 	int macrodepth;
 	int macroslots;
 	FXString protocols;
+	FXString firmware;
 	FXColor storedShadowColor;
 	FXColor storedBaseColor;
 	FXColor storedBackColor;
@@ -266,7 +268,8 @@ MainWindow::MainWindow(FXApp *app)
 	disconnect_button->disable();
 	rescan_button = new FXButton(buttonVF11, "Re-Scan devices", NULL, this, ID_RESCAN, BUTTON_NORMAL|LAYOUT_FILL_X);
 	connected_label = new FXLabel(vf1, "Disconnected");
-	connected_label2 = new FXLabel(vf1, "Protocols:");
+	connected_label2 = new FXLabel(vf1, "Firmware:");
+	connected_label3 = new FXLabel(vf1, "Protocols:");
 	
 	// horizontal frame of group boxes
 	FXHorizontalFrame *hf12 = new FXHorizontalFrame(vf1, LAYOUT_FILL_X|PACK_UNIFORM_WIDTH);	//
@@ -482,6 +485,7 @@ MainWindow::MainWindow(FXApp *app)
 	macrodepth = 0;
 	macroslots = 0;
 	protocols = "";
+	firmware = "";
 	max = 0;
 	count = 0;
 
@@ -541,9 +545,12 @@ MainWindow::onConnect(FXObject *sender, FXSelector sel, void *ptr)
 	s += FXString(" ") + device_info->manufacturer_string;
 	s += FXString(" ") + device_info->product_string;
 	connected_label->setText(s);
+	s = "Firmware: ";
+	s += firmware;
+	connected_label2->setText(s);
 	s = "Protocols: ";
 	s += protocols;
-	connected_label2->setText(s);
+	connected_label3->setText(s);
 	for(int i = 0; i < wakeupslots; i++) {
 		FXString s;
 		s = "wakeupslot";
@@ -686,8 +693,10 @@ MainWindow::onDisconnect(FXObject *sender, FXSelector sel, void *ptr)
 	hid_close(connected_device);
 	connected_device = NULL;
 	connected_label->setText("Disconnected");
-	connected_label2->setText("Protocols:");
+	connected_label2->setText("Firmware:");
+	connected_label3->setText("Protocols:");
 	protocols = "";
+	firmware = "";
 	max = 0;
 	count = 0;
 	wslistbox->clearItems();
@@ -1279,7 +1288,7 @@ MainWindow::onGcaps(FXObject *sender, FXSelector sel, void *ptr)
 	FXString s;
 	FXString t;
 	int read;
-	for(int i = 0; i < 4; i++) {
+	for(int i = 0; i < 13; i++) { // 6 queries for supported_protocols and 6 queries for firmware, should be enough
 		s = "3 0 0 1 "; // Report_ID STAT_CMD ACC_GET CMD_CAPS
 #if (FOX_MINOR >= 7)
 		t.fromInt(i,10);
@@ -1317,7 +1326,7 @@ MainWindow::onGcaps(FXObject *sender, FXSelector sel, void *ptr)
 			}
 		}
 
-		if (!i) {
+		if (!i) { // first query for slots and depth
 			macroslots = buf[4];
 			s.format("macro_slots: %u\n", buf[4]);
 			s += t;
@@ -1328,24 +1337,40 @@ MainWindow::onGcaps(FXObject *sender, FXSelector sel, void *ptr)
 			t.format("wakeup_slots: %u", buf[6]);
 			s += t;
 		} else {
-			s = "protocols: ";
- 			for (int k = 4; k < 17; k++) {
-				if (!buf[k]) {
-					s += "\n";
-					input_text->appendText(s);
-					input_text->setBottomLine(INT_MAX);
-					goto out;
+			if (i < 7) { // max. 6 queries for supported_protocols
+				s = "protocols: ";
+				for (int k = 4; k < 17; k++) {
+					if (!buf[k]) { // NULL termination
+						s += "\n";
+						input_text->appendText(s);
+						input_text->setBottomLine(INT_MAX);
+						i = 6; // next loop for firmware
+						goto again;
+					}
+					t.format("%u ", buf[k]);
+					protocols += t;  // TODO line break ?
+					s += t;
 				}
-				t.format("%u ", buf[k]);
-				protocols += t;  // TODO line break ?
-				s += t;
+			} else { // max. 6 queries for firmware
+				s = "firmware: ";
+				for (int k = 4; k < 17; k++) {
+					if (!buf[k]) { // NULL termination
+						s += "\n";
+						input_text->appendText(s);
+						input_text->setBottomLine(INT_MAX);
+						return 1;
+					}
+					t.format("%c", buf[k]);
+					firmware += t;  // TODO line break ?
+					s += t;
+				}
 			}
 		}
 		s += "\n";
 		input_text->appendText(s);
 		input_text->setBottomLine(INT_MAX);
+again:	;
 	}
-out:
 	return 1;
 }
 

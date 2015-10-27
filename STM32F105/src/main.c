@@ -17,7 +17,8 @@
 #include "config.h" /* CooCox workaround */
 
 #define BYTES_PER_QUERY	(HID_IN_BUFFER_SIZE - 4)
-#define SOF_TIMEOUT 100
+/* after plugging in, it takes some time, until SOF's are being sent to the device */
+#define SOF_TIMEOUT 500
 
 enum __attribute__ ((__packed__)) access {
 	ACC_GET,
@@ -39,6 +40,8 @@ enum __attribute__ ((__packed__)) status {
 	STAT_SUCCESS,
 	STAT_FAILURE
 };
+
+const char firmware[] = FW_STR;
 
 const char supported_protocols[] = {
 #if IRMP_SUPPORT_SIRCS_PROTOCOL==1
@@ -328,14 +331,19 @@ int8_t get_handler(uint8_t *buf)
 			ret += 3;
 			break;
 		}
-		/* in later queries we give information about supported protocols */
+		/* in later queries we give information about supported protocols and firmware */
 		idx = BYTES_PER_QUERY * (buf[3] - 1);
-		if (idx >= sizeof(supported_protocols))
-			return -1;
-		strncpy((char *) &buf[3], &supported_protocols[idx], BYTES_PER_QUERY);
+		if (idx < sizeof(supported_protocols)) {
+			strncpy((char *) &buf[3], &supported_protocols[idx], BYTES_PER_QUERY);
+			ret = HID_IN_BUFFER_SIZE-1;
+			break;
+		}
 		/* actually this is not true for the last transmission,
 		 * but it doesn't matter since it's NULL terminated
 		 */
+		if (idx >= sizeof(firmware) + 6 * BYTES_PER_QUERY) // reserve 6 * BYTES_PER_QUERY for supported protocols
+			return -1;
+		strncpy((char *) &buf[3], &firmware[idx - 6 * BYTES_PER_QUERY], BYTES_PER_QUERY);
 		ret = HID_IN_BUFFER_SIZE-1;
 		break;
 	case CMD_ALARM:
