@@ -212,7 +212,7 @@ get:	    printf("get wakeup(w)\nget macro slot(m)\nget caps(c)\n");
 						}
 					    printf("%u ", inBuf[k]);
 					    }
-					} else {
+					} else { // queries for firmware
 					    printf("firmware: ");
 					    for (k = 4; k < 17; k++) {
 						if (!inBuf[k]) {
