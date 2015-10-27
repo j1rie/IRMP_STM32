@@ -83,6 +83,7 @@ int main(int argc, const char **argv) {
 	char c, d;
 	uint8_t s, m, k, l, idx;
 	int retValm, jump_to_firmware;
+	jump_to_firmware = 0;
 	
 	open_stm32(argc>1 ? argv[1] : "/dev/irmp_stm32");
 	
