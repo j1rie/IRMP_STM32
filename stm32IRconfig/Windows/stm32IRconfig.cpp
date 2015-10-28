@@ -1,5 +1,6 @@
 /**********************************************************************************************************  
 	stm32config: configure and monitor STM32IR
+
 	Copyright (C) 2014-2015 Jörg Riechardt
 
 	based on work by Alan Ott
@@ -9,6 +10,7 @@
 	it under the terms of the GNU General Public License as published by
 	the Free Software Foundation; either version 2 of the License, or
 	(at your option) any later version.
+
 ************************************************************************************************************/
 
 #define _CRT_SECURE_NO_WARNINGS
@@ -93,6 +95,7 @@ int main(int argc, char* argv[])
 	char c, d;
 	uint8_t s, m, k, l, idx;
 	int retValm, jump_to_firmware;
+	jump_to_firmware = 0;
 
 #ifdef WIN32
 	UNREFERENCED_PARAMETER(argc);
@@ -215,7 +218,7 @@ get:		printf("get wakeup(w)\nget macro slot(m)\nget caps(c)\n");
 			break;
 		case 'c':
 			outBuf[idx++] = 0x01; // CMD_CAPS
-			for (l = 0;; l++) {
+			for (l = 0; l < 20; l++) { // for safety stop after 20 loops
 				outBuf[idx] = l;
 				write_stm32();
 				#ifdef WIN32
@@ -244,12 +247,12 @@ get:		printf("get wakeup(w)\nget macro slot(m)\nget caps(c)\n");
 					} else { // queries for firmware
 					    printf("firmware: ");
 					    for (k = 4; k < 17; k++) {
-						if (!inBuf[k]) {
+							if (!inBuf[k]) {
 								printf("\n\n");
 								goto out;
+							}
+							printf("%c", inBuf[k]);
 						}
-						printf("%c", inBuf[k]);
-					    }
 					}
 				}
 				printf("\n\n");

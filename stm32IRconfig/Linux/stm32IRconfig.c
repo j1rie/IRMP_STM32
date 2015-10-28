@@ -191,43 +191,43 @@ get:	    printf("get wakeup(w)\nget macro slot(m)\nget caps(c)\n");
 		    break;
 		case 'c':
 		    outBuf[idx++] = 0x01; // CMD_CAPS
-		    for (l = 0;; l++) {
-				outBuf[idx] = l;
-				write_stm32();
-				usleep(2000);
-				read_stm32();
-				while (inBuf[0] == 0x01)
-				    read_stm32();
-				if (!l) { // first query for slots and depth
-				    printf("macro_slots: %u\n", inBuf[4]);
-				    printf("macro_depth: %u\n", inBuf[5]);
-				    printf("wakeup_slots: %u\n", inBuf[6]);
-				} else {
-					if(!jump_to_firmware) { // queries for supported_protocols
-					    printf("protocols: ");
-					    for (k = 4; k < 17; k++) {
-						if (!inBuf[k]) {
-								printf("\n\n");
-								jump_to_firmware = 1;
-								goto again;
-						}
-					    printf("%u ", inBuf[k]);
-					    }
-					} else { // queries for firmware
-					    printf("firmware: ");
-					    for (k = 4; k < 17; k++) {
-						if (!inBuf[k]) {
-								printf("\n\n");
-								goto out;
-						}
-					    printf("%c", inBuf[k]);
-					    }
+		    for (l = 0; l < 20; l++) { // for safety stop after 20 loops
+			outBuf[idx] = l;
+			write_stm32();
+			usleep(2000);
+			read_stm32();
+			while (inBuf[0] == 0x01)
+			    read_stm32();
+			    if (!l) { // first query for slots and depth
+			        printf("macro_slots: %u\n", inBuf[4]);
+			        printf("macro_depth: %u\n", inBuf[5]);
+			        printf("wakeup_slots: %u\n", inBuf[6]);
+			    } else {
+				if(!jump_to_firmware) { // queries for supported_protocols
+				    printf("protocols: ");
+				    for (k = 4; k < 17; k++) {
+				        if (!inBuf[k]) {
+					    printf("\n\n");
+					    jump_to_firmware = 1;
+					    goto again;
 					}
+					printf("%u ", inBuf[k]);
+				    }
+				} else { // queries for firmware
+				    printf("firmware: ");
+				    for (k = 4; k < 17; k++) {
+				        if (!inBuf[k]) {
+				            printf("\n\n");
+				            goto out;
+				        }
+				        printf("%c", inBuf[k]);
+				    }
 				}
-				printf("\n\n");
-again:		;
-			}
-			break;
+			    }
+			printf("\n\n");
+again:		    ;
+		    }
+		    break;
 		default:
 		    goto get;
 		}

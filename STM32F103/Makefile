@@ -49,7 +49,7 @@ DEFINES += -DSimpleCircuit
 TARGET := $(TARGET)_SC
 endif
 
-DATE := $(shell date +"%F")
+DATE := $(shell date +"%F_%H-%M")
 TARGET := $(DATE)_$(TARGET)
 
 DEFINES += -DFW_STR=\"$(TARGET)\"

@@ -1290,7 +1290,7 @@ MainWindow::onGcaps(FXObject *sender, FXSelector sel, void *ptr)
 	int read;
 	int jump_to_firmware;
 	jump_to_firmware = 0;
-	for(int i = 0;; i++) {
+	for(int i = 0; i < 20; i++) { // for safety stop after 20 loops
 		s = "3 0 0 1 "; // Report_ID STAT_CMD ACC_GET CMD_CAPS
 #if (FOX_MINOR >= 7)
 		t.fromInt(i,10);
