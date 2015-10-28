@@ -1,4 +1,4 @@
-/**********************************************************************************************************  
+/**********************************************************************************************************
 	stm32config: configure and monitor STM32IR
 
 	Copyright (C) 2014-2015 Jörg Riechardt
@@ -11,7 +11,7 @@
 	the Free Software Foundation; either version 2 of the License, or
 	(at your option) any later version.
 
-************************************************************************************************************/
+***********************************************************************************************************/
 
 #define _CRT_SECURE_NO_WARNINGS
 #include <stdio.h>
@@ -112,9 +112,9 @@ int main(int argc, char* argv[])
 
 cont:	printf("program eeprom: wakeups and macros (p)\nprogram eeprom: wakeups and macros with remote control(P)\nget eeprom (wakeups, macros and capabilities) (g)\nreset (wakeups, macros and alarm) (r)\nset alarm (s)\nget alarm (a)\nsend IR (i)\nmonitor until ^C (m)\nexit (x)\n");
 	scanf("%s", &c);
-	
+
 	switch (c) {
-	
+
 	case 'p':
 prog:		printf("set wakeup(w)\nset macro(m)\n");
 		scanf("%s", &d);
@@ -126,16 +126,16 @@ prog:		printf("set wakeup(w)\nset macro(m)\n");
 			printf("enter slot number (starting with 0)\n");
 			scanf("%"SCNd8"", &s);
 			outBuf[idx++] = 0x05; // CMD_WAKE
-			outBuf[idx++] = s;	// (s+1)-th slot
+			outBuf[idx++] = s;    // (s+1)-th slot
 			break;
 		case 'm':
 			printf("enter macro number (starting with 0)\n");
 			scanf("%"SCNd8"", &m);
 			outBuf[idx++] = 0x04; // CMD_MACRO
-			outBuf[idx++] = m;	// (m+1)-th macro
+			outBuf[idx++] = m;    // (m+1)-th macro
 			printf("enter slot number, 0 for trigger\n");
 			scanf("%"SCNd8"", &s);
-			outBuf[idx++] = s;	// (s+1)-th slot
+			outBuf[idx++] = s;    // (s+1)-th slot
 			break;
 		default:
 			goto prog;
@@ -162,16 +162,16 @@ Prog:		printf("set wakeup with remote control(w)\nset macro with remote control(
 			printf("enter slot number (starting with 0)\n");
 			scanf("%"SCNd8"", &s);
 			outBuf[idx++] = 0x05; // CMD_WAKE
-			outBuf[idx++] = s;	// (s+1)-th slot
+			outBuf[idx++] = s;    // (s+1)-th slot
 			break;
 		case 'm':
 			printf("enter macro number (starting with 0)\n");
 			scanf("%"SCNd8"", &m);
 			outBuf[idx++] = 0x04; // CMD_MACRO
-			outBuf[idx++] = m;	// (m+1)-th macro
+			outBuf[idx++] = m;    // (m+1)-th macro
 			printf("enter slot number, 0 for trigger\n");
 			scanf("%"SCNd8"", &s);
-			outBuf[idx++] = s;	// (s+1)-th slot
+			outBuf[idx++] = s;    // (s+1)-th slot
 			break;
 		default:
 			goto Prog;
@@ -193,7 +193,7 @@ Prog:		printf("set wakeup with remote control(w)\nset macro with remote control(
 		outBuf[idx++] = inBuf[6];
 		write_and_check();
 		break;
-		
+
 	case 'g':
 get:		printf("get wakeup(w)\nget macro slot(m)\nget caps(c)\n");
 		scanf("%s", &d);
@@ -205,16 +205,16 @@ get:		printf("get wakeup(w)\nget macro slot(m)\nget caps(c)\n");
 			printf("enter slot number (starting with 0)\n");
 			scanf("%"SCNd8"", &s);
 			outBuf[idx++] = 0x05; // CMD_WAKE
-			outBuf[idx++] = s;	// (s+1)-th slot
+			outBuf[idx++] = s;    // (s+1)-th slot
 			break;
 		case 'm':
 			printf("enter macro number (starting with 0)\n");
 			scanf("%"SCNd8"", &m);
 			outBuf[idx++] = 0x04; // CMD_MACRO
-			outBuf[idx++] = m;	// (m+1)-th macro
+			outBuf[idx++] = m;    // (m+1)-th macro
 			printf("enter slot number, 0 for trigger\n");
 			scanf("%"SCNd8"", &s);
-			outBuf[idx++] = s;	// (s+1)-th slot
+			outBuf[idx++] = s;    // (s+1)-th slot
 			break;
 		case 'c':
 			outBuf[idx++] = 0x01; // CMD_CAPS
@@ -245,8 +245,8 @@ get:		printf("get wakeup(w)\nget macro slot(m)\nget caps(c)\n");
 							printf("%u ", inBuf[k]);
 						}
 					} else { // queries for firmware
-					    printf("firmware: ");
-					    for (k = 4; k < 17; k++) {
+						printf("firmware: ");
+						for (k = 4; k < 17; k++) {
 							if (!inBuf[k]) {
 								printf("\n\n");
 								goto out;
@@ -256,7 +256,7 @@ get:		printf("get wakeup(w)\nget macro slot(m)\nget caps(c)\n");
 					}
 				}
 				printf("\n\n");
-again:		;
+again:			;
 			}
 			break;
 		default:
@@ -276,16 +276,16 @@ reset:		printf("reset wakeup(w)\nreset macro slot(m)\nreset alarm(a)\n");
 			printf("enter slot number (starting with 0)\n");
 			scanf("%"SCNd8"", &s);
 			outBuf[idx++] = 0x05; // CMD_WAKE
-			outBuf[idx++] = s;	// (s+1)-th slot
+			outBuf[idx++] = s;    // (s+1)-th slot
 			break;
 		case 'm':
 			printf("enter macro number (starting with 0)\n");
 			scanf("%"SCNd8"", &m);
 			outBuf[idx++] = 0x04; // CMD_MACRO
-			outBuf[idx++] = m;	// (m+1)-th macro
+			outBuf[idx++] = m;    // (m+1)-th macro
 			printf("enter slot number, 0 for trigger\n");
 			scanf("%"SCNd8"", &s);
-			outBuf[idx++] = s;	// (s+1)-th slot
+			outBuf[idx++] = s;    // (s+1)-th slot
 			break;
 		case 'a':
 			outBuf[idx++] = 0x03; // CMD_ALARM
@@ -313,8 +313,8 @@ reset:		printf("reset wakeup(w)\nreset macro slot(m)\nreset alarm(a)\n");
 		outBuf[idx++] = 0x00; // ACC_GET
 		outBuf[idx++] = 0x03; // CMD_ALARM
 		write_and_check();
-		break;		
-		
+		break;
+
 	case 'i':
 		printf("enter IRData (protocoladdresscommandflag)\n");
 		scanf("%"SCNx64"", &i);
@@ -330,31 +330,31 @@ reset:		printf("reset wakeup(w)\nreset macro slot(m)\nreset alarm(a)\n");
 		outBuf[idx++] = i & 0xFF;
 		write_and_check();
 		break;
-		
+
 	case 'm':
 		goto monit;
 		break;
-	
+
 	case 'x':
 		goto exit;
 		break;
-		
+
 	default:
 		goto cont;
 	}
-	
+
 	goto cont;
 
-monit:  while(true) {
+monit:	while(true) {
 		retValm = hid_read(handle, inBuf, sizeof(inBuf));
 		if (retValm >= 0) {
-		printf("read %d bytes:\n\t", retValm);
-		for (l = 0; l < retValm; l++)
-			printf("%02hhx ", inBuf[l]);
-		printf("\n");
-		printf("converted to protocoladdresscommandflag:\n\t");
-		printf("%02hhx%02hhx%02hhx%02hhx%02hhx%02hhx", inBuf[1],inBuf[3],inBuf[2],inBuf[5],inBuf[4],inBuf[6]);
-		printf("\n\n");
+			printf("read %d bytes:\n\t", retValm);
+			for (l = 0; l < retValm; l++)
+				printf("%02hhx ", inBuf[l]);
+			printf("\n");
+			printf("converted to protocoladdresscommandflag:\n\t");
+			printf("%02hhx%02hhx%02hhx%02hhx%02hhx%02hhx", inBuf[1],inBuf[3],inBuf[2],inBuf[5],inBuf[4],inBuf[6]);
+			printf("\n\n");
 		}
 	}
 	
