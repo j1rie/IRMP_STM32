@@ -1,6 +1,8 @@
 /**********************************************************************************************************  
     stm32IRalarm: set alarm to and get alarm from STM32IR
+
     Copyright (C) 2014-2015 Joerg Riechardt
+
     This program is free software; you can redistribute it and/or modify
     it under the terms of the GNU General Public License as published by
     the Free Software Foundation; either version 2 of the License, or
@@ -9,34 +11,20 @@
 ************************************************************************************************************/
 
 #include <stdio.h>
-/*
-#include <sys/socket.h>
-#include <sys/un.h>
-#include <sysexits.h>
-#include <sys/stat.h>
-#include <errno.h>
-#include <termios.h>
-#include <fcntl.h>
-*/
 #include <time.h>
-
-#define _CRT_SECURE_NO_WARNINGS
+#include <stdlib.h>
+#include <inttypes.h>
 #include <wchar.h>
 #include <string.h>
-#include <stdlib.h>
 #include "hidapi.h"
 #include <stdint.h>
-#include <inttypes.h>
+#include <windows.h>
+#include "getopt.h"
+#include <tchar.h>
 
-#ifdef _WIN32
-	#include <windows.h>
-	#include "getopt.h"
-	#include <tchar.h>
-	#define STATIC_GETOPT
-	#define _GETOPT_API
-#else
-	#include <unistd.h>
-#endif
+#define STATIC_GETOPT
+#define _GETOPT_API
+#define _CRT_SECURE_NO_WARNINGS
 
 hid_device *handle;
 unsigned char inBuf[17];
@@ -107,9 +95,9 @@ int _tmain(int argc, TCHAR** argv) {
 		break;
 	    }
 	}
-	
+
 	open_stm32();
-    outBuf[0] = 0x03; // Report ID
+        outBuf[0] = 0x03; // Report ID
 	outBuf[1] = 0x00; // STAT_CMD
 
 	if (svalue != NULL) {
@@ -118,11 +106,7 @@ int _tmain(int argc, TCHAR** argv) {
 	    setalarm = strtoul(svalue, NULL, 0);
 	    memcpy(&outBuf[4], &setalarm, sizeof(setalarm));
 	    write_stm32();
-	    #ifdef WIN32
-		Sleep(2);
-		#else
-		usleep(2000);
-		#endif
+	    Sleep(2);
 	    read_stm32(); /* necessary to avoid, that echo is read by first alarm read */
 	    while (inBuf[0] == 0x01)
 		read_stm32();
@@ -133,11 +117,7 @@ int _tmain(int argc, TCHAR** argv) {
 	    outBuf[2] = 0x00; // ACC_GET
 	    outBuf[3] = 0x03; // CMD_ALARM
 	    write_stm32();
-	    #ifdef WIN32
-		Sleep(2);
-		#else
-		usleep(2000);
-		#endif
+	    Sleep(2);
 	    read_stm32();
 	    while (inBuf[0] == 0x01)
 		read_stm32();
@@ -148,16 +128,10 @@ int _tmain(int argc, TCHAR** argv) {
 	    ts = (localtime(&wakeup));
 	    printf("\tVDRwakeup: %s", asctime(ts));
 	}
-	
 
 	hid_close(handle);
-
 	/* Free static HIDAPI objects. */
 	hid_exit();
-
-#ifdef WIN32
 	Sleep(2);
-#endif
-
 	return 0;
 }

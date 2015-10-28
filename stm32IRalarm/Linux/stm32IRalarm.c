@@ -1,5 +1,5 @@
 /**********************************************************************************************************  
-    stm32config: set alarm to and get alarm from STM32IR
+    stm32IRalarm: set alarm to and get alarm from STM32IR
 
     Copyright (C) 2014-2015 Joerg Riechardt
 
@@ -11,17 +11,17 @@
 ************************************************************************************************************/
 
 #include <stdio.h>
-#include <unistd.h>
+#include <time.h>
 #include <stdlib.h>
+#include <inttypes.h>
+#include <unistd.h>
 #include <sys/socket.h>
 #include <sys/un.h>
 #include <sysexits.h>
 #include <sys/stat.h>
 #include <errno.h>
-#include <inttypes.h>
 #include <termios.h>
 #include <fcntl.h>
-#include <time.h>
 
 static int stm32fd = -1;
 uint8_t inBuf[16];
@@ -33,12 +33,12 @@ static bool open_stm32(const char *devicename) {
 		printf("error opening stm32 device: %s\n",strerror(errno));
 		return false;
 	}
-//	printf("opened stm32 device\n");
+	//printf("opened stm32 device\n");
 	return true;
 }
 
 static void read_stm32() {
-//	int i;
+	//int i;
 	int retVal;
 	retVal = read(stm32fd, inBuf, sizeof(inBuf));
 	if (retVal < 0) {
@@ -52,7 +52,7 @@ static void read_stm32() {
 } 
 
 static void write_stm32() {
-//	int i;
+	//int i;
 	int retVal;
 	retVal = write(stm32fd, outBuf, sizeof(outBuf));
 	if (retVal < 0) {
