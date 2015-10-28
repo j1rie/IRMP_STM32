@@ -19,7 +19,7 @@
 #define WAKE_SLOTS	8
 #define SIZEOF_IR	6
 
-#define FW_STR "2015-10-26_F105-jrie"
+#define FW_STR "2015-10-26_00-00_F105-jrie"
 
 #define MIN_REPEATS	2  // TODO make configurable & use Eeprom
 
