@@ -546,7 +546,8 @@ MainWindow::onConnect(FXObject *sender, FXSelector sel, void *ptr)
 	s += FXString(" ") + device_info->product_string;
 	connected_label->setText(s);
 	s = "Firmware: ";
-	firmware.substitute("_"," ");
+	firmware.substitute("___","   ");
+	firmware.substitute(":_",": ");
 	s += firmware;
 	connected_label2->setText(s);
 	s = "Protocols: ";
