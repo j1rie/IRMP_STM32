@@ -546,6 +546,7 @@ MainWindow::onConnect(FXObject *sender, FXSelector sel, void *ptr)
 	s += FXString(" ") + device_info->product_string;
 	connected_label->setText(s);
 	s = "Firmware: ";
+	firmware.substitute("_"," ");
 	s += firmware;
 	connected_label2->setText(s);
 	s = "Protocols: ";
@@ -1331,7 +1332,6 @@ MainWindow::onGcaps(FXObject *sender, FXSelector sel, void *ptr)
 		if (!i) { // first query for slots and depth
 			macroslots = buf[4];
 			s.format("macro_slots: %u\n", buf[4]);
-			s += t;
 			macrodepth = buf[5];
 			t.format("macro_depth: %u\n", buf[5]);
 			s += t;
@@ -1358,6 +1358,7 @@ MainWindow::onGcaps(FXObject *sender, FXSelector sel, void *ptr)
 				for (int k = 4; k < 17; k++) {
 					if (!buf[k]) { // NULL termination
 						s += "\n";
+						//s.substitute("_"," ");
 						input_text->appendText(s);
 						input_text->setBottomLine(INT_MAX);
 						return 1;
@@ -1369,6 +1370,7 @@ MainWindow::onGcaps(FXObject *sender, FXSelector sel, void *ptr)
 			}
 		}
 		s += "\n";
+		//s.substitute("_"," ");
 		input_text->appendText(s);
 		input_text->setBottomLine(INT_MAX);
 again:	;

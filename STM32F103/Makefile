@@ -52,7 +52,9 @@ endif
 DATE := $(shell date +"%F_%H-%M")
 TARGET := $(DATE)_$(TARGET)
 
-DEFINES += -DFW_STR=\"$(TARGET)\"
+IRMP_VERSION := $(shell grep -e "Version IRMP" irmp/README.txt | awk '{print $$3}')
+DEFINES += -DFW_STR=\"$(TARGET)___IRMP_Version:_$(IRMP_VERSION)\"
+#no blanks!
 
 ifdef Bootloader
 DEFINES += -DBootloader
@@ -62,7 +64,8 @@ else
 LDFLAGS = -nostartfiles -Wl,-Map=$(TARGET).map,--gc-sections,--entry=main,-Tscripts/arm-gcc-link.ld $(ARCH) $(COMMON)
 endif
 
-TARGET := $(TARGET)-jrie
+COMPILED_BY = jrie
+TARGET := $(TARGET)_$(COMPILED_BY)
 
 $(TARGET).bin: $(TARGET).elf
 	$(OBJCP) -O binary $< $@
