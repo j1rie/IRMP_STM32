@@ -128,7 +128,8 @@ tar -xvf $ar --strip-components=1 \
     $path/irmpsystem.h \
     $path/irsnd.c \
     $path/irsnd.h \
-    $path/irsndconfig.h
+     $path/irsndconfig.h \
+    $path/README.txt
 cd ..
 
 # patch

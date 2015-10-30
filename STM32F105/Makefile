@@ -1,4 +1,4 @@
-TARGET ?= IR
+TARGET ?= F105
 PLATFORM ?= STM32F105RC
 #STM32F105RC
 #	CL - connectivity line
@@ -32,11 +32,22 @@ OBJS = src/irmpmain.o src/usb_hid.o src/main.o\
        usb_hid/src/usbd_req.o usb_hid/src/usbd_usr.o\
 
 CFLAGS = -Wall -ffunction-sections -fno-builtin $(ARCH) $(COMMON) $(INCLUDES) $(DEFINES)
-LDFLAGS = -nostartfiles -Wl,-Map=$(TARGET).map,--gc-sections,--entry=main,-Tscripts/arm-gcc-link.ld $(ARCH) $(COMMON)
 
 ifdef SimpleCircuit
 DEFINES += -DSimpleCircuit
 endif
+
+DATE := $(shell date +"%F_%H-%M")
+TARGET := $(DATE)_$(TARGET)
+
+IRMP_VERSION := $(shell grep -e "Version IRMP" irmp/README.txt | awk '{print $$3}')
+DEFINES += -DFW_STR=\"$(TARGET)___IRMP-Version:_$(IRMP_VERSION)\"
+#no blanks!
+
+LDFLAGS = -nostartfiles -Wl,-Map=$(TARGET).map,--gc-sections,--entry=main,-Tscripts/arm-gcc-link.ld $(ARCH) $(COMMON)
+
+COMPILED_BY = jrie
+TARGET := $(TARGET)_$(COMPILED_BY)
 
 $(TARGET).bin: $(TARGET).elf
 	$(OBJCP) -O binary $< $@
@@ -44,7 +55,8 @@ $(TARGET).bin: $(TARGET).elf
 $(TARGET).elf: prepare $(OBJS)
 	$(LD) $(LDFLAGS) $(OBJS) -o $@
 
-.PHONY: prepare flash clean distclean
+.PHONY: prepare flash clean-objects clean distclean
+
 prepare:
 	@./scripts/prepare.sh
 
