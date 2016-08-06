@@ -1,6 +1,6 @@
-diff -Nrup a/irmpconfig.h b/irmpconfig.h
---- a/irmpconfig.h	2015-09-21 14:46:25.000000000 +0200
-+++ b/irmpconfig.h	2015-10-03 15:28:01.000000000 +0200
+diff -Nrup A/irmpconfig.h B/irmpconfig.h
+--- A/irmpconfig.h	2016-01-12 13:09:16.000000000 +0100
++++ B/irmpconfig.h	2016-08-06 16:24:52.000000000 +0200
 @@ -56,17 +56,17 @@
  #define IRMP_SUPPORT_KASEIKYO_PROTOCOL          1       // Kaseikyo             >= 10000                 ~250 bytes
  
@@ -30,7 +30,7 @@ diff -Nrup a/irmpconfig.h b/irmpconfig.h
  
  // exotic protocols, enable here!               Enable  Remarks                 F_INTERRUPTS            Program Space
  #define IRMP_SUPPORT_BOSE_PROTOCOL              0       // BOSE                 >= 10000                 ~150 bytes
-@@ -128,9 +128,9 @@
+@@ -129,9 +129,9 @@
   * Change hardware pin here for ARM STM32
   *---------------------------------------------------------------------------------------------------------------------------------------------------
   */
@@ -43,9 +43,9 @@ diff -Nrup a/irmpconfig.h b/irmpconfig.h
  
  /*---------------------------------------------------------------------------------------------------------------------------------------------------
   * Change hardware pin here for Stellaris ARM Cortex M4
-diff -Nrup a/irsndconfig.h b/irsndconfig.h
---- a/irsndconfig.h	2015-09-21 14:46:25.000000000 +0200
-+++ b/irsndconfig.h	2015-10-03 15:28:01.000000000 +0200
+diff -Nrup A/irsndconfig.h B/irsndconfig.h
+--- A/irsndconfig.h	2015-11-18 09:29:51.000000000 +0100
++++ B/irsndconfig.h	2016-08-06 16:24:52.000000000 +0200
 @@ -47,17 +47,17 @@
  #define IRSND_SUPPORT_KASEIKYO_PROTOCOL         1       // Kaseikyo             >= 10000                 ~300 bytes
  
@@ -74,4 +74,4 @@ diff -Nrup a/irsndconfig.h b/irsndconfig.h
 +#define IRSND_SUPPORT_NOKIA_PROTOCOL            1       // Nokia                >= 10000                 ~400 bytes
  
  // exotic protocols, enable here!               Enable  Remarks                 F_INTERRUPTS            Program Space
- #define IRSND_SUPPORT_KATHREIN_PROTOCOL         0       // Kathrein             >= 10000                 DON'T CHANGE, NOT SUPPORTED YET!
+ #define IRSND_SUPPORT_BOSE_PROTOCOL             0       // BOSE                 >= 10000                 ~100 bytes
