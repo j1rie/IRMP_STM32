@@ -5,11 +5,14 @@
 #
 
 ### Specify the target board here.
-### Default is to build a firmware for the STM32F103 development board.
 ### Red --> Build for the "Red" ST-Link board or one of the ST-Link "USB-sticks"
 ### Blue --> Build for the "Blue" ST-Link board
+### Dev --> Build for the STM32F103 development board.
+### MapleMini --> Build for the Maple Mini board
 #Platform=Red
 #Platform=Blue
+#Platform=Dev
+#Platform=MapleMini
 
 ### Enable this if your firmware is meant to run on a board with the Maple
 ### bootloader installed.
@@ -24,3 +27,6 @@
 ### Default is to build a firmware which is meant to drive the power button via
 ### an opto-coupler added between STM32 board and mainboard.
 #SimpleCircuit=1
+
+### Enable this, if you have a pulldown resistor for USB reset.
+#PullDown=1

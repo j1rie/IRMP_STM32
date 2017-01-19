@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2014-2015 Joerg Riechardt
+ * Copyright (C) 2014-2017 Joerg Riechardt
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -20,7 +20,7 @@
 #define SIZEOF_IR	6
 
 /* uncomment this for CooCox */
-//#define FW_STR "2015-10-26_00-00_Blue_SC_BL_jrie"
+//#define FW_STR "2017-01-14_00-00_Dev_SC_BL-jrie"
 
 #define MIN_REPEATS	2  // TODO make configurable & use Eeprom
 
@@ -30,8 +30,17 @@
 /* uncomment this, if you use the red ST-Link */
 //#define RedLink
 
+/* uncomment this, if you use the developer board */
+//#define DeveloperBoard
+
+/* uncomment this, if you use the Maple Mini */
+//#define MapleMini
+
 /* uncomment this in order to pull down the "active" pin of the mainboard power button connector directly */
 //#define SimpleCircuit
+
+/* uncomment this, if you have a pulldown resistor for USB reset */
+//#define PullDown
 
 #if defined(BlueLink) || defined(RedLink)
 	#define ST_Link
@@ -39,32 +48,47 @@
 
 /* B11 IRMP (irmpconfig.h), B6 IRSND (irsndconfig.h) , B10 Logging (irmp.c) */
 
-#ifdef BlueLink /* blue ST-Link */
+#if defined(BlueLink) /* blue ST-Link */
 	#define OUT_PORT	GPIOA
-	#define LED_PIN		GPIO_Pin_14
+	#define RESET_PIN		GPIO_Pin_14
 	#define WAKEUP_PIN	GPIO_Pin_13
 	#define RESET_PORT	GPIOB
 	#define WAKEUP_RESET_PIN GPIO_Pin_14
 	#define USB_DISC_PORT GPIOB
 	#define USB_DISC_RCC_APB2Periph RCC_APB2Periph_GPIOB /* TODO use concat */
 	#define USB_DISC_PIN  GPIO_Pin_13
-#else /* red ST-Link and developer board */
+#elif defined(RedLink) /* red ST-Link */
 	#define OUT_PORT	GPIOB
-	#define LED_PIN		GPIO_Pin_13
+	#define RESET_PIN		GPIO_Pin_13
 	#define WAKEUP_PIN	GPIO_Pin_14
-#ifdef RedLink /* red ST-Link */
 	#define RESET_PORT	GPIOA
 	#define WAKEUP_RESET_PIN GPIO_Pin_14
 	#define USB_DISC_PORT GPIOA
 	#define USB_DISC_RCC_APB2Periph RCC_APB2Periph_GPIOA /* TODO use concat */
 	#define USB_DISC_PIN  GPIO_Pin_13
-#else /* developer board */
+#elif defined(DeveloperBoard) /* developer board */
+	#define OUT_PORT	GPIOB
+	#define LED_PIN		GPIO_Pin_13
+	#define WAKEUP_PIN	GPIO_Pin_14
+	#define RESET_PIN	GPIO_Pin_15
 	#define RESET_PORT	GPIOB
 	#define WAKEUP_RESET_PIN GPIO_Pin_12
 	#define USB_DISC_PORT GPIOB
 	#define USB_DISC_RCC_APB2Periph RCC_APB2Periph_GPIOB /* TODO use concat */
 	#define USB_DISC_PIN  GPIO_Pin_15
-#endif /* ST_Link */
+#elif defined(MapleMini) /* Maple Mini */
+	#define OUT_PORT	GPIOB
+	#define LED_PIN		GPIO_Pin_1
+	#define WAKEUP_PIN	GPIO_Pin_6
+	#define RESET_PIN	GPIO_Pin_15
+	#define RESET_PORT	GPIOB
+	#define WAKEUP_RESET_PIN GPIO_Pin_8
+	#define USB_DISC_PORT GPIOB
+	#define USB_DISC_RCC_APB2Periph RCC_APB2Periph_GPIOB /* TODO use concat */
+	#define USB_DISC_PIN  GPIO_Pin_9
+	#define PullDown
+#else
+	#error "Missing define for board"
 #endif /* BlueLink */
 
 #endif /* __CONFIG_H */

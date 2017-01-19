@@ -4,19 +4,11 @@ For the developer board compile with 'make Platform=Dev',
 for the red ST-Link emulator compile with 'make Platform=Red'
 and for the blue ST-Link emulator compile with 'make Platform=Blue'.
 
-A pulldown resistor from USBDP to the USB disconnect pin of 220 ohm needs to be added.
-A pullup resistor of 1,5 kohm is already present.
-You find a scheme in [2].
-
-In case the opendrain disconnect pin is reset, the disconnect pin is drawn to ground and the pulldown pulls USBDP close to ground.
-In case the disconnect pin is set, the disconnect pin is open and the pullup draws USBDP to VDD.
-
-The firmware, which gets loaded by the bootloader, needs to be adapted (vector table and linker) and has to release the USB_DISC_PIN again.
-For that compile the firmware with "make Bootloader=1".
+The firmware, which gets loaded by the bootloader, has to make an USB reset for 
+reenumeration. For this compile the firmware with "make Bootloader=1".
 
 Once the bootloader is flashed, you flash the new firmware like this:
 First run /path/FlashDFUSe.sh /path/newFirmware.bin,
-then connect the ST-Link.
+then connect the board.
 
 [1] https://github.com/j1rie/maple-bootloader/tree/unify_platforms
-[2] https://github.com/EvvGC/Hardware/blob/master/EvvGC%20v1.3/EvvGC%20vpre1.3ce2.pdf?raw=true

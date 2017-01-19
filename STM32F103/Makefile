@@ -1,6 +1,5 @@
 -include Make.config
 
-TARGET = Dev
 PLATFORM ?= STM32F103C8
 #STM32F103C8
 #	MD PL - medium density performance line
@@ -42,6 +41,14 @@ endif
 ifeq ($(Platform), Red)
 DEFINES += -DRedLink
 TARGET = Red
+endif
+ifeq ($(Platform), Dev)
+DEFINES += -DDeveloperBoard
+TARGET = Dev
+endif
+ifeq ($(Platform), MapleMini)
+DEFINES += -DMapleMini
+TARGET = MapleMini
 endif
 
 ifdef SimpleCircuit
