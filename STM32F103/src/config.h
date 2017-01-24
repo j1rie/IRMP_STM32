@@ -36,6 +36,9 @@
 /* uncomment this, if you use the developer board */
 //#define DeveloperBoard
 
+/* uncomment this, if you use the blue developer board */
+//#define BlueDeveloperBoard
+
 /* uncomment this, if you use the Maple Mini */
 //#define MapleMini
 
