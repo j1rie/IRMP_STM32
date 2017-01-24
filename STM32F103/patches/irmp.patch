@@ -37,9 +37,9 @@ diff -Nrup A/irmpconfig.h B/irmpconfig.h
 -#elif defined (ARM_STM32)                                               // use C13 as IR input on STM32
 -#  define IRMP_PORT_LETTER                      C
 -#  define IRMP_BIT_NUMBER                       13
-+#elif defined (ARM_STM32)                                               // use B11 as IR input on STM32
-+#  define IRMP_PORT_LETTER                      B
-+#  define IRMP_BIT_NUMBER                       11
++#elif defined (ARM_STM32)                                               // use defines from config.h as IR input on STM32
++#  define IRMP_PORT_LETTER                      IR_IN_PORT
++#  define IRMP_BIT_NUMBER                       IR_IN_PIN
  
  /*---------------------------------------------------------------------------------------------------------------------------------------------------
   * Change hardware pin here for Stellaris ARM Cortex M4

@@ -197,7 +197,10 @@ void LED_Switch_init(void)
 {
 	GPIO_InitTypeDef GPIO_InitStructure;
 	RCC_APB2PeriphClockCmd(RCC_APB2Periph_GPIOB, ENABLE);
-#ifdef ST_Link
+#ifdef BlueDeveloperBoard
+	RCC_APB2PeriphClockCmd(RCC_APB2Periph_GPIOC, ENABLE);
+#endif
+#if (defined(ST_Link) && !defined(StickLink))
 	RCC_APB2PeriphClockCmd(RCC_APB2Periph_GPIOA | RCC_APB2Periph_AFIO, ENABLE);
 	/* disable SWD, so pins are available */
 	GPIO_PinRemapConfig(GPIO_Remap_SWJ_Disable, ENABLE);
@@ -212,7 +215,7 @@ void LED_Switch_init(void)
 	GPIO_InitStructure.GPIO_Speed = GPIO_Speed_2MHz;
 #ifndef ST_Link
 	GPIO_InitStructure.GPIO_Pin = LED_PIN;
-	GPIO_Init(OUT_PORT, &GPIO_InitStructure);
+	GPIO_Init(LED_PORT, &GPIO_InitStructure);
 #endif /* ST_Link */
 	GPIO_InitStructure.GPIO_Pin = WAKEUP_PIN;
 #ifdef SimpleCircuit
@@ -226,7 +229,7 @@ void LED_Switch_init(void)
 	red_on();
 #else
 	/* start with LED on */
-	GPIO_WriteBit(OUT_PORT, LED_PIN, Bit_SET);
+	GPIO_WriteBit(LED_PORT, LED_PIN, Bit_SET);
 #endif /* ST_Link */
 }
 
@@ -239,7 +242,7 @@ void toggle_LED(void)
 		LED_deinit();
 	}
 #else
-	OUT_PORT->ODR ^= LED_PIN;
+	LED_PORT->ODR ^= LED_PIN;
 #endif /* ST_Link */
 }
 
@@ -362,10 +365,12 @@ void store_new_wakeup(void)
 
 void wakeup_reset(void)
 {
+#ifndef StickLink
 	/* wakeup reset pin pulled low? */
 	if (!GPIO_ReadInputDataBit(RESET_PORT, WAKEUP_RESET_PIN)) {
 		store_new_wakeup();
 	}
+#endif
 }
 
 int8_t get_handler(uint8_t *buf)

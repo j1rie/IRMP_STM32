@@ -30,6 +30,9 @@
 /* uncomment this, if you use the red ST-Link */
 //#define RedLink
 
+/* uncomment this, if you use the ST-Link stick */
+//#define StickLink
+
 /* uncomment this, if you use the developer board */
 //#define DeveloperBoard
 
@@ -39,53 +42,76 @@
 /* uncomment this in order to pull down the "active" pin of the mainboard power button connector directly */
 //#define SimpleCircuit
 
-/* uncomment this, if you have a pulldown resistor for USB reset */
+/* uncomment this for legacy boards with pulldown resistor for USB reset */
 //#define PullDown
 
-#if defined(BlueLink) || defined(RedLink)
+#if defined(BlueLink) || defined(RedLink) || defined(StickLink)
 	#define ST_Link
 #endif
 
-/* B11 IRMP (irmpconfig.h), B6 IRSND (irsndconfig.h) , B10 Logging (irmp.c) */
+/* B6 IRSND (irsndconfig.h) , B10 Logging (irmp.c) */
 
 #if defined(BlueLink) /* blue ST-Link */
-	#define OUT_PORT	GPIOA
+	#define OUT_PORT		GPIOA
+	#define WAKEUP_PIN		GPIO_Pin_13
 	#define RESET_PIN		GPIO_Pin_14
-	#define WAKEUP_PIN	GPIO_Pin_13
-	#define RESET_PORT	GPIOB
-	#define WAKEUP_RESET_PIN GPIO_Pin_14
-	#define USB_DISC_PORT GPIOB
-	#define USB_DISC_RCC_APB2Periph RCC_APB2Periph_GPIOB /* TODO use concat */
-	#define USB_DISC_PIN  GPIO_Pin_13
+	#define IR_IN_PORT		B
+	#define IR_IN_PIN		11
+	#define RESET_PORT		GPIOB
+	#define WAKEUP_RESET_PIN	GPIO_Pin_14
+	#define USB_DISC_PORT		GPIOB
+	#define USB_DISC_RCC_APB2Periph	RCC_APB2Periph_GPIOB /* TODO use concat */
+	#define USB_DISC_PIN		GPIO_Pin_13
 #elif defined(RedLink) /* red ST-Link */
-	#define OUT_PORT	GPIOB
+	#define OUT_PORT		GPIOB
+	#define WAKEUP_PIN		GPIO_Pin_14
 	#define RESET_PIN		GPIO_Pin_13
-	#define WAKEUP_PIN	GPIO_Pin_14
-	#define RESET_PORT	GPIOA
-	#define WAKEUP_RESET_PIN GPIO_Pin_14
-	#define USB_DISC_PORT GPIOA
-	#define USB_DISC_RCC_APB2Periph RCC_APB2Periph_GPIOA /* TODO use concat */
-	#define USB_DISC_PIN  GPIO_Pin_13
-#elif defined(DeveloperBoard) /* developer board */
-	#define OUT_PORT	GPIOB
-	#define LED_PIN		GPIO_Pin_13
-	#define WAKEUP_PIN	GPIO_Pin_14
-	#define RESET_PIN	GPIO_Pin_15
-	#define RESET_PORT	GPIOB
-	#define WAKEUP_RESET_PIN GPIO_Pin_12
-	#define USB_DISC_PORT GPIOB
-	#define USB_DISC_RCC_APB2Periph RCC_APB2Periph_GPIOB /* TODO use concat */
-	#define USB_DISC_PIN  GPIO_Pin_15
+	#define IR_IN_PORT		B
+	#define IR_IN_PIN		11
+	#define RESET_PORT		GPIOA
+	#define WAKEUP_RESET_PIN	GPIO_Pin_14
+	#define USB_DISC_PORT		GPIOA
+	#define USB_DISC_RCC_APB2Periph	RCC_APB2Periph_GPIOA /* TODO use concat */
+	#define USB_DISC_PIN		GPIO_Pin_13
+#elif defined(StickLink) /* ST-Link stick, avoid hassle with disabled SWD */
+	#define OUT_PORT		GPIOB
+	#define WAKEUP_PIN		GPIO_Pin_14
+	#define RESET_PIN		GPIO_Pin_13
+	#define IR_IN_PORT		B
+	#define IR_IN_PIN		11
+#elif defined(DeveloperBoard) /* classic developer board */
+	#define OUT_PORT		GPIOB
+	#define WAKEUP_PIN		GPIO_Pin_14
+	#define RESET_PIN		GPIO_Pin_15
+	#define IR_IN_PORT		B
+	#define IR_IN_PIN		11
+	#define LED_PORT		GPIOB
+	#define LED_PIN			GPIO_Pin_13
+	#define RESET_PORT		GPIOB
+	#define WAKEUP_RESET_PIN	GPIO_Pin_12
+#elif defined(BlueDeveloperBoard) /* blue developer board */
+	#define OUT_PORT		GPIOB
+	#define WAKEUP_PIN		GPIO_Pin_14
+	#define RESET_PIN		GPIO_Pin_15
+	#define LED_PORT		GPIOC
+	#define LED_PIN			GPIO_Pin_13
+	#define IR_IN_PORT		B
+	#define IR_IN_PIN		9
+	#define RESET_PORT		GPIOB
+	#define WAKEUP_RESET_PIN	GPIO_Pin_12
 #elif defined(MapleMini) /* Maple Mini */
-	#define OUT_PORT	GPIOB
-	#define LED_PIN		GPIO_Pin_1
-	#define WAKEUP_PIN	GPIO_Pin_6
-	#define RESET_PIN	GPIO_Pin_15
-	#define RESET_PORT	GPIOB
-	#define WAKEUP_RESET_PIN GPIO_Pin_8
-	#define USB_DISC_PORT GPIOB
-	#define USB_DISC_RCC_APB2Periph RCC_APB2Periph_GPIOB /* TODO use concat */
-	#define USB_DISC_PIN  GPIO_Pin_9
+	#define OUT_PORT		GPIOB
+	#define WAKEUP_PIN		GPIO_Pin_6
+	#define RESET_PIN		GPIO_Pin_15
+	#define LED_PORT		GPIOB
+	#define LED_PIN			GPIO_Pin_1
+	#define IR_IN_PORT		B
+	#define IR_IN_PIN		11
+	#define RESET_PORT		GPIOB
+	#define WAKEUP_RESET_PIN	GPIO_Pin_8
+	#define USB_DISC_PORT		GPIOB
+	#define USB_DISC_RCC_APB2Periph	RCC_APB2Periph_GPIOB /* TODO use concat */
+	#define USB_DISC_PIN		GPIO_Pin_9
 	#define PullDown
 #else
 	#error "Missing define for board"
