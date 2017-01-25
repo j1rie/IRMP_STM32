@@ -18,11 +18,10 @@
 #define MACRO_DEPTH	8
 #define WAKE_SLOTS	8
 #define SIZEOF_IR	6
-
-/* uncomment this for CooCox */
-//#define FW_STR "2017-01-14_00-00_Dev_SC_BL-jrie"
-
 #define MIN_REPEATS	2  // TODO make configurable & use Eeprom
+
+/* uncomment below for CooCox */
+//#define FW_STR "2017-01-14_00-00_Dev_SC_BL-jrie"
 
 /* uncomment this, if you use the blue ST-Link */
 //#define BlueLink
@@ -30,7 +29,7 @@
 /* uncomment this, if you use the red ST-Link */
 //#define RedLink
 
-/* uncomment this, if you use the ST-Link stick */
+/* uncomment this, if you use the ST-Link USB stick */
 //#define StickLink
 
 /* uncomment this, if you use the developer board */
@@ -96,20 +95,20 @@
 	#define OUT_PORT		GPIOB
 	#define WAKEUP_PIN		GPIO_Pin_14
 	#define RESET_PIN		GPIO_Pin_15
-	#define LED_PORT		GPIOC
-	#define LED_PIN			GPIO_Pin_13
 	#define IR_IN_PORT		B
 	#define IR_IN_PIN		9
+	#define LED_PORT		GPIOC
+	#define LED_PIN			GPIO_Pin_13
 	#define RESET_PORT		GPIOB
 	#define WAKEUP_RESET_PIN	GPIO_Pin_12
 #elif defined(MapleMini) /* Maple Mini */
 	#define OUT_PORT		GPIOB
 	#define WAKEUP_PIN		GPIO_Pin_6
 	#define RESET_PIN		GPIO_Pin_15
-	#define LED_PORT		GPIOB
-	#define LED_PIN			GPIO_Pin_1
 	#define IR_IN_PORT		B
 	#define IR_IN_PIN		11
+	#define LED_PORT		GPIOB
+	#define LED_PIN			GPIO_Pin_1
 	#define RESET_PORT		GPIOB
 	#define WAKEUP_RESET_PIN	GPIO_Pin_8
 	#define USB_DISC_PORT		GPIOB

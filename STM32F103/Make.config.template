@@ -5,19 +5,20 @@
 #
 
 ### Specify the target board here.
-### Red --> Build for the "Red" ST-Link board or one of the ST-Link "USB-sticks"
+### Red --> Build for the "Red" ST-Link board
 ### Blue --> Build for the "Blue" ST-Link board
+### StickLink --> Build for the ST-Link USB stick
 ### Dev --> Build for the classic STM32F103 development board
 ### blueDev --> Build for the blue STM32F103 development board
 ### MapleMini --> Build for the Maple Mini board
 #Platform=Red
 #Platform=Blue
+#Platform=StickLink
 #Platform=Dev
 #Platform=blueDev
 #Platform=MapleMini
 
-### Enable this if your firmware is meant to run on a board with the Maple
-### bootloader installed.
+### Enable this, if you use the bootloader. Does not apply for the Maple Mini.
 #Bootloader=1
 
 ### If you enable the following option, your firmware will be able to drive the
