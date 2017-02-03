@@ -103,10 +103,10 @@
 	#define WAKEUP_RESET_PIN	GPIO_Pin_12
 #elif defined(MapleMini) /* Maple Mini */
 	#define OUT_PORT		GPIOB
-	#define WAKEUP_PIN		GPIO_Pin_6
+	#define WAKEUP_PIN		GPIO_Pin_10
 	#define RESET_PIN		GPIO_Pin_15
 	#define IR_IN_PORT		B
-	#define IR_IN_PIN		11
+	#define IR_IN_PIN		0
 	#define LED_PORT		GPIOB
 	#define LED_PIN			GPIO_Pin_1
 	#define RESET_PORT		GPIOB
