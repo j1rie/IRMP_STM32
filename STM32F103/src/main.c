@@ -229,7 +229,12 @@ void LED_Switch_init(void)
 	red_on();
 #else
 	/* start with LED on */
+	/* on the blue and black developer board the LED lights, when pulled low */
+#if !(defined(BlueDeveloperBoard) || defined(BlackDeveloperBoard))
 	GPIO_WriteBit(LED_PORT, LED_PIN, Bit_SET);
+#else
+	GPIO_WriteBit(LED_PORT, LED_PIN, Bit_RESET);
+#endif
 #endif /* ST_Link */
 }
 

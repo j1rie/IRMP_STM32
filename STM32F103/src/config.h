@@ -32,11 +32,14 @@
 /* uncomment this, if you use the ST-Link USB stick */
 //#define StickLink
 
-/* uncomment this, if you use the developer board */
+/* uncomment this, if you use the big developer board */
 //#define DeveloperBoard
 
-/* uncomment this, if you use the blue developer board */
+/* uncomment this, if you use the blue or red developer board */
 //#define BlueDeveloperBoard
+
+/* uncomment this, if you use the black developer board */
+//#define BlackDeveloperBoard
 
 /* uncomment this, if you use the Maple Mini */
 //#define MapleMini
@@ -101,6 +104,16 @@
 	#define LED_PIN			GPIO_Pin_13
 	#define RESET_PORT		GPIOB
 	#define WAKEUP_RESET_PIN	GPIO_Pin_12
+#elif defined(BlackDeveloperBoard) /* black developer board */
+	#define OUT_PORT		GPIOB
+	#define WAKEUP_PIN		GPIO_Pin_14
+	#define RESET_PIN		GPIO_Pin_15
+	#define IR_IN_PORT		B
+	#define IR_IN_PIN		9
+	#define LED_PORT		GPIOB
+	#define LED_PIN			GPIO_Pin_12
+	#define RESET_PORT		GPIOB
+	#define WAKEUP_RESET_PIN	GPIO_Pin_13
 #elif defined(MapleMini) /* Maple Mini */
 	#define OUT_PORT		GPIOB
 	#define WAKEUP_PIN		GPIO_Pin_10
@@ -110,7 +123,7 @@
 	#define LED_PORT		GPIOB
 	#define LED_PIN			GPIO_Pin_1
 	#define RESET_PORT		GPIOB
-	#define WAKEUP_RESET_PIN	GPIO_Pin_8
+	#define WAKEUP_RESET_PIN	GPIO_Pin_13
 	#define USB_DISC_PORT		GPIOB
 	#define USB_DISC_RCC_APB2Periph	RCC_APB2Periph_GPIOB /* TODO use concat */
 	#define USB_DISC_PIN		GPIO_Pin_9
