@@ -10,12 +10,14 @@
 ### StickLink --> Build for the ST-Link USB stick
 ### Dev --> Build for the classic STM32F103 development board
 ### blueDev --> Build for the blue STM32F103 development board
+### blackDev --> Build for the black STM32F103 development board
 ### MapleMini --> Build for the Maple Mini board
 #Platform=Red
 #Platform=Blue
 #Platform=StickLink
 #Platform=Dev
 #Platform=blueDev
+#Platform=blackDev
 #Platform=MapleMini
 
 ### Enable this, if you use the bootloader. Does not apply for the Maple Mini.
@@ -31,5 +33,5 @@
 ### an opto-coupler added between STM32 board and mainboard.
 #SimpleCircuit=1
 
-### Enable this, if you have a pulldown resistor for USB reset.
+### Enable this, if you have a pulldown resistor for USB reset (legacy boards).
 #PullDown=1
