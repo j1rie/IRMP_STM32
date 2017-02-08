@@ -181,9 +181,9 @@ IRMP_RADIO1_PROTOCOL,
 __IO uint8_t PrevXferComplete = 1;
 uint32_t AlarmValue = 0xFFFFFFFF;
 volatile unsigned int systicks = 0;
+volatile unsigned int systicks2 = 0;
 #ifdef ST_Link
 extern uint8_t PA9_state;
-volatile unsigned int systicks2 = 0;
 #endif /* ST_Link */
 volatile unsigned int sof_timeout = 0;
 
@@ -200,16 +200,16 @@ void LED_Switch_init(void)
 #ifdef BlueDeveloperBoard
 	RCC_APB2PeriphClockCmd(RCC_APB2Periph_GPIOC, ENABLE);
 #endif
-#if (defined(ST_Link) && !defined(StickLink))
+#if (defined(ST_Link) && !defined(StickLink) || defined(BlackDeveloperBoard))
 	RCC_APB2PeriphClockCmd(RCC_APB2Periph_GPIOA | RCC_APB2Periph_AFIO, ENABLE);
 	/* disable SWD, so pins are available */
 	GPIO_PinRemapConfig(GPIO_Remap_SWJ_Disable, ENABLE);
 #endif /* ST_Link */
 	/* start with wakeup switch off */
 #ifdef SimpleCircuit
-	GPIO_WriteBit(OUT_PORT, WAKEUP_PIN, Bit_SET);
+	GPIO_WriteBit(WAKEUP_PORT, WAKEUP_PIN, Bit_SET);
 #else
-	GPIO_WriteBit(OUT_PORT, WAKEUP_PIN, Bit_RESET);
+	GPIO_WriteBit(WAKEUP_PORT, WAKEUP_PIN, Bit_RESET);
 #endif /* SimpleCircuit */
 	GPIO_InitStructure.GPIO_Mode = GPIO_Mode_Out_PP;
 	GPIO_InitStructure.GPIO_Speed = GPIO_Speed_2MHz;
@@ -221,10 +221,10 @@ void LED_Switch_init(void)
 #ifdef SimpleCircuit
 	GPIO_InitStructure.GPIO_Mode = GPIO_Mode_Out_OD;
 #endif /* SimpleCircuit */
-	GPIO_Init(OUT_PORT, &GPIO_InitStructure);
+	GPIO_Init(WAKEUP_PORT, &GPIO_InitStructure);
 	GPIO_InitStructure.GPIO_Pin = WAKEUP_RESET_PIN;
 	GPIO_InitStructure.GPIO_Mode = GPIO_Mode_IPU;
-	GPIO_Init(RESET_PORT, &GPIO_InitStructure);
+	GPIO_Init(WAKEUP_RESET_PORT, &GPIO_InitStructure);
 #ifdef ST_Link
 	red_on();
 #else
@@ -287,9 +287,7 @@ void SysTick_Handler(void)
 {
 	static uint_fast16_t i = 0;
 	systicks++;
-#ifdef ST_Link
 	systicks2++;
-#endif /* ST_Link */
 	if (sof_timeout != SOF_TIMEOUT)
 		sof_timeout++;
 	if (i == 1000) {
@@ -322,15 +320,15 @@ void Wakeup(void)
 	Resume(RESUME_START);
 	/* motherboard power switch: WAKEUP_PIN short high (resp. low in case of SimpleCircuit) */
 #ifdef SimpleCircuit
-	GPIO_WriteBit(OUT_PORT, WAKEUP_PIN, Bit_RESET);
+	GPIO_WriteBit(WAKEUP_PORT, WAKEUP_PIN, Bit_RESET);
 #else
-	GPIO_WriteBit(OUT_PORT, WAKEUP_PIN, Bit_SET);
+	GPIO_WriteBit(WAKEUP_PORT, WAKEUP_PIN, Bit_SET);
 #endif /* SimpleCircuit */
 	delay_ms(500);
 #ifdef SimpleCircuit
-	GPIO_WriteBit(OUT_PORT, WAKEUP_PIN, Bit_SET);
+	GPIO_WriteBit(WAKEUP_PORT, WAKEUP_PIN, Bit_SET);
 #else
-	GPIO_WriteBit(OUT_PORT, WAKEUP_PIN, Bit_RESET);
+	GPIO_WriteBit(WAKEUP_PORT, WAKEUP_PIN, Bit_RESET);
 #endif /* SimpleCircuit */
 	fast_toggle();
 }
@@ -339,15 +337,15 @@ void Reset(void)
 {
 	/* motherboard reset switch: RESET_PIN short high (resp. low in case of SimpleCircuit) */
 #ifdef SimpleCircuit
-	GPIO_WriteBit(OUT_PORT, RESET_PIN, Bit_RESET);
+	GPIO_WriteBit(RESET_PORT, RESET_PIN, Bit_RESET);
 #else
-	GPIO_WriteBit(OUT_PORT, RESET_PIN, Bit_SET);
+	GPIO_WriteBit(RESET_PORT, RESET_PIN, Bit_SET);
 #endif /* SimpleCircuit */
 	delay_ms(500);
 #ifdef SimpleCircuit
-	GPIO_WriteBit(OUT_PORT, RESET_PIN, Bit_SET);
+	GPIO_WriteBit(RESET_PORT, RESET_PIN, Bit_SET);
 #else
-	GPIO_WriteBit(OUT_PORT, RESET_PIN, Bit_RESET);
+	GPIO_WriteBit(RESET_PORT, RESET_PIN, Bit_RESET);
 #endif /* SimpleCircuit */
 	fast_toggle();
 }
@@ -372,7 +370,7 @@ void wakeup_reset(void)
 {
 #ifndef StickLink
 	/* wakeup reset pin pulled low? */
-	if (!GPIO_ReadInputDataBit(RESET_PORT, WAKEUP_RESET_PIN)) {
+	if (!GPIO_ReadInputDataBit(WAKEUP_RESET_PORT, WAKEUP_RESET_PIN)) {
 		store_new_wakeup();
 	}
 #endif

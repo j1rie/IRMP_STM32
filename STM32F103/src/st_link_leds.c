@@ -92,7 +92,14 @@ void both_on(void)
 }
 #else
 void LED_deinit(void) {}
-void fast_toggle(void) {}
+void fast_toggle(void)
+{
+	systicks2 = 0;
+	while (systicks2 <= 500) {
+		LED_PORT->ODR ^= LED_PIN;
+		delay_ms(50);  // ?!
+	}
+}
 void both_on(void) {}
 void red_on(void) {}
 void yellow_short_on(void) {delay_ms(130);}

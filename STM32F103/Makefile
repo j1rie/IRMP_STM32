@@ -50,6 +50,10 @@ ifeq ($(Platform), blueDev)
 DEFINES += -DBlueDeveloperBoard
 TARGET = blueDev
 endif
+ifeq ($(Platform), blackDev)
+DEFINES += -DBlackDeveloperBoard
+TARGET = blackDev
+endif
 ifeq ($(Platform), MapleMini)
 DEFINES += -DMapleMini
 TARGET = MapleMini
