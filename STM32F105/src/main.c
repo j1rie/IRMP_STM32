@@ -2,7 +2,7 @@
  *  IR receiver, sender, USB wakeup, motherboard switch wakeup, wakeup timer,
  *  USB HID device, eeprom emulation
  *
- *  Copyright (C) 2014-2015 Joerg Riechardt
+ *  Copyright (C) 2014-2017 Joerg Riechardt
  *
  *  This program is free software; you can redistribute it and/or modify
  *  it under the terms of the GNU General Public License as published by
@@ -14,6 +14,7 @@
 #include "usb_hid.h"
 #include "irmpmain.h"
 #include "eeprom.h"
+#include "st_link_leds.h"
 #include "config.h" /* CooCox workaround */
 
 #define BYTES_PER_QUERY	(HID_IN_BUFFER_SIZE - 4)
@@ -180,6 +181,7 @@ IRMP_RADIO1_PROTOCOL,
 extern USB_OTG_CORE_HANDLE USB_OTG_dev;
 uint32_t AlarmValue = 0xFFFFFFFF;
 volatile unsigned int systicks = 0;
+volatile unsigned int systicks2 = 0;
 volatile unsigned int sof_timeout = 0;
 
 void delay_ms(unsigned int msec)
@@ -194,29 +196,30 @@ void LED_Switch_init(void)
 	RCC_APB2PeriphClockCmd(RCC_APB2Periph_GPIOB, ENABLE);
 	/* start with wakeup switch off */
 #ifdef SimpleCircuit
-	GPIO_WriteBit(OUT_PORT, WAKEUP_PIN, Bit_SET);
+	GPIO_WriteBit(WAKEUP_PORT, WAKEUP_PIN, Bit_SET);
 #else
-	GPIO_WriteBit(OUT_PORT, WAKEUP_PIN, Bit_RESET);
+	GPIO_WriteBit(WAKEUP_PORT, WAKEUP_PIN, Bit_RESET);
 #endif /* SimpleCircuit */
-	GPIO_InitStructure.GPIO_Pin = LED_PIN;
+
 	GPIO_InitStructure.GPIO_Mode = GPIO_Mode_Out_PP;
 	GPIO_InitStructure.GPIO_Speed = GPIO_Speed_2MHz;
-	GPIO_Init(OUT_PORT, &GPIO_InitStructure);
+	GPIO_InitStructure.GPIO_Pin = LED_PIN;
+	GPIO_Init(LED_PORT, &GPIO_InitStructure);
 	GPIO_InitStructure.GPIO_Pin = WAKEUP_PIN;
 #ifdef SimpleCircuit
 	GPIO_InitStructure.GPIO_Mode = GPIO_Mode_Out_OD;
 #endif /* SimpleCircuit */
-	GPIO_Init(OUT_PORT, &GPIO_InitStructure);
-	GPIO_InitStructure.GPIO_Pin = WAKEUP_RESET_PIN;
-	GPIO_InitStructure.GPIO_Mode = GPIO_Mode_IPU;
-	GPIO_Init(RESET_PORT, &GPIO_InitStructure);
+	GPIO_Init(WAKEUP_PORT, &GPIO_InitStructure);
+	//GPIO_InitStructure.GPIO_Pin = WAKEUP_RESET_PIN;
+	//GPIO_InitStructure.GPIO_Mode = GPIO_Mode_IPU;
+	//GPIO_Init(WAKEUP_RESET_PORT, &GPIO_InitStructure);
 	/* start with LED on */
-	GPIO_WriteBit(OUT_PORT, LED_PIN, Bit_SET);
+	GPIO_WriteBit(LED_PORT, LED_PIN, Bit_SET);
 }
 
 void toggle_LED(void)
 {
-	OUT_PORT->ODR ^= LED_PIN;
+	LED_PORT->ODR ^= LED_PIN;
 }
 
 /* buf[0 ... 5] -> eeprom[virt_addr ... virt_addr + 2] */
@@ -255,6 +258,7 @@ void SysTick_Handler(void)
 {
 	static uint_fast16_t i = 0;
 	systicks++;
+	systicks2++;
 	if (sof_timeout != SOF_TIMEOUT)
 		sof_timeout++;
 	if (i == 1000) {
@@ -278,18 +282,36 @@ void Wakeup(void)
 		return;
 	/* USB wakeup */
 	USB_OTG_ActiveRemoteWakeup(&USB_OTG_dev);
-	/* motherboard switch: WAKEUP_PIN short high (resp. low in case of SimpleCircuit) */
+	/* motherboard power switch: WAKEUP_PIN short high (resp. low in case of SimpleCircuit) */
 #ifdef SimpleCircuit
-	GPIO_WriteBit(OUT_PORT, WAKEUP_PIN, Bit_RESET);
+	GPIO_WriteBit(WAKEUP_PORT, WAKEUP_PIN, Bit_RESET);
 #else
-	GPIO_WriteBit(OUT_PORT, WAKEUP_PIN, Bit_SET);
+	GPIO_WriteBit(WAKEUP_PORT, WAKEUP_PIN, Bit_SET);
 #endif /* SimpleCircuit */
 	delay_ms(500);
 #ifdef SimpleCircuit
-	GPIO_WriteBit(OUT_PORT, WAKEUP_PIN, Bit_SET);
+	GPIO_WriteBit(WAKEUP_PORT, WAKEUP_PIN, Bit_SET);
 #else
-	GPIO_WriteBit(OUT_PORT, WAKEUP_PIN, Bit_RESET);
+	GPIO_WriteBit(WAKEUP_PORT, WAKEUP_PIN, Bit_RESET);
 #endif /* SimpleCircuit */
+	fast_toggle();
+}
+
+void Reset(void)
+{
+	/* motherboard reset switch: RESET_PIN short high (resp. low in case of SimpleCircuit) */
+#ifdef SimpleCircuit
+	GPIO_WriteBit(RESET_PORT, RESET_PIN, Bit_RESET);
+#else
+	GPIO_WriteBit(RESET_PORT, RESET_PIN, Bit_SET);
+#endif /* SimpleCircuit */
+	delay_ms(500);
+#ifdef SimpleCircuit
+	GPIO_WriteBit(RESET_PORT, RESET_PIN, Bit_SET);
+#else
+	GPIO_WriteBit(RESET_PORT, RESET_PIN, Bit_RESET);
+#endif /* SimpleCircuit */
+	fast_toggle();
 }
 
 void store_new_wakeup(void)
@@ -310,10 +332,12 @@ void store_new_wakeup(void)
 
 void wakeup_reset(void)
 {
+#if (0)
 	/* wakeup reset pin pulled low? */
-	if (!GPIO_ReadInputDataBit(RESET_PORT, WAKEUP_RESET_PIN)) {
+	if (!GPIO_ReadInputDataBit(WAKEUP_RESET_PORT, WAKEUP_RESET_PIN)) {
 		store_new_wakeup();
 	}
+#endif
 }
 
 int8_t get_handler(uint8_t *buf)
@@ -375,7 +399,7 @@ int8_t set_handler(uint8_t *buf)
 	uint8_t tmp[SIZEOF_IR];
 	switch ((enum command) buf[2]) {
 	case CMD_EMIT:
-		delay_ms(130);
+		yellow_short_on();
 		irsnd_send_data((IRMP_DATA *) &buf[3], 1);
 		break;
 	case CMD_ALARM:
@@ -427,18 +451,33 @@ int8_t reset_handler(uint8_t *buf)
 	return ret;
 }
 
-/* is received ir-code in one of the wakeup-slots? wakeup if true */
+/* is received ir-code in one of the lower wakeup-slots? wakeup if true */
 void check_wakeups(IRMP_DATA *ir)
 {
 	if(host_running())
 		return;
 	uint8_t i, idx;
 	uint8_t buf[SIZEOF_IR];
-	for (i=0; i < WAKE_SLOTS; i++) {
+	for (i=0; i < WAKE_SLOTS/2; i++) {
 		idx = (MACRO_DEPTH + 1) * SIZEOF_IR/2 * MACRO_SLOTS + SIZEOF_IR/2 * i;
-		eeprom_restore(buf, idx);
-		if (!memcmp(buf, ir, sizeof(buf)))
-			Wakeup();
+		if (!eeprom_restore(buf, idx)) {
+			if (!memcmp(buf, ir, sizeof(buf)))
+				Wakeup();
+		}
+	}
+}
+
+/* is received ir-code in one of the upper wakeup-slots? reset if true */
+void check_resets(IRMP_DATA *ir)
+{
+	uint8_t i, idx;
+	uint8_t buf[SIZEOF_IR];
+	for (i=WAKE_SLOTS/2; i < WAKE_SLOTS; i++) {
+		idx = (MACRO_DEPTH + 1) * SIZEOF_IR/2 * MACRO_SLOTS + SIZEOF_IR/2 * i;
+		if (!eeprom_restore(buf, idx)) {
+			if (!memcmp(buf, ir, sizeof(buf)))
+				Reset();
+		}
 	}
 }
 
@@ -456,7 +495,7 @@ void transmit_macro(uint8_t macro)
 			break;
 		/* Depending on the protocol we need a pause between the trigger and the transmission
 		 * and between two transmissions. The highest known pause is 130 ms for Denon. */
-		delay_ms(130);
+		yellow_short_on();
 		irsnd_send_data((IRMP_DATA *) buf, 1);
 	}
 }
@@ -474,6 +513,28 @@ void check_macros(IRMP_DATA *ir)
 	}
 }
 
+void USB_Reset(void)
+{
+#if defined(Bootloader) && !defined(PullDown)
+	/* disable USB */
+	//PowerOff(); // F105!!!
+	//USBD_Reset(&USB_OTG_dev); // ??
+	//USB_OTG_CoreReset(&USB_OTG_dev); // ??
+	//USB_OTG_dev.regs.GREGS->GCCFG = 0; // 
+	//FRES ?! USB_CNTR -> FRES = 1;
+	/* USB reset by pulling USBDP shortly low. A pullup resistor is needed, most
+	 * boards have it. */
+	GPIO_InitTypeDef GPIO_InitStructure;
+	RCC_APB2PeriphClockCmd(RCC_APB2Periph_GPIOA, ENABLE);
+	GPIO_InitStructure.GPIO_Pin = GPIO_Pin_12;
+	GPIO_InitStructure.GPIO_Mode = GPIO_Mode_Out_OD;
+	GPIO_InitStructure.GPIO_Speed = GPIO_Speed_2MHz;
+	GPIO_Init(GPIOA, &GPIO_InitStructure);
+	GPIO_WriteBit(GPIOA, GPIO_Pin_12, Bit_RESET);
+	delay_ms(15);
+#endif
+}
+
 int main(void)
 {
 	uint8_t buf[HID_OUT_BUFFER_SIZE-1], RepeatCounter = 0;
@@ -482,13 +543,14 @@ int main(void)
 	/* first wakeup slot empty? */
 	uint8_t learn_wakeup = eeprom_restore(buf, (MACRO_DEPTH + 1) * SIZEOF_IR/2 * MACRO_SLOTS);
 
-	USB_HID_Init();
 	LED_Switch_init();
+	Systick_Init();
+	//USB_Reset();
+	USB_HID_Init();
 	IRMP_Init();
 	irsnd_init();
 	FLASH_Unlock();
 	EE_Init();
-	Systick_Init();
 
 	while (1) {
 		if (!AlarmValue)
@@ -545,6 +607,7 @@ int main(void)
 				 * the receiving device may crash */
 				check_macros(&myIRData);
 				check_wakeups(&myIRData);
+				check_resets(&myIRData);
 			}
 
 			/* send IR-data */

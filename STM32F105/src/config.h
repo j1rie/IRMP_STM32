@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2014-2015 Joerg Riechardt
+ * Copyright (C) 2014-2017 Joerg Riechardt
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -18,18 +18,18 @@
 #define MACRO_DEPTH	8
 #define WAKE_SLOTS	8
 #define SIZEOF_IR	6
-
-/* uncomment this for CooCox */
-//#define FW_STR "2015-10-26_00-00_F105_jrie"
-
 #define MIN_REPEATS	2  // TODO make configurable & use Eeprom
 
-/* B11 IRMP (irmpconfig.h), B6 IRSND (irsndconfig.h) , B10 Logging (irmp.c) */
+/* uncomment below for CooCox */
+//#define FW_STR "2015-10-26_00-00_F105_jrie"
 
-#define OUT_PORT	GPIOB
-#define LED_PIN		GPIO_Pin_12 // blue LED
+/* C6 IRMP (irmpconfig.h), B6 IRSND (irsndconfig.h) , B10 Logging (irmp.c) */
+
+#define WAKEUP_PORT	GPIOB
 #define WAKEUP_PIN	GPIO_Pin_7
 #define RESET_PORT	GPIOB
-#define WAKEUP_RESET_PIN GPIO_Pin_8
+#define RESET_PIN	GPIO_Pin_8
+#define LED_PORT	GPIOB
+#define LED_PIN		GPIO_Pin_12 // blue LED
 
 #endif /* __CONFIG_H */
