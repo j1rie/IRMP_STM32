@@ -17,7 +17,7 @@ COMMON = -g -Os -flto
 INCLUDES = -Icmsis -Icmsis_boot -Istm_lib/inc -Iusb_hid/inc -Iirmp -Isrc
 DEFINES = -D$(PLATFORM) -DSTM32F10X_CL -DUSE_STDPERIPH_DRIVER
 
-OBJS = src/irmpmain.o src/usb_hid.o src/main.o\
+OBJS = src/irmpmain.o src/st_link_leds.o src/usb_hid.o src/main.o\
        irmp/irmp.o irmp/irsnd.o\
        cmsis_boot/startup/startup_stm32f10x_cl.o cmsis_boot/system_stm32f10x.o\
        stm_lib/src/misc.o\
@@ -41,10 +41,15 @@ DATE := $(shell date +"%F_%H-%M")
 TARGET := $(DATE)_$(TARGET)
 
 IRMP_VERSION := $(shell grep -e "Version IRMP" irmp/README.txt | awk '{print $$3}')
-DEFINES += -DFW_STR=\"$(TARGET)___IRMP-Version:_$(IRMP_VERSION)\"
-#no blanks!
+DEFINES += -DFW_STR="\"$(TARGET)   IRMP-Version:_$(IRMP_VERSION)\""
 
+ifdef Bootloader
+DEFINES += -DBootloader
+TARGET := $(TARGET)_BL
+LDFLAGS = -nostartfiles -Wl,-Map=$(TARGET).map,--gc-sections,--entry=main,-Tscripts/arm-gcc-link-bootloader.ld $(ARCH) $(COMMON)
+else
 LDFLAGS = -nostartfiles -Wl,-Map=$(TARGET).map,--gc-sections,--entry=main,-Tscripts/arm-gcc-link.ld $(ARCH) $(COMMON)
+endif
 
 COMPILED_BY = jrie
 TARGET := $(TARGET)_$(COMPILED_BY)

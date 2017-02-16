@@ -128,7 +128,7 @@ tar -xvf $ar --strip-components=1 \
     $path/irmpsystem.h \
     $path/irsnd.c \
     $path/irsnd.h \
-     $path/irsndconfig.h \
+    $path/irsndconfig.h \
     $path/README.txt
 cd ..
 
@@ -137,6 +137,7 @@ patch -d usb_hid -p1 -i ../patches/usb_hid.patch
 patch -d stm_lib -p1 -i ../patches/eeprom.patch
 patch -d cmsis_boot -p1 -i ../patches/stm32f10x_conf.patch
 patch -d cmsis_boot -p1 -i ../patches/startup.patch
+patch -d cmsis_boot -p1 -i ../patches/system.patch
 patch -d irmp -p1 -i ../patches/irmp.patch
 
 # mark as prepared

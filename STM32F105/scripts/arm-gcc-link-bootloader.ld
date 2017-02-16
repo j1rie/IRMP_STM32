@@ -2,12 +2,12 @@ OUTPUT_FORMAT ("elf32-littlearm", "elf32-bigarm", "elf32-littlearm")
 /* Internal Memory Map*/
 MEMORY
 {
-	rom (rx)  : ORIGIN = 0x08002000, LENGTH = 0x0001E000
-	ram (rwx) : ORIGIN = 0x20000000, LENGTH = 0x00005000
+	rom (rx)  : ORIGIN = 0x08002000, LENGTH = 0x0003E000
+	ram (rwx) : ORIGIN = 0x20000000, LENGTH = 0x00010000
 }
 
-_eram = 0x20000000 + 0x00005000;
-_estack = 0x20000000 + 0x00005000;
+_eram = 0x20000000 + 0x00010000;
+_estack = 0x20000000 + 0x00010000;
 SECTIONS
 {
 	.text :
