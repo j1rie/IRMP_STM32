@@ -513,15 +513,30 @@ void check_macros(IRMP_DATA *ir)
 	}
 }
 
+PowerOff()
+{
+#define CNTR_FRES   (0x0001) /* Force USB RESet */
+#define CNTR_PDWN   (0x0002) /* Power DoWN */
+#define RegBase  (0x40005C00L)  /* USB_IP Peripheral Registers base address */
+#define CNTR    ((__IO unsigned *)(RegBase + 0x40))
+#define ISTR    ((__IO unsigned *)(RegBase + 0x44))
+#define _SetCNTR(wRegValue)  (*CNTR   = (uint16_t)wRegValue)
+#define _SetISTR(wRegValue)  (*ISTR   = (uint16_t)wRegValue)
+
+	/* disable all interrupts and force USB reset */
+  _SetCNTR(CNTR_FRES);
+  /* clear interrupt status register */
+  _SetISTR(0);
+  /* switch-off device */
+  _SetCNTR(CNTR_FRES + CNTR_PDWN);
+  return;
+}
+
 void USB_Reset(void)
 {
 #if defined(Bootloader) && !defined(PullDown)
 	/* disable USB */
-	//PowerOff(); // F105!!!
-	//USBD_Reset(&USB_OTG_dev); // ??
-	//USB_OTG_CoreReset(&USB_OTG_dev); // ??
-	//USB_OTG_dev.regs.GREGS->GCCFG = 0; // 
-	//FRES ?! USB_CNTR -> FRES = 1;
+	PowerOff();
 	/* USB reset by pulling USBDP shortly low. A pullup resistor is needed, most
 	 * boards have it. */
 	GPIO_InitTypeDef GPIO_InitStructure;
@@ -545,7 +560,7 @@ int main(void)
 
 	LED_Switch_init();
 	Systick_Init();
-	//USB_Reset();
+	USB_Reset();
 	USB_HID_Init();
 	IRMP_Init();
 	irsnd_init();

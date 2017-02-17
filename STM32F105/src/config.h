@@ -23,6 +23,9 @@
 /* uncomment below for CooCox */
 //#define FW_STR "2015-10-26_00-00_F105_jrie"
 
+/* uncomment this in order to pull down the "active" pin of the mainboard power button connector directly */
+//#define SimpleCircuit
+
 /* C6 IRMP (irmpconfig.h), B6 IRSND (irsndconfig.h) , B10 Logging (irmp.c) */
 
 #define WAKEUP_PORT	GPIOB
