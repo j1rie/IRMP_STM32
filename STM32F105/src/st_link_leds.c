@@ -102,5 +102,10 @@ void fast_toggle(void)
 }
 void both_on(void) {}
 void red_on(void) {}
-void yellow_short_on(void) {delay_ms(130);}
+void yellow_short_on(void)
+{
+	LED_PORT->ODR ^= LED_PIN;
+	delay_ms(130);
+	LED_PORT->ODR ^= LED_PIN;
+}
 #endif /* ST_Link */

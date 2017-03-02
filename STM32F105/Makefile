@@ -33,8 +33,8 @@ OBJS = src/irmpmain.o src/st_link_leds.o src/usb_hid.o src/main.o\
 
 CFLAGS = -Wall -ffunction-sections -fno-builtin $(ARCH) $(COMMON) $(INCLUDES) $(DEFINES)
 
-ifdef SimpleCircuit
-DEFINES += -DSimpleCircuit
+ifdef SimpleCircuit_F105
+DEFINES += -DSimpleCircuit_F105
 TARGET := $(TARGET)_SC
 endif
 

@@ -200,7 +200,6 @@ void LED_Switch_init(void)
 #else
 	GPIO_WriteBit(WAKEUP_PORT, WAKEUP_PIN, Bit_RESET);
 #endif /* SimpleCircuit */
-
 	GPIO_InitStructure.GPIO_Mode = GPIO_Mode_Out_PP;
 	GPIO_InitStructure.GPIO_Speed = GPIO_Speed_2MHz;
 	GPIO_InitStructure.GPIO_Pin = LED_PIN;
@@ -513,30 +512,28 @@ void check_macros(IRMP_DATA *ir)
 	}
 }
 
-PowerOff()
+void USB_DISC_release(void)
 {
-#define CNTR_FRES   (0x0001) /* Force USB RESet */
-#define CNTR_PDWN   (0x0002) /* Power DoWN */
-#define RegBase  (0x40005C00L)  /* USB_IP Peripheral Registers base address */
-#define CNTR    ((__IO unsigned *)(RegBase + 0x40))
-#define ISTR    ((__IO unsigned *)(RegBase + 0x44))
-#define _SetCNTR(wRegValue)  (*CNTR   = (uint16_t)wRegValue)
-#define _SetISTR(wRegValue)  (*ISTR   = (uint16_t)wRegValue)
-
-	/* disable all interrupts and force USB reset */
-  _SetCNTR(CNTR_FRES);
-  /* clear interrupt status register */
-  _SetISTR(0);
-  /* switch-off device */
-  _SetCNTR(CNTR_FRES + CNTR_PDWN);
-  return;
+#if defined(Bootloader) && defined(PullDown)
+	GPIO_InitTypeDef GPIO_InitStructure;
+	RCC_APB2PeriphClockCmd(USB_DISC_RCC_APB2Periph, ENABLE);
+	GPIO_InitStructure.GPIO_Pin = USB_DISC_PIN;
+	GPIO_InitStructure.GPIO_Mode = GPIO_Mode_Out_OD;
+	GPIO_InitStructure.GPIO_Speed = GPIO_Speed_2MHz;
+	GPIO_Init(USB_DISC_PORT, &GPIO_InitStructure);
+#ifdef MapleMini
+	GPIO_WriteBit(USB_DISC_PORT, USB_DISC_PIN, Bit_RESET);
+#else
+	GPIO_WriteBit(USB_DISC_PORT, USB_DISC_PIN, Bit_SET);
+#endif
+#endif
 }
 
 void USB_Reset(void)
 {
 #if defined(Bootloader) && !defined(PullDown)
 	/* disable USB */
-	PowerOff();
+	//PowerOff();
 	/* USB reset by pulling USBDP shortly low. A pullup resistor is needed, most
 	 * boards have it. */
 	GPIO_InitTypeDef GPIO_InitStructure;
@@ -562,6 +559,7 @@ int main(void)
 	Systick_Init();
 	USB_Reset();
 	USB_HID_Init();
+	USB_DISC_release();
 	IRMP_Init();
 	irsnd_init();
 	FLASH_Unlock();
