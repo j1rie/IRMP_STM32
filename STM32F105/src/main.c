@@ -181,7 +181,6 @@ IRMP_RADIO1_PROTOCOL,
 extern USB_OTG_CORE_HANDLE USB_OTG_dev;
 uint32_t AlarmValue = 0xFFFFFFFF;
 volatile unsigned int systicks = 0;
-volatile unsigned int systicks2 = 0;
 volatile unsigned int sof_timeout = 0;
 volatile unsigned int i = 0;
 
