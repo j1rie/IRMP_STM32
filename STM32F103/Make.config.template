@@ -5,16 +5,16 @@
 #
 
 ### Specify the target board here.
-### Red --> Build for the "Red" ST-Link board
+### Red --> Build for the "Red" ST-Link board or a ST-Link USB stick with two LEDs
 ### Blue --> Build for the "Blue" ST-Link board
-### StickLink --> Build for the ST-Link USB stick
+### Stick --> Build for the ST-Link USB stick with only one LED
 ### Dev --> Build for the classic STM32F103 development board
 ### blueDev --> Build for the blue STM32F103 development board
 ### blackDev --> Build for the black STM32F103 development board
 ### MapleMini --> Build for the Maple Mini board
 #Platform=Red
 #Platform=Blue
-#Platform=StickLink
+#Platform=Stick
 #Platform=Dev
 #Platform=blueDev
 #Platform=blackDev

@@ -183,6 +183,7 @@ uint32_t AlarmValue = 0xFFFFFFFF;
 volatile unsigned int systicks = 0;
 volatile unsigned int systicks2 = 0;
 volatile unsigned int sof_timeout = 0;
+volatile unsigned int i = 0;
 
 void delay_ms(unsigned int msec)
 {
@@ -255,12 +256,10 @@ void Systick_Init(void)
 
 void SysTick_Handler(void)
 {
-	static uint_fast16_t i = 0;
 	systicks++;
-	systicks2++;
 	if (sof_timeout != SOF_TIMEOUT)
 		sof_timeout++;
-	if (i == 1000) {
+	if (i == 999) {
 		if (AlarmValue)
 			AlarmValue--;
 		i = 0;

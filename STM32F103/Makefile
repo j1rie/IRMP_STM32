@@ -42,6 +42,10 @@ ifeq ($(Platform), Red)
 DEFINES += -DRedLink
 TARGET = Red
 endif
+ifeq ($(Platform), Stick)
+DEFINES += -DStickLink
+TARGET = Stick
+endif
 ifeq ($(Platform), Dev)
 DEFINES += -DDeveloperBoard
 TARGET = Dev

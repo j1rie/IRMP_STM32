@@ -26,10 +26,10 @@
 /* uncomment this, if you use the blue ST-Link */
 //#define BlueLink
 
-/* uncomment this, if you use the red ST-Link */
+/* uncomment this, if you use the red ST-Link or a ST-Link USB stick with two LEDs */
 //#define RedLink
 
-/* uncomment this, if you use the ST-Link USB stick */
+/* uncomment this, if you use a ST-Link USB stick with only one LED */
 //#define StickLink
 
 /* uncomment this, if you use the big developer board */
@@ -50,43 +50,48 @@
 /* uncomment this for legacy boards with pulldown resistor for USB reset */
 //#define PullDown
 
-#if defined(BlueLink) || defined(RedLink) || defined(StickLink)
+/* for ST-Link USB sticks with only one LED no extra LED handling is needed */
+#if defined(BlueLink) || defined(RedLink)
 	#define ST_Link
 #endif
 
 /* B6 IRSND (irsndconfig.h) , B10 Logging (irmp.c) */
 
-#if defined(BlueLink) /* blue ST-Link */
+#if defined(BlueLink) /* blue ST-Link, IRSND = NRST */
 	#define WAKEUP_PORT		GPIOA
-	#define WAKEUP_PIN		GPIO_Pin_13
+	#define WAKEUP_PIN		GPIO_Pin_13 /* DIO */
 	#define RESET_PORT		GPIOA
-	#define RESET_PIN		GPIO_Pin_14
+	#define RESET_PIN		GPIO_Pin_14 /* CLK */
 	#define IR_IN_PORT		B
-	#define IR_IN_PIN		11
+	#define IR_IN_PIN		11 /* SWIM */
 	#define WAKEUP_RESET_PORT	GPIOB
-	#define WAKEUP_RESET_PIN	GPIO_Pin_14
+	#define WAKEUP_RESET_PIN	GPIO_Pin_14 /* TMS */
 	#define USB_DISC_PORT		GPIOB
 	#define USB_DISC_RCC_APB2Periph	RCC_APB2Periph_GPIOB /* TODO use concat */
-	#define USB_DISC_PIN		GPIO_Pin_13
-#elif defined(RedLink) /* red ST-Link */
+	#define USB_DISC_PIN		GPIO_Pin_13 /* TCK */
+#elif defined(RedLink) /* red ST-Link, IRSND = NRST */
 	#define WAKEUP_PORT		GPIOB
-	#define WAKEUP_PIN		GPIO_Pin_14
+	#define WAKEUP_PIN		GPIO_Pin_14 /* DIO */
 	#define RESET_PORT		GPIOB
-	#define RESET_PIN		GPIO_Pin_13
+	#define RESET_PIN		GPIO_Pin_13 /* CLK */
 	#define IR_IN_PORT		B
-	#define IR_IN_PIN		11
+	#define IR_IN_PIN		11 /* SWIM */
 	#define WAKEUP_RESET_PORT	GPIOA
 	#define WAKEUP_RESET_PIN	GPIO_Pin_14
 	#define USB_DISC_PORT		GPIOA
 	#define USB_DISC_RCC_APB2Periph	RCC_APB2Periph_GPIOA /* TODO use concat */
 	#define USB_DISC_PIN		GPIO_Pin_13
-#elif defined(StickLink) /* ST-Link stick */
+#elif defined(StickLink) /* ST-Link stick, IRSND = RST */
 	#define WAKEUP_PORT		GPIOB
-	#define WAKEUP_PIN		GPIO_Pin_14
+	#define WAKEUP_PIN		GPIO_Pin_14 /* DIO */
 	#define RESET_PORT		GPIOB
-	#define RESET_PIN		GPIO_Pin_13
+	#define RESET_PIN		GPIO_Pin_13 /* CLK */
 	#define IR_IN_PORT		B
-	#define IR_IN_PIN		11
+	#define IR_IN_PIN		11 /* SWIM */
+	#define LED_PORT		GPIOA
+	#define LED_PIN			GPIO_Pin_9
+//	#define WAKEUP_RESET_PORT	GPIOA
+//	#define WAKEUP_RESET_PIN	GPIO_Pin_14
 #elif defined(DeveloperBoard) /* classic developer board */
 	#define WAKEUP_PORT		GPIOB
 	#define WAKEUP_PIN		GPIO_Pin_14
@@ -111,11 +116,11 @@
 	#define WAKEUP_RESET_PIN	GPIO_Pin_12
 #elif defined(BlackDeveloperBoard) /* black developer board */
 	#define WAKEUP_PORT		GPIOA
-	#define WAKEUP_PIN		GPIO_Pin_14
+	#define WAKEUP_PIN		GPIO_Pin_14 /* CLK */
 	#define RESET_PORT		GPIOB
 	#define RESET_PIN		GPIO_Pin_14
 	#define IR_IN_PORT		A
-	#define IR_IN_PIN		13
+	#define IR_IN_PIN		13 /* IO */
 	#define LED_PORT		GPIOB
 	#define LED_PIN			GPIO_Pin_12
 	#define WAKEUP_RESET_PORT		GPIOB

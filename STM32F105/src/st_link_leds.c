@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2014-2015 Joerg Riechardt
+ * Copyright (C) 2014-2017 Joerg Riechardt
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -56,12 +56,12 @@ void fast_toggle(void)
 {
 	if (!PA9_state)
 		LED_init();
-	systicks2 = 0;
-	while (systicks2 <= 500) {
+	systicks = 0;
+	for(int i=0; i<5; i++) {
 		GPIO_WriteBit(GPIOA, GPIO_Pin_9, Bit_SET);
-		delay_ms(50);
+		while (systicks <= 50 * (2*i+1));
 		GPIO_WriteBit(GPIOA, GPIO_Pin_9, Bit_RESET);
-		delay_ms(50);
+		while (systicks <= 50 * (2*i+2));
 	}
 	restore();
 }
@@ -81,12 +81,12 @@ void both_on(void)
 {
 	if (!PA9_state)
 		LED_init();
-	systicks2 = 0;
-	while (systicks2 <= 500) {
+	systicks = 0;
+	for(int i=0; i<250; i++) {
 		GPIO_WriteBit(GPIOA, GPIO_Pin_9, Bit_SET);
-		delay_ms(1);
+		while (systicks <= 2*i+1);
 		GPIO_WriteBit(GPIOA, GPIO_Pin_9, Bit_RESET);
-		delay_ms(1);
+		while (systicks <= 2*i+2);
 	}
 	restore();
 }
@@ -94,10 +94,10 @@ void both_on(void)
 void LED_deinit(void) {}
 void fast_toggle(void)
 {
-	systicks2 = 0;
-	while (systicks2 <= 500) {
+	systicks = 0;
+	for(int i=0; i<10; i++) {
 		LED_PORT->ODR ^= LED_PIN;
-		delay_ms(50);
+		while (systicks <= 50 * (i+1));
 	}
 }
 void both_on(void) {}

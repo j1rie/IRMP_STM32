@@ -181,11 +181,11 @@ IRMP_RADIO1_PROTOCOL,
 __IO uint8_t PrevXferComplete = 1;
 uint32_t AlarmValue = 0xFFFFFFFF;
 volatile unsigned int systicks = 0;
-volatile unsigned int systicks2 = 0;
+volatile unsigned int sof_timeout = 0;
+volatile unsigned int i = 0;
 #ifdef ST_Link
 extern uint8_t PA9_state;
 #endif /* ST_Link */
-volatile unsigned int sof_timeout = 0;
 
 void delay_ms(unsigned int msec)
 {
@@ -200,11 +200,14 @@ void LED_Switch_init(void)
 #ifdef BlueDeveloperBoard
 	RCC_APB2PeriphClockCmd(RCC_APB2Periph_GPIOC, ENABLE);
 #endif
-#if (defined(ST_Link) && !defined(StickLink) || defined(BlackDeveloperBoard))
+#if (defined(ST_Link) || defined(BlackDeveloperBoard))
 	RCC_APB2PeriphClockCmd(RCC_APB2Periph_GPIOA | RCC_APB2Periph_AFIO, ENABLE);
 	/* disable SWD, so pins are available */
 	GPIO_PinRemapConfig(GPIO_Remap_SWJ_Disable, ENABLE);
 #endif /* ST_Link */
+#if defined(StickLink)
+	RCC_APB2PeriphClockCmd(RCC_APB2Periph_GPIOA, ENABLE);
+#endif /* StickLink */
 	/* start with wakeup switch off */
 #ifdef SimpleCircuit
 	GPIO_WriteBit(WAKEUP_PORT, WAKEUP_PIN, Bit_SET);
@@ -222,9 +225,11 @@ void LED_Switch_init(void)
 	GPIO_InitStructure.GPIO_Mode = GPIO_Mode_Out_OD;
 #endif /* SimpleCircuit */
 	GPIO_Init(WAKEUP_PORT, &GPIO_InitStructure);
+#ifndef StickLink
 	GPIO_InitStructure.GPIO_Pin = WAKEUP_RESET_PIN;
 	GPIO_InitStructure.GPIO_Mode = GPIO_Mode_IPU;
 	GPIO_Init(WAKEUP_RESET_PORT, &GPIO_InitStructure);
+#endif
 #ifdef ST_Link
 	red_on();
 #else
@@ -285,12 +290,10 @@ void Systick_Init(void)
 
 void SysTick_Handler(void)
 {
-	static uint_fast16_t i = 0;
 	systicks++;
-	systicks2++;
 	if (sof_timeout != SOF_TIMEOUT)
 		sof_timeout++;
-	if (i == 1000) {
+	if (i == 999) {
 		if (AlarmValue)
 			AlarmValue--;
 		i = 0;

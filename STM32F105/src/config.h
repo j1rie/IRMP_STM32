@@ -28,7 +28,7 @@
 
 /* C6 IRMP (irmpconfig.h), B6 IRSND (irsndconfig.h) , B10 Logging (irmp.c) */
 
-#ifndef SimpleCircuit_F105
+#ifdef SimpleCircuit_F105
 #define WAKEUP_PORT	GPIOB
 #define WAKEUP_PIN	GPIO_Pin_7
 #define RESET_PORT	GPIOB
@@ -41,9 +41,5 @@
 #endif
 #define LED_PORT	GPIOB
 #define LED_PIN		GPIO_Pin_12
-#define USB_DISC_PORT		GPIOB
-#define USB_DISC_RCC_APB2Periph	RCC_APB2Periph_GPIOB /* TODO use concat */
-#define USB_DISC_PIN		GPIO_Pin_11
-//#define PullDown
 
 #endif /* __CONFIG_H */
