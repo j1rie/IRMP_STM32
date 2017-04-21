@@ -1,5 +1,5 @@
 /*
- *  Copyright (C) 2014 Joerg Riechardt
+ *  Copyright (C) 2014-2017 Joerg Riechardt
  *
  *  inspired by work from Andrew Kambaroff - http://sysmagazine.com/posts/208026 
  *
@@ -9,8 +9,8 @@
  *  (at your option) any later version.
  */
 diff -Nrup a/inc/platform_config.h b/inc/platform_config.h
---- a/inc/platform_config.h	2013-01-21 18:27:28.000000000 +0100
-+++ b/inc/platform_config.h	2015-05-19 17:39:23.000000000 +0200
+--- a/inc/platform_config.h	2013-01-21 19:27:28.000000000 +0100
++++ b/inc/platform_config.h	2017-03-08 17:43:18.000000000 +0100
 @@ -48,7 +48,7 @@
   #elif defined (USE_STM3210E_EVAL)
    #include "stm3210e_eval.h"
@@ -21,8 +21,8 @@ diff -Nrup a/inc/platform_config.h b/inc/platform_config.h
  #elif defined (USE_STM32373C_EVAL)
   #include "stm32f37x.h"
 diff -Nrup a/inc/usb_conf.h b/inc/usb_conf.h
---- a/inc/usb_conf.h	2013-01-21 18:27:28.000000000 +0100
-+++ b/inc/usb_conf.h	2015-05-19 17:39:23.000000000 +0200
+--- a/inc/usb_conf.h	2013-01-21 19:27:28.000000000 +0100
++++ b/inc/usb_conf.h	2017-03-08 17:43:18.000000000 +0100
 @@ -57,7 +57,7 @@
  /* EP1  */
  /* tx buffer base address */
@@ -42,8 +42,8 @@ diff -Nrup a/inc/usb_conf.h b/inc/usb_conf.h
  
  /* CTR service routines */
 diff -Nrup a/inc/usb_desc.h b/inc/usb_desc.h
---- a/inc/usb_desc.h	2013-01-21 18:27:28.000000000 +0100
-+++ b/inc/usb_desc.h	2015-05-19 17:39:23.000000000 +0200
+--- a/inc/usb_desc.h	2013-01-21 19:27:28.000000000 +0100
++++ b/inc/usb_desc.h	2017-03-08 17:43:18.000000000 +0100
 @@ -31,6 +31,7 @@
  #define __USB_DESC_H
  
@@ -66,8 +66,8 @@ diff -Nrup a/inc/usb_desc.h b/inc/usb_desc.h
  
  #define STANDARD_ENDPOINT_DESC_SIZE             0x09
 diff -Nrup a/inc/usb_pwr.h b/inc/usb_pwr.h
---- a/inc/usb_pwr.h	2013-01-21 18:27:28.000000000 +0100
-+++ b/inc/usb_pwr.h	2015-05-19 17:39:23.000000000 +0200
+--- a/inc/usb_pwr.h	2013-01-21 19:27:28.000000000 +0100
++++ b/inc/usb_pwr.h	2017-03-08 17:43:18.000000000 +0100
 @@ -30,6 +30,7 @@
  #define __USB_PWR_H
  
@@ -77,8 +77,8 @@ diff -Nrup a/inc/usb_pwr.h b/inc/usb_pwr.h
  typedef enum _RESUME_STATE
  {
 diff -Nrup a/inc/usb_regs.h b/inc/usb_regs.h
---- a/inc/usb_regs.h	2013-01-21 18:27:32.000000000 +0100
-+++ b/inc/usb_regs.h	2015-05-19 17:39:23.000000000 +0200
+--- a/inc/usb_regs.h	2013-01-21 19:27:32.000000000 +0100
++++ b/inc/usb_regs.h	2017-03-08 17:43:18.000000000 +0100
 @@ -651,8 +651,8 @@ void ClearDTOG_RX(uint8_t /*bEpNum*/);
  void ClearDTOG_TX(uint8_t /*bEpNum*/);
  void SetEPAddress(uint8_t /*bEpNum*/, uint8_t /*bAddr*/);
@@ -91,8 +91,8 @@ diff -Nrup a/inc/usb_regs.h b/inc/usb_regs.h
  uint16_t GetEPRxAddr(uint8_t /*bEpNum*/);
  void SetEPCountRxReg(uint32_t * /*pdwReg*/, uint16_t /*wCount*/);
 diff -Nrup a/src/hw_config.c b/src/hw_config.c
---- a/src/hw_config.c	2013-01-21 18:27:28.000000000 +0100
-+++ b/src/hw_config.c	2015-05-19 17:39:23.000000000 +0200
+--- a/src/hw_config.c	2013-01-21 19:27:28.000000000 +0100
++++ b/src/hw_config.c	2017-03-08 17:43:18.000000000 +0100
 @@ -78,10 +78,10 @@ void Set_System(void)
    
  #if !defined(STM32L1XX_MD) && !defined(STM32L1XX_HD) && !defined(STM32L1XX_MD_PLUS) && !defined(STM32F37X) && !defined(STM32F30X)
@@ -213,9 +213,25 @@ diff -Nrup a/src/hw_config.c b/src/hw_config.c
  #endif /* STM32F30x */
  /*******************************************************************************
 diff -Nrup a/src/stm32_it.c b/src/stm32_it.c
---- a/src/stm32_it.c	2013-01-21 18:27:28.000000000 +0100
-+++ b/src/stm32_it.c	2015-05-19 17:39:23.000000000 +0200
-@@ -164,10 +164,12 @@ void PendSV_Handler(void)
+--- a/src/stm32_it.c	2013-01-21 19:27:28.000000000 +0100
++++ b/src/stm32_it.c	2017-04-21 13:57:16.030341466 +0200
+@@ -71,6 +71,7 @@ void NMI_Handler(void)
+ * Output         : None
+ * Return         : None
+ *******************************************************************************/
++#ifndef DEBUG
+ void HardFault_Handler(void)
+ {
+   /* Go to infinite loop when Hard Fault exception occurs */
+@@ -78,6 +79,7 @@ void HardFault_Handler(void)
+   {
+   }
+ }
++#endif
+ 
+ /*******************************************************************************
+ * Function Name  : MemManage_Handler
+@@ -164,10 +166,12 @@ void PendSV_Handler(void)
  * Output         : None
  * Return         : None
  *******************************************************************************/
@@ -228,7 +244,7 @@ diff -Nrup a/src/stm32_it.c b/src/stm32_it.c
  
  /******************************************************************************/
  /*            STM32 Peripherals Interrupt Handlers                        */
-@@ -262,6 +264,7 @@ void EXTI15_10_IRQHandler(void)
+@@ -262,6 +266,7 @@ void EXTI15_10_IRQHandler(void)
  * Output         : None
  * Return         : None
  *******************************************************************************/
@@ -236,7 +252,7 @@ diff -Nrup a/src/stm32_it.c b/src/stm32_it.c
  void DMA1_Channel1_IRQHandler(void)
  {  
    Send_Buffer[0] = 0x07;
-@@ -363,6 +366,7 @@ void EXTI15_10_IRQHandler(void)
+@@ -363,6 +368,7 @@ void EXTI15_10_IRQHandler(void)
  }
  
  #endif /*STM32L1XX_HD*/
@@ -245,8 +261,8 @@ diff -Nrup a/src/stm32_it.c b/src/stm32_it.c
  /*******************************************************************************
  * Function Name  : USB_FS_WKUP_IRQHandler
 diff -Nrup a/src/usb_desc.c b/src/usb_desc.c
---- a/src/usb_desc.c	2013-01-21 18:27:28.000000000 +0100
-+++ b/src/usb_desc.c	2015-10-26 05:30:02.172637000 +0100
+--- a/src/usb_desc.c	2013-01-21 19:27:28.000000000 +0100
++++ b/src/usb_desc.c	2017-03-08 17:43:18.000000000 +0100
 @@ -49,10 +49,10 @@ const uint8_t CustomHID_DeviceDescriptor
      0x00,                       /*bDeviceSubClass*/
      0x00,                       /*bDeviceProtocol*/
@@ -356,8 +372,8 @@ diff -Nrup a/src/usb_desc.c b/src/usb_desc.c
    };
  
 diff -Nrup a/src/usb_endp.c b/src/usb_endp.c
---- a/src/usb_endp.c	2013-01-21 18:27:28.000000000 +0100
-+++ b/src/usb_endp.c	2015-05-19 17:39:23.000000000 +0200
+--- a/src/usb_endp.c	2013-01-21 19:27:28.000000000 +0100
++++ b/src/usb_endp.c	2017-03-08 17:43:18.000000000 +0100
 @@ -29,6 +29,7 @@
  /* Includes ------------------------------------------------------------------*/
  
@@ -408,8 +424,8 @@ diff -Nrup a/src/usb_endp.c b/src/usb_endp.c
   
  }
 diff -Nrup a/src/usb_prop.c b/src/usb_prop.c
---- a/src/usb_prop.c	2013-01-21 18:27:28.000000000 +0100
-+++ b/src/usb_prop.c	2015-05-19 17:39:23.000000000 +0200
+--- a/src/usb_prop.c	2013-01-21 19:27:28.000000000 +0100
++++ b/src/usb_prop.c	2017-03-08 17:43:18.000000000 +0100
 @@ -43,7 +43,7 @@
  uint32_t ProtocolValue;
  __IO uint8_t EXTI_Enable;
@@ -474,8 +490,8 @@ diff -Nrup a/src/usb_prop.c b/src/usb_prop.c
      return NULL;
    }
 diff -Nrup a/src/usb_regs.c b/src/usb_regs.c
---- a/src/usb_regs.c	2013-01-21 18:27:32.000000000 +0100
-+++ b/src/usb_regs.c	2015-05-19 17:39:23.000000000 +0200
+--- a/src/usb_regs.c	2013-01-21 19:27:32.000000000 +0100
++++ b/src/usb_regs.c	2017-03-08 17:43:18.000000000 +0100
 @@ -476,7 +476,7 @@ uint8_t GetEPAddress(uint8_t bEpNum)
  * Output         : None.
  * Return         : None.

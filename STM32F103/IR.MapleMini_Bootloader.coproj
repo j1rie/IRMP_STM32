@@ -32,7 +32,7 @@
         <Option name="UserEditLinker" value="--entry=main; "/>
         <LinkedLibraries/>
         <MemoryAreas debugInFlashNotRAM="1">
-          <Memory name="IROM1" type="ReadOnly" size="0x00015000" startValue="0x08005000"/>
+          <Memory name="IROM1" type="ReadOnly" size="0x0001B000" startValue="0x08005000"/>
           <Memory name="IRAM1" type="ReadWrite" size="0x00005000" startValue="0x20000000"/>
           <Memory name="IROM2" type="ReadOnly" size="" startValue=""/>
           <Memory name="IRAM2" type="ReadWrite" size="" startValue=""/>

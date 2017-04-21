@@ -21,7 +21,7 @@
 #define MIN_REPEATS	2  // TODO make configurable & use Eeprom
 
 /* uncomment below for CooCox */
-//#define FW_STR "2017-02-04_00-00_Dev_SC_BL-jrie"
+//#define FW_STR "2017-04-20_00-00_MapleMini_BL_SC-jrie   IRMP-Version: 3.07"
 
 /* uncomment this, if you use the blue ST-Link */
 //#define BlueLink
@@ -43,6 +43,9 @@
 
 /* uncomment this, if you use the Maple Mini */
 //#define MapleMini
+
+/* uncomment this, if you use the Maple Mini with bootloader jumping to 2k offset (default for Maple Mini is 5k) */
+//#define MapleMini_2k
 
 /* uncomment this in order to pull down the "active" pin of the mainboard power button connector directly */
 //#define SimpleCircuit
@@ -125,7 +128,7 @@
 	#define LED_PIN			GPIO_Pin_12
 	#define WAKEUP_RESET_PORT		GPIOB
 	#define WAKEUP_RESET_PIN	GPIO_Pin_13
-#elif defined(MapleMini) /* Maple Mini */
+#elif defined(MapleMini) || defined(MapleMini_2k) /* Maple Mini */
 	#define WAKEUP_PORT		GPIOB
 	#define WAKEUP_PIN		GPIO_Pin_10
 	#define RESET_PORT		GPIOB
@@ -139,7 +142,6 @@
 	#define USB_DISC_PORT		GPIOB
 	#define USB_DISC_RCC_APB2Periph	RCC_APB2Periph_GPIOB /* TODO use concat */
 	#define USB_DISC_PIN		GPIO_Pin_9
-	#define PullDown
 #else
 	#error "Missing define for board"
 #endif /* BlueLink */

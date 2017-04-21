@@ -12,6 +12,8 @@
 ### blueDev --> Build for the blue STM32F103 development board
 ### blackDev --> Build for the black STM32F103 development board
 ### MapleMini --> Build for the Maple Mini board
+### MapleMini_2k --> Build for the Maple Mini board with bootloader jumping to
+###    2k offset (default for Maple Mini is 5k)
 #Platform=Red
 #Platform=Blue
 #Platform=Stick
@@ -19,8 +21,9 @@
 #Platform=blueDev
 #Platform=blackDev
 #Platform=MapleMini
+#Platform=MapleMini_2k
 
-### Enable this, if you use the bootloader. Does not apply for the Maple Mini.
+### Enable this, if you use the bootloader.
 #Bootloader=1
 
 ### If you enable the following option, your firmware will be able to drive the

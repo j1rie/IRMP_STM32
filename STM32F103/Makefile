@@ -16,6 +16,9 @@ OBJCP = $(CROSS_COMPILE)objcopy
 ARCH = -mcpu=cortex-m3 -mthumb
 COMMON = -g -Os -flto
 INCLUDES = -Icmsis -Icmsis_boot -Istm_lib/inc -Iusb_hid/inc -Iirmp -Isrc
+ifdef DEBUG
+INCLUDES += -Isemihosting -Istdio
+endif
 DEFINES = -D$(PLATFORM) -DSTM32F10X_MD -DUSE_STDPERIPH_DRIVER -DSOF_CALLBACK
 
 OBJS = src/irmpmain.o src/st_link_leds.o src/usb_hid.o src/main.o\
@@ -31,6 +34,9 @@ OBJS = src/irmpmain.o src/st_link_leds.o src/usb_hid.o src/main.o\
        usb_hid/src/usb_pwr.o usb_hid/src/usb_core.o usb_hid/src/usb_init.o\
        usb_hid/src/usb_int.o usb_hid/src/usb_mem.o usb_hid/src/usb_regs.o\
        usb_hid/src/usb_sil.o
+ifdef DEBUG
+OBJS += semihosting/semihosting.o semihosting/sh_cmd.o  stdio/printf.o
+endif
 
 CFLAGS = -Wall -ffunction-sections -fno-builtin $(ARCH) $(COMMON) $(INCLUDES) $(DEFINES)
 
@@ -62,10 +68,9 @@ ifeq ($(Platform), MapleMini)
 DEFINES += -DMapleMini
 TARGET = MapleMini
 endif
-
-ifdef SimpleCircuit
-DEFINES += -DSimpleCircuit
-TARGET := $(TARGET)_SC
+ifeq ($(Platform), MapleMini_2k)
+DEFINES += -DMapleMini_2k
+TARGET = MapleMini_2k
 endif
 
 DATE := $(shell date +"%F_%H-%M")
@@ -84,6 +89,16 @@ LDFLAGS = -nostartfiles -Wl,-Map=$(TARGET).map,--gc-sections,--entry=main,-Tscri
 endif
 else
 LDFLAGS = -nostartfiles -Wl,-Map=$(TARGET).map,--gc-sections,--entry=main,-Tscripts/arm-gcc-link.ld $(ARCH) $(COMMON)
+endif
+
+ifdef SimpleCircuit
+DEFINES += -DSimpleCircuit
+TARGET := $(TARGET)_SC
+endif
+
+ifdef DEBUG
+DEFINES += -DDEBUG
+TARGET := $(TARGET)_DBG
 endif
 
 COMPILED_BY = jrie

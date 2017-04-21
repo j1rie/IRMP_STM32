@@ -16,6 +16,9 @@
 #include "eeprom.h"
 #include "st_link_leds.h"
 #include "config.h" /* CooCox workaround */
+#ifdef DEBUG
+#include <stdio.h>
+#endif
 
 #define BYTES_PER_QUERY	(HID_IN_BUFFER_SIZE - 4)
 /* after plugging in, it takes some time, until SOF's are being sent to the device */
@@ -171,6 +174,21 @@ IRMP_ACP24_PROTOCOL,
 #endif
 #if IRMP_SUPPORT_TECHNICS_PROTOCOL==1
 IRMP_TECHNICS_PROTOCOL,
+#endif
+#if IRMP_SUPPORT_PANASONIC_PROTOCOL==1
+IRMP_PANASONIC_PROTOCOL,
+#endif
+#if IRMP_SUPPORT_MITSU_HEAVY_PROTOCOL==1
+IRMP_MITSU_HEAVY,
+#endif
+#if IRMP_SUPPORT_TECHNICS_PROTOCOL==1
+IRMP_TECHNICS_PROTOCOL,
+#endif
+#if IRMP_SUPPORT_VINCENT_PROTOCOL==1
+IRMP_VINCENT_PROTOCOL,
+#endif
+#if IRMP_SUPPORT_SAMSUNGAH_PROTOCOL==1
+IRMP_SAMSUNGAH_PROTOCOL,
 #endif
 #if IRMP_SUPPORT_RADIO1_PROTOCOL==1
 IRMP_RADIO1_PROTOCOL,
@@ -554,14 +572,14 @@ void check_macros(IRMP_DATA *ir)
 
 void USB_DISC_release(void)
 {
-#if defined(Bootloader) && defined(PullDown)
+#if defined(Bootloader) && defined(PullDown) || defined(MapleMini) || defined(MapleMini_2k)
 	GPIO_InitTypeDef GPIO_InitStructure;
 	RCC_APB2PeriphClockCmd(USB_DISC_RCC_APB2Periph, ENABLE);
 	GPIO_InitStructure.GPIO_Pin = USB_DISC_PIN;
 	GPIO_InitStructure.GPIO_Mode = GPIO_Mode_Out_OD;
 	GPIO_InitStructure.GPIO_Speed = GPIO_Speed_2MHz;
 	GPIO_Init(USB_DISC_PORT, &GPIO_InitStructure);
-#ifdef MapleMini
+#if defined(MapleMini) || defined(MapleMini_2k)
 	GPIO_WriteBit(USB_DISC_PORT, USB_DISC_PIN, Bit_RESET);
 #else
 	GPIO_WriteBit(USB_DISC_PORT, USB_DISC_PIN, Bit_SET);
@@ -571,7 +589,7 @@ void USB_DISC_release(void)
 
 void USB_Reset(void)
 {
-#if defined(Bootloader) && !defined(PullDown)
+#if defined(Bootloader) && !defined(PullDown) && !defined(MapleMini) && !defined(MapleMini_2k)
 	/* disable USB */
 	PowerOff();
 	/* USB reset by pulling USBDP shortly low. A pullup resistor is needed, most
