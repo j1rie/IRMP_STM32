@@ -7,9 +7,9 @@ cd ..
 mkdir -p ext_src
 [[ -e ./ext_src/prepared ]] && exit 0
 cd ./ext_src
-for i in stsw-stm32121 stm32_f105-07_f2_f4_usb-host-device_lib stsw-stm32010; do
+for i in en.stm32_f105-07_f2_f4_usb-host-device_lib stsw-stm32010; do
 	if [[ ! -s $i.zip ]]; then
-		wget "http://www.st.com/st-web-ui/static/active/en/st_prod_software_internet/resource/technical/software/firmware/$i.zip"
+		wget "http://www.st.com/resource/en/firmware/$i.zip"
 	fi
 done
 if [[ ! -s irmp.tar.gz ]]; then
@@ -18,16 +18,16 @@ fi
 
 # extract
 cd ..
-ar2='../../ext_src/stsw-stm32121.zip'
-ar1='../ext_src/stsw-stm32121.zip'
-ver='4.0.0'
-path="STM32_USB-FS-Device_Lib_V$ver"
+ar2='../../ext_src/en.stm32_f105-07_f2_f4_usb-host-device_lib.zip'
+ar1='../ext_src/en.stm32_f105-07_f2_f4_usb-host-device_lib.zip'
+ver='2.2.0'
+path="STM32_USB-Host-Device_Lib_V$ver"
 mkdir -p cmsis_boot
 cd cmsis_boot
 unzip -j $ar1 \
       $path/Libraries/CMSIS/Device/ST/STM32F10x/Include/stm32f10x.h \
       $path/Libraries/CMSIS/Device/ST/STM32F10x/Include/system_stm32f10x.h \
-      $path/Projects/Custom_HID/inc/stm32f10x_conf.h
+      $path/Project/USB_Device_Examples/CustomHID/inc/stm32f10x_conf.h
 mkdir -p startup
 cd startup
 unzip -j $ar2 $path/Libraries/CMSIS/Device/ST/STM32F10x/Source/Templates/gcc_ride7/startup_stm32f10x_cl.s
@@ -37,7 +37,10 @@ cd cmsis
 unzip -j $ar1 \
        $path/Libraries/CMSIS/Include/core_cm3.h \
        $path/Libraries/CMSIS/Include/core_cmFunc.h \
-       $path/Libraries/CMSIS/Include/core_cmInstr.h
+       $path/Libraries/CMSIS/Include/core_cmInstr.h \
+       $path/Libraries/CMSIS/Include/cmsis_gcc.h \
+       $path/Libraries/CMSIS/Include/cmsis_armcc.h \
+       $path/Libraries/CMSIS/Include/cmsis_armcc_V6.h
 cd ..
 mkdir -p stm_lib
 cd  stm_lib
@@ -62,10 +65,6 @@ unzip -j $ar2 \
       $path/Libraries/STM32F10x_StdPeriph_Driver/src/stm32f10x_usart.c
 cd ../..
 
-ar2='../../ext_src/stm32_f105-07_f2_f4_usb-host-device_lib.zip'
-ar1='../ext_src/stm32_f105-07_f2_f4_usb-host-device_lib.zip'
-ver='2.1.0'
-path="STM32_USB-Host-Device_Lib_V$ver"
 cd cmsis_boot
 unzip -j $ar1 $path/Libraries/CMSIS/Device/ST/STM32F10x/Source/Templates/system_stm32f10x.c
 cd ..

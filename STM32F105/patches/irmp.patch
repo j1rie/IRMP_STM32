@@ -1,6 +1,6 @@
 diff -Nrup a/irmpconfig.h b/irmpconfig.h
---- a/irmpconfig.h	2015-09-21 14:46:25.000000000 +0200
-+++ b/irmpconfig.h	2015-10-03 15:29:53.000000000 +0200
+--- a/irmpconfig.h	2017-04-25 21:39:20.861907984 +0200
++++ b/irmpconfig.h	2017-04-25 21:34:45.841002851 +0200
 @@ -56,17 +56,17 @@
  #define IRMP_SUPPORT_KASEIKYO_PROTOCOL          1       // Kaseikyo             >= 10000                 ~250 bytes
  
@@ -30,7 +30,7 @@ diff -Nrup a/irmpconfig.h b/irmpconfig.h
  
  // exotic protocols, enable here!               Enable  Remarks                 F_INTERRUPTS            Program Space
  #define IRMP_SUPPORT_BOSE_PROTOCOL              0       // BOSE                 >= 10000                 ~150 bytes
-@@ -128,9 +128,9 @@
+@@ -132,9 +132,9 @@
   * Change hardware pin here for ARM STM32
   *---------------------------------------------------------------------------------------------------------------------------------------------------
   */
@@ -43,14 +43,15 @@ diff -Nrup a/irmpconfig.h b/irmpconfig.h
  /*---------------------------------------------------------------------------------------------------------------------------------------------------
   * Change hardware pin here for Stellaris ARM Cortex M4
 diff -Nrup a/irsndconfig.h b/irsndconfig.h
---- a/irsndconfig.h	2015-09-21 14:46:25.000000000 +0200
-+++ b/irsndconfig.h	2015-10-03 15:29:53.000000000 +0200
+--- a/irsndconfig.h	2017-02-17 10:16:59.000000000 +0100
++++ b/irsndconfig.h	2017-03-08 17:44:34.000000000 +0100
 @@ -47,17 +47,17 @@
  #define IRSND_SUPPORT_KASEIKYO_PROTOCOL         1       // Kaseikyo             >= 10000                 ~300 bytes
  
  // more protocols, enable here!                 Enable  Remarks                 F_INTERRUPTS            Program Space
 -#define IRSND_SUPPORT_DENON_PROTOCOL            0       // DENON, Sharp         >= 10000                 ~200 bytes
--#define IRSND_SUPPORT_RC5_PROTOCOL              0       // RC5                  >= 10000                 ~150 bytes
++#define IRSND_SUPPORT_DENON_PROTOCOL            1       // DENON, Sharp         >= 10000                 ~200 bytes
+ #define IRSND_SUPPORT_RC5_PROTOCOL              1       // RC5                  >= 10000                 ~150 bytes
 -#define IRSND_SUPPORT_RC6_PROTOCOL              0       // RC6                  >= 10000                 ~250 bytes
 -#define IRSND_SUPPORT_RC6A_PROTOCOL             0       // RC6A                 >= 10000                 ~250 bytes
 -#define IRSND_SUPPORT_JVC_PROTOCOL              0       // JVC                  >= 10000                 ~150 bytes
@@ -60,8 +61,6 @@ diff -Nrup a/irsndconfig.h b/irsndconfig.h
 -#define IRSND_SUPPORT_GRUNDIG_PROTOCOL          0       // Grundig              >= 10000                 ~300 bytes
 -#define IRSND_SUPPORT_SIEMENS_PROTOCOL          0       // Siemens, Gigaset     >= 15000                 ~150 bytes
 -#define IRSND_SUPPORT_NOKIA_PROTOCOL            0       // Nokia                >= 10000                 ~400 bytes
-+#define IRSND_SUPPORT_DENON_PROTOCOL            1       // DENON, Sharp         >= 10000                 ~200 bytes
-+#define IRSND_SUPPORT_RC5_PROTOCOL              1       // RC5                  >= 10000                 ~150 bytes
 +#define IRSND_SUPPORT_RC6_PROTOCOL              1       // RC6                  >= 10000                 ~250 bytes
 +#define IRSND_SUPPORT_RC6A_PROTOCOL             1       // RC6A                 >= 10000                 ~250 bytes
 +#define IRSND_SUPPORT_JVC_PROTOCOL              1       // JVC                  >= 10000                 ~150 bytes
@@ -73,4 +72,4 @@ diff -Nrup a/irsndconfig.h b/irsndconfig.h
 +#define IRSND_SUPPORT_NOKIA_PROTOCOL            1       // Nokia                >= 10000                 ~400 bytes
  
  // exotic protocols, enable here!               Enable  Remarks                 F_INTERRUPTS            Program Space
- #define IRSND_SUPPORT_KATHREIN_PROTOCOL         0       // Kathrein             >= 10000                 DON'T CHANGE, NOT SUPPORTED YET!
+ #define IRSND_SUPPORT_BOSE_PROTOCOL             0       // BOSE                 >= 10000                 ~100 bytes

@@ -21,7 +21,7 @@
 #define MIN_REPEATS	2  // TODO make configurable & use Eeprom
 
 /* uncomment below for CooCox */
-//#define FW_STR "2015-10-26_00-00_F105_jrie"
+//#define FW_STR "2015-10-26_00-00_F105_jrie   IRMP-Version: 3.07"
 
 /* uncomment this in order to pull down the "active" pin of the mainboard power button connector directly */
 //#define SimpleCircuit_F105
