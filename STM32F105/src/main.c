@@ -209,11 +209,13 @@ void LED_Switch_init(void)
 {
 	GPIO_InitTypeDef GPIO_InitStructure;
 	RCC_APB2PeriphClockCmd(RCC_APB2Periph_GPIOB, ENABLE);
-	/* start with wakeup switch off */
+	/* start with wakeup and reset switch off */
 #ifdef SimpleCircuit
 	GPIO_WriteBit(WAKEUP_PORT, WAKEUP_PIN, Bit_SET);
+	GPIO_WriteBit(RESET_PORT, RESET_PIN, Bit_SET);
 #else
 	GPIO_WriteBit(WAKEUP_PORT, WAKEUP_PIN, Bit_RESET);
+	GPIO_WriteBit(RESET_PORT, RESET_PIN, Bit_RESET);
 #endif /* SimpleCircuit */
 	GPIO_InitStructure.GPIO_Mode = GPIO_Mode_Out_PP;
 	GPIO_InitStructure.GPIO_Speed = GPIO_Speed_2MHz;
@@ -224,6 +226,8 @@ void LED_Switch_init(void)
 	GPIO_InitStructure.GPIO_Mode = GPIO_Mode_Out_OD;
 #endif /* SimpleCircuit */
 	GPIO_Init(WAKEUP_PORT, &GPIO_InitStructure);
+	GPIO_InitStructure.GPIO_Pin = RESET_PIN;
+	GPIO_Init(RESET_PORT, &GPIO_InitStructure);
 	//GPIO_InitStructure.GPIO_Pin = WAKEUP_RESET_PIN;
 	//GPIO_InitStructure.GPIO_Mode = GPIO_Mode_IPU;
 	//GPIO_Init(WAKEUP_RESET_PORT, &GPIO_InitStructure);

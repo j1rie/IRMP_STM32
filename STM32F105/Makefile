@@ -33,11 +33,6 @@ OBJS = src/irmpmain.o src/st_link_leds.o src/usb_hid.o src/main.o\
 
 CFLAGS = -Wall -ffunction-sections -fno-builtin $(ARCH) $(COMMON) $(INCLUDES) $(DEFINES)
 
-ifdef SimpleCircuit_F105
-DEFINES += -DSimpleCircuit_F105
-TARGET := $(TARGET)_SC
-endif
-
 DATE := $(shell date +"%F_%H-%M")
 TARGET := $(DATE)_$(TARGET)
 
@@ -50,6 +45,11 @@ TARGET := $(TARGET)_BL
 LDFLAGS = -nostartfiles -Wl,-Map=$(TARGET).map,--gc-sections,--entry=main,-Tscripts/arm-gcc-link-bootloader.ld $(ARCH) $(COMMON)
 else
 LDFLAGS = -nostartfiles -Wl,-Map=$(TARGET).map,--gc-sections,--entry=main,-Tscripts/arm-gcc-link.ld $(ARCH) $(COMMON)
+endif
+
+ifdef SimpleCircuit_F105
+DEFINES += -DSimpleCircuit_F105
+TARGET := $(TARGET)_SC
 endif
 
 COMPILED_BY = jrie

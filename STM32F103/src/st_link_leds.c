@@ -57,7 +57,8 @@ void fast_toggle(void)
 	if (!PA9_state)
 		LED_init();
 	systicks = 0;
-	for(int i=0; i<5; i++) {
+	int i;
+	for(i=0; i<5; i++) {
 		GPIO_WriteBit(GPIOA, GPIO_Pin_9, Bit_SET);
 		while (systicks <= 50 * (2*i+1));
 		GPIO_WriteBit(GPIOA, GPIO_Pin_9, Bit_RESET);
@@ -82,7 +83,8 @@ void both_on(void)
 	if (!PA9_state)
 		LED_init();
 	systicks = 0;
-	for(int i=0; i<250; i++) {
+	int i;
+	for(i=0; i<250; i++) {
 		GPIO_WriteBit(GPIOA, GPIO_Pin_9, Bit_SET);
 		while (systicks <= 2*i+1);
 		GPIO_WriteBit(GPIOA, GPIO_Pin_9, Bit_RESET);
@@ -95,7 +97,8 @@ void LED_deinit(void) {}
 void fast_toggle(void)
 {
 	systicks = 0;
-	for(int i=0; i<10; i++) {
+	int i;
+	for(i=0; i<10; i++) {
 		LED_PORT->ODR ^= LED_PIN;
 		while (systicks <= 50 * (i+1));
 	}
