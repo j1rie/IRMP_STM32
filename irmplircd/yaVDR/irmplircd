@@ -1,0 +1,16 @@
+# Enable irmplircd daemon
+ENABLED=1
+# Set a path for a translation table to map keys
+KEYMAP="/etc/irmp.map"
+# Set the repeat rate in ms
+REPEAT=""
+# Grab the device exclusively - CAUTION: no one else (e.g. the X-server) is allowed to using the device when starting irmplircd)
+GRAB=0
+# Choose irmplircd socket path
+SOCKET="/var/run/lirc/irmplircd"
+# enable special irexec for irmplircd device socket only - do not use with yaVDR (unless you do know exactly what you are doing)
+IRMPEXEC_ENABLED=0
+# path to action mapping file for irmpexec
+# Syntax: 
+# KEY_KOFFEE /path/to/my/command -x -y --z=abc
+IRMPEXEC_MAP=""

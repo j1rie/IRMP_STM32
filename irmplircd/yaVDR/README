@@ -1,0 +1,12 @@
+Install yavdr-addon-irmp.
+Copy irmp.map to /etc/irmp.map .
+Edit /etc/default/irmplircd and change KEYMAP="" to KEYMAP="/etc/irmp.map" .
+Edit /etc/irmp.map and insert the codes from your remote control, which you see 
+with 'sudo irw /var/run/lirc/irmplircd' (or stm32IRconfig or stm32IRconfig_gui).
+
+If you press button "1" and irw shows "070000000100 0 070000000100 IRMP" the line 
+in /etc/irmp.map needs to be "070000000100 KEY_1" and so on.
+After 'sudo restart irmplircd' you should see "070000000100 0 KEY_1 IRMP", when you 
+press "1".
+
+See also http://www.yavdr.org/documentation/0.6/de/ch02s03.html#usb_irmp .

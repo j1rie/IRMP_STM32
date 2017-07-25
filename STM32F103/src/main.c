@@ -251,11 +251,11 @@ void LED_Switch_init(void)
 	GPIO_InitStructure.GPIO_Pin = WAKEUP_RESET_PIN;
 	GPIO_InitStructure.GPIO_Mode = GPIO_Mode_IPU;
 	GPIO_Init(WAKEUP_RESET_PORT, &GPIO_InitStructure);
-#endif
+#endif /* StickLink */
+	/* start with LED on */
 #ifdef ST_Link
 	red_on();
 #else
-	/* start with LED on */
 	/* on the blue and black developer board the LED lights, when pulled low */
 #if !(defined(BlueDeveloperBoard) || defined(BlackDeveloperBoard))
 	GPIO_WriteBit(LED_PORT, LED_PIN, Bit_SET);
@@ -398,7 +398,7 @@ void wakeup_reset(void)
 	if (!GPIO_ReadInputDataBit(WAKEUP_RESET_PORT, WAKEUP_RESET_PIN)) {
 		store_new_wakeup();
 	}
-#endif
+#endif /* ST_Link */
 }
 
 int8_t get_handler(uint8_t *buf)
