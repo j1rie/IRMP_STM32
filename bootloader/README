@@ -1,8 +1,4 @@
-The bootloader is in [1]. The necessary patch is already applied.
-
-For the developer board compile with 'make Platform=Dev',
-for the red ST-Link emulator compile with 'make Platform=Red'
-and for the blue ST-Link emulator compile with 'make Platform=Blue'.
+The bootloader is in [1].
 
 The firmware, which gets loaded by the bootloader, has to make an USB reset for 
 reenumeration. For this compile the firmware with "make Bootloader=1".
@@ -10,5 +6,8 @@ reenumeration. For this compile the firmware with "make Bootloader=1".
 Once the bootloader is flashed, you flash the new firmware like this:
 First run /path/FlashDFUSe.sh /path/newFirmware.bin,
 then connect the board.
+
+I made a patch for dfu-util, which lets's dfu-util loop, so this needs no longer be done in a script.
+Patched binaries are in ../binaries.
 
 [1] https://github.com/j1rie/maple-bootloader/tree/unify_platforms
