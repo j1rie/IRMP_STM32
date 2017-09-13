@@ -21,7 +21,7 @@
 #define MIN_REPEATS	2  // TODO make configurable & use Eeprom
 
 /* uncomment below for CooCox */
-//#define FW_STR "2017-04-20_00-00_MapleMini_BL_SC-jrie   IRMP-Version: 3.07"
+//#define FW_STR "2017-04-20_00-00_MapleMini_BL_SC-jrie   IRMP-Version: 3.08"
 
 /* uncomment this, if you use the blue ST-Link */
 //#define BlueLink
@@ -40,6 +40,9 @@
 
 /* uncomment this, if you use the black developer board */
 //#define BlackDeveloperBoard
+
+/* uncomment this, if you use the black developer board test */
+//#define BlackDeveloperBoardTest
 
 /* uncomment this, if you use the Maple Mini */
 //#define MapleMini
@@ -126,7 +129,18 @@
 	#define IR_IN_PIN		13 /* IO */
 	#define LED_PORT		GPIOB
 	#define LED_PIN			GPIO_Pin_12
-	#define WAKEUP_RESET_PORT		GPIOB
+	#define WAKEUP_RESET_PORT	GPIOB
+	#define WAKEUP_RESET_PIN	GPIO_Pin_13
+#elif defined(BlackDeveloperBoardTest) /* black developer board test */
+	#define WAKEUP_PORT		GPIOB
+	#define WAKEUP_PIN		GPIO_Pin_8
+	#define RESET_PORT		GPIOB
+	#define RESET_PIN		GPIO_Pin_14
+	#define IR_IN_PORT		B
+	#define IR_IN_PIN		7
+	#define LED_PORT		GPIOB
+	#define LED_PIN			GPIO_Pin_12
+	#define WAKEUP_RESET_PORT	GPIOB
 	#define WAKEUP_RESET_PIN	GPIO_Pin_13
 #elif defined(MapleMini) || defined(MapleMini_2k) /* Maple Mini */
 	#define WAKEUP_PORT		GPIOB

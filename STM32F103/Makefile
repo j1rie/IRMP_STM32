@@ -64,6 +64,10 @@ ifeq ($(Platform), blackDev)
 DEFINES += -DBlackDeveloperBoard
 TARGET = blackDev
 endif
+ifeq ($(Platform), blackDevTest)
+DEFINES += -DBlackDeveloperBoardTest
+TARGET = blackDevTest
+endif
 ifeq ($(Platform), MapleMini)
 DEFINES += -DMapleMini
 TARGET = MapleMini

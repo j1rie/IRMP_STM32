@@ -11,6 +11,7 @@
 ### Dev --> Build for the classic STM32F103 development board
 ### blueDev --> Build for the blue STM32F103 development board
 ### blackDev --> Build for the black STM32F103 development board
+### blackDevTest --> Build for the black STM32F103 development board (B7, B8)
 ### MapleMini --> Build for the Maple Mini board
 ### MapleMini_2k --> Build for the Maple Mini board with bootloader jumping to
 ###    2k offset (default for Maple Mini is 5k)
@@ -20,6 +21,7 @@
 #Platform=Dev
 #Platform=blueDev
 #Platform=blackDev
+#Platform=blackDevTest
 #Platform=MapleMini
 #Platform=MapleMini_2k
 
