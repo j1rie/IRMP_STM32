@@ -626,6 +626,7 @@ int main(void)
 	irsnd_init();
 	FLASH_Unlock();
 	EE_Init();
+	RCC_ClearFlag();
 
 	while (1) {
 		if (!AlarmValue)
