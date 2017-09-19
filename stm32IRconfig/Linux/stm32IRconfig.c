@@ -90,7 +90,7 @@ int main(int argc, const char **argv) {
 	outBuf[0] = 0x03; // Report ID
 	outBuf[1] = 0x00; // STAT_CMD
 
-cont:	printf("program eeprom: wakeups and macros (p)\nprogram eeprom: wakeups and macros with remote control(P)\nget eeprom (wakeups, macros and capabilities) (g)\nreset (wakeups, macros and alarm) (r)\nset alarm (s)\nget alarm (a)\nsend IR (i)\nmonitor until ^C (m)\nexit (x)\n");
+cont:	printf("program eeprom: wakeups and macros (p)\nprogram eeprom: wakeups and macros with remote control(P)\nget eeprom (wakeups, macros and capabilities) (g)\nreset (wakeups, macros and alarm) (r)\nset alarm (s)\nget alarm (a)\nsend IR (i)\nreboot (b)\nmonitor until ^C (m)\nexit (x)\n");
 	scanf("%s", &c);
 
 	switch (c) {
@@ -299,6 +299,14 @@ reset:		printf("reset wakeup(w)\nreset macro slot(m)\nreset alarm(a)\n");
 		outBuf[idx++] = i & 0xFF;
 		write_and_check();
 		break;
+
+	case 'b':
+	    memset(&outBuf[2], 0, 15);
+	    idx = 2;
+	    outBuf[idx++] = 0x01; // ACC_SET
+	    outBuf[idx++] = 0x06; // CMD_REBOOT
+	    write_and_check();
+	    break;
 
 	case 'm':
 		goto monit;

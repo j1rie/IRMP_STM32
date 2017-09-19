@@ -36,7 +36,8 @@ enum __attribute__ ((__packed__)) command {
 	CMD_FW,
 	CMD_ALARM,
 	CMD_MACRO,
-	CMD_WAKE
+	CMD_WAKE,
+	CMD_REBOOT
 };
 
 enum __attribute__ ((__packed__)) status {
@@ -201,6 +202,7 @@ uint32_t AlarmValue = 0xFFFFFFFF;
 volatile unsigned int systicks = 0;
 volatile unsigned int sof_timeout = 0;
 volatile unsigned int i = 0;
+uint8_t Reboot = 0;
 #ifdef ST_Link
 extern uint8_t PA9_state;
 #endif /* ST_Link */
@@ -482,6 +484,9 @@ int8_t set_handler(uint8_t *buf)
 		if (memcmp(&buf[4], tmp, sizeof(tmp)))
 			ret = -1;
 		break;
+	case CMD_REBOOT:
+		Reboot = 1;
+		break;
 	default:
 		ret = -1;
 	}
@@ -528,16 +533,30 @@ void check_wakeups(IRMP_DATA *ir)
 	}
 }
 
-/* is received ir-code in one of the upper wakeup-slots? reset if true */
+/* is received ir-code in one of the upper wakeup-slots except last one? reset if true */
 void check_resets(IRMP_DATA *ir)
 {
 	uint8_t i, idx;
 	uint8_t buf[SIZEOF_IR];
-	for (i=WAKE_SLOTS/2; i < WAKE_SLOTS; i++) {
+	for (i=WAKE_SLOTS/2; i < WAKE_SLOTS - 1; i++) {
 		idx = (MACRO_DEPTH + 1) * SIZEOF_IR/2 * MACRO_SLOTS + SIZEOF_IR/2 * i;
 		if (!eeprom_restore(buf, idx)) {
 			if (!memcmp(buf, ir, sizeof(buf)))
 				Reset();
+		}
+	}
+}
+
+/* is received ir-code in the last wakeup-slot? reboot µC if true */
+void check_reboot(IRMP_DATA *ir)
+{
+	uint8_t idx;
+	uint8_t buf[SIZEOF_IR];
+	idx = (MACRO_DEPTH + 1) * SIZEOF_IR/2 * MACRO_SLOTS + SIZEOF_IR/2 * (WAKE_SLOTS - 1);
+	if (!eeprom_restore(buf, idx)) {
+		if (!memcmp(buf, ir, sizeof(buf))) {
+			fast_toggle();
+			NVIC_SystemReset();
 		}
 	}
 }
@@ -577,6 +596,7 @@ void check_macros(IRMP_DATA *ir)
 void USB_DISC_release(void)
 {
 #if defined(Bootloader) && defined(PullDown) || defined(MapleMini) || defined(MapleMini_2k)
+	/* bootloader must activate disconnect, here we release the disconnect */
 	GPIO_InitTypeDef GPIO_InitStructure;
 	RCC_APB2PeriphClockCmd(USB_DISC_RCC_APB2Periph, ENABLE);
 	GPIO_InitStructure.GPIO_Pin = USB_DISC_PIN;
@@ -626,7 +646,7 @@ int main(void)
 	irsnd_init();
 	FLASH_Unlock();
 	EE_Init();
-	RCC_ClearFlag();
+	//RCC_ClearFlag();
 
 	while (1) {
 		if (!AlarmValue)
@@ -661,6 +681,10 @@ int main(void)
 			/* send configuration data */
 			USB_HID_SendData(REPORT_ID_CONFIG, buf, ret);
 			toggle_LED();
+			if(Reboot) {
+				fast_toggle();
+				NVIC_SystemReset();
+			}
 		}
 
 		/* poll IR-data */
@@ -684,6 +708,7 @@ int main(void)
 				check_macros(&myIRData);
 				check_wakeups(&myIRData);
 				check_resets(&myIRData);
+				check_reboot(&myIRData);
 			}
 
 			/* send IR-data */

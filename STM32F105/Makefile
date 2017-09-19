@@ -46,6 +46,7 @@ LDFLAGS = -nostartfiles -Wl,-Map=$(TARGET).map,--gc-sections,--entry=main,-Tscri
 else
 LDFLAGS = -nostartfiles -Wl,-Map=$(TARGET).map,--gc-sections,--entry=main,-Tscripts/arm-gcc-link.ld $(ARCH) $(COMMON)
 endif
+LDFLAGS += --specs=nano.specs
 
 ifdef SimpleCircuit_F105
 DEFINES += -DSimpleCircuit_F105

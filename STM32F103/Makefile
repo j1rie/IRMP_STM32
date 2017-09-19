@@ -94,6 +94,7 @@ endif
 else
 LDFLAGS = -nostartfiles -Wl,-Map=$(TARGET).map,--gc-sections,--entry=main,-Tscripts/arm-gcc-link.ld $(ARCH) $(COMMON)
 endif
+LDFLAGS += --specs=nano.specs
 
 ifdef SimpleCircuit
 DEFINES += -DSimpleCircuit

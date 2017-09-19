@@ -15,7 +15,7 @@ The PC sends obligatory bytes:
 
 byte 1: status: STAT_CMD (command PC->µC), STAT_SUCCESS (success report µC->PC), STAT_FAILURE (error report µC->PC)
 byte 2: access: ACC_GET (query value from µC), ACC_SET (set value in µC), ACC_RESET (reset value in µC)
-byte 3: command: CMD_EMIT (transmit IR data), CMD_CAPS (capabilities of µC), CMD_FW (firmware), CMD_ALARM (alarm timer), CMD_MACRO (macro), CMD_WAKE (wakeup)
+byte 3: command: CMD_EMIT (transmit IR data), CMD_CAPS (capabilities of µC), CMD_FW (firmware), CMD_ALARM (alarm timer), CMD_MACRO (macro), CMD_WAKE (wakeup), CMD_REBOOT (restart µC)
 
 and optional bytes:
 
