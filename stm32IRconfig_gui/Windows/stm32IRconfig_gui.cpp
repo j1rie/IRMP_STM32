@@ -1,7 +1,7 @@
 /*
  *  GUI Config Tool for IRMP STM32 devices
  *
- *  Copyright (C) 2015 Joerg Riechardt
+ *  Copyright (C) 2015-2017 Joerg Riechardt
  *
  *  based on work by Alan Ott
  *  Copyright 2010  Alan Ott
@@ -18,7 +18,7 @@
 //#include "mac_support.h"
 #include <limits.h>
 #include <inttypes.h>
-#include "FXArray.h"
+#include <FXArray.h>
 #include "icons.h"
 
 // Headers needed for sleeping.
@@ -41,6 +41,7 @@ public:
 		ID_CONNECT,
 		ID_DISCONNECT,
 		ID_RESCAN,
+		ID_REBOOT,
 		ID_SEND_OUTPUT_REPORT,
 		ID_PWAKEUP,
 		ID_PMACRO,
@@ -77,6 +78,7 @@ private:
 	FXButton *disconnect_button;
 	FXButton *rescan_button;
 	FXButton *output_button;
+	FXButton *reboot_button;
 	FXButton *pwakeup_button;
 	FXButton *pmacro_button;
 	FXButton *prwakeup_button;
@@ -155,6 +157,7 @@ public:
 	long onConnect(FXObject *sender, FXSelector sel, void *ptr);
 	long onDisconnect(FXObject *sender, FXSelector sel, void *ptr);
 	long onRescan(FXObject *sender, FXSelector sel, void *ptr);
+	long onReboot(FXObject *sender, FXSelector sel, void *ptr);
 	long onSendOutputReport(FXObject *sender, FXSelector sel, void *ptr);
 	long onPwakeup(FXObject *sender, FXSelector sel, void *ptr);
 	long onPmacro(FXObject *sender, FXSelector sel, void *ptr);
@@ -205,6 +208,7 @@ FXDEFMAP(MainWindow) MainWindowMap [] = {
 	FXMAPFUNC(SEL_COMMAND, MainWindow::ID_CONNECT, MainWindow::onConnect ),
 	FXMAPFUNC(SEL_COMMAND, MainWindow::ID_DISCONNECT, MainWindow::onDisconnect ),
 	FXMAPFUNC(SEL_COMMAND, MainWindow::ID_RESCAN, MainWindow::onRescan ),
+	FXMAPFUNC(SEL_COMMAND, MainWindow::ID_REBOOT, MainWindow::onReboot ),
 	FXMAPFUNC(SEL_COMMAND, MainWindow::ID_SEND_OUTPUT_REPORT, MainWindow::onSendOutputReport ),
 	FXMAPFUNC(SEL_COMMAND, MainWindow::ID_PWAKEUP, MainWindow::onPwakeup ),
 	FXMAPFUNC(SEL_COMMAND, MainWindow::ID_PMACRO, MainWindow::onPmacro ),
@@ -267,6 +271,7 @@ MainWindow::MainWindow(FXApp *app)
 	disconnect_button = new FXButton(buttonVF11, "Disconnect", NULL, this, ID_DISCONNECT, BUTTON_NORMAL|LAYOUT_FILL_X);
 	disconnect_button->disable();
 	rescan_button = new FXButton(buttonVF11, "Re-Scan devices", NULL, this, ID_RESCAN, BUTTON_NORMAL|LAYOUT_FILL_X);
+	reboot_button = new FXButton(buttonVF11, "Reboot device", NULL, this, ID_REBOOT, BUTTON_NORMAL|LAYOUT_FILL_X);
 	connected_label = new FXLabel(vf1, "Disconnected");
 	connected_label2 = new FXLabel(vf1, "Firmware:");
 	connected_label3 = new FXLabel(vf1, "Protocols:");
@@ -408,6 +413,7 @@ MainWindow::MainWindow(FXApp *app)
 	connect_button->setHelpText("connect to selected device");
 	disconnect_button->setHelpText("disconnect device");
 	rescan_button->setHelpText("rescan devices");
+	reboot_button->setHelpText("reboot device");
 	pwakeup_button->setHelpText("set wakeup");
 	pmacro_button->setHelpText("set macro");
 	prwakeup_button->setHelpText("set wakeup by remote");
@@ -442,7 +448,7 @@ MainWindow::MainWindow(FXApp *app)
 	wslistbox->setHelpText("wakeupslot to be set");
 	mnlistbox->setHelpText("macronumber to be set");
 	mslistbox->setHelpText("macroslot to be set");
-	output_text->setHelpText("data to be sent to device");
+	output_text->setHelpText("data to be sent to device (experts only)");
 	output_button->setHelpText("send to device");
 	input_text->setHelpText("debug messages");
 	clear_button->setHelpText("clear debug messages");
@@ -469,6 +475,7 @@ MainWindow::MainWindow(FXApp *app)
 	ralarm_button->disable();
 	send_button->disable();
 	read_cont_button->disable();
+	reboot_button->disable();
 
 	// save Colors
 	storedShadowColor = read_cont_button->getShadowColor();
@@ -542,7 +549,7 @@ MainWindow::onConnect(FXObject *sender, FXSelector sel, void *ptr)
 		return -1;
 	FXString s;
 	s.format("Connected to: %04hx:%04hx -", device_info->vendor_id, device_info->product_id);
-	s += FXString(" ") + device_info->manufacturer_string;
+	//s += FXString(" ") + device_info->manufacturer_string;
 	s += FXString(" ") + device_info->product_string;
 	connected_label->setText(s);
 	s = "Firmware: ";
@@ -623,6 +630,7 @@ MainWindow::onConnect(FXObject *sender, FXSelector sel, void *ptr)
 	read_cont_button->enable();
 	connect_button->disable();
 	disconnect_button->enable();
+	reboot_button->enable();
 	input_text->setText("");
 	output_text->setText("");
 
@@ -663,7 +671,7 @@ MainWindow::onConnect(FXObject *sender, FXSelector sel, void *ptr)
 	unsigned int alarm = *((uint32_t *)&buf[4]);
 	FXString t;	
 	s = "alarm: ";
-	t.format("%"PRIu16"", alarm/60/60/24);
+	t.format("%PRIu16", alarm/60/60/24);
 	s += t;
 	s += " days, ";
 	t.format("%d", (alarm/60/60) % 24);
@@ -722,6 +730,7 @@ MainWindow::onDisconnect(FXObject *sender, FXSelector sel, void *ptr)
 	read_cont_button->disable();
 	connect_button->enable();
 	disconnect_button->disable();
+	reboot_button->disable();
 	getApp()->removeTimeout(this, ID_TIMER);
 	getApp()->removeTimeout(this, ID_READIR_TIMER);
 	
@@ -757,6 +766,24 @@ MainWindow::onRescan(FXObject *sender, FXSelector sel, void *ptr)
 	else {
 		device_list->selectItem(0);
 	}
+
+	return 1;
+}
+
+long
+MainWindow::onReboot(FXObject *sender, FXSelector sel, void *ptr)
+{
+	output_text->setText("3 0 1 6"); // Report_ID STAT_CMD ACC_SET CMD_REBOOT
+
+	FXint cur_item = device_list->getCurrentItem();
+	Write_and_Check();
+	FXThread::sleep(2000000000);
+	onDisconnect(NULL, 0, NULL);
+	onRescan(NULL, 0, NULL);
+	device_list->setCurrentItem(cur_item);
+	device_list->deselectItem(0);
+	device_list->selectItem(cur_item);
+	onConnect(NULL, 0, NULL);
 
 	return 1;
 }
@@ -1391,7 +1418,7 @@ MainWindow::onAget(FXObject *sender, FXSelector sel, void *ptr)
 	FXString s;
 	FXString t;	
 	s = "";
-	t.format("%"PRIu16"", alarm/60/60/24);
+	t.format("%PRIu16", alarm/60/60/24);
 	s += t;
 	days1_text->setText(s);
 		

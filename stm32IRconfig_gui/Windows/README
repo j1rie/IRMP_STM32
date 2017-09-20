@@ -1,10 +1,2 @@
-Old way: 
-Get hidapi-externals from https://github.com/downloads/signal11/hidapi/hidapi-externals.zip
-Put the content of this folder into the directory hidapi, which has to be parallel to
-hidapi-externals, so that both are in the same parent directory.
-
-New way:
-Build with libs fox-1.6.50 or fox-1.7.51, libpng-1.6.17 and zlib-1.2.8.
-Those need to be in the folder external-libs.
-Put the content of this folder into a directory, which has to be parallel to
-external-libs, so that both are in the same parent directory.
+Now I use MSYS2 and mingw64.
+mingw-w64-x86_64-fox is needed.

@@ -301,12 +301,12 @@ reset:		printf("reset wakeup(w)\nreset macro slot(m)\nreset alarm(a)\n");
 		break;
 
 	case 'b':
-	    memset(&outBuf[2], 0, 15);
-	    idx = 2;
-	    outBuf[idx++] = 0x01; // ACC_SET
-	    outBuf[idx++] = 0x06; // CMD_REBOOT
-	    write_and_check();
-	    break;
+		memset(&outBuf[2], 0, 15);
+		idx = 2;
+		outBuf[idx++] = 0x01; // ACC_SET
+		outBuf[idx++] = 0x06; // CMD_REBOOT
+		write_and_check();
+		break;
 
 	case 'm':
 		goto monit;

@@ -1,2 +1,0 @@
-libpng/projects/visualc71
-Win32_DLL_Release
