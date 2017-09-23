@@ -69,7 +69,8 @@ public:
 		ID_OPEN,
 		ID_SAVE,
 		ID_APPEND,
-		ID_APPLY
+		ID_APPLY,
+		ID_DEVLIST
 	};
 	
 private:
@@ -191,6 +192,7 @@ public:
 	long saveFile(const FXString& file);
 	long onAppend(FXObject *sender, FXSelector sel, void *ptr);
 	long onApply(FXObject *sender, FXSelector sel, void *ptr);
+	long onDevDClicked(FXObject *sender, FXSelector sel, void *ptr);
 };
 
 // FOX 1.7 changes the timeouts to all be nanoseconds.
@@ -209,6 +211,7 @@ FXDEFMAP(MainWindow) MainWindowMap [] = {
 	FXMAPFUNC(SEL_COMMAND, MainWindow::ID_DISCONNECT, MainWindow::onDisconnect ),
 	FXMAPFUNC(SEL_COMMAND, MainWindow::ID_RESCAN, MainWindow::onRescan ),
 	FXMAPFUNC(SEL_COMMAND, MainWindow::ID_REBOOT, MainWindow::onReboot ),
+	FXMAPFUNC(SEL_DOUBLECLICKED, MainWindow::ID_DEVLIST, MainWindow::onDevDClicked ),
 	FXMAPFUNC(SEL_COMMAND, MainWindow::ID_SEND_OUTPUT_REPORT, MainWindow::onSendOutputReport ),
 	FXMAPFUNC(SEL_COMMAND, MainWindow::ID_PWAKEUP, MainWindow::onPwakeup ),
 	FXMAPFUNC(SEL_COMMAND, MainWindow::ID_PMACRO, MainWindow::onPmacro ),
@@ -265,7 +268,7 @@ MainWindow::MainWindow(FXApp *app)
 	// first vertical frame: everything else
 	// Device List and Connect/Disconnect buttons
 	FXHorizontalFrame *hf11 = new FXHorizontalFrame(vf1, LAYOUT_FILL_X); //
-	device_list = new FXList(new FXHorizontalFrame(hf11,FRAME_SUNKEN|FRAME_THICK|LAYOUT_FILL_X|LAYOUT_FILL_Y, 0,0,0,0, 0,0,0,0), NULL, 0, LISTBOX_NORMAL|LAYOUT_FILL_X|LAYOUT_FILL_Y, 0,0,300,200);
+	device_list = new FXList(new FXHorizontalFrame(hf11,FRAME_SUNKEN|FRAME_THICK|LAYOUT_FILL_X|LAYOUT_FILL_Y, 0,0,0,0, 0,0,0,0), this, ID_DEVLIST, LISTBOX_NORMAL|LAYOUT_FILL_X|LAYOUT_FILL_Y, 0,0,300,200);
 	FXVerticalFrame *buttonVF11 = new FXVerticalFrame(hf11);
 	connect_button = new FXButton(buttonVF11, "Connect", NULL, this, ID_CONNECT, BUTTON_NORMAL|LAYOUT_FILL_X);
 	disconnect_button = new FXButton(buttonVF11, "Disconnect", NULL, this, ID_DISCONNECT, BUTTON_NORMAL|LAYOUT_FILL_X);
@@ -409,7 +412,7 @@ MainWindow::MainWindow(FXApp *app)
 	statusbar = new FXStatusBar(hf17, LAYOUT_SIDE_BOTTOM|LAYOUT_FILL_X);
 
 	// HelpText
-	device_list->setHelpText("select one of found IRMP_STM32 devices");
+	device_list->setHelpText("select one of found IRMP_STM32 devices (doubleclick connects)");
 	connect_button->setHelpText("connect to selected device");
 	disconnect_button->setHelpText("disconnect device");
 	rescan_button->setHelpText("rescan devices");
@@ -671,7 +674,7 @@ MainWindow::onConnect(FXObject *sender, FXSelector sel, void *ptr)
 	unsigned int alarm = *((uint32_t *)&buf[4]);
 	FXString t;	
 	s = "alarm: ";
-	t.format("%PRIu16", alarm/60/60/24);
+	t.format("%u", alarm/60/60/24);
 	s += t;
 	s += " days, ";
 	t.format("%d", (alarm/60/60) % 24);
@@ -733,7 +736,7 @@ MainWindow::onDisconnect(FXObject *sender, FXSelector sel, void *ptr)
 	reboot_button->disable();
 	getApp()->removeTimeout(this, ID_TIMER);
 	getApp()->removeTimeout(this, ID_READIR_TIMER);
-	
+
 	return 1;
 }
 
@@ -777,7 +780,7 @@ MainWindow::onReboot(FXObject *sender, FXSelector sel, void *ptr)
 
 	FXint cur_item = device_list->getCurrentItem();
 	Write_and_Check();
-	FXThread::sleep(2000000000);
+	FXThread::sleep(2500000000);
 	onDisconnect(NULL, 0, NULL);
 	onRescan(NULL, 0, NULL);
 	device_list->setCurrentItem(cur_item);
@@ -1418,7 +1421,7 @@ MainWindow::onAget(FXObject *sender, FXSelector sel, void *ptr)
 	FXString s;
 	FXString t;	
 	s = "";
-	t.format("%PRIu16", alarm/60/60/24);
+	t.format("%u", alarm/60/60/24);
 	s += t;
 	days1_text->setText(s);
 		
@@ -1853,24 +1856,30 @@ MainWindow::onReadIRTimeout(FXObject *sender, FXSelector sel, void *ptr)
 }
 
 long MainWindow::onCmdwsListBox(FXObject*,FXSelector sel,void* ptr){
-  FXTRACE((1,"%s: %d (%d)\n",FXSELTYPE(sel)==SEL_COMMAND?"SEL_COMMAND":"SEL_CHANGED",(FXint)(FXival)ptr,wslistbox->getCurrentItem()));
-  return 1;
+	FXTRACE((1,"%s: %d (%d)\n",FXSELTYPE(sel)==SEL_COMMAND?"SEL_COMMAND":"SEL_CHANGED",(FXint)(FXival)ptr,wslistbox->getCurrentItem()));
+	return 1;
   }
 
 long MainWindow::onCmdmnListBox(FXObject*,FXSelector sel,void* ptr){
-  FXTRACE((1,"%s: %d (%d)\n",FXSELTYPE(sel)==SEL_COMMAND?"SEL_COMMAND":"SEL_CHANGED",(FXint)(FXival)ptr,mnlistbox->getCurrentItem()));
-  return 1;
+	FXTRACE((1,"%s: %d (%d)\n",FXSELTYPE(sel)==SEL_COMMAND?"SEL_COMMAND":"SEL_CHANGED",(FXint)(FXival)ptr,mnlistbox->getCurrentItem()));
+	return 1;
   }
 
 long MainWindow::onCmdmsListBox(FXObject*,FXSelector sel,void* ptr){
-  FXTRACE((1,"%s: %d (%d)\n",FXSELTYPE(sel)==SEL_COMMAND?"SEL_COMMAND":"SEL_CHANGED",(FXint)(FXival)ptr,mslistbox->getCurrentItem()));
-  return 1;
+	FXTRACE((1,"%s: %d (%d)\n",FXSELTYPE(sel)==SEL_COMMAND?"SEL_COMMAND":"SEL_CHANGED",(FXint)(FXival)ptr,mslistbox->getCurrentItem()));
+	return 1;
   }
 
 long MainWindow::onCmdrepeatListBox(FXObject*,FXSelector sel,void* ptr){
-  FXTRACE((1,"%s: %d (%d)\n",FXSELTYPE(sel)==SEL_COMMAND?"SEL_COMMAND":"SEL_CHANGED",(FXint)(FXival)ptr,repeatlistbox->getCurrentItem()));
-  return 1;
+	FXTRACE((1,"%s: %d (%d)\n",FXSELTYPE(sel)==SEL_COMMAND?"SEL_COMMAND":"SEL_CHANGED",(FXint)(FXival)ptr,repeatlistbox->getCurrentItem()));
+	return 1;
   }
+
+long MainWindow::onDevDClicked(FXObject *sender, FXSelector sel, void *ptr){
+	onDisconnect(NULL, 0, NULL);
+	onConnect(NULL, 0, NULL);
+	return 1;
+}
 
 long
 MainWindow::onMacTimeout(FXObject *sender, FXSelector sel, void *ptr)

@@ -53,7 +53,7 @@ static void read_stm32() {
 	} else {
 		printf("read %d bytes:\n\t", retVal);
 		for (i = 0; i < retVal; i++)
-			printf("%02hx ", inBuf[i]);
+			printf("%02hhx ", inBuf[i]);
 		puts("\n");
 	}
 } 
@@ -67,7 +67,7 @@ static void write_stm32() {
 	} else {
 		printf("written %d bytes:\n\t", retVal);
 		for (i = 0; i < retVal; i++)
-			printf("%02hx ", outBuf[i]);
+			printf("%02hhx ", outBuf[i]);
 		puts("\n");
 	}
 }
@@ -124,24 +124,24 @@ prog:		printf("set wakeup(w)\nset macro(m)\n");
 		switch (d) {
 		case 'w':
 			printf("enter slot number (starting with 0)\n");
-			scanf("%u", &s);
+			scanf("%"SCNd8"", &s);
 			outBuf[idx++] = 0x05; // CMD_WAKE
 			outBuf[idx++] = s;    // (s+1)-th slot
 			break;
 		case 'm':
 			printf("enter macro number (starting with 0)\n");
-			scanf("%u", &m);
+			scanf("%"SCNd8"", &m);
 			outBuf[idx++] = 0x04; // CMD_MACRO
 			outBuf[idx++] = m;    // (m+1)-th macro
 			printf("enter slot number, 0 for trigger\n");
-			scanf("%u", &s);
+			scanf("%"SCNd8"", &s);
 			outBuf[idx++] = s;    // (s+1)-th slot
 			break;
 		default:
 			goto prog;
 		}
 		printf("enter IRData (protocoladdresscommandflag)\n");
-		scanf("%I64x", &i);
+		scanf("%"SCNx64"", &i);
 		outBuf[idx++] = (i>>40) & 0xFF;
 		outBuf[idx++] = (i>>24) & 0xFF;
 		outBuf[idx++] = (i>>32) & 0xFF;
@@ -160,17 +160,17 @@ Prog:		printf("set wakeup with remote control(w)\nset macro with remote control(
 		switch (d) {
 		case 'w':
 			printf("enter slot number (starting with 0)\n");
-			scanf("%u", &s);
+			scanf("%"SCNd8"", &s);
 			outBuf[idx++] = 0x05; // CMD_WAKE
 			outBuf[idx++] = s;    // (s+1)-th slot
 			break;
 		case 'm':
 			printf("enter macro number (starting with 0)\n");
-			scanf("%u", &m);
+			scanf("%"SCNd8"", &m);
 			outBuf[idx++] = 0x04; // CMD_MACRO
 			outBuf[idx++] = m;    // (m+1)-th macro
 			printf("enter slot number, 0 for trigger\n");
-			scanf("%u", &s);
+			scanf("%"SCNd8"", &s);
 			outBuf[idx++] = s;    // (s+1)-th slot
 			break;
 		default:
@@ -203,17 +203,17 @@ get:		printf("get wakeup(w)\nget macro slot(m)\nget caps(c)\n");
 		switch (d) {
 		case 'w':
 			printf("enter slot number (starting with 0)\n");
-			scanf("%u", &s);
+			scanf("%"SCNd8"", &s);
 			outBuf[idx++] = 0x05; // CMD_WAKE
 			outBuf[idx++] = s;    // (s+1)-th slot
 			break;
 		case 'm':
 			printf("enter macro number (starting with 0)\n");
-			scanf("%u", &m);
+			scanf("%"SCNd8"", &m);
 			outBuf[idx++] = 0x04; // CMD_MACRO
 			outBuf[idx++] = m;    // (m+1)-th macro
 			printf("enter slot number, 0 for trigger\n");
-			scanf("%u", &s);
+			scanf("%"SCNd8"", &s);
 			outBuf[idx++] = s;    // (s+1)-th slot
 			break;
 		case 'c':
@@ -274,17 +274,17 @@ reset:		printf("reset wakeup(w)\nreset macro slot(m)\nreset alarm(a)\n");
 		switch (d) {
 		case 'w':
 			printf("enter slot number (starting with 0)\n");
-			scanf("%u", &s);
+			scanf("%"SCNd8"", &s);
 			outBuf[idx++] = 0x05; // CMD_WAKE
 			outBuf[idx++] = s;    // (s+1)-th slot
 			break;
 		case 'm':
 			printf("enter macro number (starting with 0)\n");
-			scanf("%u", &m);
+			scanf("%"SCNd8"", &m);
 			outBuf[idx++] = 0x04; // CMD_MACRO
 			outBuf[idx++] = m;    // (m+1)-th macro
 			printf("enter slot number, 0 for trigger\n");
-			scanf("%u", &s);
+			scanf("%"SCNd8"", &s);
 			outBuf[idx++] = s;    // (s+1)-th slot
 			break;
 		case 'a':
@@ -302,7 +302,7 @@ reset:		printf("reset wakeup(w)\nreset macro slot(m)\nreset alarm(a)\n");
 		outBuf[idx++] = 0x01; // ACC_SET
 		outBuf[idx++] = 0x03; // CMD_ALARM
 		printf("enter alarm\n");
-		scanf("%I64x", &i);
+		scanf("%"SCNx64"", &i);
 		memcpy(&outBuf[idx++], &i, 4);
 		write_and_check();
 		break;
@@ -317,7 +317,7 @@ reset:		printf("reset wakeup(w)\nreset macro slot(m)\nreset alarm(a)\n");
 
 	case 'i':
 		printf("enter IRData (protocoladdresscommandflag)\n");
-		scanf("%I64x", &i);
+		scanf("%"SCNx64"", &i);
 		memset(&outBuf[2], 0, 15);
 		idx = 2;
 		outBuf[idx++] = 0x01; // ACC_SET
@@ -358,10 +358,10 @@ monit:	while(true) {
 		if (retValm >= 0) {
 			printf("read %d bytes:\n\t", retValm);
 			for (l = 0; l < retValm; l++)
-				printf("%02hx ", inBuf[l]);
+				printf("%02hhx ", inBuf[l]);
 			printf("\n");
 			printf("converted to protocoladdresscommandflag:\n\t");
-			printf("%02hx%02hx%02hx%02hx%02hx%02hx", inBuf[1],inBuf[3],inBuf[2],inBuf[5],inBuf[4],inBuf[6]);
+			printf("%02hhx%02hhx%02hhx%02hhx%02hhx%02hhx", inBuf[1],inBuf[3],inBuf[2],inBuf[5],inBuf[4],inBuf[6]);
 			printf("\n\n");
 		}
 	}
