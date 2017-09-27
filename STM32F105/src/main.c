@@ -569,8 +569,9 @@ void USB_DISC_release(void)
 void USB_Reset(void)
 {
 #if defined(Bootloader) && !defined(PullDown) && !defined(MapleMini) && !defined(MapleMini_2k)
-	/* disable USB */
-	//PowerOff();
+	/* reset USB */
+	RCC_AHBPeriphResetCmd(RCC_AHBPeriph_OTG_FS, ENABLE);
+	RCC_AHBPeriphResetCmd(RCC_AHBPeriph_OTG_FS, DISABLE);
 	/* USB reset by pulling USBDP shortly low. A pullup resistor is needed, most
 	 * boards have it. */
 	GPIO_InitTypeDef GPIO_InitStructure;
@@ -601,7 +602,6 @@ int main(void)
 	irsnd_init();
 	FLASH_Unlock();
 	EE_Init();
-	//RCC_ClearFlag();
 
 	while (1) {
 		if (!AlarmValue)
