@@ -306,6 +306,9 @@ reset:		printf("reset wakeup(w)\nreset macro slot(m)\nreset alarm(a)\n");
 		outBuf[idx++] = 0x01; // ACC_SET
 		outBuf[idx++] = 0x06; // CMD_REBOOT
 		write_and_check();
+		usleep(2500000);
+		close(stm32fd);
+		open_stm32(argc>1 ? argv[1] : "/dev/irmp_stm32");
 		break;
 
 	case 'm':
