@@ -5,13 +5,16 @@ CXX=g++
 COBJS=hid.o
 CPPOBJS=stm32IRconfig.o
 OBJS=$(COBJS) $(CPPOBJS)
-CFLAGS=-g -c -Wall -Os -flto
-#LIBS= -mwindows -lsetupapi
+CFLAGS=-g -c -Wall
+ifeq ($(MSYSTEM),MINGW32)
+LIBS= -lsetupapi -static-libgcc
+else ifeq ($(MSYSTEM),MINGW64)
 LIBS= -lsetupapi
-#LDFLAGS+=static
+endif
+CXXFLAGS=-g -s
 
 stm32IRconfig: $(OBJS)
-	g++ -g $^ $(LIBS) -o stm32IRconfig
+	$(CXX) $(CXXFLAGS) $^ $(LIBS) -o stm32IRconfig
 
 $(COBJS): %.o: %.c
 	$(CC) $(CFLAGS) $< -o $@

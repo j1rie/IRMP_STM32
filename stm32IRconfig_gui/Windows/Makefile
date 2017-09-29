@@ -5,11 +5,17 @@ CXX=g++
 COBJS=hid.o
 CPPOBJS=stm32IRconfig_gui.o icons.o
 OBJS=$(COBJS) $(CPPOBJS)
-CFLAGS=-I/mingw64/include/fox-1.6 -g -c
-LIBS= -mwindows -lsetupapi -L/mingw64/lib -Wl,-Bstatic -lFOX-1.6 -lpng -ljpeg -ltiff -lz -llzma -lws2_32 -Wl,-Bdynamic -lgdi32 -Wl,--enable-auto-import -static-libgcc -static-libstdc++ -lkernel32
+ifeq ($(MSYSTEM),MINGW32)
+CFLAGS=-I/mingw32/include/fox-1.6 -g -c -static -s -Wall
+LIBS= -mwindows -L/mingw32/lib -L/mingw32/i686-w64-mingw32/lib -Wl,-Bstatic -lwinpthread -lFOX-1.6 -lpng -ljpeg -ltiff -lz -llzma -lws2_32 -lgdi32 -static-libgcc -static-libstdc++ -lkernel32 -lsetupapi
+else ifeq ($(MSYSTEM),MINGW64)
+CFLAGS=-I/mingw64/include/fox-1.6 -g -c -static -s -Wall
+LIBS= -mwindows -L/mingw64/lib -L/mingw64/x86_64-w64-mingw32/lib -Wl,-Bstatic -lwinpthread -lFOX-1.6 -lpng -ljpeg -ltiff -lz -llzma -lws2_32 -lgdi32 -static-libgcc -static-libstdc++ -lkernel32 -lsetupapi
+endif
+CXXFLAGS= -g -static -s
 
 stm32IRconfig_gui: $(OBJS)
-	g++ -g $^ $(LIBS) -o stm32IRconfig_gui
+	$(CXX) $(CXXFLAGS) $^ $(LIBS) -o stm32IRconfig_gui
 
 $(COBJS): %.o: %.c
 	$(CC) $(CFLAGS) $< -o $@
