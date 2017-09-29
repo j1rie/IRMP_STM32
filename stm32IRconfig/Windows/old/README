@@ -6,6 +6,7 @@ stm32IRconfig
 program and read the eeprom (wakeups, macros and capabilities)
 reset wakeups, macros and alarm
 set and get the alarm
+reboot
 send IR
 monitor (read) STM32IR, stop with ^C
 
