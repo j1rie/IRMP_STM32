@@ -203,6 +203,7 @@ volatile unsigned int systicks = 0;
 volatile unsigned int sof_timeout = 0;
 volatile unsigned int i = 0;
 uint8_t Reboot = 0;
+volatile uint32_t boot_flag __attribute__((__section__(".noinit")));
 #ifdef ST_Link
 extern uint8_t PA9_state;
 #endif /* ST_Link */
@@ -555,6 +556,7 @@ void check_reboot(IRMP_DATA *ir)
 	idx = (MACRO_DEPTH + 1) * SIZEOF_IR/2 * MACRO_SLOTS + SIZEOF_IR/2 * (WAKE_SLOTS - 1);
 	if (!eeprom_restore(buf, idx)) {
 		if (!memcmp(buf, ir, sizeof(buf))) {
+			boot_flag = 0x12094444;// let bootloader know reset is from here
 			fast_toggle();
 			NVIC_SystemReset();
 		}
