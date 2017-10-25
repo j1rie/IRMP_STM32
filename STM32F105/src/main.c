@@ -639,6 +639,7 @@ int main(void)
 			USB_HID_SendData(REPORT_ID_CONFIG, buf, ret);
 			toggle_LED();
 			if(Reboot) {
+				boot_flag = 0x12094444;// let bootloader know reset is from here
 				fast_toggle();
 				NVIC_SystemReset();
 			}
