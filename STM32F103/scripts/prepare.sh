@@ -9,8 +9,9 @@ mkdir -p ext_src
 cd ./ext_src
 for i in 32010 32121; do
 	if [[ ! -s stsw-stm$i.zip ]]; then
-		MESSAGE="unfortunately you have to download these files from ST manually and put them into ext_src"
-		echo $MESSAGE
+		echo 'unfortunately you have to download these files from ST manually and put them into ext_src'
+		echo 'http://www.st.com/en/embedded-software/stsw-stm32121.html'
+		echo 'http://www.st.com/en/embedded-software/stsw-stm32010.html'
 		exit
 		#wget "http://www.st.com/st-web-ui/static/active/en/st_prod_software_internet/resource/technical/software/firmware/stsw-stm$i.zip"
 	fi
