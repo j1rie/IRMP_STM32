@@ -9,7 +9,10 @@ mkdir -p ext_src
 cd ./ext_src
 for i in 32010 32121; do
 	if [[ ! -s stsw-stm$i.zip ]]; then
-		wget "http://www.st.com/st-web-ui/static/active/en/st_prod_software_internet/resource/technical/software/firmware/stsw-stm$i.zip"
+		MESSAGE="unfortunately you have to download these files from ST manually and put them into ext_src"
+		echo $MESSAGE
+		exit
+		#wget "http://www.st.com/st-web-ui/static/active/en/st_prod_software_internet/resource/technical/software/firmware/stsw-stm$i.zip"
 	fi
 done
 if [[ ! -s irmp.tar.gz ]]; then

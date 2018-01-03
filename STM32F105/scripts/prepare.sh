@@ -9,7 +9,10 @@ mkdir -p ext_src
 cd ./ext_src
 for i in en.stm32_f105-07_f2_f4_usb-host-device_lib stsw-stm32010; do
 	if [[ ! -s $i.zip ]]; then
-		wget "http://www.st.com/resource/en/firmware/$i.zip"
+		MESSAGE="unfortunately you have to download these files from ST manually and put them into ext_src"
+		echo $MESSAGE
+		exit
+		#wget "http://www.st.com/resource/en/firmware/$i.zip"
 	fi
 done
 if [[ ! -s irmp.tar.gz ]]; then
