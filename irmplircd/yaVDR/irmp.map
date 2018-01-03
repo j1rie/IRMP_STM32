@@ -1,6 +1,6 @@
 # yavdr's remote.conf has fixed mappings, so we have to use them
 070000001d00 KEY_UP
-070000000e00 KEY_DOW
+070000000e00 KEY_DOWN
 070000002000 KEY_MENU
 070000000b00 KEY_OK
 # insert below the scancode for button "Back"
