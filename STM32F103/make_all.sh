@@ -67,5 +67,6 @@ make clean-objects
 make -j3 Platform=Stick
 make clean-objects
 make -j3 Platform=MapleMini
+make clean-objects
 rm *.elf
 rm *.map

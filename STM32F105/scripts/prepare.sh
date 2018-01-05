@@ -9,8 +9,9 @@ mkdir -p ext_src
 cd ./ext_src
 for i in en.stm32_f105-07_f2_f4_usb-host-device_lib stsw-stm32010; do
 	if [[ ! -s $i.zip ]]; then
-		MESSAGE="unfortunately you have to download these files from ST manually and put them into ext_src"
-		echo $MESSAGE
+		echo 'unfortunately you have to download these files from ST manually and put them into ext_src'
+		echo 'http://www.st.com/en/embedded-software/stsw-stm32046.html'
+		echo 'http://www.st.com/en/embedded-software/stsw-stm32010.html'
 		exit
 		#wget "http://www.st.com/resource/en/firmware/$i.zip"
 	fi

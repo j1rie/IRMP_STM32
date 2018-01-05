@@ -275,6 +275,7 @@ void LED_Switch_init(void)
 #else
 	GPIO_WriteBit(LED_PORT, LED_PIN, Bit_RESET);
 #endif
+	GPIO_WriteBit(EXTLED_PORT, EXTLED_PIN, Bit_SET);
 #endif /* ST_Link */
 #endif /* SHORTFLASH */
 }
@@ -404,7 +405,6 @@ void Wakeup(void)
 	fast_toggle();
 	/* let software know, PC was powered on by firmware, TODO make configurable & use Eeprom */
 	send_ir_on_delay = 90;
-
 }
 
 void Reset(void)
@@ -604,7 +604,7 @@ void check_reboot(IRMP_DATA *ir)
 	idx = (MACRO_DEPTH + 1) * SIZEOF_IR/2 * MACRO_SLOTS + SIZEOF_IR/2 * (WAKE_SLOTS - 1);
 	if (!eeprom_restore(buf, idx)) {
 		if (!memcmp(buf, ir, sizeof(buf))) {
-			boot_flag = 0x12094444;// let bootloader know reset is from here
+			boot_flag = 0x12094444; // let bootloader know reset is from here
 			fast_toggle();
 			NVIC_SystemReset();
 		}
@@ -700,6 +700,7 @@ int main(void)
 	while (1) {
 		if (!AlarmValue)
 			Wakeup();
+
 		if (send_ir_on_delay == 0) {
 			uint8_t magic[SIZEOF_IR] = {0xFF, 0x00, 0x00, 0x00, 0x00, 0x00};
 			memcpy(buf, magic, SIZEOF_IR);
