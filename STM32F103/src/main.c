@@ -204,6 +204,7 @@ volatile unsigned int sof_timeout = 0;
 volatile unsigned int i = 0;
 uint8_t Reboot = 0;
 volatile uint32_t boot_flag __attribute__((__section__(".noinit")));
+volatile int send_ir_on_delay = -1;
 #ifdef ST_Link
 extern uint8_t PA9_state;
 #endif /* ST_Link */
@@ -232,10 +233,14 @@ void LED_Switch_init(void)
 	/* start with wakeup and reset switch off */
 #ifdef SimpleCircuit
 	GPIO_WriteBit(WAKEUP_PORT, WAKEUP_PIN, Bit_SET);
+#ifdef RESET_PORT
 	GPIO_WriteBit(RESET_PORT, RESET_PIN, Bit_SET);
+#endif
 #else
 	GPIO_WriteBit(WAKEUP_PORT, WAKEUP_PIN, Bit_RESET);
+#ifdef RESET_PORT
 	GPIO_WriteBit(RESET_PORT, RESET_PIN, Bit_RESET);
+#endif
 #endif /* SimpleCircuit */
 	GPIO_InitStructure.GPIO_Mode = GPIO_Mode_Out_PP;
 	GPIO_InitStructure.GPIO_Speed = GPIO_Speed_2MHz;
@@ -243,18 +248,23 @@ void LED_Switch_init(void)
 	GPIO_InitStructure.GPIO_Pin = LED_PIN;
 	GPIO_Init(LED_PORT, &GPIO_InitStructure);
 #endif /* ST_Link */
+#ifdef EXTLED_PORT
+	GPIO_InitStructure.GPIO_Pin = EXTLED_PIN;
+	GPIO_Init(EXTLED_PORT, &GPIO_InitStructure);
+#endif
 	GPIO_InitStructure.GPIO_Pin = WAKEUP_PIN;
 #ifdef SimpleCircuit
 	GPIO_InitStructure.GPIO_Mode = GPIO_Mode_Out_OD;
 #endif /* SimpleCircuit */
 	GPIO_Init(WAKEUP_PORT, &GPIO_InitStructure);
+#ifdef RESET_PORT
 	GPIO_InitStructure.GPIO_Pin = RESET_PIN;
 	GPIO_Init(RESET_PORT, &GPIO_InitStructure);
-#ifndef StickLink
+#endif
 	GPIO_InitStructure.GPIO_Pin = WAKEUP_RESET_PIN;
 	GPIO_InitStructure.GPIO_Mode = GPIO_Mode_IPU;
 	GPIO_Init(WAKEUP_RESET_PORT, &GPIO_InitStructure);
-#endif /* StickLink */
+#ifndef SHORTFLASH
 	/* start with LED on */
 #ifdef ST_Link
 	red_on();
@@ -266,6 +276,7 @@ void LED_Switch_init(void)
 	GPIO_WriteBit(LED_PORT, LED_PIN, Bit_RESET);
 #endif
 #endif /* ST_Link */
+#endif /* SHORTFLASH */
 }
 
 void toggle_LED(void)
@@ -273,11 +284,41 @@ void toggle_LED(void)
 #ifdef ST_Link
 	if (!PA9_state) {
 		red_on();
+#ifdef EXTLED_PORT
+		EXTLED_PORT->ODR ^= EXTLED_PIN;
+#endif
+#ifdef SHORTFLASH
+		delay_ms(50);
+		LED_deinit();
+#ifdef EXTLED_PORT
+		EXTLED_PORT->ODR ^= EXTLED_PIN;
+#endif
+#endif
 	} else {
 		LED_deinit();
+#ifdef EXTLED_PORT
+		EXTLED_PORT->ODR ^= EXTLED_PIN;
+#endif
+#ifdef SHORTFLASH
+		delay_ms(50);
+		red_on();
+#ifdef EXTLED_PORT
+		EXTLED_PORT->ODR ^= EXTLED_PIN;
+#endif
+#endif
 	}
 #else
 	LED_PORT->ODR ^= LED_PIN;
+#ifdef EXTLED_PORT
+	EXTLED_PORT->ODR ^= EXTLED_PIN;
+#endif
+#ifdef SHORTFLASH
+	delay_ms(50);
+	LED_PORT->ODR ^= LED_PIN;
+#ifdef EXTLED_PORT
+	EXTLED_PORT->ODR ^= EXTLED_PIN;
+#endif
+#endif
 #endif /* ST_Link */
 }
 
@@ -321,6 +362,8 @@ void SysTick_Handler(void)
 	if (i == 999) {
 		if (AlarmValue)
 			AlarmValue--;
+		if (send_ir_on_delay > 0)
+			send_ir_on_delay--;
 		i = 0;
 	} else {
 		i++;
@@ -359,10 +402,14 @@ void Wakeup(void)
 	GPIO_WriteBit(WAKEUP_PORT, WAKEUP_PIN, Bit_RESET);
 #endif /* SimpleCircuit */
 	fast_toggle();
+	/* let software know, PC was powered on by firmware, TODO make configurable & use Eeprom */
+	send_ir_on_delay = 90;
+
 }
 
 void Reset(void)
 {
+#ifdef RESET_PORT
 	/* motherboard reset switch: RESET_PIN short high (resp. low in case of SimpleCircuit) */
 #ifdef SimpleCircuit
 	GPIO_WriteBit(RESET_PORT, RESET_PIN, Bit_RESET);
@@ -376,6 +423,7 @@ void Reset(void)
 	GPIO_WriteBit(RESET_PORT, RESET_PIN, Bit_RESET);
 #endif /* SimpleCircuit */
 	fast_toggle();
+#endif
 }
 
 void store_new_wakeup(void)
@@ -652,6 +700,12 @@ int main(void)
 	while (1) {
 		if (!AlarmValue)
 			Wakeup();
+		if (send_ir_on_delay == 0) {
+			uint8_t magic[SIZEOF_IR] = {0xFF, 0x00, 0x00, 0x00, 0x00, 0x00};
+			memcpy(buf, magic, SIZEOF_IR);
+			USB_HID_SendData(REPORT_ID_IR, buf, SIZEOF_IR);
+			send_ir_on_delay = -1;
+		}
 
 		wakeup_reset();
 

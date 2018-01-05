@@ -60,8 +60,14 @@ void fast_toggle(void)
 	int i;
 	for(i=0; i<5; i++) {
 		GPIO_WriteBit(GPIOA, GPIO_Pin_9, Bit_SET);
+#ifdef EXTLED_PORT
+		EXTLED_PORT->ODR ^= EXTLED_PIN;
+#endif
 		while (systicks <= 50 * (2*i+1));
 		GPIO_WriteBit(GPIOA, GPIO_Pin_9, Bit_RESET);
+#ifdef EXTLED_PORT
+		EXTLED_PORT->ODR ^= EXTLED_PIN;
+#endif
 		while (systicks <= 50 * (2*i+2));
 	}
 	restore();
@@ -73,7 +79,13 @@ void yellow_short_on(void)
 	if (!PA9_state)
 		LED_init();
 	GPIO_WriteBit(GPIOA, GPIO_Pin_9, Bit_RESET);
+#ifdef EXTLED_PORT
+	EXTLED_PORT->ODR ^= EXTLED_PIN;
+#endif
 	delay_ms(130);
+#ifdef EXTLED_PORT
+	EXTLED_PORT->ODR ^= EXTLED_PIN;
+#endif
 	restore();
 }
 
@@ -100,6 +112,9 @@ void fast_toggle(void)
 	int i;
 	for(i=0; i<10; i++) {
 		LED_PORT->ODR ^= LED_PIN;
+#ifdef EXTLED_PORT
+		EXTLED_PORT->ODR ^= EXTLED_PIN;
+#endif
 		while (systicks <= 50 * (i+1));
 	}
 }
@@ -108,7 +123,13 @@ void red_on(void) {}
 void yellow_short_on(void)
 {
 	LED_PORT->ODR ^= LED_PIN;
+#ifdef EXTLED_PORT
+	EXTLED_PORT->ODR ^= EXTLED_PIN;
+#endif
 	delay_ms(130);
 	LED_PORT->ODR ^= LED_PIN;
+#ifdef EXTLED_PORT
+	EXTLED_PORT->ODR ^= EXTLED_PIN;
+#endif
 }
 #endif /* ST_Link */

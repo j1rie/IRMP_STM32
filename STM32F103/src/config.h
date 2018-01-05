@@ -53,6 +53,12 @@
 /* uncomment this in order to pull down the "active" pin of the mainboard power button connector directly */
 //#define SimpleCircuit
 
+/* uncomment this for an external LED instead of the reset functionality on Blue-, Red- or StickLink */
+#define EXTLED
+
+/* uncomment this in order to shortly flash the LED and EXTLED instead of toggle them */
+#define SHORTFLASH
+
 /* uncomment this for legacy boards with pulldown resistor for USB reset */
 //#define PullDown
 
@@ -66,8 +72,13 @@
 #if defined(BlueLink) /* blue ST-Link, IRSND = NRST */
 	#define WAKEUP_PORT		GPIOA
 	#define WAKEUP_PIN		GPIO_Pin_13 /* DIO */
+#ifndef EXTLED
 	#define RESET_PORT		GPIOA
 	#define RESET_PIN		GPIO_Pin_14 /* CLK */
+#else
+	#define EXTLED_PORT		GPIOA
+	#define EXTLED_PIN		GPIO_Pin_14 /* CLK */
+#endif
 	#define IR_IN_PORT		B
 	#define IR_IN_PIN		11 /* SWIM */
 	#define WAKEUP_RESET_PORT	GPIOB
@@ -78,8 +89,13 @@
 #elif defined(RedLink) /* red ST-Link, IRSND = NRST */
 	#define WAKEUP_PORT		GPIOB
 	#define WAKEUP_PIN		GPIO_Pin_14 /* DIO */
+#ifndef EXTLED
 	#define RESET_PORT		GPIOB
 	#define RESET_PIN		GPIO_Pin_13 /* CLK */
+#else
+	#define EXTLED_PORT		GPIOB
+	#define EXTLED_PIN		GPIO_Pin_13 /* CLK */
+#endif
 	#define IR_IN_PORT		B
 	#define IR_IN_PIN		11 /* SWIM */
 	#define WAKEUP_RESET_PORT	GPIOA
@@ -90,19 +106,26 @@
 #elif defined(StickLink) /* ST-Link stick, IRSND = RST */
 	#define WAKEUP_PORT		GPIOB
 	#define WAKEUP_PIN		GPIO_Pin_14 /* DIO */
+#ifndef EXTLED
 	#define RESET_PORT		GPIOB
 	#define RESET_PIN		GPIO_Pin_13 /* CLK */
+#else
+	#define EXTLED_PORT		GPIOB
+	#define EXTLED_PIN		GPIO_Pin_13 /* CLK */
+#endif
 	#define IR_IN_PORT		B
 	#define IR_IN_PIN		11 /* SWIM */
 	#define LED_PORT		GPIOA
 	#define LED_PIN			GPIO_Pin_9
-//	#define WAKEUP_RESET_PORT	GPIOA
-//	#define WAKEUP_RESET_PIN	GPIO_Pin_14
+	#define WAKEUP_RESET_PORT	GPIOA
+	#define WAKEUP_RESET_PIN	GPIO_Pin_14
 #elif defined(DeveloperBoard) /* classic developer board */
 	#define WAKEUP_PORT		GPIOB
 	#define WAKEUP_PIN		GPIO_Pin_14
 	#define RESET_PORT		GPIOB
 	#define RESET_PIN		GPIO_Pin_15
+	#define EXTLED_PORT		GPIOB
+	#define EXTLED_PIN		GPIO_Pin_10
 	#define IR_IN_PORT		B
 	#define IR_IN_PIN		11
 	#define LED_PORT		GPIOB
@@ -114,6 +137,8 @@
 	#define WAKEUP_PIN		GPIO_Pin_14
 	#define RESET_PORT		GPIOB
 	#define RESET_PIN		GPIO_Pin_15
+	#define EXTLED_PORT		GPIOB
+	#define EXTLED_PIN		GPIO_Pin_10
 	#define IR_IN_PORT		B
 	#define IR_IN_PIN		9
 	#define LED_PORT		GPIOC
@@ -125,6 +150,8 @@
 	#define WAKEUP_PIN		GPIO_Pin_14 /* CLK */
 	#define RESET_PORT		GPIOB
 	#define RESET_PIN		GPIO_Pin_14
+	#define EXTLED_PORT		GPIOB
+	#define EXTLED_PIN		GPIO_Pin_10
 	#define IR_IN_PORT		A
 	#define IR_IN_PIN		13 /* IO */
 	#define LED_PORT		GPIOB
@@ -136,6 +163,8 @@
 	#define WAKEUP_PIN		GPIO_Pin_8
 	#define RESET_PORT		GPIOB
 	#define RESET_PIN		GPIO_Pin_14
+	#define EXTLED_PORT		GPIOB
+	#define EXTLED_PIN		GPIO_Pin_10
 	#define IR_IN_PORT		B
 	#define IR_IN_PIN		7
 	#define LED_PORT		GPIOB
@@ -147,6 +176,8 @@
 	#define WAKEUP_PIN		GPIO_Pin_10
 	#define RESET_PORT		GPIOB
 	#define RESET_PIN		GPIO_Pin_15
+	#define EXTLED_PORT		GPIOB
+	#define EXTLED_PIN		GPIO_Pin_12
 	#define IR_IN_PORT		B
 	#define IR_IN_PIN		0
 	#define LED_PORT		GPIOB
