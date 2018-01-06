@@ -101,6 +101,21 @@ DEFINES += -DSimpleCircuit
 TARGET := $(TARGET)_SC
 endif
 
+ifdef Pulldown
+DEFINES += -DPulldown
+TARGET := $(TARGET)_PD
+endif
+
+ifdef EXTLED
+DEFINES += -DEXTLED
+#TARGET := $(TARGET)_
+endif
+
+ifdef SHORTFLASH
+DEFINES += -DSHORTFLASH
+#TARGET := $(TARGET)_
+endif
+
 ifdef DEBUG
 DEFINES += -DDEBUG
 TARGET := $(TARGET)_DBG

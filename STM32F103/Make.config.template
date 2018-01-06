@@ -43,7 +43,7 @@
 
 ### Uncomment this for an external LED instead of the reset functionality on Blue-, Red- or StickLink
 ### For the external LED use a series resistor of 120 ohms
-#define EXTLED
+EXTLED=1
 
 ### Uncomment this in order to shortly flash the LED and EXTLED instead of toggle them
-#define SHORTFLASH
+SHORTFLASH=1
