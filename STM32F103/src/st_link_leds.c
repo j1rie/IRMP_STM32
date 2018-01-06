@@ -83,10 +83,10 @@ void yellow_short_on(void)
 	EXTLED_PORT->ODR ^= EXTLED_PIN;
 #endif
 	delay_ms(130);
+	restore();
 #ifdef EXTLED_PORT
 	EXTLED_PORT->ODR ^= EXTLED_PIN;
 #endif
-	restore();
 }
 
 /* red + yellow both on */
