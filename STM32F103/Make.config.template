@@ -40,3 +40,10 @@
 
 ### Enable this, if you have a pulldown resistor for USB reset (legacy boards).
 #PullDown=1
+
+### Uncomment this for an external LED instead of the reset functionality on Blue-, Red- or StickLink
+### For the external LED use a series resistor of 120 ohms
+#define EXTLED
+
+### Uncomment this in order to shortly flash the LED and EXTLED instead of toggle them
+#define SHORTFLASH
