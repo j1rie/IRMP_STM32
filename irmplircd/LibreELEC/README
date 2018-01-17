@@ -1,6 +1,6 @@
-Install irmplircd on LibreELEC via ssh or CLI:
+Install irmplircd on LibreELEC via ssh:
 cd ~
 wget https://raw.githubusercontent.com/j1rie/IRMP_STM32/master/irmplircd/LibreELEC/irmplircd.tar.bz2
 tar -xjvf irmplircd.tar.bz2
-systemctl enable irmplircd kodi
-and reboot
+systemctl enable irmplircd lircd-uinput
+shutdown -r now
