@@ -1,0 +1,12 @@
+[Unit]
+Documentation=http://lirc.org/html/configure.html
+Description=Forward LIRC button presses as uinput events
+BindsTo=irmplircd.service
+After=irmplircd.service
+
+[Service]
+Type=simple
+ExecStart=/storage/.kodi/addons/virtual.irmp_stm32/bin/lircd-uinput -O /storage/.config/lirc_options.conf
+
+[Install]
+WantedBy=irmplircd.service

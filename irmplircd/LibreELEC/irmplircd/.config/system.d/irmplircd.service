@@ -1,0 +1,11 @@
+[Unit]
+Description=Start irmplircd on irmp_stm32 device
+Requisite=dev-irmp_stm32.device
+After=dev-irmp_stm32.device
+
+[Service]
+Type=forking
+ExecStart=/storage/.kodi/addons/virtual.irmp_stm32/bin/irmplircd -t /storage/.kodi/addons/virtual.irmp_stm32/etc/irmp_stm32.map /dev/irmp_stm32 -d /run/lirc/lircd.socket -r 300 -s 200
+
+[Install]
+WantedBy=dev-irmp_stm32.device
