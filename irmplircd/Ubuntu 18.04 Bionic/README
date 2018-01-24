@@ -1,0 +1,21 @@
+sudo add-apt-repository ppa:yavdr/experimental-main
+sudo apt-get update
+sudo apt-get install yavdr-hardware-irmp 
+cd /etc/irmplircd
+wget  https://raw.githubusercontent.com/j1rie/IRMP_STM32/master/irmplircd/yaVDR/irmp.map
+mv irmp.map irmplircd.map
+
+Edit /etc/irmplircd/irmplircd.map and insert the codes from your remote control, which you see
+with 'sudo irw /var/run/lirc/irmplircd' (or stm32IRconfig or stm32IRconfig_gui).
+
+If you press button "1" and irw shows "070000000100 0 070000000100 IRMP" the line
+in /etc/irmplircd/irmplircd.map needs to be "070000000100 KEY_1" and so on.
+After 'sudo restart irmplircd' you should see "070000000100 0 KEY_1 IRMP", when you
+press "1".
+
+sudo apt-get install eventlircd
+cd /lib/udev/rules.d
+mv 98-eventlircd.rules.disabled 98-eventlircd.rules
+shutdown -r now
+
+
