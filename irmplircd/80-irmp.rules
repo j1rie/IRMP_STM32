@@ -1,1 +1,2 @@
-KERNEL=="hidraw*", ATTRS{idVendor}=="1209", ATTRS{idProduct}=="4444", SYMLINK+="irmp_stm32", RUN+="/bin/mkdir /var/run/lirc", TAG+="systemd"
+KERNEL=="hidraw*", ATTRS{idVendor}=="1209", ATTRS{idProduct}=="4444", SYMLINK+="irmp_stm32", MODE="0666", RUN+="/bin/mkdir /var/run/lirc", TAG+="systemd"
+SUBSYSTEM=="usb", ATTRS{idVendor}=="1209", ATTRS{idProduct}=="4444", MODE="0666"
