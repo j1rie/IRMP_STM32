@@ -4,3 +4,10 @@ wget https://raw.githubusercontent.com/j1rie/IRMP_STM32/master/irmplircd/LibreEL
 tar -xjvf irmplircd.tar.bz2
 systemctl enable irmplircd lircd-uinput
 shutdown -r now
+
+/.kodi/addons/virtual.irmp_stm32/etc/irmp_stm32.map needs to be adapted to your
+remote control. Use stm32IRconfig(_gui).
+Configure repeat delay and repeat period in ~/.config/system.d/irmplircd.service
+with -r ... -s ...
+release-timeout in .config/lirc_options.conf needs to be bigger than delay,
+delay + 130 should be safe.
