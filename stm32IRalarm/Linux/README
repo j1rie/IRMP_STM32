@@ -11,6 +11,7 @@ set & get (136 years ahead ;-)): stm32IRalarm -d /dev/hidraw0 -s 0xFFFFFFFF -a
 
 shutdown script:
 stm32IRalarm [-d /dev/hidraw0] -s $2
+stm32IRalarm [-d /dev/hidraw0] -s $(($2 -300))
 
 commands.conf:
 stm32IRalarm [-d /dev/hidraw2] -a
