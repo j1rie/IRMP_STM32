@@ -752,6 +752,7 @@ int main(void)
 				learn_wakeup = 0;
 			}
 
+			myIRData.flags = myIRData.flags & IRMP_FLAG_REPETITION;
 			if (!(myIRData.flags)) {
 				RepeatCounter = 0;
 			} else {
