@@ -619,7 +619,8 @@ void USB_Reset(void)
 
 int main(void)
 {
-	uint8_t buf[HID_OUT_BUFFER_SIZE-1], RepeatCounter = 0;
+	uint8_t buf[HID_OUT_BUFFER_SIZE-1] = {0};
+	uint8_t RepeatCounter = 0;
 	IRMP_DATA myIRData;
 	int8_t ret;
 	/* first wakeup slot empty? */
