@@ -430,6 +430,7 @@ void store_new_wakeup(void)
 {
 	uint8_t idx;
 	IRMP_DATA wakeup_IRData;
+	irmp_get_data(&wakeup_IRData); // flush input of irmp data
 	toggle_LED();
 	/* 5 seconds to press button on remote */
 	delay_ms(5000);
@@ -681,7 +682,7 @@ void USB_Reset(void)
 
 int main(void)
 {
-	uint8_t buf[HID_OUT_BUFFER_SIZE-1] = {0};
+	uint8_t buf[HID_OUT_BUFFER_SIZE-1];
 	uint8_t RepeatCounter = 0;
 	IRMP_DATA myIRData;
 	int8_t ret;
