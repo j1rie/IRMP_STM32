@@ -559,7 +559,9 @@ void transmit_macro(uint8_t macro)
 		/* first encounter of zero in macro means end of macro */
 		if (!memcmp(buf, &zeros, sizeof(zeros)))
 			break;
-		/* Depending on the protocol we need a pause between the trigger and the transmission
+		/* if macros are sent already, while the trigger IR data are still repeated,
+		 * the receiving device may crash
+		 * Depending on the protocol we need a pause between the trigger and the transmission
 		 * and between two transmissions. The highest known pause is 130 ms for Denon. */
 		yellow_short_on();
 		irsnd_send_data((IRMP_DATA *) buf, 1);
