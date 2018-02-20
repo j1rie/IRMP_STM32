@@ -245,6 +245,11 @@ void LED_Switch_init(void)
 	//GPIO_InitStructure.GPIO_Pin = WAKEUP_RESET_PIN;
 	//GPIO_InitStructure.GPIO_Mode = GPIO_Mode_IPU;
 	//GPIO_Init(WAKEUP_RESET_PORT, &GPIO_InitStructure);
+	/* start with LED off */
+	GPIO_WriteBit(LED_PORT, LED_PIN, Bit_RESET);
+#ifdef EXTLED_PORT
+	GPIO_WriteBit(EXTLED_PORT, EXTLED_PIN, Bit_SET);
+#endif
 }
 
 void toggle_LED(void)

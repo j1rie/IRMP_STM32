@@ -29,9 +29,6 @@
 /* uncomment this for an external LED instead of the reset functionality */
 #define EXTLED
 
-/* uncomment this in order to shortly flash the LED and EXTLED instead of toggle them */
-#define SHORTFLASH
-
 /* C6 IRMP (irmpconfig.h), B6 IRSND (irsndconfig.h) Yaw-right, B10 Logging (irmp.c) */
 
 /* On this board activate for pull high the A{0,1,2} pins and for pull low the B{6,7,8} pins, BUT NEVER BOTH,

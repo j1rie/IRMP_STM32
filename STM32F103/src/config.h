@@ -18,7 +18,6 @@
 #define MACRO_DEPTH	8
 #define WAKE_SLOTS	8
 #define SIZEOF_IR	6
-#define MIN_REPEATS	2  // TODO make configurable & use Eeprom
 
 /* uncomment below for CooCox */
 //#define FW_STR "2017-04-20_00-00_MapleMini_BL_SC-jrie   IRMP-Version: 3.08"
@@ -55,9 +54,6 @@
 
 /* uncomment this for an external LED instead of the reset functionality on Blue-, Red- or StickLink */
 #define EXTLED
-
-/* uncomment this in order to shortly flash the LED and EXTLED instead of toggle them */
-#define SHORTFLASH
 
 /* uncomment this for legacy boards with pulldown resistor for USB reset */
 //#define PullDown
