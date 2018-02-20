@@ -679,14 +679,22 @@ void USB_Reset(void)
 void led_callback (uint8_t on)
 {
 	if (on) {
+#if !(defined(BlueDeveloperBoard) || defined(BlackDeveloperBoard) || defined(BlackDeveloperBoardTest))
 		GPIO_WriteBit(LED_PORT, LED_PIN, Bit_SET);
+#else
+		GPIO_WriteBit(LED_PORT, LED_PIN, Bit_RESET);
+#endif
 #ifdef EXTLED_PORT
 		GPIO_WriteBit(EXTLED_PORT, EXTLED_PIN, Bit_SET);
 #endif
 	}
 	else
 	{
+#if !(defined(BlueDeveloperBoard) || defined(BlackDeveloperBoard) || defined(BlackDeveloperBoardTest))
 		GPIO_WriteBit(LED_PORT, LED_PIN, Bit_RESET);
+#else
+		GPIO_WriteBit(LED_PORT, LED_PIN, Bit_SET);
+#endif
 #ifdef EXTLED_PORT
 		GPIO_WriteBit(EXTLED_PORT, EXTLED_PIN, Bit_RESET);
 #endif
