@@ -1,6 +1,6 @@
-diff -Nrup A/irmpconfig.h B/irmpconfig.h
---- A/irmpconfig.h	2016-01-12 13:09:16.000000000 +0100
-+++ B/irmpconfig.h	2016-08-06 16:24:52.000000000 +0200
+diff -Nrup irmp.orig/irmpconfig.h irmp.new/irmpconfig.h
+--- irmp.orig/irmpconfig.h	2018-02-19 11:30:11.000000000 +0100
++++ irmp.new/irmpconfig.h	2018-02-20 18:28:43.000000000 +0100
 @@ -56,17 +56,17 @@
  #define IRMP_SUPPORT_KASEIKYO_PROTOCOL          1       // Kaseikyo             >= 10000                 ~250 bytes
  
@@ -30,7 +30,7 @@ diff -Nrup A/irmpconfig.h B/irmpconfig.h
  
  // exotic protocols, enable here!               Enable  Remarks                 F_INTERRUPTS            Program Space
  #define IRMP_SUPPORT_BOSE_PROTOCOL              0       // BOSE                 >= 10000                 ~150 bytes
-@@ -132,9 +132,9 @@
+@@ -134,9 +134,9 @@
   * Change hardware pin here for ARM STM32
   *---------------------------------------------------------------------------------------------------------------------------------------------------
   */
@@ -43,9 +43,18 @@ diff -Nrup A/irmpconfig.h B/irmpconfig.h
  
  /*---------------------------------------------------------------------------------------------------------------------------------------------------
   * Change hardware pin here for Stellaris ARM Cortex M4
-diff -Nrup a/irsndconfig.h b/irsndconfig.h
---- a/irsndconfig.h	2017-02-17 10:16:59.000000000 +0100
-+++ b/irsndconfig.h	2017-03-08 17:44:34.000000000 +0100
+@@ -214,7 +214,7 @@
+  *---------------------------------------------------------------------------------------------------------------------------------------------------
+  */
+ #ifndef IRMP_USE_CALLBACK
+-#  define IRMP_USE_CALLBACK                     0       // 1: use callbacks. 0: do not. default is 0
++#  define IRMP_USE_CALLBACK                     1       // 1: use callbacks. 0: do not. default is 0
+ #endif
+ 
+ #endif // _IRMPCONFIG_H_
+diff -Nrup irmp.orig/irsndconfig.h irmp.new/irsndconfig.h
+--- irmp.orig/irsndconfig.h	2018-02-19 11:30:11.000000000 +0100
++++ irmp.new/irsndconfig.h	2018-02-20 00:16:35.000000000 +0100
 @@ -47,17 +47,17 @@
  #define IRSND_SUPPORT_KASEIKYO_PROTOCOL         1       // Kaseikyo             >= 10000                 ~300 bytes
  

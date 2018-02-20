@@ -624,7 +624,7 @@ void led_callback (uint8_t on)
 		GPIO_WriteBit(EXTLED_PORT, EXTLED_PIN, Bit_SET);
 #endif
 	}
-    else
+	else
 	{
 		GPIO_WriteBit(LED_PORT, LED_PIN, Bit_RESET);
 #ifdef EXTLED_PORT
