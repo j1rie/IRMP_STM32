@@ -264,20 +264,6 @@ void LED_Switch_init(void)
 	GPIO_InitStructure.GPIO_Pin = WAKEUP_RESET_PIN;
 	GPIO_InitStructure.GPIO_Mode = GPIO_Mode_IPU;
 	GPIO_Init(WAKEUP_RESET_PORT, &GPIO_InitStructure);
-#ifndef SHORTFLASH
-	/* start with LED on */
-#ifdef ST_Link
-	red_on();
-#else
-	/* on the blue and black developer board the LED lights, when pulled low */
-#if !(defined(BlueDeveloperBoard) || defined(BlackDeveloperBoard) || defined(BlackDeveloperBoardTest))
-	GPIO_WriteBit(LED_PORT, LED_PIN, Bit_SET);
-#else
-	GPIO_WriteBit(LED_PORT, LED_PIN, Bit_RESET);
-#endif
-	GPIO_WriteBit(EXTLED_PORT, EXTLED_PIN, Bit_SET);
-#endif /* ST_Link */
-#endif /* SHORTFLASH */
 }
 
 void toggle_LED(void)
@@ -288,24 +274,20 @@ void toggle_LED(void)
 #ifdef EXTLED_PORT
 		EXTLED_PORT->ODR ^= EXTLED_PIN;
 #endif
-#ifdef SHORTFLASH
 		delay_ms(25);
 		LED_deinit();
 #ifdef EXTLED_PORT
 		EXTLED_PORT->ODR ^= EXTLED_PIN;
-#endif
 #endif
 	} else {
 		LED_deinit();
 #ifdef EXTLED_PORT
 		EXTLED_PORT->ODR ^= EXTLED_PIN;
 #endif
-#ifdef SHORTFLASH
 		delay_ms(25);
 		red_on();
 #ifdef EXTLED_PORT
 		EXTLED_PORT->ODR ^= EXTLED_PIN;
-#endif
 #endif
 	}
 #else
@@ -313,12 +295,10 @@ void toggle_LED(void)
 #ifdef EXTLED_PORT
 	EXTLED_PORT->ODR ^= EXTLED_PIN;
 #endif
-#ifdef SHORTFLASH
 	delay_ms(25);
 	LED_PORT->ODR ^= LED_PIN;
 #ifdef EXTLED_PORT
 	EXTLED_PORT->ODR ^= EXTLED_PIN;
-#endif
 #endif
 #endif /* ST_Link */
 }
@@ -624,7 +604,9 @@ void transmit_macro(uint8_t macro)
 		/* first encounter of zero in macro means end of macro */
 		if (!memcmp(buf, &zeros, sizeof(zeros)))
 			break;
-		/* Depending on the protocol we need a pause between the trigger and the transmission
+		/* if macros are sent already, while the trigger IR data are still repeated,
+		 * the receiving device may crash
+		 * Depending on the protocol we need a pause between the trigger and the transmission
 		 * and between two transmissions. The highest known pause is 130 ms for Denon. */
 		yellow_short_on();
 		irsnd_send_data((IRMP_DATA *) buf, 1);
@@ -680,6 +662,23 @@ void USB_Reset(void)
 #endif
 }
 
+void led_callback (uint8_t on)
+{
+	if (on) {
+		GPIO_WriteBit(LED_PORT, LED_PIN, Bit_SET);
+#ifdef EXTLED_PORT
+		GPIO_WriteBit(EXTLED_PORT, EXTLED_PIN, Bit_SET);
+#endif
+	}
+    else
+	{
+		GPIO_WriteBit(LED_PORT, LED_PIN, Bit_RESET);
+#ifdef EXTLED_PORT
+		GPIO_WriteBit(EXTLED_PORT, EXTLED_PIN, Bit_RESET);
+#endif
+	}
+}
+
 int main(void)
 {
 	uint8_t buf[HID_OUT_BUFFER_SIZE-1];
@@ -698,6 +697,7 @@ int main(void)
 	irsnd_init();
 	FLASH_Unlock();
 	EE_Init();
+	irmp_set_callback_ptr (led_callback);
 
 	while (1) {
 		if (!AlarmValue)
@@ -757,15 +757,6 @@ int main(void)
 
 			myIRData.flags = myIRData.flags & IRMP_FLAG_REPETITION;
 			if (!(myIRData.flags)) {
-				RepeatCounter = 0;
-			} else {
-				RepeatCounter++;
-			}
-
-			if (RepeatCounter == 0 || RepeatCounter >= MIN_REPEATS) {
-				toggle_LED();
-				/* if macros are sent already, while the trigger IR data are still repeated,
-				 * the receiving device may crash */
 				check_macros(&myIRData);
 				check_wakeups(&myIRData);
 				check_resets(&myIRData);
