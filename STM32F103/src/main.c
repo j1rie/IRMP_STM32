@@ -289,7 +289,7 @@ void toggle_LED(void)
 		EXTLED_PORT->ODR ^= EXTLED_PIN;
 #endif
 #ifdef SHORTFLASH
-		delay_ms(50);
+		delay_ms(25);
 		LED_deinit();
 #ifdef EXTLED_PORT
 		EXTLED_PORT->ODR ^= EXTLED_PIN;
@@ -301,7 +301,7 @@ void toggle_LED(void)
 		EXTLED_PORT->ODR ^= EXTLED_PIN;
 #endif
 #ifdef SHORTFLASH
-		delay_ms(50);
+		delay_ms(25);
 		red_on();
 #ifdef EXTLED_PORT
 		EXTLED_PORT->ODR ^= EXTLED_PIN;
@@ -314,7 +314,7 @@ void toggle_LED(void)
 	EXTLED_PORT->ODR ^= EXTLED_PIN;
 #endif
 #ifdef SHORTFLASH
-	delay_ms(50);
+	delay_ms(25);
 	LED_PORT->ODR ^= LED_PIN;
 #ifdef EXTLED_PORT
 	EXTLED_PORT->ODR ^= EXTLED_PIN;
@@ -750,6 +750,7 @@ int main(void)
 		if (irmp_get_data(&myIRData)) {
 			if (learn_wakeup) {
 				/* store received wakeup IRData in first wakeup slot */
+				myIRData.flags = 0;
 				eeprom_store((MACRO_DEPTH + 1) * SIZEOF_IR/2 * MACRO_SLOTS, (uint8_t *) &myIRData);
 				learn_wakeup = 0;
 			}

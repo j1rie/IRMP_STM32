@@ -8,6 +8,5 @@ void fast_toggle(void);
 void both_on(void);
 void red_on(void);
 void yellow_short_on(void);
-void toggle_LED(void);
 
 #endif /* __ST_LINK_LEDS_H */
