@@ -13,7 +13,6 @@
 
 #ifdef ST_Link
 /* red + {red|yellow} LEDs on PA9 on ST-Link Emus) */
-uint8_t PA9_state = 0;
 
 void LED_init(void)
 {
@@ -31,7 +30,6 @@ void LED_deinit(void)
 	GPIO_InitStructure.GPIO_Mode = GPIO_Mode_IN_FLOATING;
 	GPIO_InitStructure.GPIO_Speed = GPIO_Speed_2MHz;
 	GPIO_Init(GPIOA, &GPIO_InitStructure);
-	PA9_state = 0;
 }
 
 /* red on */
@@ -39,23 +37,12 @@ void red_on(void)
 {
 	LED_init();
 	GPIO_WriteBit(GPIOA, GPIO_Pin_9, Bit_SET);
-	PA9_state = 1;
-}
-
-void restore(void)
-{
-	if (!PA9_state) {
-		LED_deinit();
-	} else {
-		red_on();
-	}
 }
 
 /* red + yellow fast toggle */
 void fast_toggle(void)
 {
-	if (!PA9_state)
-		LED_init();
+	LED_init();
 	systicks = 0;
 	int i;
 	for(i=0; i<5; i++) {
@@ -70,20 +57,19 @@ void fast_toggle(void)
 #endif
 		while (systicks <= 50 * (2*i+2));
 	}
-	restore();
+	LED_deinit();
 }
 
 /* yellow short on */
 void yellow_short_on(void)
 {
-	if (!PA9_state)
-		LED_init();
+	LED_init();
 	GPIO_WriteBit(GPIOA, GPIO_Pin_9, Bit_RESET);
 #ifdef EXTLED_PORT
 	EXTLED_PORT->ODR ^= EXTLED_PIN;
 #endif
 	delay_ms(130);
-	restore();
+	LED_deinit();
 #ifdef EXTLED_PORT
 	EXTLED_PORT->ODR ^= EXTLED_PIN;
 #endif
@@ -92,8 +78,7 @@ void yellow_short_on(void)
 /* red + yellow both on */
 void both_on(void)
 {
-	if (!PA9_state)
-		LED_init();
+	LED_init();
 	systicks = 0;
 	int i;
 	for(i=0; i<250; i++) {
@@ -102,7 +87,7 @@ void both_on(void)
 		GPIO_WriteBit(GPIOA, GPIO_Pin_9, Bit_RESET);
 		while (systicks <= 2*i+2);
 	}
-	restore();
+	LED_deinit();
 }
 #else
 void LED_deinit(void) {}

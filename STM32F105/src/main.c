@@ -248,11 +248,11 @@ void LED_Switch_init(void)
 	/* start with LED off */
 	GPIO_WriteBit(LED_PORT, LED_PIN, Bit_RESET);
 #ifdef EXTLED_PORT
-	GPIO_WriteBit(EXTLED_PORT, EXTLED_PIN, Bit_SET);
+	GPIO_WriteBit(EXTLED_PORT, EXTLED_PIN, Bit_RESET);
 #endif
 }
 
-void toggle_LED(void)
+void blink_LED(void)
 {
 	LED_PORT->ODR ^= LED_PIN;
 #ifdef EXTLED_PORT
@@ -289,6 +289,20 @@ uint8_t eeprom_restore(uint8_t *buf, uint8_t virt_addr)
 		memcpy(&buf[2*i], &EE_Data, 2);
 	}
 	return retVal;
+}
+
+void store_wakeup(IRMP_DATA *ir)
+{
+	uint8_t idx;
+	uint8_t tmp[SIZEOF_IR];
+	uint8_t zeros[SIZEOF_IR] = {0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF};
+	idx = (MACRO_DEPTH + 1) * SIZEOF_IR/2 * MACRO_SLOTS;
+	eeprom_restore(tmp, idx);
+	if (!memcmp(tmp, zeros, SIZEOF_IR)) {
+		/* store received wakeup IRData in first wakeup slot */
+		eeprom_store(idx, (uint8_t *) ir);
+		fast_toggle();
+	}
 }
 
 void Systick_Init(void)
@@ -366,7 +380,7 @@ void store_new_wakeup(void)
 	uint8_t idx;
 	IRMP_DATA wakeup_IRData;
 	irmp_get_data(&wakeup_IRData); // flush input of irmp data
-	toggle_LED();
+	blink_LED();
 	/* 5 seconds to press button on remote */
 	delay_ms(5000);
 	if (irmp_get_data(&wakeup_IRData)) {
@@ -374,7 +388,7 @@ void store_new_wakeup(void)
 		idx = (MACRO_DEPTH + 1) * SIZEOF_IR/2 * MACRO_SLOTS;
 		/* store received wakeup IRData in first wakeup slot */
 		eeprom_store(idx, (uint8_t *) &wakeup_IRData);
-		toggle_LED();
+		blink_LED();
 	}
 }
 
@@ -532,6 +546,13 @@ void check_resets(IRMP_DATA *ir)
 	}
 }
 
+void reboot(void)
+{
+	boot_flag = 0x12094444;// let bootloader know reset is from here
+	fast_toggle();
+	NVIC_SystemReset();
+}
+
 /* is received ir-code in the last wakeup-slot? reboot µC if true */
 void check_reboot(IRMP_DATA *ir)
 {
@@ -539,11 +560,8 @@ void check_reboot(IRMP_DATA *ir)
 	uint8_t buf[SIZEOF_IR];
 	idx = (MACRO_DEPTH + 1) * SIZEOF_IR/2 * MACRO_SLOTS + SIZEOF_IR/2 * (WAKE_SLOTS - 1);
 	if (!eeprom_restore(buf, idx)) {
-		if (!memcmp(buf, ir, sizeof(buf))) {
-			boot_flag = 0x12094444; // let bootloader know reset is from here
-			fast_toggle();
-			NVIC_SystemReset();
-		}
+		if (!memcmp(buf, ir, sizeof(buf)))
+			reboot();
 	}
 }
 
@@ -618,31 +636,19 @@ void USB_Reset(void)
 #endif
 }
 
-void led_callback (uint8_t on)
+void led_callback (uint_fast8_t on)
 {
-	if (on) {
-		GPIO_WriteBit(LED_PORT, LED_PIN, Bit_SET);
+		LED_PORT->ODR ^= LED_PIN;
 #ifdef EXTLED_PORT
-		GPIO_WriteBit(EXTLED_PORT, EXTLED_PIN, Bit_SET);
+		EXTLED_PORT->ODR ^= EXTLED_PIN;
 #endif
-	}
-	else
-	{
-		GPIO_WriteBit(LED_PORT, LED_PIN, Bit_RESET);
-#ifdef EXTLED_PORT
-		GPIO_WriteBit(EXTLED_PORT, EXTLED_PIN, Bit_RESET);
-#endif
-	}
 }
 
 int main(void)
 {
 	uint8_t buf[HID_OUT_BUFFER_SIZE-1];
-	uint8_t RepeatCounter = 0;
 	IRMP_DATA myIRData;
 	int8_t ret;
-	/* first wakeup slot empty? */
-	uint8_t learn_wakeup = eeprom_restore(buf, (MACRO_DEPTH + 1) * SIZEOF_IR/2 * MACRO_SLOTS);
 
 	LED_Switch_init();
 	Systick_Init();
@@ -694,25 +700,16 @@ int main(void)
 
 			/* send configuration data */
 			USB_HID_SendData(REPORT_ID_CONFIG, buf, ret);
-			toggle_LED();
-			if(Reboot) {
-				boot_flag = 0x12094444;// let bootloader know reset is from here
-				fast_toggle();
-				NVIC_SystemReset();
-			}
+			blink_LED();
+			if(Reboot)
+				reboot();
 		}
 
 		/* poll IR-data */
 		if (irmp_get_data(&myIRData)) {
-			if (learn_wakeup) {
-				/* store received wakeup IRData in first wakeup slot */
-				myIRData.flags = 0;
-				eeprom_store((MACRO_DEPTH + 1) * SIZEOF_IR/2 * MACRO_SLOTS, (uint8_t *) &myIRData);
-				learn_wakeup = 0;
-			}
-
 			myIRData.flags = myIRData.flags & IRMP_FLAG_REPETITION;
 			if (!(myIRData.flags)) {
+				store_wakeup(&myIRData);
 				check_macros(&myIRData);
 				check_wakeups(&myIRData);
 				check_resets(&myIRData);
