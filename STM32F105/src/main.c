@@ -2,7 +2,7 @@
  *  IR receiver, sender, USB wakeup, motherboard switch wakeup, wakeup timer,
  *  USB HID device, eeprom emulation
  *
- *  Copyright (C) 2014-2017 Joerg Riechardt
+ *  Copyright (C) 2014-2018 Joerg Riechardt
  *
  *  This program is free software; you can redistribute it and/or modify
  *  it under the terms of the GNU General Public License as published by
@@ -644,6 +644,13 @@ void led_callback (uint_fast8_t on)
 #endif
 }
 
+void send_magic(void)
+{
+	uint8_t magic[SIZEOF_IR] = {0xFF, 0x00, 0x00, 0x00, 0x00, 0x00};
+	USB_HID_SendData(REPORT_ID_IR, magic, SIZEOF_IR);
+	send_ir_on_delay = -1;
+}
+
 int main(void)
 {
 	uint8_t buf[HID_OUT_BUFFER_SIZE-1];
@@ -665,11 +672,8 @@ int main(void)
 		if (!AlarmValue)
 			Wakeup();
 
-		if (send_ir_on_delay == 0) {
-			uint8_t magic[SIZEOF_IR] = {0xFF, 0x00, 0x00, 0x00, 0x00, 0x00};
-			memcpy(buf, magic, SIZEOF_IR);
-			USB_HID_SendData(REPORT_ID_IR, buf, SIZEOF_IR);
-			send_ir_on_delay = -1;
+		if (!send_ir_on_delay) {
+			send_magic();
 		}
 
 		wakeup_reset();
