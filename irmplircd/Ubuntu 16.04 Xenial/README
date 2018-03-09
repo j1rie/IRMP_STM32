@@ -2,7 +2,7 @@ sudo add-apt-repository ppa:yavdr/unstable-main
 sudo apt-get update
 sudo apt-get install yavdr-hardware-irmp 
 cd /etc/irmplircd
-wget  https://raw.githubusercontent.com/j1rie/IRMP_STM32/master/irmplircd/yaVDR/irmp.map
+wget  https://raw.githubusercontent.com/j1rie/IRMP_STM32/master/irmplircd/yaVDR-0.6.2%20Xenial/irmp.map
 mv irmp.map irmplircd.map
 
 Edit /etc/irmplircd/irmplircd.map and insert the codes from your remote control, which you see
