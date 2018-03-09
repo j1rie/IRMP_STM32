@@ -1662,7 +1662,8 @@ MainWindow::onSave(FXObject *sender, FXSelector sel, void *ptr){
 	save.setCurrentPattern(1);
 	if(save.execute()){
 		file=save.getFilename();
-		//file += (patterns[save.getCurrentPattern()] == "map Files (*.map)") ? ".map" : ""; // TODO?
+		if(compare(file.right(4), ".map") && (save.getCurrentPattern() == 1))
+			file += ".map";
 		if(FXStat::exists(file)){
 			if(MBOX_CLICKED_NO==FXMessageBox::question(this,MBOX_YES_NO,tr("Overwrite Document"),tr("Overwrite existing document: %s?"),file.text())) return 1;
 		}
