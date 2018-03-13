@@ -1,42 +1,72 @@
-070000000100 1
-070000000200 2
-070000000300 3
-070000000400 4
-070000000500 5
-070000000600 6
-070000000700 7
-070000000800 8
-070000000900 9
-070000000000 0
-070000000c00 Power
-070000000a00 10
-070000003400 Blue
-070000003200 Yellow
-070000003600 Green
-070000003700 Red
-070000003800 Info
-070000002000 Ch+
-070000003800 AV
-07000000cc00 MINUS
-070000000d00 Mute
-070000001000 Vol+
-070000001100 Vol-
-070000003c00 REW
-070000002100 Ch-
-070000000b00 Ok
-070000001200 Left
-070000001300 Right
-070000001d00 Up
-070000000e00 Down
-070000003f00 PLAY
-070000002900 PAUSE
-070000002b00 FF
-070000001500 User1
-070000001600 User2
-070000001700 User3
-070000001800 User4
-070000001900 User5
-070000001a00 User6
-070000001b00 User7
-070000001c00 User8
-070000001400 EXIT
+# press "receive mode",
+# put cursor in line you want to edit,
+# press button on remote control,
+# press "write IR"
+# repeat the last three steps as often as needed
+#
+# KEY_UP
+# KEY_DOWN
+# KEY_MENU
+# KEY_OK
+# insert below the scancode for button "Back"
+# KEY_ESC
+# KEY_LEFT
+# KEY_RIGHT
+# KEY_RED
+# KEY_GREEN
+# KEY_YELLOW
+# KEY_BLUE
+# KEY_0
+# KEY_1
+# KEY_2
+# KEY_3
+# KEY_4
+# KEY_5
+# KEY_6
+# KEY_7
+# KEY_8
+# KEY_9
+# KEY_INFO
+# KEY_PLAY
+# KEY_PAUSE
+# KEY_PLAYPAUSE
+# KEY_STOP
+# KEY_RECORD
+# KEY_FASTFORWARD
+# KEY_REWIND
+# KEY_NEXT
+# insert below the scancode for button "Prev"
+# KEY_BACK
+# insert below the scancode for button "Power"
+# KEY_POWER2
+# KEY_CHANNELUP
+# KEY_CHANNELDOWN
+# insert below the scancode for button "PrevChannel"
+# KEY_PREVIOUS
+# KEY_VOLUMEUP
+# KEY_VOLUMEDOWN
+# KEY_MUTE
+# KEY_SUBTITLE
+# insert below the scancode for button "Schedule"
+# KEY_EPG
+# KEY_CHANNEL
+# insert below the scancode for button "Commands"
+# KEY_FAVORITES
+# insert below the scancode for button "Audio"
+# KEY_MODE
+# insert below the scancode for button "Timers"
+# KEY_TIME
+# insert below the scancode for button "Recordings"
+# KEY_PVR
+# KEY_SETUP
+# insert below the scancodes for buttons "User0" ... "User9"
+# KEY_TEXT
+# KEY_PROG1
+# KEY_PROG2
+# KEY_PROG3
+# KEY_PROG4
+# KEY_AUDIO
+# KEY_VIDEO
+# KEY_IMAGES
+# KEY_FN
+# KEY_SCREEN
