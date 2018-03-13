@@ -69,7 +69,8 @@ public:
 		ID_OPEN,
 		ID_SAVE,
 		ID_APPEND,
-		ID_APPLY,
+		//ID_APPLY,
+		ID_WRITE_IR,
 		ID_DEVLIST
 	};
 	
@@ -97,7 +98,8 @@ private:
 	FXButton *open_button;
 	FXButton *save_button;
 	FXButton *append_button;
-	FXButton *apply_button;
+	//FXButton *apply_button;
+	FXButton *write_ir_button;
 	FXLabel *connected_label;
 	FXLabel *connected_label2;
 	FXLabel *connected_label3;
@@ -142,8 +144,8 @@ private:
 	FXColor storedBaseColor;
 	FXColor storedBackColor;
 	int RepeatCounter;
-	FXString map[200];
-	int mapbeg[100];
+	FXString map[400];
+	int mapbeg[200];
 	int active_lines;
 	int max;
 	int count;
@@ -192,7 +194,9 @@ public:
 	long saveFile(const FXString& file);
 	long onAppend(FXObject *sender, FXSelector sel, void *ptr);
 	long onApply(FXObject *sender, FXSelector sel, void *ptr);
+	long onWrite_IR(FXObject *sender, FXSelector sel, void *ptr);
 	long onDevDClicked(FXObject *sender, FXSelector sel, void *ptr);
+	long onCmdQuit(FXObject *sender, FXSelector sel, void *ptr);
 };
 
 // FOX 1.7 changes the timeouts to all be nanoseconds.
@@ -242,7 +246,9 @@ FXDEFMAP(MainWindow) MainWindowMap [] = {
 	FXMAPFUNC(SEL_COMMAND, MainWindow::ID_OPEN, MainWindow::onOpen ),
 	FXMAPFUNC(SEL_COMMAND, MainWindow::ID_SAVE, MainWindow::onSave ),
 	FXMAPFUNC(SEL_COMMAND, MainWindow::ID_APPEND, MainWindow::onAppend ),
-	FXMAPFUNC(SEL_COMMAND, MainWindow::ID_APPLY, MainWindow::onApply )
+	//FXMAPFUNC(SEL_COMMAND, MainWindow::ID_APPLY, MainWindow::onApply ),
+	FXMAPFUNC(SEL_COMMAND, MainWindow::ID_WRITE_IR, MainWindow::onWrite_IR ),
+	FXMAPFUNC(SEL_CLOSE,   0, MainWindow::onCmdQuit ),
 };
 
 FXIMPLEMENT(MainWindow, FXMainWindow, MainWindowMap, ARRAYNUMBER(MainWindowMap));
@@ -381,7 +387,8 @@ MainWindow::MainWindow(FXApp *app)
 	open_button = new FXButton(gb142, "open", NULL, this, ID_OPEN, BUTTON_NORMAL|LAYOUT_FILL_X);
 	save_button = new FXButton(gb142, "save", NULL, this, ID_SAVE, BUTTON_NORMAL|LAYOUT_FILL_X);
 	append_button = new FXButton(gb142, "append", NULL, this, ID_APPEND, BUTTON_NORMAL|LAYOUT_FILL_X);
-	apply_button = new FXButton(gb142, "apply", NULL, this, ID_APPLY, BUTTON_NORMAL|LAYOUT_FILL_X);
+	//apply_button = new FXButton(gb142, "apply", NULL, this, ID_APPLY, BUTTON_NORMAL|LAYOUT_FILL_X);
+	write_ir_button = new FXButton(gb142, "write IR", NULL, this, ID_WRITE_IR, BUTTON_NORMAL|LAYOUT_FILL_X);
 	new FXLabel(gb142, "Key");
 	FXVerticalFrame *innerVF9 = new FXVerticalFrame(gb142, LAYOUT_FILL_X|LAYOUT_FILL_Y, 0,0,0,0, 0,0,0,0);
 	map_text = new FXText(new FXHorizontalFrame(innerVF9,LAYOUT_FILL_X|FRAME_SUNKEN|FRAME_THICK, 0,0,0,0, 0,0,0,0), NULL, 0, LAYOUT_FILL_X);
@@ -460,7 +467,8 @@ MainWindow::MainWindow(FXApp *app)
 	save_button->setHelpText("save translation map");
 	map_text21->setHelpText("editable translation map");
 	append_button->setHelpText("add received IR and key to translation map");
-	apply_button->setHelpText("apply changes in translation map");
+	//apply_button->setHelpText("apply changes in translation map");
+	write_ir_button->setHelpText("overwrite IR");
 
 	// disable buttons
 	output_button->disable();
@@ -506,6 +514,16 @@ MainWindow::~MainWindow()
 	if (connected_device)
 		hid_close(connected_device);
 	hid_exit();
+}
+
+long
+MainWindow::onCmdQuit(FXObject *sender, FXSelector sel, void *ptr)
+{
+	if(map_text21->isModified()){
+		if(FXMessageBox::question(this,MBOX_YES_NO,tr("map was changed"),tr("Discard changes to map?"))==MBOX_CLICKED_NO) return 1;
+	}
+	getApp()->exit(0);
+	return 0;
 }
 
 void
@@ -925,7 +943,7 @@ MainWindow::onReadIR(FXObject *sender, FXSelector sel, void *ptr)
 		s = "translated:";
 		map_text21->killHighlight();
 		map_text->killHighlight();
-		map_text->setText("");
+		//map_text->setText("");
 		for(int i = 0; i < active_lines; i++) {
 			if(map[i*2] == t) {
 				s += " ";
@@ -1588,6 +1606,9 @@ MainWindow::onSendIR(FXObject *sender, FXSelector sel, void *ptr)
 long
 MainWindow::onOpen(FXObject *sender, FXSelector sel, void *ptr)
 {
+	if(map_text21->isModified()){
+		if(FXMessageBox::question(this,MBOX_YES_NO,tr("map was changed"),tr("Discard changes to map?"))==MBOX_CLICKED_NO) return 1;
+	}
 	const FXchar patterns[]="All Files (*)\nmap Files (*.map)";
 	long loaded = 0;
 	FXint size = 0;
@@ -1631,6 +1652,7 @@ MainWindow::onOpen(FXObject *sender, FXSelector sel, void *ptr)
 			}
 		}
 
+		map_text21->setModified(0);
 		FXString u;
 		FXString v;
 		u = "opened: ";
@@ -1673,6 +1695,7 @@ MainWindow::onSave(FXObject *sender, FXSelector sel, void *ptr){
 			return 1;
 		}
 		onApply(NULL, 0, NULL);
+		map_text21->setModified(0);
 		FXString u;
 		u = "saved: ";
 		u += file;
@@ -1751,6 +1774,8 @@ MainWindow::onAppend(FXObject *sender, FXSelector sel, void *ptr){
 	s += map_text->getText();
 	s += "\n";
 	map_text21->appendText(s);
+	onApply(NULL, 0, NULL);
+	map_text21->setModified(1);
 
 	return 1;
 }
@@ -1798,6 +1823,28 @@ MainWindow::onApply(FXObject *sender, FXSelector sel, void *ptr){
 	}
 	input_text->appendText(u);
 	input_text->setBottomLine(INT_MAX);
+
+	return 1;
+}
+
+long
+MainWindow::onWrite_IR(FXObject *sender, FXSelector sel, void *ptr)
+{
+	int i = 0;
+	FXint pos = map_text21->getCursorPos();
+	while(mapbeg[i] <= pos) {
+		i++;
+	}
+	map_text21->removeText(mapbeg[i-1], map[(i-1)*2].length());
+	FXString s;
+	s = protocol1_text->getText();
+	s += address1_text->getText();
+	s += command1_text->getText();
+	s += "00";
+	map_text21->insertText(mapbeg[i-1], s);
+	onApply(NULL, 0, NULL);
+	map_text21->setCursorPos(mapbeg[i]);
+	map_text21->setModified(1);
 
 	return 1;
 }
