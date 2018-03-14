@@ -1214,6 +1214,10 @@ MainWindow::onPRwakeup(FXObject *sender, FXSelector sel, void *ptr)
 {
 	FXString s;
 	FXString t;
+	protocol1_text->setText("");
+	address1_text->setText("");
+	command1_text->setText("");
+	flag1_text->setText("");
 	s = "enter IR data by pressing a button on the remote control within 5 sec\n";
 	input_text->appendText(s);
 	input_text->setBottomLine(INT_MAX);
@@ -1234,6 +1238,10 @@ MainWindow::onPRmacro(FXObject *sender, FXSelector sel, void *ptr)
 {
 	FXString s;
 	FXString t;
+	protocol1_text->setText("");
+	address1_text->setText("");
+	command1_text->setText("");
+	flag1_text->setText("");
 	s = "enter IR data by pressing a button on the remote control within 5 sec\n";
 	input_text->appendText(s);
 	input_text->setBottomLine(INT_MAX);
@@ -1873,15 +1881,17 @@ MainWindow::onReadIRTimeout(FXObject *sender, FXSelector sel, void *ptr)
 {
 	FXString s;
 	FXString t;
+	FXString u;
 	const char *z = " ";
 
 	// toggle onReadIRcont off
 	if (ReadIRcontActive)
 		onReadIRcont(NULL, 0, NULL);
 
+	u = "";
+	u += output_text->getText();
+	u += " ";
 	s = "";
-	s += output_text->getText();
-	s += " ";
 	s += protocol1_text->getText();
 	s += " ";
 	t = address1_text->getText();
@@ -1896,7 +1906,12 @@ MainWindow::onReadIRTimeout(FXObject *sender, FXSelector sel, void *ptr)
 	s += " ";
 	s += t.section(z, 0, 1);
 	s += " 00 ";
-	output_text->setText(s);
+	if (s=="     00 "){
+		FXMessageBox::error(this, MBOX_OK, "IR Read Error", "No IR received");
+		return 0;
+	}
+	u += s;
+	output_text->setText(u);
 
 	Write_and_Check();
 
