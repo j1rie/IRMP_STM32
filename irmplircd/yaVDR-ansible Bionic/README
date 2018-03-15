@@ -5,6 +5,16 @@ Get a template map:
 wget  https://raw.githubusercontent.com/j1rie/IRMP_STM32/master/irmplircd/yaVDR-0.6.2%20Xenial/irmp.map
 mv irmp.map irmplircd.map
 
+The stm32IRconfig_gui can be used for building a keymap from the template /etc/irmplircd/irmplircd.map with the remote control.
+Press "receive mode" and open /etc/irmplircd/irmplircd.map .
+Click the line with the button's name, press the button on the remote, press "write IR" - repeat this for all buttons.
+You can test the keymap immediately: After pressing the button on the remote, the red cursor should be in the coresponding line.
+At the end press "save" and save the keymap.
+Reboot in order to apply the changes.
+
+See also https://www.mikrocontroller.net/articles/IRMP_auf_STM32_-_ein_USB_IR_Empf%C3%A4nger/Sender/Einschalter_mit_Wakeup-Timer#Creating_a_keymap
+
+Without gui:
 Edit /etc/irmplircd/irmplircd.map and insert the codes from your remote control, which you see
 with 'sudo irw /var/run/lirc/irmplircd' (or stm32IRconfig or stm32IRconfig_gui).
 
@@ -13,7 +23,4 @@ in /etc/irmplircd/irmplircd.map needs to be "070000000100 KEY_1" and so on.
 After 'sudo restart irmplircd' you should see "070000000100 0 KEY_1 IRMP", when you
 press "1".
 
-shutdown -r now
-
-
-
+See also http://www.yavdr.org/documentation/0.6/de/ch02s03.html#usb_irmp .
