@@ -3,7 +3,7 @@ If not, do a sudo apt-get install yavdr-hardware-irmp
 
 Get a template map:
 wget  https://raw.githubusercontent.com/j1rie/IRMP_STM32/master/irmplircd/yaVDR-0.6.2%20Xenial/irmp.map
-mv irmp.map irmplircd.map
+mv irmp.map /etc/irmplircd/irmplircd.map
 
 The stm32IRconfig_gui can be used for building a keymap from the template /etc/irmplircd/irmplircd.map with the remote control.
 Press "receive mode" and open /etc/irmplircd/irmplircd.map .
