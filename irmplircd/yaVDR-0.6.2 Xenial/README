@@ -1,5 +1,8 @@
-Install yavdr-addon-irmp.
-Copy irmp.map to /etc/irmp.map .
+sudo apt-get install yavdr-hardware-irmp
+Get a template map:
+wget  https://raw.githubusercontent.com/j1rie/IRMP_STM32/master/irmplircd/yaVDR-0.6.2%20Xenial/irmp.map
+mv irmp.map /etc/irmplircd.map
+
 Edit /etc/default/irmplircd and change KEYMAP="" to KEYMAP="/etc/irmp.map" .
 
 The stm32IRconfig_gui can be used for building a keymap from the template /etc/irmp.map with the remote control.

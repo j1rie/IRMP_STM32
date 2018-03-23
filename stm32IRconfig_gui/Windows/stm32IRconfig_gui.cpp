@@ -60,6 +60,7 @@ public:
 		ID_CLEAR,
 		ID_TIMER,
 		ID_READIR_TIMER,
+		ID_RED_TIMER,
 		ID_MAC_TIMER,
 		ID_LAST,
 		ID_WSLISTBOX,
@@ -69,7 +70,6 @@ public:
 		ID_OPEN,
 		ID_SAVE,
 		ID_APPEND,
-		//ID_APPLY,
 		ID_WRITE_IR,
 		ID_DEVLIST
 	};
@@ -98,7 +98,6 @@ private:
 	FXButton *open_button;
 	FXButton *save_button;
 	FXButton *append_button;
-	//FXButton *apply_button;
 	FXButton *write_ir_button;
 	FXLabel *connected_label;
 	FXLabel *connected_label2;
@@ -125,7 +124,6 @@ private:
 	FXListBox* wslistbox;
 	FXListBox* mnlistbox;
 	FXListBox* mslistbox;
-	FXListBox* repeatlistbox;
 	FXText *map_text;
 	FXStatusBar *statusbar;
 	struct hid_device_info *devices;
@@ -134,7 +132,6 @@ private:
 	unsigned char buf[17];
 	uint8_t ReadIRcontActive;
 	uint8_t ReadIRActive;
-	uint8_t BackColor;
 	int wakeupslots;
 	int macrodepth;
 	int macroslots;
@@ -180,11 +177,11 @@ public:
 	long onClear(FXObject *sender, FXSelector sel, void *ptr);
 	long onTimeout(FXObject *sender, FXSelector sel, void *ptr);
 	long onReadIRTimeout(FXObject *sender, FXSelector sel, void *ptr);
+	long onRedTimeout(FXObject *sender, FXSelector sel, void *ptr);
 	long onMacTimeout(FXObject *sender, FXSelector sel, void *ptr);
 	long onCmdwsListBox(FXObject*,FXSelector,void*);
 	long onCmdmnListBox(FXObject*,FXSelector,void*);
 	long onCmdmsListBox(FXObject*,FXSelector,void*);
-	long onCmdrepeatListBox(FXObject*,FXSelector,void*);
 	long onNew(FXObject *sender, FXSelector sel, void *ptr);
 	long onOpen(FXObject *sender, FXSelector sel, void *ptr);
 	long onSave(FXObject *sender, FXSelector sel, void *ptr);
@@ -234,6 +231,7 @@ FXDEFMAP(MainWindow) MainWindowMap [] = {
 	FXMAPFUNC(SEL_COMMAND, MainWindow::ID_CLEAR, MainWindow::onClear ),
 	FXMAPFUNC(SEL_TIMEOUT, MainWindow::ID_TIMER, MainWindow::onTimeout ),
 	FXMAPFUNC(SEL_TIMEOUT, MainWindow::ID_READIR_TIMER, MainWindow::onReadIRTimeout ),
+	FXMAPFUNC(SEL_TIMEOUT, MainWindow::ID_RED_TIMER, MainWindow::onRedTimeout ),
 	FXMAPFUNC(SEL_TIMEOUT, MainWindow::ID_MAC_TIMER, MainWindow::onMacTimeout ),
 	FXMAPFUNC(SEL_CHANGED, MainWindow::ID_WSLISTBOX, MainWindow::onCmdwsListBox),
 	FXMAPFUNC(SEL_COMMAND, MainWindow::ID_WSLISTBOX, MainWindow::onCmdwsListBox),
@@ -241,12 +239,9 @@ FXDEFMAP(MainWindow) MainWindowMap [] = {
 	FXMAPFUNC(SEL_COMMAND, MainWindow::ID_MNLISTBOX, MainWindow::onCmdmnListBox),
 	FXMAPFUNC(SEL_CHANGED, MainWindow::ID_MSLISTBOX, MainWindow::onCmdmsListBox),
 	FXMAPFUNC(SEL_COMMAND, MainWindow::ID_MSLISTBOX, MainWindow::onCmdmsListBox),
-	FXMAPFUNC(SEL_CHANGED, MainWindow::ID_RPLISTBOX, MainWindow::onCmdrepeatListBox),
-	FXMAPFUNC(SEL_COMMAND, MainWindow::ID_RPLISTBOX, MainWindow::onCmdrepeatListBox),
 	FXMAPFUNC(SEL_COMMAND, MainWindow::ID_OPEN, MainWindow::onOpen ),
 	FXMAPFUNC(SEL_COMMAND, MainWindow::ID_SAVE, MainWindow::onSave ),
 	FXMAPFUNC(SEL_COMMAND, MainWindow::ID_APPEND, MainWindow::onAppend ),
-	//FXMAPFUNC(SEL_COMMAND, MainWindow::ID_APPLY, MainWindow::onApply ),
 	FXMAPFUNC(SEL_COMMAND, MainWindow::ID_WRITE_IR, MainWindow::onWrite_IR ),
 	FXMAPFUNC(SEL_CLOSE,   0, MainWindow::onCmdQuit ),
 };
@@ -326,7 +321,7 @@ MainWindow::MainWindow(FXApp *app)
 	flag_text = new FXTextField(m13, 5, NULL, 0, TEXTFIELD_NORMAL|LAYOUT_FILL_X|LAYOUT_FILL_COLUMN);
 	send_button = new FXButton(m13, "send", NULL, this, ID_SEND, BUTTON_NORMAL|LAYOUT_FILL_X,0,0,0,0,0,0,0,0);
 	new FXLabel(m13, "      ",0,LABEL_NORMAL,0,0,0,0,0,0,0,0);
-	new FXLabel(m13, "repeat",0,LABEL_NORMAL,0,0,0,0,0,0,0,0);
+	new FXLabel(m13, "      ",0,LABEL_NORMAL,0,0,0,0,0,0,0,0);
 	new FXLabel(m13, "get");
 	FXVerticalFrame *innerVF1 = new FXVerticalFrame(m13, LAYOUT_FILL_X|LAYOUT_FILL_Y, 0,0,0,0, 0,0,0,0);
 	FXVerticalFrame *innerVF2 = new FXVerticalFrame(m13, LAYOUT_FILL_X|LAYOUT_FILL_Y, 0,0,0,0, 0,0,0,0);
@@ -338,7 +333,6 @@ MainWindow::MainWindow(FXApp *app)
 	flag1_text = new FXText(new FXHorizontalFrame(innerVF4,LAYOUT_FILL_X|LAYOUT_FILL_Y|FRAME_SUNKEN|FRAME_THICK, 0,0,0,0, 0,0,0,0), NULL, 0, LAYOUT_FILL_X);
 	read_cont_button = new FXButton(m13, " receive mode ", NULL, this, ID_READ_CONT, BUTTON_NORMAL|LAYOUT_FILL_X,0,0,0,0,0,0,0,0);
 	new FXLabel(m13, "      ",0,LABEL_NORMAL,0,0,0,0,0,0,0,0);
-	repeatlistbox=new FXListBox(m13,this,ID_RPLISTBOX,FRAME_SUNKEN|FRAME_THICK|LISTBOX_NORMAL,0,0,0,0,0,0,0,0);//LAYOUT_TOP
 	protocol1_text->setVisibleRows(1);
 	address1_text->setVisibleRows(1);
 	command1_text->setVisibleRows(1);
@@ -444,7 +438,6 @@ MainWindow::MainWindow(FXApp *app)
 	command1_text->setHelpText("received IR command");
 	flag1_text->setHelpText("received IR flags");
 	read_cont_button->setHelpText("receive IR until pressed again");
-	repeatlistbox->setHelpText("repeats for toggle");
 	days_text->setHelpText("enter days to be set");
 	hours_text->setHelpText("enter hours to be set");
 	minutes_text->setHelpText("enter minutes to be set");
@@ -467,7 +460,6 @@ MainWindow::MainWindow(FXApp *app)
 	save_button->setHelpText("save translation map");
 	map_text21->setHelpText("editable translation map");
 	append_button->setHelpText("add received IR and key to translation map");
-	//apply_button->setHelpText("apply changes in translation map");
 	write_ir_button->setHelpText("overwrite IR");
 
 	// disable buttons
@@ -496,7 +488,6 @@ MainWindow::MainWindow(FXApp *app)
 	// initialize
 	ReadIRcontActive = 0;
 	ReadIRActive = 0;
-	BackColor = 0;
 	RepeatCounter = 0;
 	active_lines = 0;
 	wakeupslots = 0;
@@ -630,10 +621,7 @@ MainWindow::onConnect(FXObject *sender, FXSelector sel, void *ptr)
 #else
 		s += FXStringVal(i,10);
 #endif
-		repeatlistbox->appendItem(s);	
 	}
-	repeatlistbox->setNumVisible(9);
-	repeatlistbox->setCurrentItem(1);	
 	output_button->enable();
 	pwakeup_button->enable();
 	pmacro_button->enable();
@@ -733,7 +721,6 @@ MainWindow::onDisconnect(FXObject *sender, FXSelector sel, void *ptr)
 	wslistbox->clearItems();
 	mnlistbox->clearItems();
 	mslistbox->clearItems();
-	repeatlistbox->clearItems();
 	output_button->disable();
 	pwakeup_button->disable();
 	pmacro_button->disable();
@@ -754,6 +741,7 @@ MainWindow::onDisconnect(FXObject *sender, FXSelector sel, void *ptr)
 	reboot_button->disable();
 	getApp()->removeTimeout(this, ID_TIMER);
 	getApp()->removeTimeout(this, ID_READIR_TIMER);
+	getApp()->removeTimeout(this, ID_RED_TIMER);
 
 	return 1;
 }
@@ -880,33 +868,26 @@ MainWindow::Read()
 long
 MainWindow::onReadIR(FXObject *sender, FXSelector sel, void *ptr)
 {
-	FXString s;
-	FXString t;
-
 	if(Read() <= 0)
 		return 0;
 
+	FXString s;
+	FXString t;
+
 	if (buf[0] == 1) { // REPORT_ID_IR
 		// Repeat Counter
-		if	(ReadIRcontActive) {
+		if(ReadIRcontActive) {
 			if (!buf[6]) {
 				RepeatCounter = 0;
 			} else {
 				RepeatCounter++;
-				FXString u;
-				u.format("RepeatCounter: %d \n", RepeatCounter);
-				input_text->appendText(u);
-				input_text->setBottomLine(INT_MAX);
 			}
-			if (RepeatCounter == 0 || RepeatCounter >= (repeatlistbox->getCurrentItem() + 1)) {
-				if (BackColor == 0) {
-					read_cont_button->setBackColor(FXRGB(255,23,23));
-					BackColor = 1;
-				} else {
-					read_cont_button->setBackColor(FXRGB(255,127,127));
-					BackColor = 0;
-				}
-			}
+			FXString u;
+			u.format("RepeatCounter: %d \n", RepeatCounter);
+			input_text->appendText(u);
+			input_text->setBottomLine(INT_MAX);
+			read_cont_button->setBackColor(FXRGB(255,23,23));
+			getApp()->addTimeout(this, ID_RED_TIMER, 35 * timeout_scalar /*35ms*/);
 		}
 
 		// show received IR
@@ -985,7 +966,7 @@ MainWindow::onReadIRcont(FXObject *sender, FXSelector sel, void *ptr)
 		// timer on
 		getApp()->addTimeout(this, ID_TIMER, 5 * timeout_scalar /*5ms*/);
 		ReadIRcontActive = 1;
-		BackColor = 0;
+		read_cont_button->setBackColor(FXRGB(255,207,207));
 		read_cont_button->setBaseColor(FXRGB(0,0,255));
 		read_cont_button->setShadowColor(makeShadowColor(FXRGB(0,0,255)));
 		FXString s;
@@ -999,6 +980,7 @@ MainWindow::onReadIRcont(FXObject *sender, FXSelector sel, void *ptr)
   	} else {
 		// timer off
 		getApp()->removeTimeout(this, ID_TIMER);
+		getApp()->removeTimeout(this, ID_RED_TIMER);
 		output_button->enable();
 		pwakeup_button->enable();
 		pmacro_button->enable();
@@ -1918,6 +1900,14 @@ MainWindow::onReadIRTimeout(FXObject *sender, FXSelector sel, void *ptr)
 	return 1;
 }
 
+long
+MainWindow::onRedTimeout(FXObject *sender, FXSelector sel, void *ptr)
+{
+	read_cont_button->setBackColor(FXRGB(255,207,207));
+
+	return 1;
+}
+
 long MainWindow::onCmdwsListBox(FXObject*,FXSelector sel,void* ptr){
 	FXTRACE((1,"%s: %d (%d)\n",FXSELTYPE(sel)==SEL_COMMAND?"SEL_COMMAND":"SEL_CHANGED",(FXint)(FXival)ptr,wslistbox->getCurrentItem()));
 	return 1;
@@ -1930,11 +1920,6 @@ long MainWindow::onCmdmnListBox(FXObject*,FXSelector sel,void* ptr){
 
 long MainWindow::onCmdmsListBox(FXObject*,FXSelector sel,void* ptr){
 	FXTRACE((1,"%s: %d (%d)\n",FXSELTYPE(sel)==SEL_COMMAND?"SEL_COMMAND":"SEL_CHANGED",(FXint)(FXival)ptr,mslistbox->getCurrentItem()));
-	return 1;
-  }
-
-long MainWindow::onCmdrepeatListBox(FXObject*,FXSelector sel,void* ptr){
-	FXTRACE((1,"%s: %d (%d)\n",FXSELTYPE(sel)==SEL_COMMAND?"SEL_COMMAND":"SEL_CHANGED",(FXint)(FXival)ptr,repeatlistbox->getCurrentItem()));
 	return 1;
   }
 
