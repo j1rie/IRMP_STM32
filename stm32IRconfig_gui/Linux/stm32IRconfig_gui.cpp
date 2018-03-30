@@ -887,7 +887,8 @@ MainWindow::onReadIR(FXObject *sender, FXSelector sel, void *ptr)
 			input_text->appendText(u);
 			input_text->setBottomLine(INT_MAX);
 			read_cont_button->setBackColor(FXRGB(255,23,23));
-			getApp()->addTimeout(this, ID_RED_TIMER, 50 * timeout_scalar /*50ms*/);
+			g_main_window->repaint();
+			getApp()->addTimeout(this, ID_RED_TIMER, 50 * timeout_scalar /*50ms*/); // three refreshes at 60Hz
 		}
 
 		// show received IR
@@ -1904,6 +1905,7 @@ long
 MainWindow::onRedTimeout(FXObject *sender, FXSelector sel, void *ptr)
 {
 	read_cont_button->setBackColor(FXRGB(255,207,207));
+	g_main_window->repaint();
 
 	return 1;
 }
