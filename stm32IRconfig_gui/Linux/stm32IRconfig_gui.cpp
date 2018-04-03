@@ -970,6 +970,7 @@ MainWindow::onReadIRcont(FXObject *sender, FXSelector sel, void *ptr)
 		read_cont_button->setBackColor(FXRGB(255,207,207));
 		read_cont_button->setBaseColor(FXRGB(0,0,255));
 		read_cont_button->setShadowColor(makeShadowColor(FXRGB(0,0,255)));
+		g_main_window->repaint();
 		FXString s;
 		if (!ReadIRActive) {
 			s = "receive IR data by pressing buttons on the remote control\n";
@@ -1000,6 +1001,7 @@ MainWindow::onReadIRcont(FXObject *sender, FXSelector sel, void *ptr)
 		read_cont_button->setBaseColor(storedBaseColor);
 		read_cont_button->setShadowColor(storedShadowColor);
 		read_cont_button->setBackColor(storedBackColor);
+		g_main_window->repaint();
 	}
 
 	return 1;

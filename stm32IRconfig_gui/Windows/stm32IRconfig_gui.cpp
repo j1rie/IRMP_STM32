@@ -838,14 +838,7 @@ MainWindow::Read()
 		return -1;
 	}
 
-	/*FXString u;
-	FXlong now = FXThread::time()/1000000;*/
-	int res = hid_read(connected_device, buf, sizeof(buf)); // TODO: 100ms!!!
-	/*now = FXThread::time()/1000000 - now;
-	if(now > 1)
-		u.format("hid_read() took %lld ms\n", now);
-	input_text->appendText(u);
-	input_text->setBottomLine(INT_MAX);*/
+	int res = hid_read(connected_device, buf, sizeof(buf));
 	
 	if (res < 0) {
 		FXMessageBox::error(this, MBOX_OK, "Error Reading", "Could not read from device. Error reported was: %ls", hid_error(connected_device));
@@ -977,6 +970,7 @@ MainWindow::onReadIRcont(FXObject *sender, FXSelector sel, void *ptr)
 		read_cont_button->setBackColor(FXRGB(255,207,207));
 		read_cont_button->setBaseColor(FXRGB(0,0,255));
 		read_cont_button->setShadowColor(makeShadowColor(FXRGB(0,0,255)));
+		g_main_window->repaint();
 		FXString s;
 		if (!ReadIRActive) {
 			s = "receive IR data by pressing buttons on the remote control\n";
@@ -1007,6 +1001,7 @@ MainWindow::onReadIRcont(FXObject *sender, FXSelector sel, void *ptr)
 		read_cont_button->setBaseColor(storedBaseColor);
 		read_cont_button->setShadowColor(storedShadowColor);
 		read_cont_button->setBackColor(storedBackColor);
+		g_main_window->repaint();
 	}
 
 	return 1;
