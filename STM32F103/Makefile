@@ -76,6 +76,10 @@ ifeq ($(Platform), MapleMini_2k)
 DEFINES += -DMapleMini_2k
 TARGET = MapleMini_2k
 endif
+ifeq ($(Platform), MapleMini_2k_ExtBd)
+DEFINES += -DMapleMini_2k_ExtBd
+TARGET = MapleMini_2k_ExtBd
+endif
 
 DATE := $(shell date +"%F_%H-%M")
 TARGET := $(DATE)_$(TARGET)

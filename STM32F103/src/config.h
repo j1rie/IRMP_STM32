@@ -49,6 +49,9 @@
 /* uncomment this, if you use the Maple Mini with bootloader jumping to 2k offset (default for Maple Mini is 5k) */
 //#define MapleMini_2k
 
+/* uncomment this, if you use the Maple Mini with bootloader jumping to 2k offset (default for Maple Mini is 5k) and the extension board */
+//#define MapleMini_2k_ExtBd
+
 /* uncomment this in order to pull down the "active" pin of the mainboard power button connector directly */
 //#define SimpleCircuit
 
@@ -64,6 +67,8 @@
 #endif
 
 /* B6 IRSND (irsndconfig.h) , B10 Logging (irmp.c) */
+#define IR_OUT_PORT B
+#define IR_OUT_PIN  6
 
 #if defined(BlueLink) /* blue ST-Link, IRSND = NRST */
 	#define WAKEUP_PORT		GPIOA
@@ -178,7 +183,27 @@
 	#define IR_IN_PIN		0
 	#define LED_PORT		GPIOB
 	#define LED_PIN			GPIO_Pin_1
-	#define WAKEUP_RESET_PORT		GPIOB
+	#define WAKEUP_RESET_PORT	GPIOB
+	#define WAKEUP_RESET_PIN	GPIO_Pin_13
+	#define USB_DISC_PORT		GPIOB
+	#define USB_DISC_RCC_APB2Periph	RCC_APB2Periph_GPIOB /* TODO use concat */
+	#define USB_DISC_PIN		GPIO_Pin_9
+#elif defined(MapleMini_2k_ExtBd) /* Maple Mini 2k with Extension Board */
+	#define WAKEUP_PORT		GPIOB
+	#define WAKEUP_PIN		GPIO_Pin_7
+	#define RESET_PORT		GPIOB
+	#define RESET_PIN		GPIO_Pin_15
+	#define EXTLED_PORT		GPIOB
+	#define EXTLED_PIN		GPIO_Pin_6
+	#define IR_IN_PORT		C
+	#define IR_IN_PIN		13
+	#undef	IR_OUT_PORT
+	#undef	IR_OUT_PIN
+	#define IR_OUT_PORT		A
+	#define IR_OUT_PIN		6
+	#define LED_PORT		GPIOB
+	#define LED_PIN			GPIO_Pin_1
+	#define WAKEUP_RESET_PORT	GPIOB
 	#define WAKEUP_RESET_PIN	GPIO_Pin_13
 	#define USB_DISC_PORT		GPIOB
 	#define USB_DISC_RCC_APB2Periph	RCC_APB2Periph_GPIOB /* TODO use concat */

@@ -645,7 +645,7 @@ void check_macros(IRMP_DATA *ir)
 
 void USB_DISC_release(void)
 {
-#if defined(Bootloader) && defined(PullDown) || defined(MapleMini) || defined(MapleMini_2k)
+#if defined(Bootloader) && defined(PullDown) || defined(MapleMini) || defined(MapleMini_2k) || defined(MapleMini_2k_ExtBd)
 	/* bootloader must activate disconnect, here we release the disconnect */
 	GPIO_InitTypeDef GPIO_InitStructure;
 	RCC_APB2PeriphClockCmd(USB_DISC_RCC_APB2Periph, ENABLE);
@@ -653,7 +653,7 @@ void USB_DISC_release(void)
 	GPIO_InitStructure.GPIO_Mode = GPIO_Mode_Out_OD;
 	GPIO_InitStructure.GPIO_Speed = GPIO_Speed_2MHz;
 	GPIO_Init(USB_DISC_PORT, &GPIO_InitStructure);
-#if defined(MapleMini) || defined(MapleMini_2k)
+#if defined(MapleMini) || defined(MapleMini_2k) || defined(MapleMini_2k_ExtBd)
 	GPIO_WriteBit(USB_DISC_PORT, USB_DISC_PIN, Bit_RESET);
 #else
 	GPIO_WriteBit(USB_DISC_PORT, USB_DISC_PIN, Bit_SET);
@@ -663,7 +663,7 @@ void USB_DISC_release(void)
 
 void USB_Reset(void)
 {
-#if defined(Bootloader) && !defined(PullDown) && !defined(MapleMini) && !defined(MapleMini_2k)
+#if defined(Bootloader) && !defined(PullDown) && !defined(MapleMini) && !defined(MapleMini_2k) && !defined(MapleMini_2k_ExtBd)
 	/* disable USB */
 	PowerOff();
 	/* USB reset by pulling USBDP shortly low. A pullup resistor is needed, most

@@ -1,6 +1,6 @@
-diff -Nrup irmp.orig/irmpconfig.h irmp.new/irmpconfig.h
---- irmp.orig/irmpconfig.h	2018-02-19 11:30:11.000000000 +0100
-+++ irmp.new/irmpconfig.h	2018-02-20 18:28:43.000000000 +0100
+diff -Nrup A/irmpconfig.h B/irmpconfig.h
+--- A/irmpconfig.h	2018-02-19 11:30:11.000000000 +0100
++++ B/irmpconfig.h	2018-02-20 22:34:43.000000000 +0100
 @@ -56,17 +56,17 @@
  #define IRMP_SUPPORT_KASEIKYO_PROTOCOL          1       // Kaseikyo             >= 10000                 ~250 bytes
  
@@ -52,9 +52,9 @@ diff -Nrup irmp.orig/irmpconfig.h irmp.new/irmpconfig.h
  #endif
  
  #endif // _IRMPCONFIG_H_
-diff -Nrup irmp.orig/irsndconfig.h irmp.new/irsndconfig.h
---- irmp.orig/irsndconfig.h	2018-02-19 11:30:11.000000000 +0100
-+++ irmp.new/irsndconfig.h	2018-02-20 00:16:35.000000000 +0100
+diff -Nrup A/irsndconfig.h B/irsndconfig.h
+--- A/irsndconfig.h	2018-02-19 11:30:11.000000000 +0100
++++ B/irsndconfig.h	2018-05-05 15:09:40.000000000 +0200
 @@ -47,17 +47,17 @@
  #define IRSND_SUPPORT_KASEIKYO_PROTOCOL         1       // Kaseikyo             >= 10000                 ~300 bytes
  
@@ -83,3 +83,14 @@ diff -Nrup irmp.orig/irsndconfig.h irmp.new/irsndconfig.h
  
  // exotic protocols, enable here!               Enable  Remarks                 F_INTERRUPTS            Program Space
  #define IRSND_SUPPORT_BOSE_PROTOCOL             0       // BOSE                 >= 10000                 ~100 bytes
+@@ -147,8 +147,8 @@
+  *---------------------------------------------------------------------------------------------------------------------------------------------------
+  */
+ #elif defined (ARM_STM32)                                               // use B6 as IR output on STM32
+-#  define IRSND_PORT_LETTER                     B
+-#  define IRSND_BIT_NUMBER                      6
++#  define IRSND_PORT_LETTER                     IR_OUT_PORT
++#  define IRSND_BIT_NUMBER                      IR_OUT_PIN
+ #  define IRSND_TIMER_NUMBER                    4
+ #  define IRSND_TIMER_CHANNEL_NUMBER            1                       // only channel 1 can be used at the moment, others won't work
+ 
