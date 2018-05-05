@@ -1,2 +1,8 @@
 For the sticks there are several hardware designs
 Make sure the extension board fits your stick.
+
+Stick1_jr1 is based on [1].
+
+[1]
+https://github.com/ranseyer/STM32-IRMP-Hardware/tree/master/1_Small_ST-Link/STl-Link-V303-small.brd
+https://github.com/ranseyer/STM32-IRMP-Hardware/tree/master/1_Small_ST-Link/STl-Link-V303-small.sch
