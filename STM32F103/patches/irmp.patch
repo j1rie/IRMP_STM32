@@ -54,7 +54,7 @@ diff -Nrup A/irmpconfig.h B/irmpconfig.h
  #endif // _IRMPCONFIG_H_
 diff -Nrup A/irsndconfig.h B/irsndconfig.h
 --- A/irsndconfig.h	2018-02-19 11:30:11.000000000 +0100
-+++ B/irsndconfig.h	2018-05-05 15:09:40.000000000 +0200
++++ B/irsndconfig.h	2018-06-07 16:56:36.000000000 +0200
 @@ -47,17 +47,17 @@
  #define IRSND_SUPPORT_KASEIKYO_PROTOCOL         1       // Kaseikyo             >= 10000                 ~300 bytes
  
@@ -83,12 +83,14 @@ diff -Nrup A/irsndconfig.h B/irsndconfig.h
  
  // exotic protocols, enable here!               Enable  Remarks                 F_INTERRUPTS            Program Space
  #define IRSND_SUPPORT_BOSE_PROTOCOL             0       // BOSE                 >= 10000                 ~100 bytes
-@@ -147,8 +147,8 @@
+@@ -146,9 +146,9 @@
+  * ARM STM32 section:
   *---------------------------------------------------------------------------------------------------------------------------------------------------
   */
- #elif defined (ARM_STM32)                                               // use B6 as IR output on STM32
+-#elif defined (ARM_STM32)                                               // use B6 as IR output on STM32
 -#  define IRSND_PORT_LETTER                     B
 -#  define IRSND_BIT_NUMBER                      6
++#elif defined (ARM_STM32)                                               // use IR_OUT_PORT + IR_OUT_PIN as IR output on STM32
 +#  define IRSND_PORT_LETTER                     IR_OUT_PORT
 +#  define IRSND_BIT_NUMBER                      IR_OUT_PIN
  #  define IRSND_TIMER_NUMBER                    4

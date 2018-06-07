@@ -190,13 +190,13 @@
 	#define USB_DISC_PIN		GPIO_Pin_9
 #elif defined(MapleMini_2k_ExtBd) /* Maple Mini 2k with Extension Board */
 	#define WAKEUP_PORT		GPIOB
-	#define WAKEUP_PIN		GPIO_Pin_7
+	#define WAKEUP_PIN		GPIO_Pin_7 /* 15 */
 	#define RESET_PORT		GPIOB
 	#define RESET_PIN		GPIO_Pin_15
 	#define EXTLED_PORT		GPIOB
-	#define EXTLED_PIN		GPIO_Pin_6
+	#define EXTLED_PIN		GPIO_Pin_6 /* 16 */
 	#define IR_IN_PORT		C
-	#define IR_IN_PIN		13
+	#define IR_IN_PIN		13 /* 14 */
 	#undef	IR_OUT_PORT
 	#undef	IR_OUT_PIN
 	#define IR_OUT_PORT		A
