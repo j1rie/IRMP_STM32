@@ -316,14 +316,12 @@ void eeprom_store(uint8_t virt_addr, uint8_t *buf)
 uint8_t eeprom_restore(uint8_t *buf, uint8_t virt_addr)
 {
 	uint8_t i, retVal = 0;
-	uint16_t EE_Data;
 	for(i=0; i<3; i++) {
-		if (EE_ReadVariable(virt_addr + i, &EE_Data)) {
+		if (EE_ReadVariable(virt_addr + i, (uint16_t *) &buf[2*i])) {
 			/* the variable was not found or no valid page was found */
-			EE_Data = 0xFFFF;
+			*((uint16_t *) &buf[2*i]) = 0xFFFF;
 			retVal = 1;
 		}
-		memcpy(&buf[2*i], &EE_Data, 2);
 	}
 	return retVal;
 }
@@ -771,8 +769,7 @@ int main(void)
 			}
 
 			/* send IR-data */
-			memcpy(buf, &myIRData, sizeof(myIRData));
-			USB_HID_SendData(REPORT_ID_IR, buf, sizeof(myIRData));
+			USB_HID_SendData(REPORT_ID_IR, (uint8_t *) &myIRData, sizeof(myIRData));
 		}
 	}
 }
