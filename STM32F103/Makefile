@@ -71,10 +71,16 @@ endif
 ifeq ($(Platform), MapleMini)
 DEFINES += -DMapleMini
 TARGET = MapleMini
+BOOT = Maple_Boot
 endif
 ifeq ($(Platform), MapleMini_2k)
 DEFINES += -DMapleMini_2k
 TARGET = MapleMini_2k
+endif
+ifeq ($(Platform), MapleMini_ExtBd)
+DEFINES += -DMapleMini_ExtBd
+TARGET = MapleMini_ExtBd
+BOOT = Maple_Boot
 endif
 ifeq ($(Platform), MapleMini_2k_ExtBd)
 DEFINES += -DMapleMini_2k_ExtBd
@@ -90,7 +96,7 @@ DEFINES += -DFW_STR="\"$(TARGET)   IRMP-Version: $(IRMP_VERSION)\""
 ifdef Bootloader
 DEFINES += -DBootloader
 TARGET := $(TARGET)_BL
-ifneq ($(Platform), MapleMini)
+ifneq ($(BOOT), Maple_Boot)
 LDFLAGS = -nostartfiles -Wl,-Map=$(TARGET).map,--gc-sections,--entry=main,-Tscripts/arm-gcc-link-bootloader.ld $(ARCH) $(COMMON)
 else
 LDFLAGS = -nostartfiles -Wl,-Map=$(TARGET).map,--gc-sections,--entry=main,-Tscripts/arm-gcc-link-maple.ld $(ARCH) $(COMMON)

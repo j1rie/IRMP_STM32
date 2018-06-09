@@ -15,6 +15,7 @@
 ### MapleMini --> Build for the Maple Mini board
 ### MapleMini_2k --> Build for the Maple Mini board with bootloader jumping to
 ###    2k offset (default for Maple Mini is 5k)
+### MapleMini_ExtBd --> Build for the Maple Mini board with extension board
 ### MapleMini_2k_ExtBd --> Build for the Maple Mini board with bootloader jumping to
 ###    2k offset (default for Maple Mini is 5k) and the extension board
 #Platform=Red
@@ -26,6 +27,8 @@
 #Platform=blackDevTest
 #Platform=MapleMini
 #Platform=MapleMini_2k
+#Platform=MapleMini_ExtBd
+#Platform=MapleMini_2k_ExtBd
 
 ### Enable this, if you use the bootloader.
 #Bootloader=1

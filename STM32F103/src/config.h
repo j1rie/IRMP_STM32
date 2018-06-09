@@ -49,6 +49,9 @@
 /* uncomment this, if you use the Maple Mini with bootloader jumping to 2k offset (default for Maple Mini is 5k) */
 //#define MapleMini_2k
 
+/* uncomment this, if you use the Maple Mini and the extension board */
+//#define MapleMini_ExtBd
+
 /* uncomment this, if you use the Maple Mini with bootloader jumping to 2k offset (default for Maple Mini is 5k) and the extension board */
 //#define MapleMini_2k_ExtBd
 
@@ -65,6 +68,13 @@
 #if defined(BlueLink) || defined(RedLink)
 	#define ST_Link
 #endif
+#if defined(MapleMini) || defined(MapleMini_2k) || defined(MapleMini_ExtBd) || defined(MapleMini_2k_ExtBd)
+	#define Maple
+#endif
+#if defined(MapleMini) || defined(MapleMini_ExtBd)
+	#define Maple_Boot
+#endif
+
 
 /* B6 IRSND (irsndconfig.h) , B10 Logging (irmp.c) */
 #define IR_OUT_PORT B
@@ -188,7 +198,7 @@
 	#define USB_DISC_PORT		GPIOB
 	#define USB_DISC_RCC_APB2Periph	RCC_APB2Periph_GPIOB /* TODO use concat */
 	#define USB_DISC_PIN		GPIO_Pin_9
-#elif defined(MapleMini_2k_ExtBd) /* Maple Mini 2k with Extension Board */
+#elif defined(MapleMini_ExtBd) || defined(MapleMini_2k_ExtBd) /* Maple Mini with Extension Board */
 	#define WAKEUP_PORT		GPIOB
 	#define WAKEUP_PIN		GPIO_Pin_7 /* 15 */
 	#define RESET_PORT		GPIOB
