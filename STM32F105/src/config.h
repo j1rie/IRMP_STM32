@@ -18,7 +18,6 @@
 #define MACRO_DEPTH	8
 #define WAKE_SLOTS	8
 #define SIZEOF_IR	6
-#define MIN_REPEATS	2  // TODO make configurable & use Eeprom
 
 /* uncomment below for CooCox */
 //#define FW_STR "2015-10-26_00-00_F105_jrie   IRMP-Version: 3.07"

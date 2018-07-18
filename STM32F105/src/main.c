@@ -279,14 +279,12 @@ void eeprom_store(uint8_t virt_addr, uint8_t *buf)
 uint8_t eeprom_restore(uint8_t *buf, uint8_t virt_addr)
 {
 	uint8_t i, retVal = 0;
-	uint16_t EE_Data;
 	for(i=0; i<3; i++) {
-		if (EE_ReadVariable(virt_addr + i, &EE_Data)) {
+		if (EE_ReadVariable(virt_addr + i, (uint16_t *) &buf[2*i])) {
 			/* the variable was not found or no valid page was found */
-			EE_Data = 0xFFFF;
+			*((uint16_t *) &buf[2*i]) = 0xFFFF;
 			retVal = 1;
 		}
-		memcpy(&buf[2*i], &EE_Data, 2);
 	}
 	return retVal;
 }
@@ -601,7 +599,7 @@ void check_macros(IRMP_DATA *ir)
 
 void USB_DISC_release(void)
 {
-#if defined(Bootloader) && defined(PullDown) || defined(MapleMini) || defined(MapleMini_2k)
+#if defined(Bootloader) && defined(PullDown) || defined(Maple)
 	/* bootloader must activate disconnect, here we release the disconnect */
 	GPIO_InitTypeDef GPIO_InitStructure;
 	RCC_APB2PeriphClockCmd(USB_DISC_RCC_APB2Periph, ENABLE);
@@ -609,7 +607,7 @@ void USB_DISC_release(void)
 	GPIO_InitStructure.GPIO_Mode = GPIO_Mode_Out_OD;
 	GPIO_InitStructure.GPIO_Speed = GPIO_Speed_2MHz;
 	GPIO_Init(USB_DISC_PORT, &GPIO_InitStructure);
-#if defined(MapleMini) || defined(MapleMini_2k)
+#if defined(Maple)
 	GPIO_WriteBit(USB_DISC_PORT, USB_DISC_PIN, Bit_RESET);
 #else
 	GPIO_WriteBit(USB_DISC_PORT, USB_DISC_PIN, Bit_SET);
@@ -619,7 +617,7 @@ void USB_DISC_release(void)
 
 void USB_Reset(void)
 {
-#if defined(Bootloader) && !defined(PullDown) && !defined(MapleMini) && !defined(MapleMini_2k)
+#if defined(Bootloader) && !defined(PullDown) && !defined(Maple)
 	/* reset USB */
 	RCC_AHBPeriphResetCmd(RCC_AHBPeriph_OTG_FS, ENABLE);
 	RCC_AHBPeriphResetCmd(RCC_AHBPeriph_OTG_FS, DISABLE);
@@ -721,8 +719,7 @@ int main(void)
 			}
 
 			/* send IR-data */
-			memcpy(buf, &myIRData, sizeof(myIRData));
-			USB_HID_SendData(REPORT_ID_IR, buf, sizeof(myIRData));
+			USB_HID_SendData(REPORT_ID_IR, (uint8_t *) &myIRData, sizeof(myIRData));
 		}
 	}
 }
