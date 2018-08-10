@@ -226,7 +226,7 @@ void LED_Switch_init(void)
 	/* disable SWD, so pins are available */
 	GPIO_PinRemapConfig(GPIO_Remap_SWJ_Disable, ENABLE);
 #endif /* ST_Link */
-#if defined(StickLink)
+#if (defined(StickLink) || defined(GreenLink))
 	RCC_APB2PeriphClockCmd(RCC_APB2Periph_GPIOA, ENABLE);
 #endif /* StickLink */
 	/* start with wakeup and reset switch off */
@@ -267,8 +267,8 @@ void LED_Switch_init(void)
 #ifdef ST_Link
 	LED_deinit();
 #else
-	/* on the blue and black developer board the LED lights, when pulled low */
-#if !(defined(BlueDeveloperBoard) || defined(BlackDeveloperBoard) || defined(BlackDeveloperBoardTest))
+	/* on the blue and black developer board and on the green ST-Link stick the LED lights, when pulled low */
+#if !(defined(BlueDeveloperBoard) || defined(BlackDeveloperBoard) || defined(BlackDeveloperBoardTest) || defined(GreenLink))
 	GPIO_WriteBit(LED_PORT, LED_PIN, Bit_RESET);
 #else
 	GPIO_WriteBit(LED_PORT, LED_PIN, Bit_SET);
@@ -314,7 +314,7 @@ void eeprom_store(uint8_t virt_addr, uint8_t *buf)
 }
 
 /* eeprom[virt_addr ... virt_addr + 2] -> buf[0-5] */
-/* eeprom: 01,23,45 -> Read results: (10)(32)(54) -> memcpy 01|23|45 -> buffer: 012345 */
+/* eeprom: 01,23,45 -> Read results: (10)(32)(54) -> buffer: 012345 */
 uint8_t eeprom_restore(uint8_t *buf, uint8_t virt_addr)
 {
 	uint8_t i, retVal = 0;
@@ -438,7 +438,8 @@ void store_new_wakeup(void)
 
 void wakeup_reset(void)
 {
-#ifndef StickLink
+/* avoid AFIO in order to avoid having to flash with reset! */
+#if !defined(StickLink) && !defined(GreenLink)
 	/* wakeup reset pin pulled low? */
 	if (!GPIO_ReadInputDataBit(WAKEUP_RESET_PORT, WAKEUP_RESET_PIN)) {
 		store_new_wakeup();

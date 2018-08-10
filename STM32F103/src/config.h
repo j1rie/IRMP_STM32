@@ -31,6 +31,9 @@
 /* uncomment this, if you use a ST-Link USB stick with only one LED */
 //#define StickLink
 
+/* uncomment this, if you use the green ST-Link USB stick with only one LED */
+//#define GreenLink
+
 /* uncomment this, if you use the big developer board */
 //#define DeveloperBoard
 
@@ -115,6 +118,22 @@
 	#define USB_DISC_RCC_APB2Periph	RCC_APB2Periph_GPIOA /* TODO use concat */
 	#define USB_DISC_PIN		GPIO_Pin_13
 #elif defined(StickLink) /* ST-Link stick, IRSND = RST */
+	#define WAKEUP_PORT		GPIOB
+	#define WAKEUP_PIN		GPIO_Pin_14 /* DIO */
+#ifndef EXTLED
+	#define RESET_PORT		GPIOB
+	#define RESET_PIN		GPIO_Pin_13 /* CLK */
+#else
+	#define EXTLED_PORT		GPIOB
+	#define EXTLED_PIN		GPIO_Pin_13 /* CLK */
+#endif
+	#define IR_IN_PORT		B
+	#define IR_IN_PIN		11 /* SWIM */
+	#define LED_PORT		GPIOA
+	#define LED_PIN			GPIO_Pin_9
+	#define WAKEUP_RESET_PORT	GPIOA
+	#define WAKEUP_RESET_PIN	GPIO_Pin_14
+#elif defined(GreenLink) /* green ST-Link stick, IRSND = RST */
 	#define WAKEUP_PORT		GPIOB
 	#define WAKEUP_PIN		GPIO_Pin_14 /* DIO */
 #ifndef EXTLED
