@@ -61,7 +61,7 @@
 /* uncomment this in order to pull down the "active" pin of the mainboard power button connector directly */
 //#define SimpleCircuit
 
-/* uncomment this for an external LED instead of the reset functionality on Blue-, Red- or StickLink */
+/* uncomment this for an external LED instead of the reset functionality on Blue-, Red-, Green- or StickLink */
 #define EXTLED
 
 /* uncomment this for legacy boards with pulldown resistor for USB reset */

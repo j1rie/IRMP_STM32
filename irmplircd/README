@@ -1,3 +1,4 @@
+get irmplircd from https://github.com/realglotzi/irmplircd
 for automatic start and stop of irmplircd during boot and on device dis/reconnect
 put the udev rule '70-irmp.rules' into your udev rules directory (/etc/udev/rules.d/) and
 put the systemd service 'irmplircd.service' into your services directory (/etc/systemd/system/)
