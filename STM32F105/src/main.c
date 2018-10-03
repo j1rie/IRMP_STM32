@@ -95,7 +95,7 @@ IRMP_NOKIA_PROTOCOL,
 #if IRMP_SUPPORT_BOSE_PROTOCOL==1
 IRMP_BOSE_PROTOCOL,
 #endif
-#if IRMP_KATHREIN_PROTOCOL==1
+#if IRMP_SUPPORT_KATHREIN_PROTOCOL==1
 IRMP_KATHREIN_PROTOCOL,
 #endif
 #if IRMP_SUPPORT_NUBERT_PROTOCOL==1
@@ -150,7 +150,9 @@ IRMP_A1TVBOX_PROTOCOL,
 IRMP_LEGO_PROTOCOL,
 #endif
 #if IRMP_SUPPORT_RCMM_PROTOCOL==1
-IRMP_RCMM_PROTOCOL,
+IRMP_RCMM32_PROTOCOL,
+IRMP_RCMM24_PROTOCOL,
+IRMP_RCMM12_PROTOCOL,
 #endif
 #if IRMP_SUPPORT_LGAIR_PROTOCOL==1
 IRMP_LGAIR_PROTOCOL,
@@ -267,16 +269,17 @@ void blink_LED(void)
 
 /* buf[0 ... 5] -> eeprom[virt_addr ... virt_addr + 2] */
 /* buffer: 012345 -> arguments for Write: (10)(32)(54) -> eeprom: 01,23,45 */
-void eeprom_store(uint8_t virt_addr, uint8_t *buf)
+void eeprom_store(uint16_t virt_addr, uint8_t *buf)
 {
-	EE_WriteVariable(virt_addr, (buf[1] << 8) | buf[0]);
-	EE_WriteVariable(virt_addr + 1, (buf[3] << 8) | buf[2]);
-	EE_WriteVariable(virt_addr + 2, (buf[5] << 8) | buf[4]);
+	uint8_t i;
+	for(i=0; i<3; i++) {
+		EE_WriteVariable(virt_addr + i, *(uint16_t*)&buf[2*i]);
+	}
 }
 
 /* eeprom[virt_addr ... virt_addr + 2] -> buf[0-5] */
-/* eeprom: 01,23,45 -> Read results: (10)(32)(54) -> memcpy 01|23|45 -> buffer: 012345 */
-uint8_t eeprom_restore(uint8_t *buf, uint8_t virt_addr)
+/* eeprom: 01,23,45 -> Read results: (10)(32)(54) -> buffer: 012345 */
+uint8_t eeprom_restore(uint8_t *buf, uint16_t virt_addr)
 {
 	uint8_t i, retVal = 0;
 	for(i=0; i<3; i++) {
