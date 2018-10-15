@@ -680,7 +680,7 @@ MainWindow::onConnect(FXObject *sender, FXSelector sel, void *ptr)
 	unsigned int alarm = *((uint32_t *)&buf[4]);
 	FXString t;	
 	s = "alarm: ";
-	t.format("%"PRIu16"", alarm/60/60/24);
+	t.format("%" PRIu16 "", alarm/60/60/24);
 	s += t;
 	s += " days, ";
 	t.format("%d", (alarm/60/60) % 24);
@@ -1432,7 +1432,7 @@ MainWindow::onAget(FXObject *sender, FXSelector sel, void *ptr)
 	FXString s;
 	FXString t;	
 	s = "";
-	t.format("%"PRIu16"", alarm/60/60/24);
+	t.format("%" PRIu16 "", alarm/60/60/24);
 	s += t;
 	days1_text->setText(s);
 		
