@@ -1207,7 +1207,7 @@ MainWindow::onPRwakeup(FXObject *sender, FXSelector sel, void *ptr)
 	input_text->appendText(s);
 	input_text->setBottomLine(INT_MAX);
 	ReadIRActive = 1;
-	getApp()->addTimeout(this, ID_READIR_TIMER, 5000 * timeout_scalar /*5s*/);
+	getApp()->addTimeout(this, ID_READIR_TIMER, 5000 * timeout_scalar /*5s*/); // TODO wait for signal from onReadIR() instead of waiting fixed time
 	onReadIRcont(NULL, 0, NULL);
 	ReadIRActive = 0;
 	t.format("%d ", wslistbox->getCurrentItem());
@@ -1231,7 +1231,7 @@ MainWindow::onPRmacro(FXObject *sender, FXSelector sel, void *ptr)
 	input_text->appendText(s);
 	input_text->setBottomLine(INT_MAX);
 	ReadIRActive = 1;
-	getApp()->addTimeout(this, ID_READIR_TIMER, 5000 * timeout_scalar /*5s*/);
+	getApp()->addTimeout(this, ID_READIR_TIMER, 5000 * timeout_scalar /*5s*/); // TODO wait for signal from onReadIR() instead of waiting fixed time
 	onReadIRcont(NULL, 0, NULL);
 	ReadIRActive = 0;
 	t.format("%d ", mnlistbox->getCurrentItem());
