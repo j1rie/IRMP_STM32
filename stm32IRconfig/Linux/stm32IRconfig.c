@@ -104,24 +104,24 @@ prog:		printf("set wakeup(w)\nset macro(m)\n");
 		switch (d) {
 		case 'w':
 			printf("enter slot number (starting with 0)\n");
-			scanf("%"SCNd8"", &s);
+			scanf("%" SCNd8 "", &s);
 			outBuf[idx++] = 0x05; // CMD_WAKE
 			outBuf[idx++] = s;    // (s+1)-th slot
 			break;
 		case 'm':
 			printf("enter macro number (starting with 0)\n");
-			scanf("%"SCNd8"", &m);
+			scanf("%" SCNd8 "", &m);
 			outBuf[idx++] = 0x04; // CMD_MACRO
 			outBuf[idx++] = m;    // (m+1)-th macro
 			printf("enter slot number, 0 for trigger\n");
-			scanf("%"SCNd8"", &s);
+			scanf("%" SCNd8 "", &s);
 			outBuf[idx++] = s;    // (s+1)-th slot
 			break;
 		default:
 			goto prog;
 		}
 		printf("enter IRData (protocoladdresscommandflag)\n");
-		scanf("%"SCNx64"", &i);
+		scanf("%" SCNx64 "", &i);
 		outBuf[idx++] = (i>>40) & 0xFF;
 		outBuf[idx++] = (i>>24) & 0xFF;
 		outBuf[idx++] = (i>>32) & 0xFF;
@@ -140,17 +140,17 @@ Prog:		printf("set wakeup with remote control(w)\nset macro with remote control(
 		switch (d) {
 		case 'w':
 			printf("enter slot number (starting with 0)\n");
-			scanf("%"SCNd8"", &s);
+			scanf("%" SCNd8 "", &s);
 			outBuf[idx++] = 0x05; // CMD_WAKE
 			outBuf[idx++] = s;    // (s+1)-th slot
 			break;
 		case 'm':
 			printf("enter macro number (starting with 0)\n");
-			scanf("%"SCNd8"", &m);
+			scanf("%" SCNd8 "", &m);
 			outBuf[idx++] = 0x04; // CMD_MACRO
 			outBuf[idx++] = m;    // (m+1)-th macro
 			printf("enter slot number, 0 for trigger\n");
-			scanf("%"SCNd8"", &s);
+			scanf("%" SCNd8 "", &s);
 			outBuf[idx++] = s;    // (s+1)-th slot
 			break;
 		default:
@@ -176,17 +176,17 @@ get:		printf("get wakeup(w)\nget macro slot(m)\nget caps(c)\n");
 		switch (d) {
 		case 'w':
 			printf("enter slot number (starting with 0)\n");
-			scanf("%"SCNd8"", &s);
+			scanf("%" SCNd8 "", &s);
 			outBuf[idx++] = 0x05; // CMD_WAKE
 			outBuf[idx++] = s;    // (s+1)-th slot
 			break;
 		case 'm':
 			printf("enter macro number (starting with 0)\n");
-			scanf("%"SCNd8"", &m);
+			scanf("%" SCNd8 "", &m);
 			outBuf[idx++] = 0x04; // CMD_MACRO
 			outBuf[idx++] = m;    // (m+1)-th macro
 			printf("enter slot number, 0 for trigger\n");
-			scanf("%"SCNd8"", &s);
+			scanf("%" SCNd8 "", &s);
 			outBuf[idx++] = s;    // (s+1)-th slot
 			break;
 		case 'c':
@@ -243,17 +243,17 @@ reset:		printf("reset wakeup(w)\nreset macro slot(m)\nreset alarm(a)\n");
 		switch (d) {
 		case 'w':
 			printf("enter slot number (starting with 0)\n");
-			scanf("%"SCNd8"", &s);
+			scanf("%" SCNd8 "", &s);
 			outBuf[idx++] = 0x05; // CMD_WAKE
 			outBuf[idx++] = s;    // (s+1)-th slot
 			break;
 		case 'm':
 			printf("enter macro number (starting with 0)\n");
-			scanf("%"SCNd8"", &m);
+			scanf("%" SCNd8 "", &m);
 			outBuf[idx++] = 0x04; // CMD_MACRO
 			outBuf[idx++] = m;    // (m+1)-th macro
 			printf("enter slot number, 0 for trigger\n");
-			scanf("%"SCNd8"", &s);
+			scanf("%" SCNd8 "", &s);
 			outBuf[idx++] = s;    // (s+1)-th slot
 			break;
 		case 'a':
@@ -271,7 +271,7 @@ reset:		printf("reset wakeup(w)\nreset macro slot(m)\nreset alarm(a)\n");
 		outBuf[idx++] = 0x01; // ACC_SET
 		outBuf[idx++] = 0x03; // CMD_ALARM
 		printf("enter alarm\n");
-		scanf("%"SCNx64"", &i);
+		scanf("%" SCNx64 "", &i);
 		memcpy(&outBuf[idx++], &i, 4);
 		write_and_check();
 		break;
@@ -286,7 +286,7 @@ reset:		printf("reset wakeup(w)\nreset macro slot(m)\nreset alarm(a)\n");
 
 	case 'i':
 		printf("enter IRData (protocoladdresscommandflag)\n");
-		scanf("%"SCNx64"", &i);
+		scanf("%" SCNx64 "", &i);
 		memset(&outBuf[2], 0, 15);
 		idx = 2;
 		outBuf[idx++] = 0x01; // ACC_SET

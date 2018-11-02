@@ -118,7 +118,7 @@ int main(int argc, char *argv[]) {
 	    while (inBuf[0] == 0x01)
 		read_stm32();
 	    alarm = *((uint32_t *)&inBuf[4]);
-	    printf("\tSTM32alarm: %"PRIu16" days %d hours %d minutes %d seconds\n", alarm/60/60/24, (alarm/60/60) % 24, (alarm/60) % 60, alarm % 60);
+	    printf("\tSTM32alarm: %" PRIu16 " days %d hours %d minutes %d seconds\n", alarm/60/60/24, (alarm/60/60) % 24, (alarm/60) % 60, alarm % 60);
 	    wakeup = time(NULL);
 	    wakeup += alarm;
 	    ts = (localtime(&wakeup));
