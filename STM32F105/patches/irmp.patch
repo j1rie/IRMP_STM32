@@ -1,7 +1,16 @@
-diff -Nrup irmp.orig/irmpconfig.h irmp.new/irmpconfig.h
---- irmp.orig/irmpconfig.h	2018-02-19 11:30:11.000000000 +0100
-+++ irmp.new/irmpconfig.h	2018-02-20 15:43:24.000000000 +0100
-@@ -56,17 +56,17 @@
+diff -Nrup A/irmpconfig.h B/irmpconfig.h
+--- A/irmpconfig.h	2018-09-10 14:26:02.000000000 +0200
++++ B/irmpconfig.h	2018-11-23 17:30:59.949840745 +0100
+@@ -28,7 +28,7 @@
+  *---------------------------------------------------------------------------------------------------------------------------------------------------
+  */
+ #ifndef F_INTERRUPTS
+-#  define F_INTERRUPTS                          15000   // interrupts per second, min: 10000, max: 20000, typ: 15000
++#  define F_INTERRUPTS                          20000   // interrupts per second, min: 10000, max: 20000, typ: 15000
+ #endif
+ 
+ /*---------------------------------------------------------------------------------------------------------------------------------------------------
+@@ -54,17 +54,17 @@
  #define IRMP_SUPPORT_KASEIKYO_PROTOCOL          1       // Kaseikyo             >= 10000                 ~250 bytes
  
  // more protocols, enable here!                 Enable  Remarks                 F_INTERRUPTS            Program Space
@@ -30,6 +39,15 @@ diff -Nrup irmp.orig/irmpconfig.h irmp.new/irmpconfig.h
  
  // exotic protocols, enable here!               Enable  Remarks                 F_INTERRUPTS            Program Space
  #define IRMP_SUPPORT_BOSE_PROTOCOL              0       // BOSE                 >= 10000                 ~150 bytes
+@@ -86,7 +86,7 @@
+ #define IRMP_SUPPORT_RUWIDO_PROTOCOL            0       // RUWIDO, T-Home       >= 15000                 ~550 bytes
+ #define IRMP_SUPPORT_A1TVBOX_PROTOCOL           0       // A1 TV BOX            >= 15000 (better 20000)  ~300 bytes
+ #define IRMP_SUPPORT_LEGO_PROTOCOL              0       // LEGO Power RC        >= 20000                 ~150 bytes
+-#define IRMP_SUPPORT_RCMM_PROTOCOL              0       // RCMM 12,24, or 32    >= 20000                 ~150 bytes
++#define IRMP_SUPPORT_RCMM_PROTOCOL              1       // RCMM 12,24, or 32    >= 20000                 ~150 bytes
+ #define IRMP_SUPPORT_LGAIR_PROTOCOL             0       // LG Air Condition     >= 10000                 ~300 bytes
+ #define IRMP_SUPPORT_SAMSUNG48_PROTOCOL         0       // Samsung48            >= 10000                 ~100 bytes (SAMSUNG must be enabled!)
+ #define IRMP_SUPPORT_MERLIN_PROTOCOL            0       // Merlin               >= 15000 (better 20000)  ~300 bytes
 @@ -134,9 +134,9 @@
   * Change hardware pin here for ARM STM32
   *---------------------------------------------------------------------------------------------------------------------------------------------------
@@ -41,8 +59,8 @@ diff -Nrup irmp.orig/irmpconfig.h irmp.new/irmpconfig.h
 +#  define IRMP_BIT_NUMBER                       6
  
  /*---------------------------------------------------------------------------------------------------------------------------------------------------
-  * Change hardware pin here for Stellaris ARM Cortex M4
-@@ -214,7 +214,7 @@
+  * Hardware pin for ARM STM32 (HAL) - don't change here, define IRMP_RECEIVE_GPIO_Port & IRMP_RECEIVE_PIN in STM32Cube (Main.h)
+@@ -232,7 +232,7 @@
   *---------------------------------------------------------------------------------------------------------------------------------------------------
   */
  #ifndef IRMP_USE_CALLBACK
@@ -50,11 +68,11 @@ diff -Nrup irmp.orig/irmpconfig.h irmp.new/irmpconfig.h
 +#  define IRMP_USE_CALLBACK                     1       // 1: use callbacks. 0: do not. default is 0
  #endif
  
- #endif // _IRMPCONFIG_H_
-diff -Nrup irmp.orig/irsndconfig.h irmp.new/irsndconfig.h
---- irmp.orig/irsndconfig.h	2018-02-19 11:30:11.000000000 +0100
-+++ irmp.new/irsndconfig.h	2018-02-20 00:32:14.000000000 +0100
-@@ -47,17 +47,17 @@
+ /*---------------------------------------------------------------------------------------------------------------------------------------------------
+diff -Nrup A/irsndconfig.h B/irsndconfig.h
+--- A/irsndconfig.h	2018-09-06 16:52:14.000000000 +0200
++++ B/irsndconfig.h	2018-11-23 17:26:52.459582809 +0100
+@@ -45,17 +45,17 @@
  #define IRSND_SUPPORT_KASEIKYO_PROTOCOL         1       // Kaseikyo             >= 10000                 ~300 bytes
  
  // more protocols, enable here!                 Enable  Remarks                 F_INTERRUPTS            Program Space
