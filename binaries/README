@@ -1,2 +1,5 @@
 The compiler is from
 https://developer.arm.com/open-source/gnu-toolchain/gnu-rm/downloads
+
+For complete eeprom and firmware reset flash the file "ZEROS".
+Afterwards a new firmware needs to be flashed.
