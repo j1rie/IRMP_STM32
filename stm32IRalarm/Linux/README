@@ -9,7 +9,7 @@ set alarmtime 1 hour ahead, 3600 sec: stm32IRalarm -d /dev/hidraw1 -s 3600
 get alarmtime: stm32IRalarm -d /dev/hidraw2 -a
 set & get (136 years ahead ;-)): stm32IRalarm -d /dev/hidraw0 -s 0xFFFFFFFF -a
 
-shutdown script:
+shutdown script (pointed to by vdr.conf's --shutdown line):
 stm32IRalarm [-d /dev/hidraw0] -s $2
 stm32IRalarm [-d /dev/hidraw0] -s $(($2 -300))
 
