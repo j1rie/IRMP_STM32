@@ -1,0 +1,19 @@
+#!/bin/bash
+
+NVRAMCMD=/path/nvram-wakeup
+SVDRPCMD=/path/svdrpsend
+
+skipmsg=skip
+if [ "$(stat -c %Y /var/log/started_by_IRMP_STM32_KBD)" -lt "$(stat -c %Y /var/log/boot.msg)" ];
+then {
+echo skip >> /var/log/started_by_IRMP_STM32_KBD
+date >> /var/log/started_by_IRMP_STM32_KBD
+$SVDRPCMD MESG $skipmsg &
+exit 0
+}
+fi;
+
+msg=wakeup.nvram
+$SVDRPCMD MESG $msg &
+
+other needed stuff
