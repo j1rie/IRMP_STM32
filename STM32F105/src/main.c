@@ -203,7 +203,7 @@ volatile unsigned int sof_timeout = 0;
 volatile unsigned int i = 0;
 uint8_t Reboot = 0;
 volatile uint32_t boot_flag __attribute__((__section__(".noinit")));
-volatile int send_ir_on_delay = -1;
+volatile unsigned int send_ir_on_delay = 0;
 
 void delay_ms(unsigned int msec)
 {
@@ -320,7 +320,7 @@ void SysTick_Handler(void)
 	if (i == 999) {
 		if (AlarmValue)
 			AlarmValue--;
-		if (send_ir_on_delay > 0)
+		if (send_ir_on_delay)
 			send_ir_on_delay--;
 		i = 0;
 	} else {
@@ -336,8 +336,6 @@ uint8_t host_running(void)
 void Wakeup(void)
 {
 	AlarmValue = 0xFFFFFFFF;
-	if(host_running())
-		return;
 	/* USB wakeup */
 	USB_OTG_ActiveRemoteWakeup(&USB_OTG_dev);
 	/* motherboard power switch: WAKEUP_PIN short high (resp. low in case of SimpleCircuit) */
@@ -639,9 +637,9 @@ void USB_Reset(void)
 
 void led_callback (uint_fast8_t on)
 {
-		LED_PORT->ODR ^= LED_PIN;
+	LED_PORT->ODR ^= LED_PIN;
 #ifdef EXTLED_PORT
-		EXTLED_PORT->ODR ^= EXTLED_PIN;
+	EXTLED_PORT->ODR ^= EXTLED_PIN;
 #endif
 }
 
@@ -649,7 +647,7 @@ void send_magic(void)
 {
 	uint8_t magic[SIZEOF_IR] = {0xFF, 0x00, 0x00, 0x00, 0x00, 0x00};
 	USB_HID_SendData(REPORT_ID_IR, magic, SIZEOF_IR);
-	send_ir_on_delay = -1;
+	send_ir_on_delay = 0;
 }
 
 int main(void)
@@ -657,6 +655,7 @@ int main(void)
 	uint8_t buf[HID_OUT_BUFFER_SIZE-1];
 	IRMP_DATA myIRData;
 	int8_t ret;
+	uint8_t last_magic_sent = 0;
 
 	LED_Switch_init();
 	Systick_Init();
@@ -670,11 +669,12 @@ int main(void)
 	irmp_set_callback_ptr (led_callback);
 
 	while (1) {
-		if (!AlarmValue)
+		if (!AlarmValue && !host_running())
 			Wakeup();
 
-		if (!send_ir_on_delay) {
+		if (send_ir_on_delay && last_magic_sent != send_ir_on_delay) {
 			send_magic();
+			last_magic_sent = send_ir_on_delay;
 		}
 
 		wakeup_reset();

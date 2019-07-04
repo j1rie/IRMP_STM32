@@ -4,3 +4,11 @@ put the udev rule '70-irmp.rules' into your udev rules directory (/etc/udev/rule
 put the systemd service 'irmplircd.service' into your services directory (/etc/systemd/system/)
 put the systemd-tmpfiles config file 'irmplircd.conf' into your tmpfiles directory (/etc/tmpfiles.d/)
 and run "systemctl enable irmplircd.service" once
+
+you want to know, if the computer was started by the receiver?
+run irmpexec with an irmpexec.map which touches /var/log/started_by_irmp_stm32 on receiving 'FF0000000000'
+if 'stat -c %Y /var/log/started_by_irmp_stm32' is greater than 'stat -c %Y /var/log/boot.msg', the
+computer was started by the receiver
+You may use this in VDR's shutdownscript in order to not shut down on the first power key press, if the computer is already running.
+This is handy if you have a remote control with macros as the logitech and use one button to power
+on not only VDR but other devices as well.

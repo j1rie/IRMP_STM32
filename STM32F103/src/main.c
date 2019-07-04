@@ -206,7 +206,7 @@ volatile unsigned int sof_timeout = 0;
 volatile unsigned int i = 0;
 uint8_t Reboot = 0;
 volatile uint32_t boot_flag __attribute__((__section__(".noinit")));
-volatile int send_ir_on_delay = -1;
+volatile unsigned int send_ir_on_delay = 0;
 
 void delay_ms(unsigned int msec)
 {
@@ -306,16 +306,17 @@ void blink_LED(void)
 
 /* buf[0 ... 5] -> eeprom[virt_addr ... virt_addr + 2] */
 /* buffer: 012345 -> arguments for Write: (10)(32)(54) -> eeprom: 01,23,45 */
-void eeprom_store(uint8_t virt_addr, uint8_t *buf)
+void eeprom_store(uint16_t virt_addr, uint8_t *buf)
 {
-	EE_WriteVariable(virt_addr, (buf[1] << 8) | buf[0]);
-	EE_WriteVariable(virt_addr + 1, (buf[3] << 8) | buf[2]);
-	EE_WriteVariable(virt_addr + 2, (buf[5] << 8) | buf[4]);
+	uint8_t i;
+	for(i=0; i<3; i++) {
+		EE_WriteVariable(virt_addr + i, *(uint16_t*)&buf[2*i]);
+	}
 }
 
 /* eeprom[virt_addr ... virt_addr + 2] -> buf[0-5] */
 /* eeprom: 01,23,45 -> Read results: (10)(32)(54) -> buffer: 012345 */
-uint8_t eeprom_restore(uint8_t *buf, uint8_t virt_addr)
+uint8_t eeprom_restore(uint8_t *buf, uint16_t virt_addr)
 {
 	uint8_t i, retVal = 0;
 	for(i=0; i<3; i++) {
@@ -356,7 +357,7 @@ void SysTick_Handler(void)
 	if (i == 999) {
 		if (AlarmValue)
 			AlarmValue--;
-		if (send_ir_on_delay > 0)
+		if (send_ir_on_delay)
 			send_ir_on_delay--;
 		i = 0;
 	} else {
@@ -379,8 +380,6 @@ uint8_t host_running(void)
 void Wakeup(void)
 {
 	AlarmValue = 0xFFFFFFFF;
-	if(host_running())
-		return;
 	/* USB wakeup */
 	Resume(RESUME_START);
 	/* motherboard power switch: WAKEUP_PIN short high (resp. low in case of SimpleCircuit) */
@@ -700,7 +699,7 @@ void send_magic(void)
 {
 	uint8_t magic[SIZEOF_IR] = {0xFF, 0x00, 0x00, 0x00, 0x00, 0x00};
 	USB_HID_SendData(REPORT_ID_IR, magic, SIZEOF_IR);
-	send_ir_on_delay = -1;
+	send_ir_on_delay = 0;
 }
 
 int main(void)
@@ -708,6 +707,7 @@ int main(void)
 	uint8_t buf[HID_OUT_BUFFER_SIZE-1];
 	IRMP_DATA myIRData;
 	int8_t ret;
+	uint8_t last_magic_sent = 0;
 
 	LED_Switch_init();
 	Systick_Init();
@@ -721,11 +721,13 @@ int main(void)
 	irmp_set_callback_ptr (led_callback);
 
 	while (1) {
-		if (!AlarmValue)
+		if (!AlarmValue && !host_running())
 			Wakeup();
 
-		if (!send_ir_on_delay)
+		if (send_ir_on_delay && last_magic_sent != send_ir_on_delay) {
 			send_magic();
+			last_magic_sent = send_ir_on_delay;
+		}
 
 		wakeup_reset();
 

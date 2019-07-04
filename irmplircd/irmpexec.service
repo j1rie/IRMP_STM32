@@ -1,0 +1,11 @@
+[Unit]
+Description=Start irmpexec on irmp_stm32 device
+Requisite=dev-irmp_stm32.device
+After=dev-irmp_stm32.device
+
+[Service]
+Type=forking
+ExecStart=/usr/bin/irmpexec -t /etc/irmp_exec.map
+
+[Install]
+WantedBy=dev-irmp_stm32.device
