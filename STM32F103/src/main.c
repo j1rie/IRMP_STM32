@@ -699,7 +699,6 @@ void send_magic(void)
 {
 	uint8_t magic[SIZEOF_IR] = {0xFF, 0x00, 0x00, 0x00, 0x00, 0x00};
 	USB_HID_SendData(REPORT_ID_IR, magic, SIZEOF_IR);
-	send_ir_on_delay = 0;
 }
 
 int main(void)

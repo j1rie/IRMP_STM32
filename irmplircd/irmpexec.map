@@ -1,1 +1,1 @@
-FF0000000000 date >> /var/log/started_by_irmp_stm32
+KEY_REFRESH /path/log_KEY_REFRESH.sh
