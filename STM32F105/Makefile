@@ -41,7 +41,7 @@ DEFINES += -DFW_STR="\"$(TARGET)   IRMP-Version:_$(IRMP_VERSION)\""
 
 ifdef Bootloader
 DEFINES += -DBootloader
-TARGET := $(TARGET)_BL
+TARGET := $(TARGET)_BL5k
 LDFLAGS = -nostartfiles -Wl,-Map=$(TARGET).map,--gc-sections,--entry=main,-Tscripts/arm-gcc-link-bootloader.ld $(ARCH) $(COMMON)
 else
 LDFLAGS = -nostartfiles -Wl,-Map=$(TARGET).map,--gc-sections,--entry=main,-Tscripts/arm-gcc-link.ld $(ARCH) $(COMMON)

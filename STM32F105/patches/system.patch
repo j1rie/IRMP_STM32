@@ -14,7 +14,7 @@ diff -Nrup a/system_stm32f10x.c b/system_stm32f10x.c
       Internal SRAM. */ 
  /* #define VECT_TAB_SRAM */
 +#if defined(Bootloader)
-+#define VECT_TAB_OFFSET  0x2000
++#define VECT_TAB_OFFSET  0x5000
 +#else
  #define VECT_TAB_OFFSET  0x0 /*!< Vector Table base offset field. 
                                    This value must be a multiple of 0x200. */
