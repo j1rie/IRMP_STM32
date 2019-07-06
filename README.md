@@ -38,7 +38,16 @@ For 2 € you can buy on ebay a ST-Link emulator or a STM32F103 development boar
 The stm32IRconfig_gui can be used for building a keymap with the remote control.
 There are two methods.
 
-...
+![setting irdata into template map](https://raw.githubusercontent.com/wiki/j1rie/IRMP_STM32_KBD/images/Write_IR.jpg)  
+First method: Press "receive mode" and open the template keymap.
+Click the line with the button's name, press the button on the remote, press "write IR" - repeat this for all buttons. 
+
+![setting irdata into template map](https://raw.githubusercontent.com/wiki/j1rie/IRMP_STM32_KBD/images/Append.jpg)   
+Second method: Press "receive mode".
+Press the button on the remote, enter the button's name into the textfield Key and press "append" - repeat this for all buttons.
+
+You can test the keymap immediately: After pressing the button on the remote, the red cursor should be in the coresponding line.
+At the end press "save" and save the keymap.
 
 ## Learning wakeup
 If the first wakeup is empty, the first received IR data will be stored into the wakeup.  
@@ -47,7 +56,10 @@ Important for testing: wakeup happens only, if the PC is powered off.
 If the PC is powered on, only the key is send to the PC (so you can use the same button for power on and power off).  
 
 ## EventGhost
-...
+![setting irdata into template map](https://raw.githubusercontent.com/wiki/j1rie/IRMP_STM32_KBD/images/EG1.jpg)   
+![setting irdata into template map](https://raw.githubusercontent.com/wiki/j1rie/IRMP_STM32_KBD/images/EG2.jpg)   
+![setting irdata into template map](https://raw.githubusercontent.com/wiki/j1rie/IRMP_STM32_KBD/images/EG7.jpg)   
+A keycode in the left event-window is pulled via drag&drop into the right configuration-window and assigned to the wanted action of a plugin. 
 
 ## Building from source
 The sources are complete only after running the prepare script, the script downloads the IRMP sources, extracts and patches the sources. You have to download the ST sources manually, because you have to register unfortunately.  
