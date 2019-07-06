@@ -38,11 +38,11 @@ For 2 € you can buy on ebay a ST-Link emulator or a STM32F103 development boar
 The stm32IRconfig_gui can be used for building a keymap with the remote control.
 There are two methods.
 
-![setting irdata into template map](https://raw.githubusercontent.com/wiki/j1rie/IRMP_STM32_KBD/images/Write_IR.jpg)  
+![write_IR](https://raw.githubusercontent.com/wiki/j1rie/IRMP_STM32_KBD/images/write_IR.jpg)  
 First method: Press "receive mode" and open the template keymap.
 Click the line with the button's name, press the button on the remote, press "write IR" - repeat this for all buttons. 
 
-![setting irdata into template map](https://raw.githubusercontent.com/wiki/j1rie/IRMP_STM32_KBD/images/Append.jpg)   
+![append](https://raw.githubusercontent.com/wiki/j1rie/IRMP_STM32_KBD/images/append.jpg)   
 Second method: Press "receive mode".
 Press the button on the remote, enter the button's name into the textfield Key and press "append" - repeat this for all buttons.
 
@@ -56,9 +56,9 @@ Important for testing: wakeup happens only, if the PC is powered off.
 If the PC is powered on, only the key is send to the PC (so you can use the same button for power on and power off).  
 
 ## EventGhost
-![setting irdata into template map](https://raw.githubusercontent.com/wiki/j1rie/IRMP_STM32_KBD/images/EG1.jpg)   
-![setting irdata into template map](https://raw.githubusercontent.com/wiki/j1rie/IRMP_STM32_KBD/images/EG2.jpg)   
-![setting irdata into template map](https://raw.githubusercontent.com/wiki/j1rie/IRMP_STM32_KBD/images/EG7.jpg)   
+![EG1](https://raw.githubusercontent.com/wiki/j1rie/IRMP_STM32_KBD/images/EG1.jpg)   
+![EG2](https://raw.githubusercontent.com/wiki/j1rie/IRMP_STM32_KBD/images/EG2.jpg)   
+![EG7](https://raw.githubusercontent.com/wiki/j1rie/IRMP_STM32_KBD/images/EG7.jpg)   
 A keycode in the left event-window is pulled via drag&drop into the right configuration-window and assigned to the wanted action of a plugin. 
 
 ## Building from source
