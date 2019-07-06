@@ -18,27 +18,27 @@ For 2 € you can buy on ebay a ST-Link emulator or a STM32F103 development boar
 * IR sender (ca. 40 protocols) 
 * send IR Codes via configurable remote control button 
 * the configuration is stored in the emulated eeprom
-* bootloader for comfortable firmware update 
+* bootloader for comfortable firmware update
 
 ## Software Linux
 * GUI config-tool stm32IRconfig_gui for configuration: set, get and reset wakeup codes, macros, alarm time, send IR and show the received IR code. It is possible to program wakeups and macros via remote control. Create the translation table with remote control and mouse, as well test and edit. Comprehensive debug messages.
 * interactive command line program stm32IRconfig for configuration: set, get and reset wakeups, macros, alarm time, send IR and show the received IR code. It is possible to program wakeups and macros via remote control.
 * stm32IRalarm for setting and reading alarm time via script 
 * irmplircd is a daemon, running in background as an independent lirc server and passing the IR codes/events on to the application https://github.com/realglotzi/irmplircd
-* Software ready for LibreELEC, Ubuntu, yaVDR, easyVDR, MLD, OpenELEC. 
+* Software ready for LibreELEC, Ubuntu, yaVDR, easyVDR, MLD, OpenELEC.
 
 ## Software Windows
 * GUI config-tool stm32IRconfig_gui (same as linux)
 * interactive command line programm stm32IRconfig (same as linux)
 * stm32IRalarm for setting and reading alarm time via script
 * MediaPortal plugin: https://github.com/pikim/HIDIRT-host/tree/master/hidirt.MePo
-* EventGhost with Generic HID 
+* EventGhost with Generic HID
 
 ## Creating a keymap
-The stm32IRconfig_gui can be used for building a keymap with the remote control.
+The stm32IRconfig_gui can be used for building a keymap with the remote control.  
 There are two methods.
 
-![write_IR](https://raw.githubusercontent.com/wiki/j1rie/IRMP_STM32_KBD/images/write_IR.jpg)  
+![write_IR](https://raw.githubusercontent.com/wiki/j1rie/IRMP_STM32_KBD/images/write_IR.jpg)   
 First method: Press "receive mode" and open the template keymap.
 Click the line with the button's name, press the button on the remote, press "write IR" - repeat this for all buttons. 
 
@@ -57,8 +57,11 @@ If the PC is powered on, only the key is send to the PC (so you can use the same
 
 ## EventGhost
 ![EG1](https://raw.githubusercontent.com/wiki/j1rie/IRMP_STM32_KBD/images/EG1.jpg)   
+
 ![EG2](https://raw.githubusercontent.com/wiki/j1rie/IRMP_STM32_KBD/images/EG2.jpg)   
+
 ![EG7](https://raw.githubusercontent.com/wiki/j1rie/IRMP_STM32_KBD/images/EG7.jpg)   
+
 A keycode in the left event-window is pulled via drag&drop into the right configuration-window and assigned to the wanted action of a plugin. 
 
 ## Building from source
@@ -90,6 +93,11 @@ Manuel Reimer for gcc-4.9 fix, SimpleCircuit and check if host running. [5]
 
 ## Discussion and more information
 For comments, questions, suggestions go to https://www.vdr-portal.de/forum/index.php?thread/123572-irmp-auf-stm32-ein-usb-ir-empf%C3%A4nger-sender-einschalter-mit-wakeup-timer/
+
+## Construction manual
+https://github.com/j1rie/IRMP_STM32_KBD/wiki/Herstellungsprozess-Schwarze
+https://www.mikrocontroller.net/articles/IRMP_auf_STM32_%E2%80%93_stark_vereinfachte_Bauanleitung
+https://www.mikrocontroller.net/articles/IRMP_auf_STM32_-_Bauanleitung 
 
 Much fun with IRMP on STM32!
 
