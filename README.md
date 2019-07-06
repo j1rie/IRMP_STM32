@@ -95,9 +95,9 @@ Manuel Reimer for gcc-4.9 fix, SimpleCircuit and check if host running. [5]
 For comments, questions, suggestions go to https://www.vdr-portal.de/forum/index.php?thread/123572-irmp-auf-stm32-ein-usb-ir-empf%C3%A4nger-sender-einschalter-mit-wakeup-timer/
 
 ## Construction manual
-https://github.com/j1rie/IRMP_STM32_KBD/wiki/Herstellungsprozess-Schwarze
-https://www.mikrocontroller.net/articles/IRMP_auf_STM32_%E2%80%93_stark_vereinfachte_Bauanleitung
-https://www.mikrocontroller.net/articles/IRMP_auf_STM32_-_Bauanleitung 
+https://github.com/j1rie/IRMP_STM32_KBD/wiki/Herstellungsprozess-Schwarze  
+https://www.mikrocontroller.net/articles/IRMP_auf_STM32_%E2%80%93_stark_vereinfachte_Bauanleitung  
+https://www.mikrocontroller.net/articles/IRMP_auf_STM32_-_Bauanleitung  
 
 Much fun with IRMP on STM32!
 
