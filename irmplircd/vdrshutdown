@@ -16,4 +16,6 @@ fi;
 msg=wakeup.nvram
 $SVDRPCMD MESG $msg &
 
-other needed stuff
+/path/stm32IRalarm -s $(($2 - 300))
+
+shutdown -h now
