@@ -420,18 +420,22 @@ void Reset(void)
 
 void store_new_wakeup(void)
 {
+	int8_t loop;
 	uint8_t idx;
 	IRMP_DATA wakeup_IRData;
 	irmp_get_data(&wakeup_IRData); // flush input of irmp data
 	blink_LED();
 	/* 5 seconds to press button on remote */
-	delay_ms(5000);
-	if (irmp_get_data(&wakeup_IRData)) {
-		wakeup_IRData.flags = 0;
-		idx = (MACRO_DEPTH + 1) * SIZEOF_IR/2 * MACRO_SLOTS;
-		/* store received wakeup IRData in first wakeup slot */
-		eeprom_store(idx, (uint8_t *) &wakeup_IRData);
-		blink_LED();
+	for(loop=0; loop < 50; loop++;) {
+		delay_ms(100);
+		if (irmp_get_data(&wakeup_IRData)) {
+			wakeup_IRData.flags = 0;
+			idx = (MACRO_DEPTH + 1) * SIZEOF_IR/2 * MACRO_SLOTS;
+			/* store received wakeup IRData in first wakeup slot */
+			eeprom_store(idx, (uint8_t *) &wakeup_IRData);
+			blink_LED();
+			return;
+		}
 	}
 }
 
