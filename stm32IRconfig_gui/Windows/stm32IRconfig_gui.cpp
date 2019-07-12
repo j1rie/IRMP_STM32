@@ -268,7 +268,7 @@ MainWindow::MainWindow(FXApp *app)
 
 	// first vertical frame: everything else
 	// Device List and Connect/Disconnect buttons
-	FXHorizontalFrame *hf11 = new FXHorizontalFrame(vf1, LAYOUT_FILL_X); //
+	FXHorizontalFrame *hf11 = new FXHorizontalFrame(vf1, LAYOUT_FILL_X);
 	device_list = new FXList(new FXHorizontalFrame(hf11,FRAME_SUNKEN|FRAME_THICK|LAYOUT_FILL_X|LAYOUT_FILL_Y, 0,0,0,0, 0,0,0,0), this, ID_DEVLIST, LISTBOX_NORMAL|LAYOUT_FILL_X|LAYOUT_FILL_Y, 0,0,300,200);
 	FXVerticalFrame *buttonVF11 = new FXVerticalFrame(hf11);
 	connect_button = new FXButton(buttonVF11, "Connect", NULL, this, ID_CONNECT, BUTTON_NORMAL|LAYOUT_FILL_X);
@@ -302,16 +302,16 @@ MainWindow::MainWindow(FXApp *app)
 	ralarm_button = new FXButton(gb124, "alarm", NULL, this, ID_RALARM, BUTTON_NORMAL|LAYOUT_FILL_X);
 
 	// horizontal frame for IR Group Box
-	FXHorizontalFrame *hf13 = new FXHorizontalFrame(vf1, LAYOUT_FILL_X|PACK_UNIFORM_WIDTH); //
+	FXHorizontalFrame *hf13 = new FXHorizontalFrame(vf1, LAYOUT_FILL_X|PACK_UNIFORM_WIDTH);
 	//IR Group Box
-	FXGroupBox *gb13 = new FXGroupBox(hf13, "IR", FRAME_GROOVE|LAYOUT_FILL_X);
+	FXGroupBox *gb13 = new FXGroupBox(hf13, "IR (hex)", FRAME_GROOVE|LAYOUT_FILL_X);
 	FXMatrix *m13 = new FXMatrix(gb13, 8, MATRIX_BY_COLUMNS);
 	new FXLabel(m13, "");
 	new FXLabel(m13, "protocol");
 	new FXLabel(m13, "address");
 	new FXLabel(m13, "command");
 	new FXLabel(m13, "flag");
-	new FXLabel(m13, "(hex)");
+	new FXLabel(m13, "");
 	new FXLabel(m13, "");
 	new FXLabel(m13, "");
 	new FXLabel(m13, "set");
@@ -346,13 +346,13 @@ MainWindow::MainWindow(FXApp *app)
 	// horizontal frame for alarm Group Box and select listboxes
 	FXHorizontalFrame *hf143 = new FXHorizontalFrame(vf141, LAYOUT_FILL_X/*,0,0,0,0, 0,0,0,0*/);
 	//alarm Group Box
-	FXGroupBox *gb14 = new FXGroupBox(hf143, "alarm", FRAME_GROOVE|LAYOUT_FILL_X);
+	FXGroupBox *gb14 = new FXGroupBox(hf143, "alarm (dec)", FRAME_GROOVE|LAYOUT_FILL_X);
 	FXMatrix *m14 = new FXMatrix(gb14, 5, MATRIX_BY_COLUMNS|LAYOUT_FILL_X);
 	new FXLabel(m14, "days");
 	new FXLabel(m14, "hours");
 	new FXLabel(m14, "minutes");
 	new FXLabel(m14, "seconds");
-	new FXLabel(m14, "(dec)");
+	new FXLabel(m14, "");
 	days_text = new FXTextField(m14, 5, NULL, 0, TEXTFIELD_NORMAL|LAYOUT_FILL_X|LAYOUT_FILL_COLUMN);
 	hours_text = new FXTextField(m14, 5, NULL, 0, TEXTFIELD_NORMAL|LAYOUT_FILL_X|LAYOUT_FILL_COLUMN);
 	minutes_text = new FXTextField(m14, 5, NULL, 0, TEXTFIELD_NORMAL|LAYOUT_FILL_X|LAYOUT_FILL_COLUMN);
@@ -389,7 +389,7 @@ MainWindow::MainWindow(FXApp *app)
 	map_text->setVisibleRows(1);
 
 	// horizontal frame for Output Group Box
-	FXHorizontalFrame *hf15 = new FXHorizontalFrame(vf141, LAYOUT_FILL_X); //
+	FXHorizontalFrame *hf15 = new FXHorizontalFrame(vf141, LAYOUT_FILL_X);
 	// Output Group Box
 	FXGroupBox *gb15 = new FXGroupBox(hf15, "PC->STM32", FRAME_GROOVE|LAYOUT_FILL_X);
 	FXMatrix *m3 = new FXMatrix(gb15, 2, MATRIX_BY_COLUMNS|LAYOUT_FILL_X);
@@ -399,7 +399,7 @@ MainWindow::MainWindow(FXApp *app)
 	output_button = new FXButton(m3, "Send to IRMP Device", NULL, this, ID_SEND_OUTPUT_REPORT, BUTTON_NORMAL|LAYOUT_FILL_X);
 
 	// horizontal frame for Input Group Box
-	FXHorizontalFrame *hf16 = new FXHorizontalFrame(vf1, LAYOUT_FILL_X|LAYOUT_FILL_Y); //
+	FXHorizontalFrame *hf16 = new FXHorizontalFrame(vf1, LAYOUT_FILL_X|LAYOUT_FILL_Y);
 	// Input Group Box
 	FXGroupBox *gb16 = new FXGroupBox(hf16, "debug messages", FRAME_GROOVE|LAYOUT_FILL_X|LAYOUT_FILL_Y);
 	FXVerticalFrame *innerVF16 = new FXVerticalFrame(gb16, LAYOUT_FILL_X|LAYOUT_FILL_Y);
@@ -574,13 +574,13 @@ MainWindow::onConnect(FXObject *sender, FXSelector sel, void *ptr)
 	connected_label3->setText(s);
 	for(int i = 0; i < wakeupslots; i++) {
 		FXString s;
-		s = "wakeupslot";
+		s = (i < wakeupslots-1) ? "wakeup" : "reboot";
 #if (FOX_MINOR >= 7)
 		FXString t;
 		t.fromInt(i,10);
-		s += t;
+		s += (i < wakeupslots-1) ? t : "";
 #else
-		s += FXStringVal(i,10);
+		s += (i < wakeupslots-1) ? FXStringVal(i,10) : "";
 #endif
 		wslistbox->appendItem(s);	
 	}
@@ -611,17 +611,6 @@ MainWindow::onConnect(FXObject *sender, FXSelector sel, void *ptr)
 		mslistbox->appendItem(s);	
 	}
 	mslistbox->setNumVisible(macroslots);
-	for(int i = 1; i < 10; i++) {
-		FXString s;
-		s = "";
-#if (FOX_MINOR >= 7)
-		FXString t;
-		t.fromInt(i,10);
-		s += t;
-#else
-		s += FXStringVal(i,10);
-#endif
-	}
 	output_button->enable();
 	pwakeup_button->enable();
 	pmacro_button->enable();
@@ -832,7 +821,7 @@ MainWindow::Read()
 		FXMessageBox::error(this, MBOX_OK, "Device Error R", "Unable To Connect to Device");
 		getApp()->removeTimeout(this, ID_TIMER);
 		ReadIRcontActive = 0;
-		s = "Unable To Connect to Device R\n"; //
+		s = "Unable To Connect to Device R\n";
 		input_text->appendText(s);
 		input_text->setBottomLine(INT_MAX);
 		return -1;
@@ -1207,7 +1196,7 @@ MainWindow::onPRwakeup(FXObject *sender, FXSelector sel, void *ptr)
 	input_text->appendText(s);
 	input_text->setBottomLine(INT_MAX);
 	ReadIRActive = 1;
-	getApp()->addTimeout(this, ID_READIR_TIMER, 5000 * timeout_scalar /*5s*/);
+	getApp()->addTimeout(this, ID_READIR_TIMER, 5000 * timeout_scalar /*5s*/); // TODO wait for signal from onReadIR() instead of waiting fixed time
 	onReadIRcont(NULL, 0, NULL);
 	ReadIRActive = 0;
 	t.format("%d ", wslistbox->getCurrentItem());
@@ -1231,7 +1220,7 @@ MainWindow::onPRmacro(FXObject *sender, FXSelector sel, void *ptr)
 	input_text->appendText(s);
 	input_text->setBottomLine(INT_MAX);
 	ReadIRActive = 1;
-	getApp()->addTimeout(this, ID_READIR_TIMER, 5000 * timeout_scalar /*5s*/);
+	getApp()->addTimeout(this, ID_READIR_TIMER, 5000 * timeout_scalar /*5s*/); // TODO wait for signal from onReadIR() instead of waiting fixed time
 	onReadIRcont(NULL, 0, NULL);
 	ReadIRActive = 0;
 	t.format("%d ", mnlistbox->getCurrentItem());
