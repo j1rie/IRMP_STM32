@@ -1,4 +1,4 @@
-# IRMP on STM32 - a USB IR receiver/sender/powerswitch with wakeup-timer
+﻿# IRMP on STM32 - a USB IR receiver/sender/powerswitch with wakeup-timer
 
 A remote control receiver with many functions based on cheap hardware.
 
@@ -16,9 +16,12 @@ For 2 € you can buy on ebay a ST-Link emulator or a STM32F103 development boar
 * switch PC on via remote control from S3 (STR) and S4 (STD) via USB or from S3, S4 and S5 (SoftOff) via motherboard-switch (+5V needed, on USB or from PSU or motherboard) 
 * switch PC on via build in timer from S3 (STR) and S4 (STD) via USB or from S3, S4 and S5 (SoftOff) via motherboard-switch (+5V needed, on USB or from PSU or motherboard) 
 * IR sender (ca. 40 protocols) 
-* send IR Codes via configurable remote control button 
 * the configuration is stored in the emulated eeprom
 * bootloader for comfortable firmware update
+* support for macros 
+
+A macro makes it possible to send a sequence of IR commands via the send diode on reception of a trigger.
+ macroslot0 is the trigger, macroslot1 … macroslot7 are the commands to be sent.
 
 ## Software Linux
 * GUI config-tool stm32IRconfig_gui for configuration: set, get and reset wakeup codes, macros, alarm time, send IR and show the received IR code. It is possible to program wakeups and macros via remote control. Create the translation table with remote control and mouse, as well test and edit. Comprehensive debug messages.
