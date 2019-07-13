@@ -11,7 +11,7 @@ Click the line with the button's name, press the button on the remote, press "wr
 You can test the keymap immediately: After pressing the button on the remote, the red cursor should be in the coresponding line.
 At the end press "save" and save the keymap.
 
-See also https://www.mikrocontroller.net/articles/IRMP_auf_STM32_-_ein_USB_IR_Empf%C3%A4nger/Sender/Einschalter_mit_Wakeup-Timer#Creating_a_keymap
+See also https://github.com/j1rie/IRMP_STM32#creating-a-keymap
 
 Without gui:
 Edit /etc/irmplircd/irmplircd.map and insert the codes from your remote control, which you see
