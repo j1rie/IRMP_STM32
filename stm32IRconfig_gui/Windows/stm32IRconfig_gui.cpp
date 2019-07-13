@@ -132,6 +132,7 @@ private:
 	unsigned char buf[17];
 	uint8_t ReadIRcontActive;
 	uint8_t ReadIRActive;
+	uint8_t reduce_timeout;
 	int wakeupslots;
 	int macrodepth;
 	int macroslots;
@@ -857,8 +858,14 @@ MainWindow::Read()
 long
 MainWindow::onReadIR(FXObject *sender, FXSelector sel, void *ptr)
 {
-	if(Read() <= 0)
+	if(Read() <= 0) {
 		return 0;
+	} else {
+		if(reduce_timeout) {
+			reduce_timeout = 0;
+			getApp()->addTimeout(this, ID_READIR_TIMER, 1 * timeout_scalar /*1ms*/);
+		}
+	}
 
 	FXString s;
 	FXString t;
@@ -1196,7 +1203,8 @@ MainWindow::onPRwakeup(FXObject *sender, FXSelector sel, void *ptr)
 	input_text->appendText(s);
 	input_text->setBottomLine(INT_MAX);
 	ReadIRActive = 1;
-	getApp()->addTimeout(this, ID_READIR_TIMER, 5000 * timeout_scalar /*5s*/); // TODO wait for signal from onReadIR() instead of waiting fixed time
+	reduce_timeout = 1;
+	getApp()->addTimeout(this, ID_READIR_TIMER, 5000 * timeout_scalar /*5s*/);
 	onReadIRcont(NULL, 0, NULL);
 	ReadIRActive = 0;
 	t.format("%d ", wslistbox->getCurrentItem());
@@ -1220,7 +1228,8 @@ MainWindow::onPRmacro(FXObject *sender, FXSelector sel, void *ptr)
 	input_text->appendText(s);
 	input_text->setBottomLine(INT_MAX);
 	ReadIRActive = 1;
-	getApp()->addTimeout(this, ID_READIR_TIMER, 5000 * timeout_scalar /*5s*/); // TODO wait for signal from onReadIR() instead of waiting fixed time
+	reduce_timeout = 1;
+	getApp()->addTimeout(this, ID_READIR_TIMER, 5000 * timeout_scalar /*5s*/);
 	onReadIRcont(NULL, 0, NULL);
 	ReadIRActive = 0;
 	t.format("%d ", mnlistbox->getCurrentItem());
