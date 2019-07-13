@@ -960,6 +960,11 @@ MainWindow::onReadIRcont(FXObject *sender, FXSelector sel, void *ptr)
 		rmacro_button->disable();
 		ralarm_button->disable();
 		send_button->disable();
+		/* consume IR */
+		int read;
+		read = Read();
+		while(read > 0)
+			read = Read();
 		// timer on
 		getApp()->addTimeout(this, ID_TIMER, 5 * timeout_scalar /*5ms*/);
 		ReadIRcontActive = 1;
@@ -1193,11 +1198,6 @@ MainWindow::onPmacro(FXObject *sender, FXSelector sel, void *ptr)
 long
 MainWindow::onPRwakeup(FXObject *sender, FXSelector sel, void *ptr)
 {
-	/* consume IR */
-	int read;
-	read = Read();
-	while(read > 0)
-		read = Read();
 	FXString s;
 	FXString t;
 	protocol1_text->setText("");
@@ -1223,11 +1223,6 @@ MainWindow::onPRwakeup(FXObject *sender, FXSelector sel, void *ptr)
 long
 MainWindow::onPRmacro(FXObject *sender, FXSelector sel, void *ptr)
 {
-	/* consume IR */
-	int read;
-	read = Read();
-	while(read > 0)
-		read = Read();
 	FXString s;
 	FXString t;
 	protocol1_text->setText("");
