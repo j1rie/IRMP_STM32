@@ -1193,6 +1193,11 @@ MainWindow::onPmacro(FXObject *sender, FXSelector sel, void *ptr)
 long
 MainWindow::onPRwakeup(FXObject *sender, FXSelector sel, void *ptr)
 {
+	/* consume IR */
+	int read;
+	read = Read();
+	while(read > 0)
+		read = Read();
 	FXString s;
 	FXString t;
 	protocol1_text->setText("");
@@ -1218,6 +1223,11 @@ MainWindow::onPRwakeup(FXObject *sender, FXSelector sel, void *ptr)
 long
 MainWindow::onPRmacro(FXObject *sender, FXSelector sel, void *ptr)
 {
+	/* consume IR */
+	int read;
+	read = Read();
+	while(read > 0)
+		read = Read();
 	FXString s;
 	FXString t;
 	protocol1_text->setText("");
