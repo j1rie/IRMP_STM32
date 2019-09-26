@@ -43,6 +43,9 @@
 ### Please be careful and don't damage your motherboard!
 ### Default is to build a firmware which is meant to drive the power button via
 ### an opto-coupler added between STM32 board and mainboard.
+### These are the mainboards known so far to really need optocouplers:
+### Up Squared (UP2)
+### H110M-A/M.2 (ASUS)
 #SimpleCircuit=1
 
 ### Enable this, if you have a pulldown resistor for USB reset (legacy boards).
