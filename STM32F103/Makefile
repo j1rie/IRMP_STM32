@@ -48,6 +48,10 @@ ifeq ($(Platform), Red)
 DEFINES += -DRedLink
 TARGET = Red
 endif
+ifeq ($(Platform), RedCrap)
+DEFINES += -DRedLinkCrap
+TARGET = RedCrap
+endif
 ifeq ($(Platform), Stick)
 DEFINES += -DStickLink
 TARGET = Stick

@@ -426,7 +426,7 @@ void store_new_wakeup(void)
 	irmp_get_data(&wakeup_IRData); // flush input of irmp data
 	blink_LED();
 	/* 5 seconds to press button on remote */
-	for(loop=0; loop < 50; loop++;) {
+	for(loop=0; loop < 50; loop++) {
 		delay_ms(100);
 		if (irmp_get_data(&wakeup_IRData)) {
 			wakeup_IRData.flags = 0;
