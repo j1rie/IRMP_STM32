@@ -131,11 +131,7 @@
 	#define EXTLED_PIN		GPIO_Pin_13 /* CLK */
 #endif
 	#define IR_IN_PORT		B
-	#define IR_IN_PIN		6 /* RST */
-	#undef	IR_OUT_PORT
-	#undef	IR_OUT_PIN
-	#define IR_OUT_PORT		A
-	#define IR_OUT_PIN		6
+	#define IR_IN_PIN		8 /* SWIM */
 	#define WAKEUP_RESET_PORT	GPIOA
 	#define WAKEUP_RESET_PIN	GPIO_Pin_14
 	#define USB_DISC_PORT		GPIOA
