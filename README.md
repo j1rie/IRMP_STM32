@@ -89,7 +89,7 @@ Target - Program & Verify (confirm a message about Read Out Protection, if it ap
 https://github.com/j1rie/IRMP_STM32_KBD/wiki/Herstellungsprozess-Schwarze#bootloader-flashen  
 ## Flashing the firmware
 Disconnect from USB.  
-Start ./FlashDFUjrie.sh ./2019-07-06_16-32_blackDev_BL_SC_jrie.bin (or whatever).  
+Start ./FlashDFUjrie.sh ./2019-07-06_16-32_blackDev_BL_SC_jrie.bin  
 Attach to USB.  
 You need dfu-util from git.  
 https://github.com/j1rie/IRMP_STM32_KBD/wiki/Herstellungsprozess-Schwarze#firmware-flashen  
