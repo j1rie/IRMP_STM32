@@ -76,6 +76,22 @@ Compile with arm-none-eabi-gcc.
 ## Pin-Out
 See /STM32F10x/src/config.h.
 
+## Flashing the bootloader with a ST-Link
+Get STM32 ST-Link Utility
+Connect
+Programmer SWDIO -> IO
+Programmer SWCLK -> CLK
+Programmer GND -> G
+Programmer 3V3 -> V3
+File - Open File - boot.blackDev.bin (see @j1rie - STM32F103-bootloader)
+Target - Program & Verify (confirm a message about Read Out Protection)
+https://github.com/j1rie/IRMP_STM32_KBD/wiki/Herstellungsprozess-Schwarze#bootloader-flashen
+## Flashing the firmware
+Disconnect from USB.
+Start ./FlashDFUjrie.sh ./2019-07-06_16-32_blackDev_BL_SC_jrie.bin (or whatever)
+Attach to USB.
+You need dfu-util from git.
+https://github.com/j1rie/IRMP_STM32_KBD/wiki/Herstellungsprozess-Schwarze#firmware-flashen
 ## irmplircd, eventlircd, udev and systemd
 See /irmplircd/README.
 
