@@ -91,7 +91,7 @@ https://github.com/j1rie/IRMP_STM32_KBD/wiki/Herstellungsprozess-Schwarze#bootlo
 Disconnect from USB.  
 Start ./FlashDFUjrie.sh ./2019-07-06_16-32_blackDev_BL_SC_jrie.bin  
 Attach to USB.  
-You need dfu-util from git.  
+You need dfu-util from git (https://sourceforge.net/p/dfu-util/dfu-util/ci/master/tree/).  
 https://github.com/j1rie/IRMP_STM32_KBD/wiki/Herstellungsprozess-Schwarze#firmware-flashen  
 ## irmplircd, eventlircd, udev and systemd
 See /irmplircd/README.
@@ -122,3 +122,4 @@ https://www.mikrocontroller.net/articles/IRMP_auf_STM32_-_Bauanleitung
 Much fun with IRMP on STM32!
 
 Copyright (C) 2014-2019 Jörg Riechardt
+
