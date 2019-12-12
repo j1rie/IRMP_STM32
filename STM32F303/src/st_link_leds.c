@@ -8,7 +8,7 @@
  */
 
 #include "st_link_leds.h"
-#include "stm32f10x.h"
+#include "stm32f30x.h"
 #include "config.h" /* CooCox workaround */
 
 #ifdef ST_Link

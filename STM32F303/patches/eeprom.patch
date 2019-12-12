@@ -7,8 +7,8 @@ diff -Nrup a/inc/eeprom.h b/inc/eeprom.h
  /* EEPROM start address in Flash */
 -#define EEPROM_START_ADDRESS    ((uint32_t)0x08010000) /* EEPROM emulation start address:
 -                                                  after 64KByte of used Flash memory */
-+#define EEPROM_START_ADDRESS    ((uint32_t)0x0801F800) /* F103C8 has actually 128k = 0x20000 Flash */
-+                                                       /* 0x8020000 - 2 * 0x400 = 0x801F800 */
++#define EEPROM_START_ADDRESS    ((uint32_t)0x0803F800) /* F303CC has actually 256k = 0x40000 Flash */
++                                                       /* 0x8040000 - 2 * 0x400 = 0x803F800 */
  
  /* Pages 0 and 1 base and end addresses */
  #define PAGE0_BASE_ADDRESS      ((uint32_t)(EEPROM_START_ADDRESS + 0x000))

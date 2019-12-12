@@ -1,11 +1,12 @@
 -include Make.config
+TARGET ?= F303
 
-PLATFORM ?= STM32F103C8
-#STM32F103C8
+PLATFORM ?= STM32F303CC
+#STM32F303CC
 #	MD PL - medium density performance line
 #	max. 72MHz
-#	64 KB (0x10000) of Flash memory
-#	20 KB (0x05000) of SRAM
+#	256 KB (0x40000) of Flash memory
+#	40 KB (0x0A000) of SRAM
 
 CROSS_COMPILE ?= arm-none-eabi-
 AS = $(CROSS_COMPILE)as
@@ -13,21 +14,21 @@ CC = $(CROSS_COMPILE)gcc
 LD = $(CC)
 OBJCP = $(CROSS_COMPILE)objcopy
 
-ARCH = -mcpu=cortex-m3 -mthumb
+ARCH = -mcpu=cortex-m4 -mthumb
 COMMON = -g -Os -flto
 INCLUDES = -Icmsis -Icmsis_boot -Istm_lib/inc -Iusb_hid/inc -Iirmp -Isrc
 ifdef DEBUG
 INCLUDES += -Isemihosting -Istdio
 endif
-DEFINES = -D$(PLATFORM) -DSTM32F10X_MD -DUSE_STDPERIPH_DRIVER -DSOF_CALLBACK
+DEFINES = -D$(PLATFORM) -DSTM32F30X -DUSE_STDPERIPH_DRIVER -DSOF_CALLBACK
 
 OBJS = src/irmpmain.o src/st_link_leds.o src/usb_hid.o src/main.o\
        irmp/irmp.o irmp/irsnd.o\
-       cmsis_boot/startup/startup_stm32f10x_md.o cmsis_boot/system_stm32f10x.o\
-       stm_lib/src/misc.o stm_lib/src/stm32f10x_exti.o\
-       stm_lib/src/stm32f10x_flash.o stm_lib/src/stm32f10x_gpio.o\
-       stm_lib/src/stm32f10x_pwr.o stm_lib/src/stm32f10x_rcc.o\
-       stm_lib/src/stm32f10x_tim.o stm_lib/src/stm32f10x_usart.o\
+       cmsis_boot/startup/startup_stm32f30x.o cmsis_boot/system_stm32f30x.o\
+       stm_lib/src/stm32f30x_misc.o stm_lib/src/stm32f30x_exti.o\
+       stm_lib/src/stm32f30x_flash.o stm_lib/src/stm32f30x_gpio.o\
+       stm_lib/src/stm32f30x_pwr.o stm_lib/src/stm32f30x_rcc.o\
+       stm_lib/src/stm32f30x_tim.o stm_lib/src/stm32f30x_usart.o\
        stm_lib/src/eeprom.o\
        usb_hid/src/hw_config.o usb_hid/src/stm32_it.o usb_hid/src/usb_desc.o\
        usb_hid/src/usb_endp.o usb_hid/src/usb_istr.o usb_hid/src/usb_prop.o\
@@ -40,59 +41,9 @@ endif
 
 CFLAGS = -Wall -ffunction-sections -fno-builtin $(ARCH) $(COMMON) $(INCLUDES) $(DEFINES)
 
-ifeq ($(Platform), Blue)
-DEFINES += -DBlueLink
-TARGET = Blue
-endif
-ifeq ($(Platform), Red)
-DEFINES += -DRedLink
-TARGET = Red
-endif
-ifeq ($(Platform), RedCrap)
-DEFINES += -DRedLinkCrap
-TARGET = RedCrap
-endif
-ifeq ($(Platform), Stick)
-DEFINES += -DStickLink
-TARGET = Stick
-endif
-ifeq ($(Platform), Green)
-DEFINES += -DGreenLink
-TARGET = Green
-endif
-ifeq ($(Platform), Dev)
-DEFINES += -DDeveloperBoard
-TARGET = Dev
-endif
 ifeq ($(Platform), blueDev)
 DEFINES += -DBlueDeveloperBoard
-TARGET = blueDev
-endif
-ifeq ($(Platform), blackDev)
-DEFINES += -DBlackDeveloperBoard
-TARGET = blackDev
-endif
-ifeq ($(Platform), blackDevTest)
-DEFINES += -DBlackDeveloperBoardTest
-TARGET = blackDevTest
-endif
-ifeq ($(Platform), MapleMini)
-DEFINES += -DMapleMini
-TARGET = MapleMini
-BOOT = Maple_Boot
-endif
-ifeq ($(Platform), MapleMini_2k)
-DEFINES += -DMapleMini_2k
-TARGET = MapleMini_2k
-endif
-ifeq ($(Platform), MapleMini_ExtBd)
-DEFINES += -DMapleMini_ExtBd
-TARGET = MapleMini_ExtBd
-BOOT = Maple_Boot
-endif
-ifeq ($(Platform), MapleMini_2k_ExtBd)
-DEFINES += -DMapleMini_2k_ExtBd
-TARGET = MapleMini_2k_ExtBd
+TARGET := $(TARGET)_blueDev
 endif
 
 DATE := $(shell date +"%F_%H-%M")
@@ -104,11 +55,7 @@ DEFINES += -DFW_STR="\"$(TARGET)   IRMP-Version: $(IRMP_VERSION)\""
 ifdef Bootloader
 DEFINES += -DBootloader
 TARGET := $(TARGET)_BL
-ifneq ($(BOOT), Maple_Boot)
 LDFLAGS = -nostartfiles -Wl,-Map=$(TARGET).map,--gc-sections,--entry=main,-Tscripts/arm-gcc-link-bootloader.ld $(ARCH) $(COMMON)
-else
-LDFLAGS = -nostartfiles -Wl,-Map=$(TARGET).map,--gc-sections,--entry=main,-Tscripts/arm-gcc-link-maple.ld $(ARCH) $(COMMON)
-endif
 else
 LDFLAGS = -nostartfiles -Wl,-Map=$(TARGET).map,--gc-sections,--entry=main,-Tscripts/arm-gcc-link.ld $(ARCH) $(COMMON)
 endif
@@ -117,11 +64,6 @@ LDFLAGS += --specs=nano.specs
 ifdef SimpleCircuit
 DEFINES += -DSimpleCircuit
 TARGET := $(TARGET)_SC
-endif
-
-ifdef Pulldown
-DEFINES += -DPulldown
-TARGET := $(TARGET)_PD
 endif
 
 ifdef EXTLED

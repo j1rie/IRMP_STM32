@@ -29,18 +29,19 @@ path="STM32_USB-FS-Device_Lib_V$ver"
 mkdir -p cmsis_boot
 cd cmsis_boot
 unzip -j $ar1 \
-      $path/Libraries/CMSIS/Device/ST/STM32F10x/Include/stm32f10x.h \
-      $path/Libraries/CMSIS/Device/ST/STM32F10x/Include/system_stm32f10x.h \
-      $path/Projects/Custom_HID/src/system_stm32f10x.c \
-      $path/Projects/Custom_HID/inc/stm32f10x_conf.h
+      $path/Libraries/CMSIS/Device/ST/STM32F30x/Include/stm32f30x.h \
+      $path/Libraries/CMSIS/Device/ST/STM32F30x/Include/system_stm32f30x.h \
+      $path/Projects/Custom_HID/src/system_stm32f30x.c \
+      $path/Projects/Custom_HID/inc/stm32f30x_conf.h
 mkdir -p startup
 cd startup
-unzip -j $ar2 $path/Libraries/CMSIS/Device/ST/STM32F10x/Source/Templates/gcc_ride7/startup_stm32f10x_md.s
+unzip -j $ar2 $path/Libraries/CMSIS/Device/ST/STM32F30x/Source/Templates/gcc_ride7/startup_stm32f30x.s
 cd ../..
 mkdir -p cmsis
 cd cmsis
 unzip -j $ar1 \
-      $path/Libraries/CMSIS/Include/core_cm3.h \
+      $path/Libraries/CMSIS/Include/core_cm4.h \
+      $path/Libraries/CMSIS/Include/core_cm4_simd.h \
       $path/Libraries/CMSIS/Include/core_cmFunc.h \
       $path/Libraries/CMSIS/Include/core_cmInstr.h
 cd ..
@@ -49,26 +50,26 @@ cd  stm_lib
 mkdir -p inc
 cd inc
 unzip -j $ar2 \
-      $path/Libraries/STM32F10x_StdPeriph_Driver/inc/misc.h \
-      $path/Libraries/STM32F10x_StdPeriph_Driver/inc/stm32f10x_exti.h \
-      $path/Libraries/STM32F10x_StdPeriph_Driver/inc/stm32f10x_flash.h \
-      $path/Libraries/STM32F10x_StdPeriph_Driver/inc/stm32f10x_gpio.h \
-      $path/Libraries/STM32F10x_StdPeriph_Driver/inc/stm32f10x_pwr.h \
-      $path/Libraries/STM32F10x_StdPeriph_Driver/inc/stm32f10x_rcc.h \
-      $path/Libraries/STM32F10x_StdPeriph_Driver/inc/stm32f10x_tim.h \
-      $path/Libraries/STM32F10x_StdPeriph_Driver/inc/stm32f10x_usart.h
+      $path/Libraries/STM32F30x_StdPeriph_Driver/inc/stm32f30x_misc.h \
+      $path/Libraries/STM32F30x_StdPeriph_Driver/inc/stm32f30x_exti.h \
+      $path/Libraries/STM32F30x_StdPeriph_Driver/inc/stm32f30x_flash.h \
+      $path/Libraries/STM32F30x_StdPeriph_Driver/inc/stm32f30x_gpio.h \
+      $path/Libraries/STM32F30x_StdPeriph_Driver/inc/stm32f30x_pwr.h \
+      $path/Libraries/STM32F30x_StdPeriph_Driver/inc/stm32f30x_rcc.h \
+      $path/Libraries/STM32F30x_StdPeriph_Driver/inc/stm32f30x_tim.h \
+      $path/Libraries/STM32F30x_StdPeriph_Driver/inc/stm32f30x_usart.h
 cd ..
 mkdir -p src
 cd src
 unzip -j $ar2 \
-      $path/Libraries/STM32F10x_StdPeriph_Driver/src/misc.c \
-      $path/Libraries/STM32F10x_StdPeriph_Driver/src/stm32f10x_exti.c \
-      $path/Libraries/STM32F10x_StdPeriph_Driver/src/stm32f10x_flash.c \
-      $path/Libraries/STM32F10x_StdPeriph_Driver/src/stm32f10x_gpio.c \
-      $path/Libraries/STM32F10x_StdPeriph_Driver/src/stm32f10x_pwr.c \
-      $path/Libraries/STM32F10x_StdPeriph_Driver/src/stm32f10x_rcc.c \
-      $path/Libraries/STM32F10x_StdPeriph_Driver/src/stm32f10x_tim.c \
-      $path/Libraries/STM32F10x_StdPeriph_Driver/src/stm32f10x_usart.c
+      $path/Libraries/STM32F30x_StdPeriph_Driver/src/stm32f30x_misc.c \
+      $path/Libraries/STM32F30x_StdPeriph_Driver/src/stm32f30x_exti.c \
+      $path/Libraries/STM32F30x_StdPeriph_Driver/src/stm32f30x_flash.c \
+      $path/Libraries/STM32F30x_StdPeriph_Driver/src/stm32f30x_gpio.c \
+      $path/Libraries/STM32F30x_StdPeriph_Driver/src/stm32f30x_pwr.c \
+      $path/Libraries/STM32F30x_StdPeriph_Driver/src/stm32f30x_rcc.c \
+      $path/Libraries/STM32F30x_StdPeriph_Driver/src/stm32f30x_tim.c \
+      $path/Libraries/STM32F30x_StdPeriph_Driver/src/stm32f30x_usart.c
 cd ../..
 mkdir -p usb_hid
 cd usb_hid
@@ -141,7 +142,7 @@ cd ..
 # patch
 patch -d usb_hid -p1 -i ../patches/usb_hid.patch
 patch -d stm_lib -p1 -i ../patches/eeprom.patch
-patch -d cmsis_boot -p1 -i ../patches/stm32f10x_conf.patch
+patch -d cmsis_boot -p1 -i ../patches/stm32f30x_conf.patch
 patch -d cmsis_boot -p1 -i ../patches/startup.patch
 patch -d cmsis_boot -p1 -i ../patches/system.patch
 patch -d irmp -p1 -i ../patches/irmp.patch

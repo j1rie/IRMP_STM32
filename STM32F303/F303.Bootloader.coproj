@@ -1,0 +1,171 @@
+<?xml version="1.0" encoding="UTF-8" standalone="no"?>
+<Project version="2G - 1.7.8" name="F303.Bootloader">
+  <Target name="F303.Bootloader" isCurrent="1">
+    <Device manufacturerId="9" manufacturerName="ST" chipId="516" chipName="STM32F303CC" boardId="" boardName=""/>
+    <BuildOption>
+      <Compile>
+        <Option name="OptimizationLevel" value="4"/>
+        <Option name="UseFPU" value="0"/>
+        <Option name="UserEditCompiler" value=""/>
+        <Option name="SupportCPlusplus" value="0"/>
+        <Includepaths>
+          <Includepath path="."/>
+        </Includepaths>
+        <DefinedSymbols>
+          <Define name="STM32F303CC"/>
+          <Define name="STM32F30X"/>
+          <Define name="Bootloader"/>
+          <Define name="SOF_CALLBACK"/>
+          <Define name="USE_STDPERIPH_DRIVER"/>
+        </DefinedSymbols>
+      </Compile>
+      <Link useDefault="0">
+        <Option name="DiscardUnusedSection" value="0"/>
+        <Option name="UserEditLinkder" value=""/>
+        <Option name="UseMemoryLayout" value="1"/>
+        <Option name="nostartfiles" value="1"/>
+        <Option name="LTO" value="1"/>
+        <Option name="IsNewStartupCode" value="1"/>
+        <Option name="Library" value="Not use C Library"/>
+        <Option name="UserEditLinker" value="--entry=main; "/>
+        <LinkedLibraries/>
+        <MemoryAreas debugInFlashNotRAM="1">
+          <Memory name="IROM1" type="ReadOnly" size="0x0003C000" startValue="0x08003000"/>
+          <Memory name="IRAM1" type="ReadWrite" size="0x0000A000" startValue="0x20000000"/>
+          <Memory name="IROM2" type="ReadOnly" size="" startValue=""/>
+          <Memory name="IRAM2" type="ReadWrite" size="0x00002000" startValue="0x10000000"/>
+        </MemoryAreas>
+        <LocateLinkFile path="c:/coocox/coide/configuration/programdata/f303.bootloader/arm-gcc-link.ld" type="0"/>
+      </Link>
+      <Output>
+        <Option name="OutputFileType" value="0"/>
+        <Option name="Path" value="./"/>
+        <Option name="Name" value="F303.BL"/>
+        <Option name="HEX" value="0"/>
+        <Option name="BIN" value="1"/>
+      </Output>
+      <User>
+        <UserRun name="Run#1" type="Before" checked="0" value=""/>
+        <UserRun name="Run#1" type="After" checked="0" value=""/>
+      </User>
+    </BuildOption>
+    <DebugOption>
+      <Option name="org.coocox.codebugger.gdbjtag.core.adapter" value="ST-Link"/>
+      <Option name="org.coocox.codebugger.gdbjtag.core.debugMode" value="SWD"/>
+      <Option name="org.coocox.codebugger.gdbjtag.core.clockDiv" value="1M"/>
+      <Option name="org.coocox.codebugger.gdbjtag.corerunToMain" value="1"/>
+      <Option name="org.coocox.codebugger.gdbjtag.core.jlinkgdbserver" value=""/>
+      <Option name="org.coocox.codebugger.gdbjtag.core.userDefineGDBScript" value=""/>
+      <Option name="org.coocox.codebugger.gdbjtag.core.targetEndianess" value="0"/>
+      <Option name="org.coocox.codebugger.gdbjtag.core.jlinkResetMode" value="Type 0: Normal"/>
+      <Option name="org.coocox.codebugger.gdbjtag.core.resetMode" value="SYSRESETREQ"/>
+      <Option name="org.coocox.codebugger.gdbjtag.core.ifSemihost" value="0"/>
+      <Option name="org.coocox.codebugger.gdbjtag.core.ifCacheRom" value="1"/>
+      <Option name="org.coocox.codebugger.gdbjtag.core.ipAddress" value="127.0.0.1"/>
+      <Option name="org.coocox.codebugger.gdbjtag.core.portNumber" value="2009"/>
+      <Option name="org.coocox.codebugger.gdbjtag.core.autoDownload" value="1"/>
+      <Option name="org.coocox.codebugger.gdbjtag.core.verify" value="1"/>
+      <Option name="org.coocox.codebugger.gdbjtag.core.downloadFuction" value="Erase Effected"/>
+      <Option name="org.coocox.codebugger.gdbjtag.core.defaultAlgorithm" value="STM32F3xx_256.elf"/>
+    </DebugOption>
+    <ExcludeFile/>
+  </Target>
+  <Components path="./">
+    <Component id="54" name="M4 CMSIS Core" path="" type="2"/>
+    <Component id="1205" name="cmsis_boot" path="" type="2"/>
+    <Component id="1206" name="RCC" path="" type="2"/>
+    <Component id="1207" name="GPIO" path="" type="2"/>
+    <Component id="1214" name="EXTI" path="" type="2"/>
+    <Component id="1215" name="FLASH" path="" type="2"/>
+    <Component id="1220" name="PWR" path="" type="2"/>
+    <Component id="1224" name="TIM" path="" type="2"/>
+    <Component id="1225" name="USART" path="" type="2"/>
+    <Component id="1226" name="MISC" path="" type="2"/>
+  </Components>
+  <Files>
+    <File name="cmsis_lib/include/stm32f30x_gpio.h" path="cmsis_lib/include/stm32f30x_gpio.h" type="1"/>
+    <File name="usb_hid/src" path="" type="2"/>
+    <File name="cmsis_lib/include/stm32f30x_pwr.h" path="cmsis_lib/include/stm32f30x_pwr.h" type="1"/>
+    <File name="cmsis_lib/source/stm32f30x_pwr.c" path="cmsis_lib/source/stm32f30x_pwr.c" type="1"/>
+    <File name="usb_hid/src/usb_desc.c" path="usb_hid/src/usb_desc.c" type="1"/>
+    <File name="cmsis_lib/include/stm32f30x_flash.h" path="cmsis_lib/include/stm32f30x_flash.h" type="1"/>
+    <File name="usb_hid/src/usb_core.c" path="usb_hid/src/usb_core.c" type="1"/>
+    <File name="usb_hid/inc/usb_conf.h" path="usb_hid/inc/usb_conf.h" type="1"/>
+    <File name="usb_hid/inc/platform_config.h" path="usb_hid/inc/platform_config.h" type="1"/>
+    <File name="cmsis_boot" path="" type="2"/>
+    <File name="cmsis_lib/include/stm32f30x_exti.h" path="cmsis_lib/include/stm32f30x_exti.h" type="1"/>
+    <File name="irmp/irsnd.c" path="irmp/irsnd.c" type="1"/>
+    <File name="cmsis_lib/source/stm32f30x_flash.c" path="cmsis_lib/source/stm32f30x_flash.c" type="1"/>
+    <File name="usb_hid/inc/usb_regs.h" path="usb_hid/inc/usb_regs.h" type="1"/>
+    <File name="src" path="" type="2"/>
+    <File name="src/usb_hid.h" path="src/usb_hid.h" type="1"/>
+    <File name="cmsis_lib/source/stm32f30x_exti.c" path="cmsis_lib/source/stm32f30x_exti.c" type="1"/>
+    <File name="src/irmpmain.c" path="src/irmpmain.c" type="1"/>
+    <File name="cmsis_boot/startup/startup_stm32f30x.S" path="cmsis_boot/startup/startup_stm32f30x.S" type="1"/>
+    <File name="usb_hid/inc/usb_core.h" path="usb_hid/inc/usb_core.h" type="1"/>
+    <File name="cmsis_boot/startup" path="" type="2"/>
+    <File name="cmsis/core_cm4_simd.h" path="cmsis/core_cm4_simd.h" type="1"/>
+    <File name="cmsis/core_cmFunc.h" path="cmsis/core_cmFunc.h" type="1"/>
+    <File name="usb_hid/inc" path="" type="2"/>
+    <File name="cmsis_lib/source/stm32f30x_misc.c" path="cmsis_lib/source/stm32f30x_misc.c" type="1"/>
+    <File name="usb_hid/src/usb_istr.c" path="usb_hid/src/usb_istr.c" type="1"/>
+    <File name="cmsis/core_cm4.h" path="cmsis/core_cm4.h" type="1"/>
+    <File name="usb_hid/inc/usb_int.h" path="usb_hid/inc/usb_int.h" type="1"/>
+    <File name="src/st_link_leds.h" path="src/st_link_leds.h" type="1"/>
+    <File name="usb_hid/src/hw_config.c" path="usb_hid/src/hw_config.c" type="1"/>
+    <File name="cmsis_lib/include/stm32f30x_rcc.h" path="cmsis_lib/include/stm32f30x_rcc.h" type="1"/>
+    <File name="cmsis_lib/include/stm32f30x_tim.h" path="cmsis_lib/include/stm32f30x_tim.h" type="1"/>
+    <File name="src/st_link_leds.c" path="src/st_link_leds.c" type="1"/>
+    <File name="usb_hid/inc/usb_lib.h" path="usb_hid/inc/usb_lib.h" type="1"/>
+    <File name="usb_hid/inc/usb_istr.h" path="usb_hid/inc/usb_istr.h" type="1"/>
+    <File name="usb_hid/src/usb_mem.c" path="usb_hid/src/usb_mem.c" type="1"/>
+    <File name="src/usb_hid.c" path="src/usb_hid.c" type="1"/>
+    <File name="irmp/irsnd.h" path="irmp/irsnd.h" type="1"/>
+    <File name="usb_hid/inc/stm32_it.h" path="usb_hid/inc/stm32_it.h" type="1"/>
+    <File name="cmsis_lib/source" path="" type="2"/>
+    <File name="usb_hid/src/usb_prop.c" path="usb_hid/src/usb_prop.c" type="1"/>
+    <File name="usb_hid/inc/usb_type.h" path="usb_hid/inc/usb_type.h" type="1"/>
+    <File name="usb_hid/src/usb_regs.c" path="usb_hid/src/usb_regs.c" type="1"/>
+    <File name="usb_hid/src/usb_sil.c" path="usb_hid/src/usb_sil.c" type="1"/>
+    <File name="usb_hid/inc/usb_pwr.h" path="usb_hid/inc/usb_pwr.h" type="1"/>
+    <File name="irmp/irmp.h" path="irmp/irmp.h" type="1"/>
+    <File name="cmsis_boot/system_stm32f30x.h" path="cmsis_boot/system_stm32f30x.h" type="1"/>
+    <File name="usb_hid/inc/usb_desc.h" path="usb_hid/inc/usb_desc.h" type="1"/>
+    <File name="src/main.c" path="src/main.c" type="1"/>
+    <File name="usb_hid/inc/usb_def.h" path="usb_hid/inc/usb_def.h" type="1"/>
+    <File name="cmsis_lib/include/stm32f30x_misc.h" path="cmsis_lib/include/stm32f30x_misc.h" type="1"/>
+    <File name="cmsis_lib/include/stm32f30x_usart.h" path="cmsis_lib/include/stm32f30x_usart.h" type="1"/>
+    <File name="usb_hid/inc/usb_prop.h" path="usb_hid/inc/usb_prop.h" type="1"/>
+    <File name="cmsis_boot/stm32f30x_conf.h" path="cmsis_boot/stm32f30x_conf.h" type="1"/>
+    <File name="usb_hid/src/stm32_it.c" path="usb_hid/src/stm32_it.c" type="1"/>
+    <File name="usb_hid/src/usb_pwr.c" path="usb_hid/src/usb_pwr.c" type="1"/>
+    <File name="cmsis/core_cmInstr.h" path="cmsis/core_cmInstr.h" type="1"/>
+    <File name="usb_hid/inc/usb_mem.h" path="usb_hid/inc/usb_mem.h" type="1"/>
+    <File name="cmsis_boot/stm32f30x.h" path="cmsis_boot/stm32f30x.h" type="1"/>
+    <File name="usb_hid" path="" type="2"/>
+    <File name="src/irmpmain.h" path="src/irmpmain.h" type="1"/>
+    <File name="usb_hid/src/usb_init.c" path="usb_hid/src/usb_init.c" type="1"/>
+    <File name="usb_hid/inc/hw_config.h" path="usb_hid/inc/hw_config.h" type="1"/>
+    <File name="cmsis_lib/source/stm32f30x_tim.c" path="cmsis_lib/source/stm32f30x_tim.c" type="1"/>
+    <File name="usb_hid/inc/usb_init.h" path="usb_hid/inc/usb_init.h" type="1"/>
+    <File name="irmp/irmp.c" path="irmp/irmp.c" type="1"/>
+    <File name="irmp" path="" type="2"/>
+    <File name="cmsis_lib/source/stm32f30x_gpio.c" path="cmsis_lib/source/stm32f30x_gpio.c" type="1"/>
+    <File name="cmsis" path="" type="2"/>
+    <File name="cmsis_lib" path="" type="2"/>
+    <File name="irmp/irmpprotocols.h" path="irmp/irmpprotocols.h" type="1"/>
+    <File name="irmp/irmpsystem.h" path="irmp/irmpsystem.h" type="1"/>
+    <File name="irmp/irsndconfig.h" path="irmp/irsndconfig.h" type="1"/>
+    <File name="usb_hid/inc/usb_sil.h" path="usb_hid/inc/usb_sil.h" type="1"/>
+    <File name="usb_hid/src/usb_int.c" path="usb_hid/src/usb_int.c" type="1"/>
+    <File name="irmp/irmpconfig.h" path="irmp/irmpconfig.h" type="1"/>
+    <File name="cmsis_boot/system_stm32f30x_temp.c" path="cmsis_boot/system_stm32f30x_temp.c" type="1"/>
+    <File name="cmsis_lib/include" path="" type="2"/>
+    <File name="src/config.h" path="src/config.h" type="1"/>
+    <File name="cmsis_lib/source/eeprom.c" path="cmsis_lib/source/eeprom.c" type="1"/>
+    <File name="cmsis_lib/include/eeprom.h" path="cmsis_lib/include/eeprom.h" type="1"/>
+    <File name="usb_hid/src/usb_endp.c" path="usb_hid/src/usb_endp.c" type="1"/>
+    <File name="cmsis_lib/source/stm32f30x_usart.c" path="cmsis_lib/source/stm32f30x_usart.c" type="1"/>
+    <File name="cmsis_lib/source/stm32f30x_rcc.c" path="cmsis_lib/source/stm32f30x_rcc.c" type="1"/>
+  </Files>
+</Project>

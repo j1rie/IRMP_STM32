@@ -8,9 +8,9 @@
  *  the Free Software Foundation; either version 2 of the License, or
  *  (at your option) any later version.
  */
-diff -Nrup usb_hid.orig/inc/platform_config.h usb_hid.new/inc/platform_config.h
---- usb_hid.orig/inc/platform_config.h	2013-01-21 19:27:28.000000000 +0100
-+++ usb_hid.new/inc/platform_config.h	2018-02-20 22:27:24.529874770 +0100
+diff -Nrup A/inc/platform_config.h B/inc/platform_config.h
+--- A/inc/platform_config.h	2013-01-21 19:27:00.000000000 +0100
++++ B/inc/platform_config.h	2019-12-03 23:23:11.952809951 +0100
 @@ -48,7 +48,7 @@
   #elif defined (USE_STM3210E_EVAL)
    #include "stm3210e_eval.h"
@@ -20,7 +20,16 @@ diff -Nrup usb_hid.orig/inc/platform_config.h usb_hid.new/inc/platform_config.h
   #endif /* USE_STM3210B_EVAL */
  #elif defined (USE_STM32373C_EVAL)
   #include "stm32f37x.h"
-@@ -68,7 +68,7 @@
+@@ -56,6 +56,8 @@
+ #elif defined (USE_STM32303C_EVAL)
+  #include "stm32f30x.h"
+  #include "stm32303c_eval.h"
++#elif defined (STM32F30X)
++ #include "stm32f30x.h"
+ #endif
+ 
+ /* Exported types ------------------------------------------------------------*/
+@@ -68,7 +70,7 @@
   //#define USE_STM32L152_EVAL
  //#define USE_STM32L152D_EVAL
  //#define USE_STM32373C_EVAL
@@ -29,9 +38,9 @@ diff -Nrup usb_hid.orig/inc/platform_config.h usb_hid.new/inc/platform_config.h
  #endif
  
  /*Unique Devices IDs register set*/
-diff -Nrup usb_hid.orig/inc/usb_conf.h usb_hid.new/inc/usb_conf.h
---- usb_hid.orig/inc/usb_conf.h	2013-01-21 19:27:28.000000000 +0100
-+++ usb_hid.new/inc/usb_conf.h	2018-02-20 22:20:43.000000000 +0100
+diff -Nrup A/inc/usb_conf.h B/inc/usb_conf.h
+--- A/inc/usb_conf.h	2013-01-21 19:27:00.000000000 +0100
++++ B/inc/usb_conf.h	2019-12-03 21:17:50.193487655 +0100
 @@ -57,7 +57,7 @@
  /* EP1  */
  /* tx buffer base address */
@@ -50,9 +59,9 @@ diff -Nrup usb_hid.orig/inc/usb_conf.h usb_hid.new/inc/usb_conf.h
                   | CNTR_ESOFM | CNTR_RESETM )
  
  /* CTR service routines */
-diff -Nrup usb_hid.orig/inc/usb_desc.h usb_hid.new/inc/usb_desc.h
---- usb_hid.orig/inc/usb_desc.h	2013-01-21 19:27:28.000000000 +0100
-+++ usb_hid.new/inc/usb_desc.h	2018-02-20 22:20:43.000000000 +0100
+diff -Nrup A/inc/usb_desc.h B/inc/usb_desc.h
+--- A/inc/usb_desc.h	2013-01-21 19:27:00.000000000 +0100
++++ B/inc/usb_desc.h	2019-12-03 21:17:50.194487601 +0100
 @@ -31,6 +31,7 @@
  #define __USB_DESC_H
  
@@ -74,9 +83,9 @@ diff -Nrup usb_hid.orig/inc/usb_desc.h usb_hid.new/inc/usb_desc.h
  #define CUSTOMHID_SIZ_STRING_SERIAL             26
  
  #define STANDARD_ENDPOINT_DESC_SIZE             0x09
-diff -Nrup usb_hid.orig/inc/usb_pwr.h usb_hid.new/inc/usb_pwr.h
---- usb_hid.orig/inc/usb_pwr.h	2013-01-21 19:27:28.000000000 +0100
-+++ usb_hid.new/inc/usb_pwr.h	2018-02-20 22:20:43.000000000 +0100
+diff -Nrup A/inc/usb_pwr.h B/inc/usb_pwr.h
+--- A/inc/usb_pwr.h	2013-01-21 19:27:00.000000000 +0100
++++ B/inc/usb_pwr.h	2019-12-03 21:17:50.194487601 +0100
 @@ -30,6 +30,7 @@
  #define __USB_PWR_H
  
@@ -85,9 +94,9 @@ diff -Nrup usb_hid.orig/inc/usb_pwr.h usb_hid.new/inc/usb_pwr.h
  /* Exported types ------------------------------------------------------------*/
  typedef enum _RESUME_STATE
  {
-diff -Nrup usb_hid.orig/inc/usb_regs.h usb_hid.new/inc/usb_regs.h
---- usb_hid.orig/inc/usb_regs.h	2013-01-21 19:27:32.000000000 +0100
-+++ usb_hid.new/inc/usb_regs.h	2018-02-20 22:20:43.000000000 +0100
+diff -Nrup A/inc/usb_regs.h B/inc/usb_regs.h
+--- A/inc/usb_regs.h	2013-01-21 19:27:00.000000000 +0100
++++ B/inc/usb_regs.h	2019-12-03 21:17:50.194487601 +0100
 @@ -651,8 +651,8 @@ void ClearDTOG_RX(uint8_t /*bEpNum*/);
  void ClearDTOG_TX(uint8_t /*bEpNum*/);
  void SetEPAddress(uint8_t /*bEpNum*/, uint8_t /*bAddr*/);
@@ -99,9 +108,9 @@ diff -Nrup usb_hid.orig/inc/usb_regs.h usb_hid.new/inc/usb_regs.h
  uint16_t GetEPTxAddr(uint8_t /*bEpNum*/);
  uint16_t GetEPRxAddr(uint8_t /*bEpNum*/);
  void SetEPCountRxReg(uint32_t * /*pdwReg*/, uint16_t /*wCount*/);
-diff -Nrup usb_hid.orig/src/hw_config.c usb_hid.new/src/hw_config.c
---- usb_hid.orig/src/hw_config.c	2013-01-21 19:27:28.000000000 +0100
-+++ usb_hid.new/src/hw_config.c	2018-02-20 22:20:43.000000000 +0100
+diff -Nrup A/src/hw_config.c B/src/hw_config.c
+--- A/src/hw_config.c	2013-01-21 19:27:00.000000000 +0100
++++ B/src/hw_config.c	2019-12-03 23:33:45.914352805 +0100
 @@ -78,10 +78,10 @@ void Set_System(void)
    
  #if !defined(STM32L1XX_MD) && !defined(STM32L1XX_HD) && !defined(STM32L1XX_MD_PLUS) && !defined(STM32F37X) && !defined(STM32F30X)
@@ -115,7 +124,31 @@ diff -Nrup usb_hid.orig/src/hw_config.c usb_hid.new/src/hw_config.c
  #endif /* STM32L1XX_XD */
    
    /* Configure the used GPIOs*/
-@@ -135,21 +135,23 @@ void Set_System(void)
+@@ -103,7 +103,7 @@ void Set_System(void)
+ #if defined(STM32F37X) || defined(STM32F30X)
+   
+   /* Enable the USB disconnect GPIO clock */
+-  RCC_AHBPeriphClockCmd(RCC_AHBPeriph_GPIO_DISCONNECT, ENABLE);
++  //RCC_AHBPeriphClockCmd(RCC_AHBPeriph_GPIO_DISCONNECT, ENABLE);
+   
+   /*Set PA11,12 as IN - USB_DM,DP*/
+   RCC_AHBPeriphClockCmd(RCC_AHBPeriph_GPIOA, ENABLE);
+@@ -119,12 +119,14 @@ void Set_System(void)
+   GPIO_PinAFConfig(GPIOA, GPIO_PinSource12, GPIO_AF_14);
+   
+   /* USB_DISCONNECT used as USB pull-up */
++#if 0
+   GPIO_InitStructure.GPIO_Pin = USB_DISCONNECT_PIN;
+   GPIO_InitStructure.GPIO_Speed = GPIO_Speed_2MHz;
+   GPIO_InitStructure.GPIO_Mode = GPIO_Mode_OUT;
+   GPIO_InitStructure.GPIO_OType = GPIO_OType_OD;
+   GPIO_InitStructure.GPIO_PuPd = GPIO_PuPd_NOPULL;
+   GPIO_Init(USB_DISCONNECT, &GPIO_InitStructure);
++#endif
+   
+ #endif
+ #if defined(STM32L1XX_MD) 
+@@ -135,21 +137,23 @@ void Set_System(void)
    STM_EVAL_PBInit(Button_RIGHT, Mode_EXTI);
  #else  
    /* Configure the KEY button in EXTI mode */
@@ -141,7 +174,7 @@ diff -Nrup usb_hid.orig/src/hw_config.c usb_hid.new/src/hw_config.c
  #if defined (STM32F30X)
    ADC30x_Configuration();
  #else  
-@@ -282,6 +284,7 @@ void USB_Interrupts_Config(void)
+@@ -282,6 +286,7 @@ void USB_Interrupts_Config(void)
    NVIC_Init(&NVIC_InitStructure);
  #endif /* STM32L1XX_XD */
    
@@ -149,7 +182,7 @@ diff -Nrup usb_hid.orig/src/hw_config.c usb_hid.new/src/hw_config.c
    /* Enable the EXTI9_5 Interrupt */
    NVIC_InitStructure.NVIC_IRQChannel = EXTI9_5_IRQn;
    NVIC_InitStructure.NVIC_IRQChannelPreemptionPriority = 0;
-@@ -297,6 +300,7 @@ void USB_Interrupts_Config(void)
+@@ -297,6 +302,7 @@ void USB_Interrupts_Config(void)
    NVIC_InitStructure.NVIC_IRQChannelPreemptionPriority = 2;
    NVIC_Init(&NVIC_InitStructure);
    
@@ -157,7 +190,7 @@ diff -Nrup usb_hid.orig/src/hw_config.c usb_hid.new/src/hw_config.c
  }
  
  /*******************************************************************************
-@@ -308,6 +312,7 @@ void USB_Interrupts_Config(void)
+@@ -308,6 +314,7 @@ void USB_Interrupts_Config(void)
  *******************************************************************************/
  void USB_Cable_Config (FunctionalState NewState)
  { 
@@ -165,7 +198,7 @@ diff -Nrup usb_hid.orig/src/hw_config.c usb_hid.new/src/hw_config.c
  #if defined(STM32L1XX_MD) || defined (STM32L1XX_HD)|| (STM32L1XX_MD_PLUS)
    if (NewState != DISABLE)
    {
-@@ -328,6 +333,7 @@ void USB_Cable_Config (FunctionalState N
+@@ -328,6 +335,7 @@ void USB_Cable_Config (FunctionalState N
      GPIO_SetBits(USB_DISCONNECT, USB_DISCONNECT_PIN);
    }
  #endif /* STM32L1XX_MD */
@@ -173,7 +206,7 @@ diff -Nrup usb_hid.orig/src/hw_config.c usb_hid.new/src/hw_config.c
  }
  
  /*******************************************************************************
-@@ -339,6 +345,7 @@ void USB_Cable_Config (FunctionalState N
+@@ -339,10 +347,11 @@ void USB_Cable_Config (FunctionalState N
  *******************************************************************************/
  void GPIO_Configuration(void)
  {
@@ -181,7 +214,12 @@ diff -Nrup usb_hid.orig/src/hw_config.c usb_hid.new/src/hw_config.c
    GPIO_InitTypeDef GPIO_InitStructure;
    
  #if defined(STM32L1XX_MD) || defined(STM32L1XX_HD)|| defined(STM32L1XX_MD_PLUS) || defined (STM32F37X) || defined (STM32F30X)
-@@ -359,6 +366,7 @@ void GPIO_Configuration(void)
+-  RCC_AHBPeriphClockCmd(RCC_AHBPeriph_GPIO_DISCONNECT | 
++  //RCC_AHBPeriphClockCmd(RCC_AHBPeriph_GPIO_DISCONNECT | 
+                         RCC_AHBPeriph_GPIO_IOAIN , ENABLE); 
+ #else  
+   RCC_APB2PeriphClockCmd(RCC_APB2Periph_GPIO_DISCONNECT | 
+@@ -359,6 +368,7 @@ void GPIO_Configuration(void)
    GPIO_InitStructure.GPIO_Pin = GPIO_IOAIN_PIN;
    GPIO_InitStructure.GPIO_Mode = GPIO_Mode_AIN;
    GPIO_Init(GPIO_IOAIN, &GPIO_InitStructure);
@@ -189,7 +227,7 @@ diff -Nrup usb_hid.orig/src/hw_config.c usb_hid.new/src/hw_config.c
  }
  
  /*******************************************************************************
-@@ -372,6 +380,7 @@ void EXTI_Configuration(void)
+@@ -372,6 +382,7 @@ void EXTI_Configuration(void)
  {
    EXTI_InitTypeDef EXTI_InitStructure;
    
@@ -197,7 +235,7 @@ diff -Nrup usb_hid.orig/src/hw_config.c usb_hid.new/src/hw_config.c
  #if defined (USE_STM32L152_EVAL)
    /* Configure RIGHT EXTI line to generate an interrupt on rising & falling edges */  
    EXTI_InitStructure.EXTI_Line = RIGHT_BUTTON_EXTI_LINE;
-@@ -414,6 +423,7 @@ void EXTI_Configuration(void)
+@@ -414,6 +425,7 @@ void EXTI_Configuration(void)
  #endif 
  #endif /* USE_STM32L152_EVAL */  
    
@@ -205,7 +243,7 @@ diff -Nrup usb_hid.orig/src/hw_config.c usb_hid.new/src/hw_config.c
    /* Configure the EXTI line 18 connected internally to the USB IP */
    EXTI_ClearITPendingBit(EXTI_Line18);
    EXTI_InitStructure.EXTI_Line = EXTI_Line18; 
-@@ -431,6 +441,7 @@ void EXTI_Configuration(void)
+@@ -431,6 +443,7 @@ void EXTI_Configuration(void)
  *******************************************************************************/
  void ADC_Configuration(void)
  {
@@ -213,7 +251,7 @@ diff -Nrup usb_hid.orig/src/hw_config.c usb_hid.new/src/hw_config.c
    ADC_InitTypeDef       ADC_InitStructure;
    DMA_InitTypeDef DMA_InitStructure;
    /* Enable DMA1 clock */
-@@ -524,6 +535,7 @@ void ADC_Configuration(void)
+@@ -524,6 +537,7 @@ void ADC_Configuration(void)
    while(ADC_GetCalibrationStatus(ADC1));  
    
  #endif /* STM32L1XX_XD */ 
@@ -221,57 +259,25 @@ diff -Nrup usb_hid.orig/src/hw_config.c usb_hid.new/src/hw_config.c
  }
  #endif /* STM32F30x */
  /*******************************************************************************
-diff -Nrup usb_hid.orig/src/stm32_it.c usb_hid.new/src/stm32_it.c
---- usb_hid.orig/src/stm32_it.c	2013-01-21 19:27:28.000000000 +0100
-+++ usb_hid.new/src/stm32_it.c	2018-02-20 22:20:43.000000000 +0100
-@@ -71,6 +71,7 @@ void NMI_Handler(void)
- * Output         : None
- * Return         : None
- *******************************************************************************/
-+#ifndef DEBUG
- void HardFault_Handler(void)
+@@ -589,6 +603,7 @@ static void IntToUnicode (uint32_t value
+ 
+ void ADC30x_Configuration(void)
  {
-   /* Go to infinite loop when Hard Fault exception occurs */
-@@ -78,6 +79,7 @@ void HardFault_Handler(void)
-   {
-   }
- }
-+#endif
- 
- /*******************************************************************************
- * Function Name  : MemManage_Handler
-@@ -164,10 +166,12 @@ void PendSV_Handler(void)
- * Output         : None
- * Return         : None
- *******************************************************************************/
 +#if 0
- void SysTick_Handler(void)
- {
-     TimingDelay--;
- }
+   ADC_InitTypeDef    ADC_InitStructure;
+   ADC_CommonInitTypeDef ADC_CommonInitStructure;
+   DMA_InitTypeDef  DMA_InitStructure;
+@@ -671,6 +686,7 @@ void ADC30x_Configuration(void)
+   /* Get ADC1 converted data */
+   
+   ADC_ConvertedValueX =ADC_GetConversionValue(ADC1);
 +#endif
- 
- /******************************************************************************/
- /*            STM32 Peripherals Interrupt Handlers                        */
-@@ -262,6 +266,7 @@ void EXTI15_10_IRQHandler(void)
- * Output         : None
- * Return         : None
- *******************************************************************************/
-+#if 0
- void DMA1_Channel1_IRQHandler(void)
- {  
-   Send_Buffer[0] = 0x07;
-@@ -363,6 +368,7 @@ void EXTI15_10_IRQHandler(void)
  }
  
- #endif /*STM32L1XX_HD*/
-+#endif
- 
- /*******************************************************************************
- * Function Name  : USB_FS_WKUP_IRQHandler
-diff -Nrup usb_hid.orig/src/usb_desc.c usb_hid.new/src/usb_desc.c
---- usb_hid.orig/src/usb_desc.c	2013-01-21 19:27:28.000000000 +0100
-+++ usb_hid.new/src/usb_desc.c	2018-02-20 22:20:43.000000000 +0100
+ #endif
+diff -Nrup A/src/usb_desc.c B/src/usb_desc.c
+--- A/src/usb_desc.c	2013-01-21 19:27:00.000000000 +0100
++++ B/src/usb_desc.c	2019-12-03 21:17:50.195487546 +0100
 @@ -49,10 +49,10 @@ const uint8_t CustomHID_DeviceDescriptor
      0x00,                       /*bDeviceSubClass*/
      0x00,                       /*bDeviceProtocol*/
@@ -380,9 +386,9 @@ diff -Nrup usb_hid.orig/src/usb_desc.c usb_hid.new/src/usb_desc.c
      'S', 0, 'T', 0, 'M', 0,'3', 0,'2', 0
    };
  
-diff -Nrup usb_hid.orig/src/usb_endp.c usb_hid.new/src/usb_endp.c
---- usb_hid.orig/src/usb_endp.c	2013-01-21 19:27:28.000000000 +0100
-+++ usb_hid.new/src/usb_endp.c	2018-02-20 22:20:43.000000000 +0100
+diff -Nrup A/src/usb_endp.c B/src/usb_endp.c
+--- A/src/usb_endp.c	2013-01-21 19:27:00.000000000 +0100
++++ B/src/usb_endp.c	2019-12-03 21:17:50.195487546 +0100
 @@ -29,6 +29,7 @@
  /* Includes ------------------------------------------------------------------*/
  
@@ -432,9 +438,9 @@ diff -Nrup usb_hid.orig/src/usb_endp.c usb_hid.new/src/usb_endp.c
    SetEPRxStatus(ENDP1, EP_RX_VALID);
   
  }
-diff -Nrup usb_hid.orig/src/usb_prop.c usb_hid.new/src/usb_prop.c
---- usb_hid.orig/src/usb_prop.c	2013-01-21 19:27:28.000000000 +0100
-+++ usb_hid.new/src/usb_prop.c	2018-02-20 22:20:43.000000000 +0100
+diff -Nrup A/src/usb_prop.c B/src/usb_prop.c
+--- A/src/usb_prop.c	2013-01-21 19:27:00.000000000 +0100
++++ B/src/usb_prop.c	2019-12-03 23:34:50.758828360 +0100
 @@ -43,7 +43,7 @@
  uint32_t ProtocolValue;
  __IO uint8_t EXTI_Enable;
@@ -455,9 +461,12 @@ diff -Nrup usb_hid.orig/src/usb_prop.c usb_hid.new/src/usb_prop.c
    SetEPRxStatus(ENDP1, EP_RX_VALID);
    SetEPTxStatus(ENDP1, EP_TX_NAK);
  
-@@ -207,7 +207,7 @@ void CustomHID_SetConfiguration(void)
+@@ -205,9 +205,9 @@ void CustomHID_SetConfiguration(void)
+ #if defined(STM32L1XX_MD) || defined(STM32L1XX_HD)|| defined(STM32L1XX_MD_PLUS)|| defined(STM32F37X)
+     ADC_SoftwareStartConv(ADC1);
  #elif defined (STM32F30X)
-     ADC_StartConversion(ADC1);
+-    ADC_StartConversion(ADC1);
++    //ADC_StartConversion(ADC1);
  #else
 -    ADC_SoftwareStartConvCmd(ADC1, ENABLE);
 +    //ADC_SoftwareStartConvCmd(ADC1, ENABLE);
@@ -498,9 +507,9 @@ diff -Nrup usb_hid.orig/src/usb_prop.c usb_hid.new/src/usb_prop.c
    {
      return NULL;
    }
-diff -Nrup usb_hid.orig/src/usb_regs.c usb_hid.new/src/usb_regs.c
---- usb_hid.orig/src/usb_regs.c	2013-01-21 19:27:32.000000000 +0100
-+++ usb_hid.new/src/usb_regs.c	2018-02-20 22:20:43.000000000 +0100
+diff -Nrup A/src/usb_regs.c B/src/usb_regs.c
+--- A/src/usb_regs.c	2013-01-21 19:27:00.000000000 +0100
++++ B/src/usb_regs.c	2019-12-03 21:17:50.195487546 +0100
 @@ -476,7 +476,7 @@ uint8_t GetEPAddress(uint8_t bEpNum)
  * Output         : None.
  * Return         : None.

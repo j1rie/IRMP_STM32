@@ -10,9 +10,9 @@
 #ifndef __CONFIG_H
 #define __CONFIG_H
 
-/* MACRO_SLOTS x (MACRO_DEPTH + 1) + WAKE_SLOTS < 85
- * Eeprom page size = 1kB - 4, 255 pairs of 16bit variable + address,
- * IRdata needs 3 variables, 255 / 3 = 85
+/* MACRO_SLOTS x (MACRO_DEPTH + 1) + WAKE_SLOTS < 170
+ * Eeprom page size = 2kB - 4, 511 pairs of 16bit variable + address,
+ * IRdata needs 3 variables, 511 / 3 = 170
  */
 #define MACRO_SLOTS	8
 #define MACRO_DEPTH	8
@@ -183,18 +183,18 @@
 	#define WAKEUP_RESET_PORT	GPIOB
 	#define WAKEUP_RESET_PIN	GPIO_Pin_12
 #elif defined(BlueDeveloperBoard) /* blue developer board */
-	#define WAKEUP_PORT		GPIOB
-	#define WAKEUP_PIN		GPIO_Pin_14
+	#define WAKEUP_PORT		GPIOA
+	#define WAKEUP_PIN		GPIO_Pin_14 /* CLK */
 	#define RESET_PORT		GPIOB
-	#define RESET_PIN		GPIO_Pin_15
+	#define RESET_PIN		GPIO_Pin_14
 	#define EXTLED_PORT		GPIOB
 	#define EXTLED_PIN		GPIO_Pin_10
-	#define IR_IN_PORT		B
-	#define IR_IN_PIN		9
+	#define IR_IN_PORT		A
+	#define IR_IN_PIN		13 /* IO */
 	#define LED_PORT		GPIOC
 	#define LED_PIN			GPIO_Pin_13
 	#define WAKEUP_RESET_PORT	GPIOB
-	#define WAKEUP_RESET_PIN	GPIO_Pin_12
+	#define WAKEUP_RESET_PIN	GPIO_Pin_13
 #elif defined(BlackDeveloperBoard) /* black developer board */
 	#define WAKEUP_PORT		GPIOA
 	#define WAKEUP_PIN		GPIO_Pin_14 /* CLK */

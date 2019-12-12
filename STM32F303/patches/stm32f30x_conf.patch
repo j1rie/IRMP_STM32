@@ -1,0 +1,28 @@
+diff -Nrup A/stm32f30x_conf.h B/stm32f30x_conf.h
+--- A/stm32f30x_conf.h	2019-12-03 20:05:59.977892885 +0100
++++ B/stm32f30x_conf.h	2019-12-03 20:15:52.883633619 +0100
+@@ -31,6 +31,7 @@
+ 
+ /* Includes ------------------------------------------------------------------*/
+ /* Comment the line below to disable peripheral header file inclusion */
++#if 0
+ #include "stm32f30x_adc.h"
+ #include "stm32f30x_can.h"
+ #include "stm32f30x_crc.h"
+@@ -53,6 +54,16 @@
+ #include "stm32f30x_usart.h"
+ #include "stm32f30x_wwdg.h"
+ #include "stm32f30x_misc.h"  /* High level functions for NVIC and SysTick (add-on to CMSIS functions) */
++#endif
++#include "stm32f30x_exti.h"
++#include "stm32f30x_flash.h"
++#include "stm32f30x_gpio.h"
++#include "stm32f30x_pwr.h"
++#include "stm32f30x_rcc.h"
++#include "stm32f30x_tim.h"
++#include "stm32f30x_usart.h"
++#include "stm32f30x_misc.h"
++#include "config.h"
+ 
+ /* Exported types ------------------------------------------------------------*/
+ /* Exported constants --------------------------------------------------------*/

@@ -2,11 +2,11 @@ OUTPUT_FORMAT ("elf32-littlearm", "elf32-bigarm", "elf32-littlearm")
 /* Internal Memory Map*/
 MEMORY
 {
-	rom (rx)  : ORIGIN = 0x08002000, LENGTH = 0x0001D800 /* -bootloader -eeprom */
-	ram (rwx) : ORIGIN = 0x20000000, LENGTH = 0x00005000
+	rom (rx)  : ORIGIN = 0x08003000, LENGTH = 0x0003C000 /* -bootloader -eeprom */
+	ram (rwx) : ORIGIN = 0x20000000, LENGTH = 0x0000A000
 }
 
-_eram = ORIGIN(ram) + LENGTH(ram) - 8;  /* in CooCox used for _estack, 8 for boot_flag */
+_eram = ORIGIN(ram) + LENGTH(ram) - 8;  /* in CooCox used for _estack */
 _estack = _eram;
 SECTIONS
 {

@@ -11,7 +11,7 @@
 #ifndef __USB_HID_H
 #define __USB_HID_H
 
-#include "stm32f10x.h"
+#include "stm32f30x.h"
 #include "usb_core.h"
 #include "usb_init.h"
 #include "usb_pwr.h"

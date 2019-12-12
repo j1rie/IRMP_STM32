@@ -10,7 +10,7 @@
  *  (at your option) any later version.
  */
 
-#include "stm32f10x.h"
+#include "stm32f30x.h"
 #include "usb_hid.h"
 #include "irmpmain.h"
 #include "eeprom.h"
@@ -217,17 +217,18 @@ void delay_ms(unsigned int msec)
 void LED_Switch_init(void)
 {
 	GPIO_InitTypeDef GPIO_InitStructure;
-	RCC_APB2PeriphClockCmd(RCC_APB2Periph_GPIOB, ENABLE);
+	RCC_AHBPeriphClockCmd(RCC_AHBPeriph_GPIOB, ENABLE);
 #ifdef BlueDeveloperBoard
-	RCC_APB2PeriphClockCmd(RCC_APB2Periph_GPIOC, ENABLE);
+	RCC_AHBPeriphClockCmd(RCC_AHBPeriph_GPIOA, ENABLE);
+	RCC_AHBPeriphClockCmd(RCC_AHBPeriph_GPIOC, ENABLE);
 #endif
 #if (defined(ST_Link) || defined(BlackDeveloperBoard))
-	RCC_APB2PeriphClockCmd(RCC_APB2Periph_GPIOA | RCC_APB2Periph_AFIO, ENABLE);
+	RCC_AHBPeriphClockCmd(RCC_AHBPeriph_GPIOA | RCC_APB2Periph_AFIO, ENABLE);
 	/* disable SWD, so pins are available */
 	GPIO_PinRemapConfig(GPIO_Remap_SWJ_Disable, ENABLE);
 #endif /* ST_Link */
 #if defined(StickLink) || defined(GreenLink)
-	RCC_APB2PeriphClockCmd(RCC_APB2Periph_GPIOA, ENABLE);
+	RCC_AHBPeriphClockCmd(RCC_AHBPeriph_GPIOA, ENABLE);
 #endif /* StickLink */
 	/* start with wakeup and reset switch off */
 #ifdef SimpleCircuit
@@ -241,8 +242,10 @@ void LED_Switch_init(void)
 	GPIO_WriteBit(RESET_PORT, RESET_PIN, Bit_RESET);
 #endif
 #endif /* SimpleCircuit */
-	GPIO_InitStructure.GPIO_Mode = GPIO_Mode_Out_PP;
+	GPIO_InitStructure.GPIO_Mode = GPIO_Mode_OUT;
 	GPIO_InitStructure.GPIO_Speed = GPIO_Speed_2MHz;
+	GPIO_InitStructure.GPIO_OType = GPIO_OType_PP;
+	GPIO_InitStructure.GPIO_PuPd = GPIO_PuPd_NOPULL;
 #ifndef ST_Link
 	GPIO_InitStructure.GPIO_Pin = LED_PIN;
 	GPIO_Init(LED_PORT, &GPIO_InitStructure);
@@ -253,7 +256,10 @@ void LED_Switch_init(void)
 #endif
 	GPIO_InitStructure.GPIO_Pin = WAKEUP_PIN;
 #ifdef SimpleCircuit
-	GPIO_InitStructure.GPIO_Mode = GPIO_Mode_Out_OD;
+	GPIO_InitStructure.GPIO_Mode = GPIO_Mode_OUT;
+	GPIO_InitStructure.GPIO_Speed = GPIO_Speed_2MHz;
+	GPIO_InitStructure.GPIO_OType = GPIO_OType_OD;
+	GPIO_InitStructure.GPIO_PuPd = GPIO_PuPd_NOPULL;
 #endif /* SimpleCircuit */
 	GPIO_Init(WAKEUP_PORT, &GPIO_InitStructure);
 #ifdef RESET_PORT
@@ -261,7 +267,8 @@ void LED_Switch_init(void)
 	GPIO_Init(RESET_PORT, &GPIO_InitStructure);
 #endif
 	GPIO_InitStructure.GPIO_Pin = WAKEUP_RESET_PIN;
-	GPIO_InitStructure.GPIO_Mode = GPIO_Mode_IPU;
+	GPIO_InitStructure.GPIO_Mode = GPIO_Mode_IN;
+	GPIO_InitStructure.GPIO_PuPd = GPIO_PuPd_UP;
 	GPIO_Init(WAKEUP_RESET_PORT, &GPIO_InitStructure);
 	/* start with LED off */
 #ifdef ST_Link
@@ -652,10 +659,12 @@ void USB_DISC_release(void)
 #if defined(Bootloader) && defined(PullDown) || defined(Maple)
 	/* bootloader must activate disconnect, here we release the disconnect */
 	GPIO_InitTypeDef GPIO_InitStructure;
-	RCC_APB2PeriphClockCmd(USB_DISC_RCC_APB2Periph, ENABLE);
+	RCC_AHBPeriphClockCmd(USB_DISC_RCC_AHBPeriph, ENABLE);
 	GPIO_InitStructure.GPIO_Pin = USB_DISC_PIN;
-	GPIO_InitStructure.GPIO_Mode = GPIO_Mode_Out_OD;
+	GPIO_InitStructure.GPIO_Mode = GPIO_Mode_OUT;
 	GPIO_InitStructure.GPIO_Speed = GPIO_Speed_2MHz;
+	GPIO_InitStructure.GPIO_OType = GPIO_OType_OD;
+	GPIO_InitStructure.GPIO_PuPd = GPIO_PuPd_NOPULL;
 	GPIO_Init(USB_DISC_PORT, &GPIO_InitStructure);
 #if defined(Maple)
 	GPIO_WriteBit(USB_DISC_PORT, USB_DISC_PIN, Bit_RESET);
@@ -673,10 +682,12 @@ void USB_Reset(void)
 	/* USB reset by pulling USBDP shortly low. A pullup resistor is needed, most
 	 * boards have it. */
 	GPIO_InitTypeDef GPIO_InitStructure;
-	RCC_APB2PeriphClockCmd(RCC_APB2Periph_GPIOA, ENABLE);
+	RCC_AHBPeriphClockCmd(RCC_AHBPeriph_GPIOA, ENABLE);
 	GPIO_InitStructure.GPIO_Pin = GPIO_Pin_12;
-	GPIO_InitStructure.GPIO_Mode = GPIO_Mode_Out_OD;
+	GPIO_InitStructure.GPIO_Mode = GPIO_Mode_OUT;
 	GPIO_InitStructure.GPIO_Speed = GPIO_Speed_2MHz;
+	GPIO_InitStructure.GPIO_OType = GPIO_OType_OD;
+	GPIO_InitStructure.GPIO_PuPd = GPIO_PuPd_NOPULL;
 	GPIO_Init(GPIOA, &GPIO_InitStructure);
 	GPIO_WriteBit(GPIOA, GPIO_Pin_12, Bit_RESET);
 	delay_ms(15);
