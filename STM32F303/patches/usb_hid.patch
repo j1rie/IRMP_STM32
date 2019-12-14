@@ -1,5 +1,4 @@
-/*
- *  Copyright (C) 2014-2018 Joerg Riechardt
+ *  Copyright (C) 2014-2019 Joerg Riechardt
  *
  *  inspired by work from Andrew Kambaroff - http://sysmagazine.com/posts/208026
  *
@@ -275,6 +274,54 @@ diff -Nrup A/src/hw_config.c B/src/hw_config.c
  }
  
  #endif
+diff -Nrup A/src/stm32_it.c B/src/stm32_it.c
+--- A/src/stm32_it.c	2013-01-21 19:27:00.000000000 +0100
++++ B/src/stm32_it.c	2019-12-03 21:17:50.194487601 +0100
+@@ -71,6 +71,7 @@ void NMI_Handler(void)
+ * Output         : None
+ * Return         : None
+ *******************************************************************************/
++#ifndef DEBUG
+ void HardFault_Handler(void)
+ {
+   /* Go to infinite loop when Hard Fault exception occurs */
+@@ -78,6 +79,7 @@ void HardFault_Handler(void)
+   {
+   }
+ }
++#endif
+ 
+ /*******************************************************************************
+ * Function Name  : MemManage_Handler
+@@ -164,10 +166,12 @@ void PendSV_Handler(void)
+ * Output         : None
+ * Return         : None
+ *******************************************************************************/
++#if 0
+ void SysTick_Handler(void)
+ {
+     TimingDelay--;
+ }
++#endif
+ 
+ /******************************************************************************/
+ /*            STM32 Peripherals Interrupt Handlers                        */
+@@ -262,6 +266,7 @@ void EXTI15_10_IRQHandler(void)
+ * Output         : None
+ * Return         : None
+ *******************************************************************************/
++#if 0
+ void DMA1_Channel1_IRQHandler(void)
+ {  
+   Send_Buffer[0] = 0x07;
+@@ -363,6 +368,7 @@ void EXTI15_10_IRQHandler(void)
+ }
+ 
+ #endif /*STM32L1XX_HD*/
++#endif
+ 
+ /*******************************************************************************
+ * Function Name  : USB_FS_WKUP_IRQHandler
 diff -Nrup A/src/usb_desc.c B/src/usb_desc.c
 --- A/src/usb_desc.c	2013-01-21 19:27:00.000000000 +0100
 +++ B/src/usb_desc.c	2019-12-03 21:17:50.195487546 +0100
@@ -528,3 +575,5 @@ diff -Nrup A/src/usb_regs.c B/src/usb_regs.c
  {
    _SetEPRxAddr(bEpNum, wAddr);
  }
+/*
+ 

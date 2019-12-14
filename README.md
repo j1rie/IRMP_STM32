@@ -85,7 +85,7 @@ Programmer GND -> G
 Programmer 3V3 -> V3  
 File - Open File - boot.blackDev.bin (https://github.com/j1rie/STM32F103-bootloader/tree/master/binaries
 )  
-Target - Program & Verify (confirm a message about Read Out Protection, if it appears)  
+Target - Program & Verify (confirm a message about read out protection, if it appears)  
 https://github.com/j1rie/IRMP_STM32_KBD/wiki/Herstellungsprozess-Schwarze#bootloader-flashen  
 ## Flashing the firmware
 Disconnect from USB.  

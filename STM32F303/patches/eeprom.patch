@@ -1,18 +1,32 @@
-diff -Nrup a/inc/eeprom.h b/inc/eeprom.h
---- a/inc/eeprom.h	2009-08-04 17:25:52.000000000 +0200
-+++ b/inc/eeprom.h	2014-12-13 00:00:30.000000000 +0100
-@@ -35,8 +35,8 @@
+diff -Nrup C/inc/eeprom.h D/inc/eeprom.h
+--- C/inc/eeprom.h	2009-08-04 16:25:00.000000000 +0200
++++ D/inc/eeprom.h	2019-12-03 22:26:44.283699406 +0100
+@@ -24,7 +24,7 @@
+ #define __EEPROM_H
+ 
+ /* Includes ------------------------------------------------------------------*/
+-#include "stm32f10x.h"
++#include "stm32f30x.h"
+ 
+ /* Exported constants --------------------------------------------------------*/
+ /* Define the STM32F10Xxx Flash page size depending on the used STM32 device */
+@@ -32,11 +32,13 @@
+   #define PAGE_SIZE  (uint16_t)0x400  /* Page size = 1KByte */
+ #elif defined (STM32F10X_HD) || defined (STM32F10X_CL)
+   #define PAGE_SIZE  (uint16_t)0x800  /* Page size = 2KByte */
++#elif defined (STM32F30X)
++  #define PAGE_SIZE  (uint16_t)0x800  /* Page size = 2KByte */
  #endif
  
  /* EEPROM start address in Flash */
 -#define EEPROM_START_ADDRESS    ((uint32_t)0x08010000) /* EEPROM emulation start address:
 -                                                  after 64KByte of used Flash memory */
-+#define EEPROM_START_ADDRESS    ((uint32_t)0x0803F800) /* F303CC has actually 256k = 0x40000 Flash */
-+                                                       /* 0x8040000 - 2 * 0x400 = 0x803F800 */
++#define EEPROM_START_ADDRESS    ((uint32_t)0x0803F000) /* F303CC has actually 256k = 0x40000 Flash */
++                                                       /* 0x8040000 - 2 * 0x800 = 0x803F000 */
  
  /* Pages 0 and 1 base and end addresses */
  #define PAGE0_BASE_ADDRESS      ((uint32_t)(EEPROM_START_ADDRESS + 0x000))
-@@ -65,7 +65,7 @@
+@@ -65,7 +67,7 @@
  #define PAGE_FULL               ((uint8_t)0x80)
  
  /* Variables' number */
@@ -21,9 +35,9 @@ diff -Nrup a/inc/eeprom.h b/inc/eeprom.h
  
  /* Exported types ------------------------------------------------------------*/
  /* Exported macro ------------------------------------------------------------*/
-diff -Nrup a/src/eeprom.c b/src/eeprom.c
---- a/src/eeprom.c	2009-08-04 17:25:52.000000000 +0200
-+++ b/src/eeprom.c	2014-11-28 23:12:13.708972100 +0100
+diff -Nrup C/src/eeprom.c D/src/eeprom.c
+--- C/src/eeprom.c	2009-08-04 16:25:00.000000000 +0200
++++ D/src/eeprom.c	2019-12-03 21:17:50.197487438 +0100
 @@ -111,19 +111,19 @@ uint16_t EE_Init(void)
          /* Transfer data from Page1 to Page0 */
          for (VarIdx = 0; VarIdx < NumbOfVar; VarIdx++)
