@@ -331,7 +331,7 @@ uint8_t eeprom_restore(uint8_t *buf, uint16_t virt_addr)
 
 void store_wakeup(IRMP_DATA *ir)
 {
-	uint8_t idx;
+	uint16_t idx;
 	uint8_t tmp[SIZEOF_IR];
 	uint8_t zeros[SIZEOF_IR] = {0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF};
 	idx = (MACRO_DEPTH + 1) * SIZEOF_IR/2 * MACRO_SLOTS;
@@ -421,7 +421,7 @@ void Reset(void)
 void store_new_wakeup(void)
 {
 	int8_t loop;
-	uint8_t idx;
+	uint16_t idx;
 	IRMP_DATA wakeup_IRData;
 	irmp_get_data(&wakeup_IRData); // flush input of irmp data
 	blink_LED();
@@ -454,7 +454,7 @@ int8_t get_handler(uint8_t *buf)
 {
 	/* number of valid bytes in buf, -1 signifies error */
 	int8_t ret = 3;
-	uint8_t idx;
+	uint16_t idx;
 	switch ((enum command) buf[2]) {
 	case CMD_CAPS:
 		/* in first query we give information about slots and depth */
@@ -505,7 +505,7 @@ int8_t set_handler(uint8_t *buf)
 {
 	/* number of valid bytes in buf, -1 signifies error */
 	int8_t ret = 3;
-	uint8_t idx;
+	uint16_t idx;
 	uint8_t tmp[SIZEOF_IR];
 	switch ((enum command) buf[2]) {
 	case CMD_EMIT:
@@ -544,7 +544,7 @@ int8_t reset_handler(uint8_t *buf)
 {
 	/* number of valid bytes in buf, -1 signifies error */
 	int8_t ret = 3;
-	uint8_t idx;
+	uint16_t idx;
 	uint8_t zeros[SIZEOF_IR] = {0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF};
 	switch ((enum command) buf[2]) {
 	case CMD_ALARM:
@@ -569,7 +569,8 @@ void check_wakeups(IRMP_DATA *ir)
 {
 	if(host_running())
 		return;
-	uint8_t i, idx;
+	uint8_t i;
+	uint16_t idx;
 	uint8_t buf[SIZEOF_IR];
 	for (i=0; i < WAKE_SLOTS/2; i++) {
 		idx = (MACRO_DEPTH + 1) * SIZEOF_IR/2 * MACRO_SLOTS + SIZEOF_IR/2 * i;
@@ -583,7 +584,8 @@ void check_wakeups(IRMP_DATA *ir)
 /* is received ir-code in one of the upper wakeup-slots except last one? reset if true */
 void check_resets(IRMP_DATA *ir)
 {
-	uint8_t i, idx;
+	uint8_t i;
+	uint16_t idx;
 	uint8_t buf[SIZEOF_IR];
 	for (i=WAKE_SLOTS/2; i < WAKE_SLOTS - 1; i++) {
 		idx = (MACRO_DEPTH + 1) * SIZEOF_IR/2 * MACRO_SLOTS + SIZEOF_IR/2 * i;
@@ -604,7 +606,7 @@ void reboot(void)
 /* is received ir-code in the last wakeup-slot? reboot µC if true */
 void check_reboot(IRMP_DATA *ir)
 {
-	uint8_t idx;
+	uint16_t idx;
 	uint8_t buf[SIZEOF_IR];
 	idx = (MACRO_DEPTH + 1) * SIZEOF_IR/2 * MACRO_SLOTS + SIZEOF_IR/2 * (WAKE_SLOTS - 1);
 	if (!eeprom_restore(buf, idx)) {
@@ -615,7 +617,8 @@ void check_reboot(IRMP_DATA *ir)
 
 void transmit_macro(uint8_t macro)
 {
-	uint8_t i, idx;
+	uint8_t i;
+	uint16_t idx;
 	uint8_t buf[SIZEOF_IR];
 	uint8_t zeros[SIZEOF_IR] = {0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF};
 	/* we start from 1, since we don't want to tx the trigger code of the macro*/
@@ -637,7 +640,8 @@ void transmit_macro(uint8_t macro)
 /* is received ir-code (trigger) in one of the macro-slots? transmit_macro if true */
 void check_macros(IRMP_DATA *ir)
 {
-	uint8_t i, idx;
+	uint8_t i;
+	uint16_t idx;
 	uint8_t buf[SIZEOF_IR];
 	for (i=0; i < MACRO_SLOTS; i++) {
 		idx = (MACRO_DEPTH + 1) * SIZEOF_IR/2 * i;
