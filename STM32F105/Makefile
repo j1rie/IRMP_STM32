@@ -71,7 +71,7 @@ flash: $(TARGET).bin
 	stm32flash -v -w $(TARGET).bin /dev/ttyUSB0
 
 clean-objects:
-	rm -f $(OBJS) $(TARGET).{elf,map}
+	rm -f $(OBJS) $(TARGET).{bin,elf,map}
 
 clean: clean-objects
 	rm -rf cmsis cmsis_boot irmp stm_lib usb_hid ext_src/prepared
