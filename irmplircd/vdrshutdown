@@ -3,12 +3,12 @@
 SVDRPCMD=/path/svdrpsend
 
 skipmsg=skip
-if [ "$(stat -c %Y /var/log/started_by_IRMP_STM32)" -lt "$(stat -c %Y /var/log/boot.msg)" ];
+if [ /var/log/started_by_IRMP_STM32 -ot /var/log/boot.msg ];
 then {
 echo skip >> /var/log/started_by_IRMP_STM32
 date >> /var/log/started_by_IRMP_STM32
 $SVDRPCMD MESG $skipmsg &
-exit 0
+exit 1
 }
 fi;
 
