@@ -1334,15 +1334,16 @@ MainWindow::onGcaps(FXObject *sender, FXSelector sel, void *ptr)
 	FXString s;
 	FXString t;
 	int read;
-	int jump_to_firmware;
+	int jump_to_firmware,	jump_to_romtable, k_exit;
 	jump_to_firmware = 0;
+	jump_to_romtable = 0;
 	for(int i = 0; i < 20; i++) { // for safety stop after 20 loops
 		s = "3 0 0 1 "; // Report_ID STAT_CMD ACC_GET CMD_CAPS
 #if (FOX_MINOR >= 7)
-		t.fromInt(i,10);
+		t.fromInt(i,16);
 		s += t;
 #else
-		s += FXStringVal(i,10);
+		s += FXStringVal(i,16);
 #endif
 		s += " ";
 		output_text->setText(s);
@@ -1364,7 +1365,7 @@ MainWindow::onGcaps(FXObject *sender, FXSelector sel, void *ptr)
 			return -1;
 		}
 
-  	 	while (buf[0] == 0x01 || read == 0) {
+		while (buf[0] == 0x01 || read == 0) {
 			read = Read();
 			if(read == -1) {
 				t = "onGcaps loop Read(): -1\n";
@@ -1398,24 +1399,52 @@ MainWindow::onGcaps(FXObject *sender, FXSelector sel, void *ptr)
 					protocols += t;  // TODO line break ?
 					s += t;
 				}
-			} else { // queries for firmware
+			} else if(!jump_to_romtable) { // queries for firmware
 				s = "firmware: ";
+				for (int k = 4; k < 17; k++) {
+						if (!buf[k]) { // NULL termination for legacy
+						s += "\n";
+						input_text->appendText(s);
+						input_text->setBottomLine(INT_MAX);
+						return 1;
+					}
+					if (buf[k] == 42) { // * termination
+						s += "\n";
+						s += "romtable: ";
+						jump_to_romtable = 1;
+					}
+					if(buf[k] != 42) {
+						t.format("%c", buf[k]);
+						firmware += t;  // TODO line break ?
+						s += t;
+					} else {
+						firmware += "   uC: ";
+						k_exit = k;
+					}
+				}
+				if(jump_to_romtable) {
+					s += "\n";
+					input_text->appendText(s);
+					input_text->setBottomLine(INT_MAX);
+					goto again;
+				}
+			} else { // queries for romtable
+				s = "romtable: ";
 				for (int k = 4; k < 17; k++) {
 					if (!buf[k]) { // NULL termination
 						s += "\n";
-						//s.substitute("_"," ");
 						input_text->appendText(s);
 						input_text->setBottomLine(INT_MAX);
 						return 1;
 					}
 					t.format("%c", buf[k]);
-					firmware += t;  // TODO line break ?
+					if(k_exit - 7 > k )
+						firmware += t;  // TODO line break ?
 					s += t;
 				}
 			}
 		}
 		s += "\n";
-		//s.substitute("_"," ");
 		input_text->appendText(s);
 		input_text->setBottomLine(INT_MAX);
 again:	;

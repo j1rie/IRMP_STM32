@@ -33,7 +33,7 @@ OBJS = src/irmpmain.o src/st_link_leds.o src/usb_hid.o src/main.o\
        usb_hid/src/usb_endp.o usb_hid/src/usb_istr.o usb_hid/src/usb_prop.o\
        usb_hid/src/usb_pwr.o usb_hid/src/usb_core.o usb_hid/src/usb_init.o\
        usb_hid/src/usb_int.o usb_hid/src/usb_mem.o usb_hid/src/usb_regs.o\
-       usb_hid/src/usb_sil.o
+       usb_hid/src/usb_sil.o src/arm_cpuid.o
 ifdef DEBUG
 OBJS += semihosting/semihosting.o semihosting/sh_cmd.o  stdio/printf.o
 endif
@@ -112,7 +112,7 @@ endif
 else
 LDFLAGS = -nostartfiles -Wl,-Map=$(TARGET).map,--gc-sections,--entry=main,-Tscripts/arm-gcc-link.ld $(ARCH) $(COMMON)
 endif
-LDFLAGS += --specs=nano.specs
+LDFLAGS += --specs=nano.specs --specs=nosys.specs
 
 ifdef SimpleCircuit
 DEFINES += -DSimpleCircuit
