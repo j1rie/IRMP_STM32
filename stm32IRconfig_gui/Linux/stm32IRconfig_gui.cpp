@@ -1402,7 +1402,7 @@ MainWindow::onGcaps(FXObject *sender, FXSelector sel, void *ptr)
 			} else if(!jump_to_romtable) { // queries for firmware
 				s = "firmware: ";
 				for (int k = 4; k < 17; k++) {
-						if (!buf[k]) { // NULL termination for legacy
+					if (!buf[k]) { // NULL termination for legacy
 						s += "\n";
 						input_text->appendText(s);
 						input_text->setBottomLine(INT_MAX);
