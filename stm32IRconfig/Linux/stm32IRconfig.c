@@ -82,8 +82,9 @@ int main(int argc, const char **argv) {
 	uint64_t i;
 	char c, d;
 	uint8_t s, m, k, l, idx;
-	int retValm, jump_to_firmware;
+	int retValm, jump_to_firmware, jump_to_romtable;
 	jump_to_firmware = 0;
+	jump_to_romtable = 0;
 
 	open_stm32(argc>1 ? argv[1] : "/dev/irmp_stm32");
 
@@ -213,8 +214,24 @@ get:		printf("get wakeup(w)\nget macro slot(m)\nget caps(c)\n");
 							}
 							printf("%u ", inBuf[k]);
 						}
-					} else { // queries for firmware
+					} else if(!jump_to_romtable) { // queries for firmware
 						printf("firmware: ");
+						for (k = 4; k < 17; k++) {
+							if (inBuf[k] == 42) { // *
+								printf("\n\n");
+								printf("romtable: ");
+								jump_to_romtable = 1;
+							}
+							if(inBuf[k] != 42) {
+								printf("%c", inBuf[k]);
+							}
+						}
+						if(jump_to_romtable) {
+							printf("\n\n");
+							goto again;
+						}
+					} else { // queries for romtable
+						printf("romtable: ");
 						for (k = 4; k < 17; k++) {
 							if (!inBuf[k]) {
 								printf("\n\n");

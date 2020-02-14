@@ -9,8 +9,7 @@ you want to know, if the computer was started by the receiver?
 put the systemd service 'irmpexec.service' into your services directory (/etc/systemd/system/)
 and run "systemctl enable irmpexec.service" once
 irmp_stm32.map needs to contain a line "ff0000000000 KEY_REFRESH"
-if 'stat -c %Y /var/log/started_by_irmp_stm32' is greater than 'stat -c %Y /var/log/boot.msg', the
-computer was started by the receiver
+if /var/log/started_by_irmp_stm32 is newer than /var/log/boot.msg, the computer was started by the receiver
 You may use this in VDR's shutdownscript in order to not shut down on the first power key press, if the
 computer is already running. See the example script.
 This is handy if you have a remote control with macros as the logitech and use one button to power
