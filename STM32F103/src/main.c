@@ -221,7 +221,7 @@ void LED_Switch_init(void)
 	GPIO_InitTypeDef GPIO_InitStructure;
 	RCC_APB2PeriphClockCmd(RCC_APB2Periph_GPIOB, ENABLE);
 #ifdef BlueDeveloperBoard
-       RCC_APB2PeriphClockCmd(RCC_APB2Periph_GPIOC, ENABLE);
+	RCC_APB2PeriphClockCmd(RCC_APB2Periph_GPIOC, ENABLE);
 #endif
 #if (defined(ST_Link) || defined(BlackDeveloperBoard) || defined(BlueDeveloperBoard))
 	RCC_APB2PeriphClockCmd(RCC_APB2Periph_GPIOA | RCC_APB2Periph_AFIO, ENABLE);
