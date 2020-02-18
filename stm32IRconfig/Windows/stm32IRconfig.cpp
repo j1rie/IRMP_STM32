@@ -1,7 +1,7 @@
 /**********************************************************************************************************
 	stm32config: configure and monitor STM32IR
 
-	Copyright (C) 2014-2015 Jörg Riechardt
+	Copyright (C) 2014-2020 Jörg Riechardt
 
 	based on work by Alan Ott
 	Copyright 2010  Alan Ott
@@ -94,8 +94,9 @@ int main(int argc, char* argv[])
 	uint64_t i;
 	char c, d;
 	uint8_t s, m, k, l, idx;
-	int retValm, jump_to_firmware;
+	int retValm, jump_to_firmware, jump_to_romtable;
 	jump_to_firmware = 0;
+	jump_to_romtable = 0;
 
 #ifdef WIN32
 	UNREFERENCED_PARAMETER(argc);
@@ -244,8 +245,24 @@ get:		printf("get wakeup(w)\nget macro slot(m)\nget caps(c)\n");
 							}
 							printf("%u ", inBuf[k]);
 						}
-					} else { // queries for firmware
+					} else if(!jump_to_romtable) { // queries for firmware
 						printf("firmware: ");
+						for (k = 4; k < 17; k++) {
+							if (inBuf[k] == 42) { // *
+								printf("\n\n");
+								printf("romtable: ");
+								jump_to_romtable = 1;
+							}
+							if(inBuf[k] != 42) {
+								printf("%c", inBuf[k]);
+							}
+						}
+						if(jump_to_romtable) {
+							printf("\n\n");
+							goto again;
+						}
+					} else { // queries for romtable
+						printf("romtable: ");
 						for (k = 4; k < 17; k++) {
 							if (!inBuf[k]) {
 								printf("\n\n");

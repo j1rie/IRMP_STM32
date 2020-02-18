@@ -1,7 +1,7 @@
 /**********************************************************************************************************
 	stm32config: configure and monitor STM32IR
 
-	Copyright (C) 2014-2015 Jörg Riechardt
+	Copyright (C) 2014-2020 Jörg Riechardt
 
 	This program is free software; you can redistribute it and/or modify
 	it under the terms of the GNU General Public License as published by

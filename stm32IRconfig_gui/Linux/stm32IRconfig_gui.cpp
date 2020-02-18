@@ -1,7 +1,7 @@
 /*
  *  GUI Config Tool for IRMP STM32 devices
  *
- *  Copyright (C) 2015-2017 Joerg Riechardt
+ *  Copyright (C) 2015-2020 Joerg Riechardt
  *
  *  based on work by Alan Ott
  *  Copyright 2010  Alan Ott
@@ -1334,9 +1334,11 @@ MainWindow::onGcaps(FXObject *sender, FXSelector sel, void *ptr)
 	FXString s;
 	FXString t;
 	int read;
-	int jump_to_firmware,	jump_to_romtable, k_exit;
+	int jump_to_firmware,	jump_to_romtable, k_exit, stop;
 	jump_to_firmware = 0;
 	jump_to_romtable = 0;
+	stop = 0;
+	k_exit = 0;
 	for(int i = 0; i < 20; i++) { // for safety stop after 20 loops
 		s = "3 0 0 1 "; // Report_ID STAT_CMD ACC_GET CMD_CAPS
 #if (FOX_MINOR >= 7)
@@ -1412,14 +1414,17 @@ MainWindow::onGcaps(FXObject *sender, FXSelector sel, void *ptr)
 						s += "\n";
 						s += "romtable: ";
 						jump_to_romtable = 1;
-					}
-					if(buf[k] != 42) {
-						t.format("%c", buf[k]);
-						firmware += t;  // TODO line break ?
-						s += t;
-					} else {
 						firmware += "   uC: ";
 						k_exit = k;
+					} else {
+						t.format("%c", buf[k]);
+						if(jump_to_romtable && t == " ") {
+							stop = 1;
+						}
+						if(!stop) {
+							firmware += t;
+						}
+						s += t;
 					}
 				}
 				if(jump_to_romtable) {
