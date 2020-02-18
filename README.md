@@ -89,7 +89,8 @@ Target - Program & Verify (confirm a message about read out protection, if it ap
 https://github.com/j1rie/IRMP_STM32_KBD/wiki/Herstellungsprozess-Schwarze#bootloader-flashen  
 ## Flashing the firmware
 Disconnect from USB.  
-Start ./FlashDFUjrie.sh ./2019-07-06_16-32_blackDev_BL_SC_jrie.bin  
+Linux: Start ./FlashDFUjrie.sh ./2019-07-06_16-32_blackDev_BL_SC_jrie.bin  
+Windows: Start FlashDFUjrie.bat 2020-02-15_00-29_blueDev_BL_SC_jrie.bin  
 Attach to USB.  
 You need dfu-util from git (https://sourceforge.net/p/dfu-util/dfu-util/ci/master/tree/).  
 https://github.com/j1rie/IRMP_STM32_KBD/wiki/Herstellungsprozess-Schwarze#firmware-flashen  
@@ -122,4 +123,3 @@ https://www.mikrocontroller.net/articles/IRMP_auf_STM32_-_Bauanleitung
 Much fun with IRMP on STM32!
 
 Copyright (C) 2014-2019 Jörg Riechardt
-
