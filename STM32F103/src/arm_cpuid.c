@@ -33,8 +33,6 @@
 
 #include <inttypes.h>
 
-#include <stdbool.h>
-
 char* cpuid() {
 	static char buff[64] = "Unknown";
 	// ARM v7m manual,page 702, section B4.1.2.
