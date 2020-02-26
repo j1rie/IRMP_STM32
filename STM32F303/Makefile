@@ -50,7 +50,7 @@ DATE := $(shell date +"%F_%H-%M")
 TARGET := $(DATE)_$(TARGET)
 
 IRMP_VERSION := $(shell grep -e "Version IRMP" irmp/README.txt | awk '{print $$3}')
-DEFINES += -DFW_STR="\"$(TARGET)   IRMP-Version: $(IRMP_VERSION)\""
+DEFINES += -DFW_STR="\"$(TARGET)   IRMP-Version: $(IRMP_VERSION)*STM32\""
 
 ifdef Bootloader
 DEFINES += -DBootloader
