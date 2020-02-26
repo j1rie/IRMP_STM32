@@ -32,7 +32,7 @@ OBJS = src/irmpmain.o src/st_link_leds.o src/usb_hid.o src/main.o\
        usb_hid/src/usb_dcd_int.o usb_hid/src/usbd_core.o\
        usb_hid/src/usbd_desc.o\
        usb_hid/src/usbd_hid_core.o usb_hid/src/usbd_ioreq.o\
-       usb_hid/src/usbd_req.o usb_hid/src/usbd_usr.o\
+       usb_hid/src/usbd_req.o usb_hid/src/usbd_usr.o
 ifdef DEBUG
 OBJS += semihosting/semihosting.o semihosting/sh_cmd.o  stdio/printf.o
 endif
@@ -43,7 +43,7 @@ DATE := $(shell date +"%F_%H-%M")
 TARGET := $(DATE)_$(TARGET)
 
 IRMP_VERSION := $(shell grep -e "Version IRMP" irmp/README.txt | awk '{print $$3}')
-DEFINES += -DFW_STR="\"$(TARGET)   IRMP-Version: $(IRMP_VERSION)\""
+DEFINES += -DFW_STR="\"$(TARGET)   IRMP-Version: $(IRMP_VERSION)*STM32\""
 
 ifdef Bootloader
 DEFINES += -DBootloader
