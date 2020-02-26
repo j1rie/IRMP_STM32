@@ -728,7 +728,7 @@ int main(void)
 	FLASH_Unlock();
 	EE_Init();
 	irmp_set_callback_ptr (led_callback);
-	stm_romtable();
+	parse_romtable();
 	memcpy(&firmware, &firmwarestring, sizeof(firmwarestring));
 	firmware[sizeof(firmwarestring) - 1] = 42; // *
 	memcpy(&firmware[sizeof(firmwarestring)], &rt, 128 - sizeof(firmwarestring));
