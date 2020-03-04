@@ -826,8 +826,6 @@ MainWindow::Read()
 	FXString s;
 	if (!connected_device) {
 		FXMessageBox::error(this, MBOX_OK, "Device Error R", "Unable To Connect to Device");
-		getApp()->removeTimeout(this, ID_TIMER);
-		ReadIRcontActive = 0;
 		s = "Unable To Connect to Device R\n";
 		input_text->appendText(s);
 		input_text->setBottomLine(INT_MAX);
@@ -864,9 +862,13 @@ MainWindow::Read()
 long
 MainWindow::onReadIR(FXObject *sender, FXSelector sel, void *ptr)
 {
-	if(Read() <= 0) {
+	int read;
+	read = Read();
+	if(read == -1)
+		return -1;
+	else if (read == 0)
 		return 0;
-	} else {
+	else {
 		if(reduce_timeout) {
 			reduce_timeout = 0;
 			getApp()->addTimeout(this, ID_READIR_TIMER, 1 * timeout_scalar /*1ms*/);
@@ -1902,9 +1904,8 @@ MainWindow::onClear(FXObject *sender, FXSelector sel, void *ptr)
 long
 MainWindow::onTimeout(FXObject *sender, FXSelector sel, void *ptr)
 {
-	onReadIR(NULL, 0, NULL);
-
-	getApp()->addTimeout(this, ID_TIMER, 5 * timeout_scalar /*5ms*/);
+	if(onReadIR(NULL, 0, NULL) != -1)
+		getApp()->addTimeout(this, ID_TIMER, 5 * timeout_scalar /*5ms*/);
 
 	return 1;
 }

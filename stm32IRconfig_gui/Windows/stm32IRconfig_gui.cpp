@@ -138,6 +138,7 @@ private:
 	int macroslots;
 	FXString protocols;
 	FXString firmware;
+	FXString uC;
 	FXColor storedShadowColor;
 	FXColor storedBaseColor;
 	FXColor storedBackColor;
@@ -633,7 +634,7 @@ MainWindow::onConnect(FXObject *sender, FXSelector sel, void *ptr)
 	input_text->setText("");
 	output_text->setText("");
 
-	//list wakeups and alarm
+	//list wakeups and alarm and warn if no STM32
 	FXString u;
 	for(int i = 0; i < wakeupslots; i++) {
 		FXString s;
@@ -647,7 +648,7 @@ MainWindow::onConnect(FXObject *sender, FXSelector sel, void *ptr)
 		s += t;
 		output_text->setText(s);
 		Write_and_Check();
-		s = "wakeup: ";
+		s = (i < wakeupslots-1) ? "wakeup: " : "reboot: ";
 		t.format("%02hhx", buf[4]);
 		s += t;
 		t.format("%02hhx", buf[6]);
@@ -661,7 +662,7 @@ MainWindow::onConnect(FXObject *sender, FXSelector sel, void *ptr)
 		t.format("%02hhx", buf[9]);
 		s += t;
 		s += "\n";
-		if(!(s == "wakeup: ffffffffffff\n")) {
+		if(!(s == "wakeup: ffffffffffff\n") && !(s == "reboot: ffffffffffff\n") ) {
 			u += s;
 		}
 	}
@@ -682,6 +683,11 @@ MainWindow::onConnect(FXObject *sender, FXSelector sel, void *ptr)
 	t.format("%d", alarm % 60);
 	s += t;
 	s += " seconds\n";
+	if(uC != "STM32"){
+		s += "WARNING: This device's microcontroller is a ";
+		s += uC;
+		s += ", NOT a STM32!\n";
+	}
 	onClear(NULL, 0, NULL);
 	output_text->setText("");
 	input_text->appendText(u);
@@ -820,8 +826,6 @@ MainWindow::Read()
 	FXString s;
 	if (!connected_device) {
 		FXMessageBox::error(this, MBOX_OK, "Device Error R", "Unable To Connect to Device");
-		getApp()->removeTimeout(this, ID_TIMER);
-		ReadIRcontActive = 0;
 		s = "Unable To Connect to Device R\n";
 		input_text->appendText(s);
 		input_text->setBottomLine(INT_MAX);
@@ -858,9 +862,13 @@ MainWindow::Read()
 long
 MainWindow::onReadIR(FXObject *sender, FXSelector sel, void *ptr)
 {
-	if(Read() <= 0) {
+	int read;
+	read = Read();
+	if(read == -1)
+		return -1;
+	else if (read == 0)
 		return 0;
-	} else {
+	else {
 		if(reduce_timeout) {
 			reduce_timeout = 0;
 			getApp()->addTimeout(this, ID_READIR_TIMER, 1 * timeout_scalar /*1ms*/);
@@ -1334,11 +1342,11 @@ MainWindow::onGcaps(FXObject *sender, FXSelector sel, void *ptr)
 	FXString s;
 	FXString t;
 	int read;
-	int jump_to_firmware,	jump_to_romtable, k_exit, stop;
+	int jump_to_firmware, jump_to_romtable, stop;
 	jump_to_firmware = 0;
 	jump_to_romtable = 0;
 	stop = 0;
-	k_exit = 0;
+	uC = "";
 	for(int i = 0; i < 20; i++) { // for safety stop after 20 loops
 		s = "3 0 0 1 "; // Report_ID STAT_CMD ACC_GET CMD_CAPS
 #if (FOX_MINOR >= 7)
@@ -1415,7 +1423,6 @@ MainWindow::onGcaps(FXObject *sender, FXSelector sel, void *ptr)
 						s += "romtable: ";
 						jump_to_romtable = 1;
 						firmware += "   uC: ";
-						k_exit = k;
 					} else {
 						t.format("%c", buf[k]);
 						if(jump_to_romtable && t == " ") {
@@ -1423,6 +1430,8 @@ MainWindow::onGcaps(FXObject *sender, FXSelector sel, void *ptr)
 						}
 						if(!stop) {
 							firmware += t;
+							if(jump_to_romtable)
+								uC += t;
 						}
 						s += t;
 					}
@@ -1443,8 +1452,13 @@ MainWindow::onGcaps(FXObject *sender, FXSelector sel, void *ptr)
 						return 1;
 					}
 					t.format("%c", buf[k]);
-					if(k_exit - 7 > k )
+					if(!stop && t == " ") {
+						stop = 1;
+					}
+					if(!stop) {
 						firmware += t;  // TODO line break ?
+						uC += t;
+					}
 					s += t;
 				}
 			}
@@ -1890,9 +1904,8 @@ MainWindow::onClear(FXObject *sender, FXSelector sel, void *ptr)
 long
 MainWindow::onTimeout(FXObject *sender, FXSelector sel, void *ptr)
 {
-	onReadIR(NULL, 0, NULL);
-
-	getApp()->addTimeout(this, ID_TIMER, 5 * timeout_scalar /*5ms*/);
+	if(onReadIR(NULL, 0, NULL) != -1)
+		getApp()->addTimeout(this, ID_TIMER, 5 * timeout_scalar /*5ms*/);
 
 	return 1;
 }
