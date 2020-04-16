@@ -129,7 +129,7 @@ private:
 	struct hid_device_info *devices;
 	hid_device *connected_device;
 	size_t getDataFromTextField(FXTextField *tf, char *buf, size_t len);
-	unsigned char buf[17];
+	uint8_t buf[17];
 	uint8_t ReadIRcontActive;
 	uint8_t ReadIRActive;
 	uint8_t reduce_timeout;
@@ -637,8 +637,7 @@ MainWindow::onConnect(FXObject *sender, FXSelector sel, void *ptr)
 	//list wakeups and alarm and warn if no STM32
 	FXString u;
 	for(int i = 0; i < wakeupslots; i++) {
-		FXString s;
-		FXString t;
+		FXString s, t, v;
 #if (FOX_MINOR >= 7)
 		t.fromInt(i,10);
 #else
@@ -650,19 +649,20 @@ MainWindow::onConnect(FXObject *sender, FXSelector sel, void *ptr)
 		Write_and_Check();
 		s = (i < wakeupslots-1) ? "wakeup: " : "reboot: ";
 		t.format("%02hhx", buf[4]);
-		s += t;
+		v = t;
 		t.format("%02hhx", buf[6]);
-		s += t;
+		v += t;
 		t.format("%02hhx", buf[5]);
-		s += t;
+		v += t;
 		t.format("%02hhx", buf[8]);
-		s += t;
+		v += t;
 		t.format("%02hhx", buf[7]);
-		s += t;
+		v += t;
 		t.format("%02hhx", buf[9]);
-		s += t;
+		v += t;
+		s += v;
 		s += "\n";
-		if(!(s == "wakeup: ffffffffffff\n") && !(s == "reboot: ffffffffffff\n") ) {
+		if(v != "ffffffffffff") {
 			u += s;
 		}
 	}
@@ -691,7 +691,6 @@ MainWindow::onConnect(FXObject *sender, FXSelector sel, void *ptr)
 	onClear(NULL, 0, NULL);
 	output_text->setText("");
 	input_text->appendText(u);
-	input_text->setBottomLine(INT_MAX);
 	input_text->appendText(s);
 	input_text->setBottomLine(INT_MAX);
 
@@ -809,9 +808,13 @@ MainWindow::getDataFromTextField(FXTextField *tf, char *buf, size_t len)
 	// For each token in the string, parse and store in buf[].
 	char *token = strtok(str, delim);
 	while (token) {
-		char *endptr;  // TODO why not NULL?!
+		char *endptr = NULL;
 		long int val = strtol(token, &endptr, 16); // hex!
 		buf[i++] = val;
+		if (i > len) {
+			FXMessageBox::error(this, MBOX_OK, "Invalid length", "Data field is too long.");
+			break;
+		}
 		token = strtok(NULL, delim);
 	}
 	
@@ -1024,7 +1027,7 @@ MainWindow::Write()
 	memset(bufw, 0, sizeof(bufw));
 	getDataFromTextField(output_text, bufw, sizeof(bufw));
 
-	if (!connected_device) { //TODO this helps, but where is the error message?!
+	if (!connected_device) {
 		FXMessageBox::error(this, MBOX_OK, "Device Error W", "Unable To Connect to Device");
 		s = "Unable To Connect to Device W\n";//
 		input_text->appendText(s);
@@ -1088,7 +1091,7 @@ MainWindow::Write_and_Check()
 		}
 	}
 
-	if(buf[1] == 0x01) { // STAT_SUCCESS // TODO compare other indices too?
+	if(buf[1] == 0x01) { // STAT_SUCCESS
 		s += "************************OK***************************\n";	
 	} else {
 		s += "**********************ERROR**************************\n";
@@ -1102,7 +1105,7 @@ MainWindow::Write_and_Check()
 long
 MainWindow::onSendOutputReport(FXObject *sender, FXSelector sel, void *ptr)
 {
-	Write();
+	Write_and_Check();
 
 	return 1;
 }
@@ -1341,7 +1344,6 @@ MainWindow::onGcaps(FXObject *sender, FXSelector sel, void *ptr)
 {
 	FXString s;
 	FXString t;
-	int read;
 	int jump_to_firmware, jump_to_romtable, stop;
 	jump_to_firmware = 0;
 	jump_to_romtable = 0;
@@ -1358,32 +1360,7 @@ MainWindow::onGcaps(FXObject *sender, FXSelector sel, void *ptr)
 		s += " ";
 		output_text->setText(s);
 
-  	 	if(Write() == -1) {
-			t = "onGcaps Write(): -1\n";
-			input_text->appendText(t);
-			input_text->setBottomLine(INT_MAX);
-			return -1;
-		}
-
-		FXThread::sleep(2000);
-		
-		read = Read();
-		if(read == -1) {
-			t = "onGcaps first Read(): -1\n";
-			input_text->appendText(t);
-			input_text->setBottomLine(INT_MAX);
-			return -1;
-		}
-
-		while (buf[0] == 0x01 || read == 0) {
-			read = Read();
-			if(read == -1) {
-				t = "onGcaps loop Read(): -1\n";
-				input_text->appendText(t);
-				input_text->setBottomLine(INT_MAX);
-				return -1;
-			}
-		}
+		Write_and_Check();
 
 		if (!i) { // first query for slots and depth
 			macroslots = buf[4];
@@ -1406,7 +1383,7 @@ MainWindow::onGcaps(FXObject *sender, FXSelector sel, void *ptr)
 						goto again;
 					}
 					t.format("%u ", buf[k]);
-					protocols += t;  // TODO line break ?
+					protocols += t;
 					s += t;
 				}
 			} else if(!jump_to_romtable) { // queries for firmware
@@ -1456,7 +1433,7 @@ MainWindow::onGcaps(FXObject *sender, FXSelector sel, void *ptr)
 						stop = 1;
 					}
 					if(!stop) {
-						firmware += t;  // TODO line break ?
+						firmware += t;
 						uC += t;
 					}
 					s += t;
