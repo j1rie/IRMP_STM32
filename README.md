@@ -94,6 +94,10 @@ Windows: Start FlashDFUjrie.bat 2020-02-15_00-29_blueDev_BL_SC_jrie.bin
 Attach to USB.  
 You need dfu-util from git (https://sourceforge.net/p/dfu-util/dfu-util/ci/master/tree/).  
 https://github.com/j1rie/IRMP_STM32_KBD/wiki/Herstellungsprozess-Schwarze#firmware-flashen  
+## Other ways how to flash
+Flashing with an USB-serial-TTL is possible on the developer boards.  
+Flashing over USB is possible on those boards, which support it.  
+See https://www.mikrocontroller.net/articles/IRMP_auf_STM32_-_ein_USB_IR_Empf%C3%A4nger/Sender/Einschalter_mit_Wakeup-Timer#Firmware_Flashing  
 ## irmplircd, eventlircd, udev and systemd
 See /irmplircd/README.
 
@@ -104,7 +108,7 @@ His work helped me in getting started with the STM32F105.
 Andrew Kambaroff for his USB-HID for the STM32F103. [3]  
 His work helped me in getting started with the STM32F103.  
 Ole Ernst for code review, linux Makefile and linux download-extract-patch-script and new protocol. [4]  
-Manuel Reimer for gcc-4.9 fix, SimpleCircuit and check if host running. [5]  
+Manuel Reimer for gcc-4.9 fix, SimpleCircuit and check if host is running. [5]  
 
 [1] https://www.mikrocontroller.net/articles/IRMP  
 [2] http://mikrocontroller.bplaced.net/wordpress/?page_id=744  
@@ -122,4 +126,4 @@ https://www.mikrocontroller.net/articles/IRMP_auf_STM32_-_Bauanleitung
 
 Much fun with IRMP on STM32!
 
-Copyright (C) 2014-2019 Jörg Riechardt
+Copyright (C) 2014-2020 Jörg Riechardt
