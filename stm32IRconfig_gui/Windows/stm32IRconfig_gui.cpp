@@ -73,6 +73,34 @@ public:
 		ID_WRITE_IR,
 		ID_DEVLIST
 	};
+
+enum access {
+	ACC_GET,
+	ACC_SET,
+	ACC_RESET
+};
+
+enum command {
+	CMD_EMIT,
+	CMD_CAPS,
+	CMD_FW,
+	CMD_ALARM,
+	CMD_MACRO,
+	CMD_WAKE,
+	CMD_REBOOT
+};
+
+enum status {
+	STAT_CMD,
+	STAT_SUCCESS,
+	STAT_FAILURE
+};
+
+enum report_id {
+	REPORT_ID_IR = 1,
+	REPORT_ID_CONFIG_IN = 2,
+	REPORT_ID_CONFIG_OUT = 3
+};
 	
 private:
 	FXList *device_list;
@@ -643,7 +671,7 @@ MainWindow::onConnect(FXObject *sender, FXSelector sel, void *ptr)
 #else
 		t = FXStringVal(i,10);
 #endif
-		s = "3 0 0 5 "; // Report_ID STAT_CMD ACC_GET CMD_WAKE
+		s.format("%d %d %d %d ", REPORT_ID_CONFIG_OUT, STAT_CMD, ACC_GET, CMD_WAKE);
 		s += t;
 		output_text->setText(s);
 		Write_and_Check();
@@ -666,7 +694,8 @@ MainWindow::onConnect(FXObject *sender, FXSelector sel, void *ptr)
 			u += s;
 		}
 	}
-	output_text->setText("3 0 0 3"); // Report_ID STAT_CMD ACC_GET CMD_ALARM
+	s.format("%d %d %d %d", REPORT_ID_CONFIG_OUT, STAT_CMD, ACC_GET, CMD_ALARM);
+	output_text->setText(s);
 	Write_and_Check();
 	unsigned int alarm = *((uint32_t *)&buf[4]);
 	FXString t;	
@@ -777,7 +806,9 @@ MainWindow::onRescan(FXObject *sender, FXSelector sel, void *ptr)
 long
 MainWindow::onReboot(FXObject *sender, FXSelector sel, void *ptr)
 {
-	output_text->setText("3 0 1 6"); // Report_ID STAT_CMD ACC_SET CMD_REBOOT
+	FXString s;
+	s.format("%d %d %d %d", REPORT_ID_CONFIG_OUT, STAT_CMD, ACC_SET, CMD_REBOOT);
+	output_text->setText(s);
 
 	FXint cur_item = device_list->getCurrentItem();
 	Write_and_Check();
@@ -881,7 +912,7 @@ MainWindow::onReadIR(FXObject *sender, FXSelector sel, void *ptr)
 	FXString s;
 	FXString t;
 
-	if (buf[0] == 1) { // REPORT_ID_IR
+	if (buf[0] == REPORT_ID_IR) {
 		// Repeat Counter
 		if(ReadIRcontActive) {
 			if (!buf[6]) {
@@ -1081,7 +1112,7 @@ MainWindow::Write_and_Check()
 		return -1;
 	}
 
-    while (buf[0] == 0x01 || read == 0) {
+    while (buf[0] == REPORT_ID_IR || read == 0) {
 		read = Read();
 		if(read == -1) {
 			s += "W&C loop Read(): -1\n";
@@ -1091,7 +1122,7 @@ MainWindow::Write_and_Check()
 		}
 	}
 
-	if(buf[1] == 0x01) { // STAT_SUCCESS
+	if(buf[1] == STAT_SUCCESS) {
 		s += "************************OK***************************\n";	
 	} else {
 		s += "**********************ERROR**************************\n";
@@ -1118,7 +1149,7 @@ MainWindow::onPwakeup(FXObject *sender, FXSelector sel, void *ptr)
 	const char *z = " ";
 	int len;
 	t.format("%d ", wslistbox->getCurrentItem());
-	s = "3 0 1 5 "; // Report_ID STAT_CMD ACC_SET CMD_WAKE
+	s.format("%d %d %d %d ", REPORT_ID_CONFIG_OUT, STAT_CMD, ACC_SET, CMD_WAKE);
 	s += t;
 	t = protocol_text->getText();
 	len = t.length(); // don't put this into the for loop!!!
@@ -1165,7 +1196,7 @@ MainWindow::onPmacro(FXObject *sender, FXSelector sel, void *ptr)
 	const char *z = " ";
 	int len;
 	t.format("%d ", mnlistbox->getCurrentItem());
-	s = "3 0 1 4 "; // Report_ID STAT_CMD ACC_SET CMD_MACRO
+	s.format("%d %d %d %d ", REPORT_ID_CONFIG_OUT, STAT_CMD, ACC_SET, CMD_MACRO);
 	s += t;
 	t.format("%d ", mslistbox->getCurrentItem());
 	s += t;
@@ -1224,7 +1255,7 @@ MainWindow::onPRwakeup(FXObject *sender, FXSelector sel, void *ptr)
 	onReadIRcont(NULL, 0, NULL);
 	ReadIRActive = 0;
 	t.format("%d ", wslistbox->getCurrentItem());
-	s = "3 0 1 5 "; // Report_ID STAT_CMD ACC_SET CMD_WAKE
+	s.format("%d %d %d %d ", REPORT_ID_CONFIG_OUT, STAT_CMD, ACC_SET, CMD_WAKE);
 	s += t;
 	output_text->setText(s);
 
@@ -1249,7 +1280,7 @@ MainWindow::onPRmacro(FXObject *sender, FXSelector sel, void *ptr)
 	onReadIRcont(NULL, 0, NULL);
 	ReadIRActive = 0;
 	t.format("%d ", mnlistbox->getCurrentItem());
-	s = "3 0 1 4 "; // Report_ID STAT_CMD ACC_SET CMD_MACRO
+	s.format("%d %d %d %d ", REPORT_ID_CONFIG_OUT, STAT_CMD, ACC_SET, CMD_MACRO);
 	s += t;
 	t.format("%d ", mslistbox->getCurrentItem());
 	s += t;
@@ -1265,7 +1296,7 @@ MainWindow::onGwakeup(FXObject *sender, FXSelector sel, void *ptr)
 	FXString s;
 	FXString t;
 	t.format("%d", wslistbox->getCurrentItem());
-	s = "3 0 0 5 "; // Report_ID STAT_CMD ACC_GET CMD_WAKE
+	s.format("%d %d %d %d ", REPORT_ID_CONFIG_OUT, STAT_CMD, ACC_GET, CMD_WAKE);
 	s += t;
 	output_text->setText(s);
 
@@ -1304,7 +1335,7 @@ MainWindow::onGmacro(FXObject *sender, FXSelector sel, void *ptr)
 	FXString s;
 	FXString t;
 	t.format("%d ", mnlistbox->getCurrentItem());
-	s = "3 0 0 4 "; // Report_ID STAT_CMD ACC_GET CMD_MACRO
+	s.format("%d %d %d %d ", REPORT_ID_CONFIG_OUT, STAT_CMD, ACC_GET, CMD_MACRO);
 	s += t;
 	t.format("%d", mslistbox->getCurrentItem());
 	s += t;
@@ -1350,7 +1381,7 @@ MainWindow::onGcaps(FXObject *sender, FXSelector sel, void *ptr)
 	stop = 0;
 	uC = "";
 	for(int i = 0; i < 20; i++) { // for safety stop after 20 loops
-		s = "3 0 0 1 "; // Report_ID STAT_CMD ACC_GET CMD_CAPS
+		s.format("%d %d %d %d ", REPORT_ID_CONFIG_OUT, STAT_CMD, ACC_GET, CMD_CAPS);
 #if (FOX_MINOR >= 7)
 		t.fromInt(i,16);
 		s += t;
@@ -1451,13 +1482,14 @@ again:	;
 long
 MainWindow::onAget(FXObject *sender, FXSelector sel, void *ptr)
 {
-	output_text->setText("3 0 0 3"); // Report_ID STAT_CMD ACC_GET CMD_ALARM
+	FXString s;
+	s.format("%d %d %d %d", REPORT_ID_CONFIG_OUT, STAT_CMD, ACC_GET, CMD_ALARM);
+	output_text->setText(s);
 
 	Write_and_Check();
 
 	unsigned int alarm = *((uint32_t *)&buf[4]);
 
-	FXString s;
 	FXString t;	
 	s = "";
 	t.format("%u", alarm/60/60/24);
@@ -1506,7 +1538,7 @@ MainWindow::onAset(FXObject *sender, FXSelector sel, void *ptr)
 	FXString s;
 	FXString t;
 	const char *z = " ";
-	s = "3 0 1 3 "; // Report_ID STAT_CMD ACC_SET CMD_ALARM
+	s.format("%d %d %d %d ", REPORT_ID_CONFIG_OUT, STAT_CMD, ACC_SET, CMD_ALARM);
 #if (FOX_MINOR >= 7)
 	t.fromInt(setalarm,16);
 #else
@@ -1543,7 +1575,7 @@ MainWindow::onRwakeup(FXObject *sender, FXSelector sel, void *ptr)
 	FXString s;
 	FXString t;
 	t.format("%d", wslistbox->getCurrentItem());
-	s = "3 0 2 5 "; // Report_ID STAT_CMD ACC_RESET CMD_WAKE
+	s.format("%d %d %d %d ", REPORT_ID_CONFIG_OUT, STAT_CMD, ACC_RESET, CMD_WAKE);
 	s += t;
 	output_text->setText(s);
 
@@ -1558,7 +1590,7 @@ MainWindow::onRmacro(FXObject *sender, FXSelector sel, void *ptr)
 	FXString s;
 	FXString t;
 	t.format("%d ", mnlistbox->getCurrentItem());
-	s = "3 0 2 4 "; // Report_ID STAT_CMD ACC_RESET CMD_MACRO
+	s.format("%d %d %d %d ", REPORT_ID_CONFIG_OUT, STAT_CMD, ACC_RESET, CMD_MACRO);
 	s += t;
 	t.format("%d ", mslistbox->getCurrentItem());
 	s += t;
@@ -1572,7 +1604,9 @@ MainWindow::onRmacro(FXObject *sender, FXSelector sel, void *ptr)
 long
 MainWindow::onRalarm(FXObject *sender, FXSelector sel, void *ptr)
 {
-	output_text->setText("3 0 2 3"); // Report_ID STAT_CMD ACC_RESET CMD_ALARM
+	FXString s;
+	s.format("%d %d %d %d", REPORT_ID_CONFIG_OUT, STAT_CMD, ACC_RESET, CMD_ALARM);
+	output_text->setText(s);
 
 	Write_and_Check();
 
@@ -1586,7 +1620,7 @@ MainWindow::onSendIR(FXObject *sender, FXSelector sel, void *ptr)
 	FXString t;
 	const char *z = " ";
 	int len;
-	s = "3 0 1 0 "; // Report_ID STAT_CMD ACC_SET CMD_EMIT
+	s.format("%d %d %d %d ", REPORT_ID_CONFIG_OUT, STAT_CMD, ACC_SET, CMD_EMIT);
 	t = protocol_text->getText();
 	len = t.length(); // don't put this into the for loop!!!
 	for (int i = 0; i < 2 - len; i++)
