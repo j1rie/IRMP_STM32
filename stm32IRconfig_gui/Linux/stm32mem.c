@@ -35,7 +35,7 @@
 #define STM32_CMD_ERASE			0x41
 
 static int stm32_download(usb_dev_handle *dev, uint16_t iface, 
-			  uint16_t wBlockNum, void *data, int size)
+			  uint16_t wBlockNum, char *data, int size)
 {
 	dfu_status status;
 	int i;
@@ -61,7 +61,7 @@ static int stm32_download(usb_dev_handle *dev, uint16_t iface,
 
 int stm32_mem_erase(usb_dev_handle *dev, uint16_t iface, uint32_t addr)
 {
-	uint8_t request[5];
+	char request[5];
 
 	request[0] = STM32_CMD_ERASE;
 	memcpy(request+1, &addr, sizeof(addr));
@@ -69,7 +69,7 @@ int stm32_mem_erase(usb_dev_handle *dev, uint16_t iface, uint32_t addr)
 	return stm32_download(dev, iface, 0, request, sizeof(request));
 }
 
-int stm32_mem_write(usb_dev_handle *dev, uint16_t iface, uint16_t wBlockNum, void *data, int size)
+int stm32_mem_write(usb_dev_handle *dev, uint16_t iface, uint16_t wBlockNum, char *data, int size)
 {
 	return stm32_download(dev, iface, wBlockNum, data, size);
 }
@@ -95,4 +95,3 @@ int stm32_mem_manifest(usb_dev_handle *dev, uint16_t iface)
 		}
 	}
 }
-

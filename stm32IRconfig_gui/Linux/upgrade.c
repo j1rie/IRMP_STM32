@@ -99,7 +99,7 @@ usb_dev_handle * get_dfu_interface(struct usb_device *dev, uint16_t *interface)
 	return NULL;
 }
 
-int upgrade(const char* firmwarefile, int TransferSize)
+int upgrade(const char* firmwarefile, int TransferSize, char* print)
 {
 	struct usb_device *dev;
 	usb_dev_handle *handle;
@@ -108,49 +108,63 @@ int upgrade(const char* firmwarefile, int TransferSize)
 	int offset;
 	FILE *fpFirmware;
   	int firmwareSize;
-	uint8_t *fw_buf;
+	char *fw_buf;
 
-    fpFirmware = fopen (firmwarefile, "rb");
-    if(fpFirmware == NULL) {
-        printf("error opening firmware file: %s\n",firmwarefile);
-        return 0;
-    } else {
-	  printf("opened firmware file %s\n", firmwarefile);
-    }
+	char* printbuf;
+	printbuf = (char*)malloc(80);
+	if (printbuf == NULL) {
+		printf("printbuf: error allocating memory\n");
+		return 0;
+	}
 
-    if((fseek(fpFirmware, 0, SEEK_END) != 0) ||
-	((firmwareSize = ftell(fpFirmware)) < 0) ||
-	(fseek(fpFirmware, 0, SEEK_SET) != 0)) {
-	    printf("error determining firmware size\n");
-	    return 0;
-    }
+	fpFirmware = fopen (firmwarefile, "rb");
+	if(fpFirmware == NULL) {
+		printf("error opening firmware file: %s\n",firmwarefile);
+		sprintf(print, "error opening firmware file: %s\n",firmwarefile);
+		return 0;
+	} else {
+		printf("opened firmware file %s\n", firmwarefile);
+		sprintf(print, "opened firmware file %s\n", firmwarefile);
+	}
 
-//    uint8_t fw_buf[firmwareSize];
+	if((fseek(fpFirmware, 0, SEEK_END) != 0) ||
+			((firmwareSize = ftell(fpFirmware)) < 0) ||
+			(fseek(fpFirmware, 0, SEEK_SET) != 0)) {
+		printf("error determining firmware size\n");
+		sprintf(printbuf, "error determining firmware size\n");
+		strcat(print, printbuf);
+		return 0;
+	}
 
-    fw_buf = malloc(firmwareSize);
-    if (fw_buf == NULL) {
-	  fclose(fpFirmware);
-	  printf("error allocating memory\n");
-	  return 0;
-    }
+	fw_buf = (char*)malloc(firmwareSize);
+	if (fw_buf == NULL) {
+		fclose(fpFirmware);
+		printf("error allocating memory\n");
+		return 0;
+	}
 
+	if(fread(fw_buf,firmwareSize,1,fpFirmware) != 1) {
+		puts("read firmware error\n");
+	} else {
+		printf("read %d bytes of firmware\n", firmwareSize);
+		sprintf(printbuf, "read %d bytes of firmware\n", firmwareSize);
+		strcat(print, printbuf);
+	}
 
-    if(fread(fw_buf,firmwareSize,1,fpFirmware) != 1) {
-	  puts("read firmware error\n");
-    } else {
-	  printf("read %d bytes of firmware\n", firmwareSize);
-    }
-
-    fclose(fpFirmware);
+	fclose(fpFirmware);
 
 	usb_init();
 
+	printf("Waiting for device\n");
+	sprintf(printbuf, "Waiting for device\n");
+	strcat(print, printbuf);
+
+
 retry:
 	if(!(dev = find_dev()) || !(handle = get_dfu_interface(dev, &iface))) {
-		printf("\rDevice not yet found ...");
 
 #ifdef WIN32
-		sleep(3);
+		Sleep(3);
 #else
 		usleep(3000);
 #endif
@@ -160,6 +174,9 @@ retry:
 	state = dfu_getstate(handle, iface);
 	if((state < 0) || (state == STATE_APP_IDLE)) {
 		puts("Resetting device in firmware upgrade mode...");
+		sprintf(printbuf, "Resetting device in firmware upgrade mode...\n");
+		strcat(print, printbuf);
+
 		dfu_detach(handle, iface, 1000);
 		usb_release_interface(handle, iface);
 		usb_close(handle);
@@ -170,20 +187,31 @@ retry:
 #endif
 		goto retry;
 	}
-	printf("\nDevice found at %s:%s\n", dev->bus->dirname, dev->filename);
+
+	printf("Device found at %s:%s\n", dev->bus->dirname, dev->filename);
+	sprintf(printbuf, "Device found at %s:%s\n", dev->bus->dirname, dev->filename);
+	strcat(print, printbuf);
+
 	printf("Transfer Size:%d\n", TransferSize);
+	sprintf(printbuf, "Transfer Size:%d\n", TransferSize);
+	strcat(print, printbuf);
 
 	dfu_makeidle(handle, iface);
 
 	for(offset = 0; offset < firmwareSize; offset += TransferSize) {
 		printf("Progress: %d%%\n", (offset*100)/firmwareSize);
+		sprintf(printbuf, "Progress: %d%%\n", (offset*100)/firmwareSize);
+		strcat(print, printbuf);
 		fflush(stdout);
 		if(firmwareSize - offset > TransferSize)
-		    stm32_mem_write(handle, iface, offset/TransferSize, (void*)&fw_buf[offset], TransferSize);
+		    stm32_mem_write(handle, iface, offset/TransferSize, &fw_buf[offset], TransferSize);
 		else
-		    stm32_mem_write(handle, iface, offset/TransferSize, (void*)&fw_buf[offset], firmwareSize - offset);
+		    stm32_mem_write(handle, iface, offset/TransferSize, &fw_buf[offset], firmwareSize - offset);
 	}
+
 	puts("Progress: 100%");
+	sprintf(printbuf, "Progress: 100%%\n");
+	strcat(print, printbuf);
 	
 	stm32_mem_manifest(handle, iface);
 
@@ -192,6 +220,8 @@ retry:
 	free(fw_buf);
 
 	printf("=== Firmware Upgrade successful! ===\n");
+	sprintf(printbuf, "=== Firmware Upgrade successful! ===\n");
+	strcat(print, printbuf);
 
 	return 1;
 }
