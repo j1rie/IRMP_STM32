@@ -27,7 +27,7 @@
 #endif
 
 int stm32_mem_erase(usb_dev_handle *dev, uint16_t iface, uint32_t addr);
-int stm32_mem_write(usb_dev_handle *dev, uint16_t iface, uint16_t wBlockNum, void *data, int size);
+int stm32_mem_write(usb_dev_handle *dev, uint16_t iface, uint16_t wBlockNum, char *data, int size);
 int stm32_mem_manifest(usb_dev_handle *dev, uint16_t iface);
 
 #endif

@@ -22,7 +22,11 @@
 
 #include <stdint.h>
 
-#include <usb.h>
+#ifdef WIN32
+#   include <C:/msys64/mingw64/include/libusb-compat/usb.h>
+#else
+#   include <usb.h>
+#endif
 
 /* DFU states as returned by DFU_GETSTATE and DFU_GETSTATUS request in bState field.
  * Refer to Section 6.1.2
@@ -71,9 +75,9 @@ typedef struct dfu_status {
 
 int dfu_detach(usb_dev_handle *dev, uint16_t iface, uint16_t wTimeout);
 int dfu_dnload(usb_dev_handle *dev, uint16_t iface, 
-		 uint16_t wBlockNum, void *data, uint16_t size);
+		 uint16_t wBlockNum, char *data, uint16_t size);
 int dfu_upload(usb_dev_handle *dev, uint16_t iface, 
-		 uint16_t wBlockNum, void *data, uint16_t size);
+		 uint16_t wBlockNum, char *data, uint16_t size);
 int dfu_getstatus(usb_dev_handle *dev, uint16_t iface, dfu_status *status);
 int dfu_clrstatus(usb_dev_handle *dev, uint16_t iface);
 int dfu_getstate(usb_dev_handle *dev, uint16_t iface);

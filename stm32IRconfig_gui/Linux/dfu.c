@@ -47,7 +47,7 @@ int dfu_detach(usb_dev_handle *dev, uint16_t iface, uint16_t wTimeout)
 }
 
 int dfu_dnload(usb_dev_handle *dev, uint16_t iface, 
-		 uint16_t wBlockNum, void *data, uint16_t size)
+		 uint16_t wBlockNum, char *data, uint16_t size)
 {
 	return usb_control_msg(dev, 
 			USB_ENDPOINT_OUT | USB_TYPE_CLASS | USB_RECIP_INTERFACE,
@@ -56,7 +56,7 @@ int dfu_dnload(usb_dev_handle *dev, uint16_t iface,
 }
 
 int dfu_upload(usb_dev_handle *dev, uint16_t iface, 
-		 uint16_t wBlockNum, void *data, uint16_t size)
+		 uint16_t wBlockNum, char *data, uint16_t size)
 {
 	return usb_control_msg(dev, 
 			USB_ENDPOINT_IN | USB_TYPE_CLASS | USB_RECIP_INTERFACE,
@@ -68,7 +68,7 @@ int dfu_getstatus(usb_dev_handle *dev, uint16_t iface, dfu_status *status)
 {
 	return usb_control_msg(dev, 
 			USB_ENDPOINT_IN | USB_TYPE_CLASS | USB_RECIP_INTERFACE,
-			DFU_GETSTATUS, 0, iface, (void*)status, sizeof(dfu_status), 
+			DFU_GETSTATUS, 0, iface, (char*)status, sizeof(dfu_status),
 			USB_DEFAULT_TIMEOUT);
 }
 
@@ -151,5 +151,3 @@ int dfu_makeidle(usb_dev_handle *dev, uint16_t iface)
 
 	return -1;
 }
-
-

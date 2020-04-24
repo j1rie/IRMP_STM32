@@ -20,7 +20,7 @@
 #include <inttypes.h>
 #include <FXArray.h>
 #include "icons.h"
-extern "C" int upgrade(const char* file, int TransferSize);
+extern "C" int upgrade(const char* file, int TransferSize, char* print);
 
 // Headers needed for sleeping.
 #ifdef _WIN32
@@ -1710,19 +1710,17 @@ MainWindow::onUpgrade(FXObject *sender, FXSelector sel, void *ptr)
 		Write();
 		onDisconnect(NULL, 0, NULL);
 		FXThread::sleep(1000000000);
-		FXint success = upgrade(open.getFilename().text(), TransferSize);
+		char* print;
+		print = (char*)malloc(3200);
+		upgrade(open.getFilename().text(), TransferSize, print);
 		FXThread::sleep(1000000000);
 		onRescan(NULL, 0, NULL);
 		device_list->setCurrentItem(cur_item);
 		device_list->deselectItem(0);
 		device_list->selectItem(cur_item);
 		onConnect(NULL, 0, NULL);
-		if(success){
-			s = "Firmware Upgrade successful\n";
-		} else {
-			s = "could not upgrade firmware\n";
-		}
-		input_text->appendText(s);
+		FXString t = print;
+		input_text->appendText(t);
 		input_text->setBottomLine(INT_MAX);
 	}
 
