@@ -21,7 +21,7 @@
 
 #ifdef WIN32
 #   include <windows.h>
-#include "lusb0_usb.h"
+#   include "lusb0_usb.h"
 #else
 #   include <unistd.h>
 #   include <usb.h>

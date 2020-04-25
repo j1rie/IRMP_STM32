@@ -140,6 +140,8 @@ int upgrade(const char* firmwarefile, int TransferSize, char* print)
 	if (fw_buf == NULL) {
 		fclose(fpFirmware);
 		printf("error allocating memory\n");
+		sprintf(printbuf, "error allocating memory\n");
+		strcat(print, printbuf);
 		return 0;
 	}
 

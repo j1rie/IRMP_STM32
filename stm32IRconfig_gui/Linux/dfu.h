@@ -23,7 +23,7 @@
 #include <stdint.h>
 
 #ifdef WIN32
-#include "lusb0_usb.h"
+#   include "lusb0_usb.h"
 #else
 #   include <usb.h>
 #endif
