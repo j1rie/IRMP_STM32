@@ -476,6 +476,7 @@ MainWindow::MainWindow(FXApp *app)
 	command1_text->setHelpText("received IR command");
 	flag1_text->setHelpText("received IR flags");
 	read_cont_button->setHelpText("receive IR until pressed again");
+	upgrade_button->setHelpText("upgrade firmware");
 	days_text->setHelpText("enter days to be set");
 	hours_text->setHelpText("enter hours to be set");
 	minutes_text->setHelpText("enter minutes to be set");
@@ -509,6 +510,7 @@ MainWindow::MainWindow(FXApp *app)
 	gwakeup_button->disable();
 	gmacro_button->disable();
 	gcap_button->disable();
+	upgrade_button->disable();
 	aget_button->disable();
 	aset_button->disable();
 	rwakeup_button->disable();
@@ -670,6 +672,7 @@ MainWindow::onConnect(FXObject *sender, FXSelector sel, void *ptr)
 	connect_button->disable();
 	disconnect_button->enable();
 	reboot_button->enable();
+	upgrade_button->enable();
 	input_text->setText("");
 	output_text->setText("");
 
@@ -772,6 +775,7 @@ MainWindow::onDisconnect(FXObject *sender, FXSelector sel, void *ptr)
 	ralarm_button->disable();
 	send_button->disable();
 	read_cont_button->disable();
+	upgrade_button->disable();
 	connect_button->enable();
 	disconnect_button->disable();
 	reboot_button->disable();
@@ -1014,6 +1018,7 @@ MainWindow::onReadIRcont(FXObject *sender, FXSelector sel, void *ptr)
 		rmacro_button->disable();
 		ralarm_button->disable();
 		send_button->disable();
+		upgrade_button->disable();
 		/* consume IR */
 		int read;
 		read = Read();
@@ -1052,6 +1057,7 @@ MainWindow::onReadIRcont(FXObject *sender, FXSelector sel, void *ptr)
 		rmacro_button->enable();
 		ralarm_button->enable();
 		send_button->enable();
+		upgrade_button->enable();
 		ReadIRcontActive = 0;
 		read_cont_button->setBaseColor(storedBaseColor);
 		read_cont_button->setShadowColor(storedShadowColor);

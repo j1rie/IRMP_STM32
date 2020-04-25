@@ -19,7 +19,7 @@
  */
 
 #ifdef WIN32
-#   include <C:/msys64/mingw64/include/libusb-compat/usb.h>
+#include "lusb0_usb.h"
 #else
 #   include <usb.h>
 #endif

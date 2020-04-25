@@ -21,7 +21,7 @@
 
 #ifdef WIN32
 #   include <windows.h>
-#   include <C:/msys64/mingw64/include/libusb-compat/usb.h>
+#include "lusb0_usb.h"
 #else
 #   include <unistd.h>
 #   include <usb.h>
