@@ -1713,7 +1713,7 @@ MainWindow::onUpgrade(FXObject *sender, FXSelector sel, void *ptr)
 		s.format("%d %d %d %d", REPORT_ID_CONFIG_OUT, STAT_CMD, ACC_SET, CMD_REBOOT);
 		output_text->setText(s);
 		FXint cur_item = device_list->getCurrentItem();
-		Write();
+		Write_and_Check();
 		onDisconnect(NULL, 0, NULL);
 		FXThread::sleep(1000000000);
 		char* print;
@@ -1751,8 +1751,8 @@ MainWindow::onOpen(FXObject *sender, FXSelector sel, void *ptr)
 		FXString file=open.getFilename();
 		FXFile textfile(file,FXFile::Reading);
 		// Opened file?
- 		if(textfile.isOpen()){
-  			FXchar *text; 
+		if(textfile.isOpen()){
+			FXchar *text;
 
 			// Get file size
 			size=textfile.size();

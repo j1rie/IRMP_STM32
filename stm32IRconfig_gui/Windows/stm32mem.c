@@ -33,7 +33,7 @@
 #define STM32_CMD_SETADDRESSPOINTER	0x21
 #define STM32_CMD_ERASE			0x41
 
-static int stm32_download(libusb_device_handle *dev, uint16_t iface,
+static int stm32_download(libusb_device_handle *dev, uint16_t iface, 
 			  uint16_t wBlockNum, void *data, int size)
 {
 	dfu_status status;

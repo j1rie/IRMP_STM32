@@ -3,3 +3,7 @@ https://developer.arm.com/open-source/gnu-toolchain/gnu-rm/downloads
 
 For complete eeprom and firmware reset flash the file "ZEROS".
 Afterwards a new firmware needs to be flashed.
+
+Use Zadig [1] in order to create Windows USB drivers for the device in bootloader mode (WinUSB).
+
+[1] https://zadig.akeo.ie

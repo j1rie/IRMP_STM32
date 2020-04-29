@@ -5,8 +5,8 @@ CXX=g++
 COBJS=hid.o dfu.o stm32mem.o upgrade.o
 CPPOBJS=stm32IRconfig_gui.o icons.o
 OBJS=$(COBJS) $(CPPOBJS)
-CFLAGS=-Wall -g -c `fox-config --cflags`
-LIBS=-ludev -lrt `fox-config --libs` -lusb
+CFLAGS=-Wall -g -c `fox-config --cflags` -I/usr/include/libusb-1.0
+LIBS=-ludev -lrt `fox-config --libs` -lusb-1.0
 
 stm32IRconfig_gui: $(OBJS)
 	g++ -Wall -g $^ $(LIBS) -o stm32IRconfig_gui

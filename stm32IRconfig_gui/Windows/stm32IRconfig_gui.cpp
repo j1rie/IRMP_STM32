@@ -20,6 +20,7 @@
 #include <inttypes.h>
 #include <FXArray.h>
 #include "icons.h"
+extern "C" int upgrade(const char* file, int TransferSize, char* print);
 
 // Headers needed for sleeping.
 #ifdef _WIN32
@@ -57,6 +58,7 @@ public:
 		ID_RALARM,
 		ID_SEND,
 		ID_READ_CONT,
+		ID_UPGRADE,
 		ID_CLEAR,
 		ID_TIMER,
 		ID_READIR_TIMER,
@@ -123,6 +125,7 @@ private:
 	FXButton *ralarm_button;
 	FXButton *send_button;
 	FXButton *read_cont_button;
+	FXButton *upgrade_button;
 	FXButton *open_button;
 	FXButton *save_button;
 	FXButton *append_button;
@@ -166,6 +169,7 @@ private:
 	int macroslots;
 	FXString protocols;
 	FXString firmware;
+	FXString firmware1;
 	FXString uC;
 	FXColor storedShadowColor;
 	FXColor storedBaseColor;
@@ -204,6 +208,7 @@ public:
 	long onSendIR(FXObject *sender, FXSelector sel, void *ptr);
 	long onReadIR(FXObject *sender, FXSelector sel, void *ptr);
 	long onReadIRcont(FXObject *sender, FXSelector sel, void *ptr);
+	long onUpgrade(FXObject *sender, FXSelector sel, void *ptr);
 	long onClear(FXObject *sender, FXSelector sel, void *ptr);
 	long onTimeout(FXObject *sender, FXSelector sel, void *ptr);
 	long onReadIRTimeout(FXObject *sender, FXSelector sel, void *ptr);
@@ -258,6 +263,7 @@ FXDEFMAP(MainWindow) MainWindowMap [] = {
 	FXMAPFUNC(SEL_COMMAND, MainWindow::ID_RALARM, MainWindow::onRalarm ),
 	FXMAPFUNC(SEL_COMMAND, MainWindow::ID_SEND, MainWindow::onSendIR ),
 	FXMAPFUNC(SEL_COMMAND, MainWindow::ID_READ_CONT, MainWindow::onReadIRcont ),
+	FXMAPFUNC(SEL_COMMAND, MainWindow::ID_UPGRADE, MainWindow::onUpgrade ),
 	FXMAPFUNC(SEL_COMMAND, MainWindow::ID_CLEAR, MainWindow::onClear ),
 	FXMAPFUNC(SEL_TIMEOUT, MainWindow::ID_TIMER, MainWindow::onTimeout ),
 	FXMAPFUNC(SEL_TIMEOUT, MainWindow::ID_READIR_TIMER, MainWindow::onReadIRTimeout ),
@@ -331,42 +337,44 @@ MainWindow::MainWindow(FXApp *app)
 	rmacro_button = new FXButton(gb124, "macro", NULL, this, ID_RMACRO, BUTTON_NORMAL|LAYOUT_FILL_X);
 	ralarm_button = new FXButton(gb124, "alarm", NULL, this, ID_RALARM, BUTTON_NORMAL|LAYOUT_FILL_X);
 
-	// horizontal frame for IR Group Box
-	FXHorizontalFrame *hf13 = new FXHorizontalFrame(vf1, LAYOUT_FILL_X|PACK_UNIFORM_WIDTH);
+	// horizontal frame for IR Group Box and firmware upgrade
+	FXHorizontalFrame *hf13 = new FXHorizontalFrame(vf1, LAYOUT_FILL_X,0,0,0,0, 0,0,0,0, 0,0);
+	FXSpring *s131 = new FXSpring(hf13, LAYOUT_FILL_X, 300, 0, 0,0,0,0, 4,2,2,2, 2,2);
+	FXSpring *s132 = new FXSpring(hf13, LAYOUT_FILL_X, 100, 0, 0,0,0,0, 2,4,2,2, 2,2);
+
 	//IR Group Box
-	FXGroupBox *gb13 = new FXGroupBox(hf13, "IR (hex)", FRAME_GROOVE|LAYOUT_FILL_X);
-	FXMatrix *m13 = new FXMatrix(gb13, 8, MATRIX_BY_COLUMNS);
-	new FXLabel(m13, "");
-	new FXLabel(m13, "protocol");
-	new FXLabel(m13, "address");
-	new FXLabel(m13, "command");
-	new FXLabel(m13, "flag");
-	new FXLabel(m13, "");
-	new FXLabel(m13, "");
-	new FXLabel(m13, "");
-	new FXLabel(m13, "set");
-	protocol_text = new FXTextField(m13, 5, NULL, 0, TEXTFIELD_NORMAL|LAYOUT_FILL_X|LAYOUT_FILL_COLUMN);
-	address_text = new FXTextField(m13, 10, NULL, 0, TEXTFIELD_NORMAL|LAYOUT_FILL_X|LAYOUT_FILL_COLUMN);
-	command_text = new FXTextField(m13, 10, NULL, 0, TEXTFIELD_NORMAL|LAYOUT_FILL_X|LAYOUT_FILL_COLUMN);
-	flag_text = new FXTextField(m13, 5, NULL, 0, TEXTFIELD_NORMAL|LAYOUT_FILL_X|LAYOUT_FILL_COLUMN);
-	send_button = new FXButton(m13, "send", NULL, this, ID_SEND, BUTTON_NORMAL|LAYOUT_FILL_X,0,0,0,0,0,0,0,0);
-	new FXLabel(m13, "      ",0,LABEL_NORMAL,0,0,0,0,0,0,0,0);
-	new FXLabel(m13, "      ",0,LABEL_NORMAL,0,0,0,0,0,0,0,0);
-	new FXLabel(m13, "get");
-	FXVerticalFrame *innerVF1 = new FXVerticalFrame(m13, LAYOUT_FILL_X|LAYOUT_FILL_Y, 0,0,0,0, 0,0,0,0);
-	FXVerticalFrame *innerVF2 = new FXVerticalFrame(m13, LAYOUT_FILL_X|LAYOUT_FILL_Y, 0,0,0,0, 0,0,0,0);
-	FXVerticalFrame *innerVF3 = new FXVerticalFrame(m13, LAYOUT_FILL_X|LAYOUT_FILL_Y, 0,0,0,0, 0,0,0,0);
-	FXVerticalFrame *innerVF4 = new FXVerticalFrame(m13, LAYOUT_FILL_X|LAYOUT_FILL_Y, 0,0,0,0, 0,0,0,0);
+	FXGroupBox *gb131 = new FXGroupBox(s131, "IR (hex)", FRAME_GROOVE|LAYOUT_FILL_X);
+	FXMatrix *m131 = new FXMatrix(gb131, 6, MATRIX_BY_COLUMNS,0,0,0,0, 0,0,0,0, 0,0);
+	new FXLabel(m131, "");
+	new FXLabel(m131, "protocol");
+	new FXLabel(m131, "address");
+	new FXLabel(m131, "command");
+	new FXLabel(m131, "flag");
+	new FXLabel(m131, "");
+	new FXLabel(m131, "set");
+	protocol_text = new FXTextField(m131, 4, NULL, 0, TEXTFIELD_NORMAL|LAYOUT_FILL_X|LAYOUT_FILL_COLUMN);
+	address_text = new FXTextField(m131, 8, NULL, 0, TEXTFIELD_NORMAL|LAYOUT_FILL_X|LAYOUT_FILL_COLUMN);
+	command_text = new FXTextField(m131, 8, NULL, 0, TEXTFIELD_NORMAL|LAYOUT_FILL_X|LAYOUT_FILL_COLUMN);
+	flag_text = new FXTextField(m131, 4, NULL, 0, TEXTFIELD_NORMAL|LAYOUT_FILL_X|LAYOUT_FILL_COLUMN);
+	send_button = new FXButton(m131, "send", NULL, this, ID_SEND, BUTTON_NORMAL|LAYOUT_FILL_X,0,0,0,0,0,0,0,0);
+	new FXLabel(m131, "get");
+	FXVerticalFrame *innerVF1 = new FXVerticalFrame(m131, LAYOUT_FILL_X|LAYOUT_FILL_Y, 0,0,0,0, 0,0,0,0);
+	FXVerticalFrame *innerVF2 = new FXVerticalFrame(m131, LAYOUT_FILL_X|LAYOUT_FILL_Y, 0,0,0,0, 0,0,0,0);
+	FXVerticalFrame *innerVF3 = new FXVerticalFrame(m131, LAYOUT_FILL_X|LAYOUT_FILL_Y, 0,0,0,0, 0,0,0,0);
+	FXVerticalFrame *innerVF4 = new FXVerticalFrame(m131, LAYOUT_FILL_X|LAYOUT_FILL_Y, 0,0,0,0, 0,0,0,0);
 	protocol1_text = new FXText(new FXHorizontalFrame(innerVF1,LAYOUT_FILL_X|LAYOUT_FILL_Y|FRAME_SUNKEN|FRAME_THICK, 0,0,0,0, 0,0,0,0), NULL, 0, LAYOUT_FILL_X);
 	address1_text = new FXText(new FXHorizontalFrame(innerVF2,LAYOUT_FILL_X|LAYOUT_FILL_Y|FRAME_SUNKEN|FRAME_THICK, 0,0,0,0, 0,0,0,0), NULL, 0, LAYOUT_FILL_X);
 	command1_text = new FXText(new FXHorizontalFrame(innerVF3,LAYOUT_FILL_X|LAYOUT_FILL_Y|FRAME_SUNKEN|FRAME_THICK, 0,0,0,0, 0,0,0,0), NULL, 0, LAYOUT_FILL_X);
 	flag1_text = new FXText(new FXHorizontalFrame(innerVF4,LAYOUT_FILL_X|LAYOUT_FILL_Y|FRAME_SUNKEN|FRAME_THICK, 0,0,0,0, 0,0,0,0), NULL, 0, LAYOUT_FILL_X);
-	read_cont_button = new FXButton(m13, " receive mode ", NULL, this, ID_READ_CONT, BUTTON_NORMAL|LAYOUT_FILL_X,0,0,0,0,0,0,0,0);
-	new FXLabel(m13, "      ",0,LABEL_NORMAL,0,0,0,0,0,0,0,0);
+	read_cont_button = new FXButton(m131, " receive mode ", NULL, this, ID_READ_CONT, BUTTON_NORMAL|LAYOUT_FILL_X,0,0,0,0,0,0,0,0);
 	protocol1_text->setVisibleRows(1);
 	address1_text->setVisibleRows(1);
 	command1_text->setVisibleRows(1);
 	flag1_text->setVisibleRows(1);
+
+	//firmware Group Box
+	FXGroupBox *gb132 = new FXGroupBox(s132, "firmware", FRAME_GROOVE|LAYOUT_FILL_X);
+	upgrade_button = new FXButton(gb132, "upgrade", NULL, this, ID_UPGRADE, BUTTON_NORMAL|LAYOUT_FILL_X);
 
 	// horizontal frame for alarm Group Box, select listboxes, Output Group Box and map group box
 	FXHorizontalFrame *hf14 = new FXHorizontalFrame(vf1, LAYOUT_FILL_X,0,0,0,0, 0,0,0,0, 0,0);
@@ -468,6 +476,7 @@ MainWindow::MainWindow(FXApp *app)
 	command1_text->setHelpText("received IR command");
 	flag1_text->setHelpText("received IR flags");
 	read_cont_button->setHelpText("receive IR until pressed again");
+	upgrade_button->setHelpText("upgrade firmware");
 	days_text->setHelpText("enter days to be set");
 	hours_text->setHelpText("enter hours to be set");
 	minutes_text->setHelpText("enter minutes to be set");
@@ -501,6 +510,7 @@ MainWindow::MainWindow(FXApp *app)
 	gwakeup_button->disable();
 	gmacro_button->disable();
 	gcap_button->disable();
+	upgrade_button->disable();
 	aget_button->disable();
 	aset_button->disable();
 	rwakeup_button->disable();
@@ -525,6 +535,7 @@ MainWindow::MainWindow(FXApp *app)
 	macroslots = 0;
 	protocols = "";
 	firmware = "";
+	firmware1 = "";
 	max = 0;
 	count = 0;
 
@@ -595,6 +606,8 @@ MainWindow::onConnect(FXObject *sender, FXSelector sel, void *ptr)
 	s += FXString(" ") + device_info->product_string;
 	connected_label->setText(s);
 	s = "Firmware: ";
+	FXint pos = firmware.find("   ", 3);
+	firmware1 = firmware.left(pos);
 	firmware.substitute("___","   ");
 	firmware.substitute(":_",": ");
 	s += firmware;
@@ -659,6 +672,7 @@ MainWindow::onConnect(FXObject *sender, FXSelector sel, void *ptr)
 	connect_button->disable();
 	disconnect_button->enable();
 	reboot_button->enable();
+	upgrade_button->enable();
 	input_text->setText("");
 	output_text->setText("");
 
@@ -740,6 +754,7 @@ MainWindow::onDisconnect(FXObject *sender, FXSelector sel, void *ptr)
 	connected_label3->setText("Protocols:");
 	protocols = "";
 	firmware = "";
+	firmware1 = "";
 	max = 0;
 	count = 0;
 	wslistbox->clearItems();
@@ -760,6 +775,7 @@ MainWindow::onDisconnect(FXObject *sender, FXSelector sel, void *ptr)
 	ralarm_button->disable();
 	send_button->disable();
 	read_cont_button->disable();
+	upgrade_button->disable();
 	connect_button->enable();
 	disconnect_button->disable();
 	reboot_button->disable();
@@ -1002,6 +1018,7 @@ MainWindow::onReadIRcont(FXObject *sender, FXSelector sel, void *ptr)
 		rmacro_button->disable();
 		ralarm_button->disable();
 		send_button->disable();
+		upgrade_button->disable();
 		/* consume IR */
 		int read;
 		read = Read();
@@ -1040,6 +1057,7 @@ MainWindow::onReadIRcont(FXObject *sender, FXSelector sel, void *ptr)
 		rmacro_button->enable();
 		ralarm_button->enable();
 		send_button->enable();
+		upgrade_button->enable();
 		ReadIRcontActive = 0;
 		read_cont_button->setBaseColor(storedBaseColor);
 		read_cont_button->setShadowColor(storedShadowColor);
@@ -1659,6 +1677,63 @@ MainWindow::onSendIR(FXObject *sender, FXSelector sel, void *ptr)
 }
 
 long
+MainWindow::onUpgrade(FXObject *sender, FXSelector sel, void *ptr)
+{
+	const FXchar patterns[]="All Files (*)\nfirmware Files (*.bin)";
+	FXString s, v, Filename, FilenameText;
+	int TransferSize = 1024;
+	FXFileDialog open(this,"Open a firmware file");
+	open.setPatternList(patterns);
+	open.setCurrentPattern(1);
+	if(open.execute()){
+		Filename = open.getFilename();
+		FilenameText = Filename.text();
+		if(FilenameText.contains("F105") || FilenameText.contains("F303")){
+			TransferSize = 2048;
+		}
+#if (FOX_MINOR >= 7)
+		v.fromInt(TransferSize, 10);
+#else
+		v = FXStringVal(TransferSize, 10);
+#endif
+		s = "TransferSize: ";
+		s += v;
+		s += "\n";
+#ifdef WIN32
+#define PATHSEP '\\'
+#else
+#define PATHSEP '/'
+#endif
+		FXint pos = Filename.rfind(PATHSEP);
+		FXint endpos = Filename.length();
+		FXString Firmwarename = Filename.mid(pos + 1, endpos - pos - 5);
+		input_text->appendText(s);
+		input_text->setBottomLine(INT_MAX);
+		if(MBOX_CLICKED_NO==FXMessageBox::question(this,MBOX_YES_NO,"Really upgrade?","Old Firmware: %s\nNew Firmware: %s", firmware1.text(),  Firmwarename.text())) return 1;
+		s.format("%d %d %d %d", REPORT_ID_CONFIG_OUT, STAT_CMD, ACC_SET, CMD_REBOOT);
+		output_text->setText(s);
+		FXint cur_item = device_list->getCurrentItem();
+		Write_and_Check();
+		onDisconnect(NULL, 0, NULL);
+		FXThread::sleep(1200000000);
+		char* print;
+		print = (char*)malloc(3200);
+		upgrade(open.getFilename().text(), TransferSize, print);
+		FXThread::sleep(1200000000);
+		onRescan(NULL, 0, NULL);
+		device_list->setCurrentItem(cur_item);
+		device_list->deselectItem(0);
+		device_list->selectItem(cur_item);
+		onConnect(NULL, 0, NULL);
+		FXString t = print;
+		input_text->appendText(t);
+		input_text->setBottomLine(INT_MAX);
+	}
+
+	return 1;
+}
+
+long
 MainWindow::onOpen(FXObject *sender, FXSelector sel, void *ptr)
 {
 	if(map_text21->isModified()){
@@ -1676,8 +1751,8 @@ MainWindow::onOpen(FXObject *sender, FXSelector sel, void *ptr)
 		FXString file=open.getFilename();
 		FXFile textfile(file,FXFile::Reading);
 		// Opened file?
- 		if(textfile.isOpen()){
-  			FXchar *text; 
+		if(textfile.isOpen()){
+			FXchar *text;
 
 			// Get file size
 			size=textfile.size();
