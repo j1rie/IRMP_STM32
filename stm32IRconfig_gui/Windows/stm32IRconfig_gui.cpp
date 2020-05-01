@@ -1706,7 +1706,7 @@ MainWindow::onUpgrade(FXObject *sender, FXSelector sel, void *ptr)
 		FXThread::sleep(1200000000);
 		char* print;
 		print = (char*)malloc(3200);
-		upgrade(open.getFilename().text(), print);
+		upgrade(open.getFilename().text(), print); // TODO make thread, start earlier
 		FXThread::sleep(1200000000);
 		onRescan(NULL, 0, NULL);
 		device_list->setCurrentItem(cur_item);
