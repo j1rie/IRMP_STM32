@@ -397,7 +397,7 @@ void Wakeup(void)
 	GPIO_WriteBit(WAKEUP_PORT, WAKEUP_PIN, Bit_RESET);
 #endif /* SimpleCircuit */
 	fast_toggle();
-	/* let software know, PC was powered on by firmware, TODO make configurable & use Eeprom */
+	/* let software know, PC was powered on by firmware */
 	send_ir_on_delay = 90;
 }
 
