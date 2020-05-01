@@ -769,7 +769,7 @@ int main(void)
 			}
 
 			/* send configuration data */
-			USB_HID_SendData(REPORT_ID_CONFIG, buf, ret);
+			USB_HID_SendData(REPORT_ID_CONFIG_IN, buf, ret);
 			blink_LED();
 			if(Reboot)
 				reboot();

@@ -1,5 +1,5 @@
 /*
- *  Copyright (C) 2014-2018 Joerg Riechardt
+ *  Copyright (C) 2014-2020 Joerg Riechardt
  *
  *  inspired by work from Andrew Kambaroff - http://sysmagazine.com/posts/208026
  *
@@ -8,9 +8,9 @@
  *  the Free Software Foundation; either version 2 of the License, or
  *  (at your option) any later version.
  */
-diff -Nrup usb_hid.orig/inc/platform_config.h usb_hid.new/inc/platform_config.h
---- usb_hid.orig/inc/platform_config.h	2013-01-21 19:27:28.000000000 +0100
-+++ usb_hid.new/inc/platform_config.h	2018-02-20 22:27:24.529874770 +0100
+diff -Nrup A/inc/platform_config.h B/inc/platform_config.h
+--- A/inc/platform_config.h	2013-01-21 19:27:00.000000000 +0100
++++ B/inc/platform_config.h	2020-05-01 15:06:24.414406830 +0200
 @@ -48,7 +48,7 @@
   #elif defined (USE_STM3210E_EVAL)
    #include "stm3210e_eval.h"
@@ -29,9 +29,9 @@ diff -Nrup usb_hid.orig/inc/platform_config.h usb_hid.new/inc/platform_config.h
  #endif
  
  /*Unique Devices IDs register set*/
-diff -Nrup usb_hid.orig/inc/usb_conf.h usb_hid.new/inc/usb_conf.h
---- usb_hid.orig/inc/usb_conf.h	2013-01-21 19:27:28.000000000 +0100
-+++ usb_hid.new/inc/usb_conf.h	2018-02-20 22:20:43.000000000 +0100
+diff -Nrup A/inc/usb_conf.h B/inc/usb_conf.h
+--- A/inc/usb_conf.h	2013-01-21 19:27:00.000000000 +0100
++++ B/inc/usb_conf.h	2020-05-01 15:06:24.414406830 +0200
 @@ -57,7 +57,7 @@
  /* EP1  */
  /* tx buffer base address */
@@ -50,9 +50,9 @@ diff -Nrup usb_hid.orig/inc/usb_conf.h usb_hid.new/inc/usb_conf.h
                   | CNTR_ESOFM | CNTR_RESETM )
  
  /* CTR service routines */
-diff -Nrup usb_hid.orig/inc/usb_desc.h usb_hid.new/inc/usb_desc.h
---- usb_hid.orig/inc/usb_desc.h	2013-01-21 19:27:28.000000000 +0100
-+++ usb_hid.new/inc/usb_desc.h	2018-02-20 22:20:43.000000000 +0100
+diff -Nrup A/inc/usb_desc.h B/inc/usb_desc.h
+--- A/inc/usb_desc.h	2013-01-21 19:27:00.000000000 +0100
++++ B/inc/usb_desc.h	2020-05-01 15:06:24.414406830 +0200
 @@ -31,6 +31,7 @@
  #define __USB_DESC_H
  
@@ -74,9 +74,9 @@ diff -Nrup usb_hid.orig/inc/usb_desc.h usb_hid.new/inc/usb_desc.h
  #define CUSTOMHID_SIZ_STRING_SERIAL             26
  
  #define STANDARD_ENDPOINT_DESC_SIZE             0x09
-diff -Nrup usb_hid.orig/inc/usb_pwr.h usb_hid.new/inc/usb_pwr.h
---- usb_hid.orig/inc/usb_pwr.h	2013-01-21 19:27:28.000000000 +0100
-+++ usb_hid.new/inc/usb_pwr.h	2018-02-20 22:20:43.000000000 +0100
+diff -Nrup A/inc/usb_pwr.h B/inc/usb_pwr.h
+--- A/inc/usb_pwr.h	2013-01-21 19:27:00.000000000 +0100
++++ B/inc/usb_pwr.h	2020-05-01 15:06:24.414406830 +0200
 @@ -30,6 +30,7 @@
  #define __USB_PWR_H
  
@@ -85,9 +85,9 @@ diff -Nrup usb_hid.orig/inc/usb_pwr.h usb_hid.new/inc/usb_pwr.h
  /* Exported types ------------------------------------------------------------*/
  typedef enum _RESUME_STATE
  {
-diff -Nrup usb_hid.orig/inc/usb_regs.h usb_hid.new/inc/usb_regs.h
---- usb_hid.orig/inc/usb_regs.h	2013-01-21 19:27:32.000000000 +0100
-+++ usb_hid.new/inc/usb_regs.h	2018-02-20 22:20:43.000000000 +0100
+diff -Nrup A/inc/usb_regs.h B/inc/usb_regs.h
+--- A/inc/usb_regs.h	2013-01-21 19:27:00.000000000 +0100
++++ B/inc/usb_regs.h	2020-05-01 15:06:24.415406776 +0200
 @@ -651,8 +651,8 @@ void ClearDTOG_RX(uint8_t /*bEpNum*/);
  void ClearDTOG_TX(uint8_t /*bEpNum*/);
  void SetEPAddress(uint8_t /*bEpNum*/, uint8_t /*bAddr*/);
@@ -99,9 +99,9 @@ diff -Nrup usb_hid.orig/inc/usb_regs.h usb_hid.new/inc/usb_regs.h
  uint16_t GetEPTxAddr(uint8_t /*bEpNum*/);
  uint16_t GetEPRxAddr(uint8_t /*bEpNum*/);
  void SetEPCountRxReg(uint32_t * /*pdwReg*/, uint16_t /*wCount*/);
-diff -Nrup usb_hid.orig/src/hw_config.c usb_hid.new/src/hw_config.c
---- usb_hid.orig/src/hw_config.c	2013-01-21 19:27:28.000000000 +0100
-+++ usb_hid.new/src/hw_config.c	2018-02-20 22:20:43.000000000 +0100
+diff -Nrup A/src/hw_config.c B/src/hw_config.c
+--- A/src/hw_config.c	2013-01-21 19:27:00.000000000 +0100
++++ B/src/hw_config.c	2020-05-01 15:06:24.415406776 +0200
 @@ -78,10 +78,10 @@ void Set_System(void)
    
  #if !defined(STM32L1XX_MD) && !defined(STM32L1XX_HD) && !defined(STM32L1XX_MD_PLUS) && !defined(STM32F37X) && !defined(STM32F30X)
@@ -221,9 +221,9 @@ diff -Nrup usb_hid.orig/src/hw_config.c usb_hid.new/src/hw_config.c
  }
  #endif /* STM32F30x */
  /*******************************************************************************
-diff -Nrup usb_hid.orig/src/stm32_it.c usb_hid.new/src/stm32_it.c
---- usb_hid.orig/src/stm32_it.c	2013-01-21 19:27:28.000000000 +0100
-+++ usb_hid.new/src/stm32_it.c	2018-02-20 22:20:43.000000000 +0100
+diff -Nrup A/src/stm32_it.c B/src/stm32_it.c
+--- A/src/stm32_it.c	2013-01-21 19:27:00.000000000 +0100
++++ B/src/stm32_it.c	2020-05-01 15:06:24.416406723 +0200
 @@ -71,6 +71,7 @@ void NMI_Handler(void)
  * Output         : None
  * Return         : None
@@ -269,9 +269,9 @@ diff -Nrup usb_hid.orig/src/stm32_it.c usb_hid.new/src/stm32_it.c
  
  /*******************************************************************************
  * Function Name  : USB_FS_WKUP_IRQHandler
-diff -Nrup usb_hid.orig/src/usb_desc.c usb_hid.new/src/usb_desc.c
---- usb_hid.orig/src/usb_desc.c	2013-01-21 19:27:28.000000000 +0100
-+++ usb_hid.new/src/usb_desc.c	2018-02-20 22:20:43.000000000 +0100
+diff -Nrup A/src/usb_desc.c B/src/usb_desc.c
+--- A/src/usb_desc.c	2013-01-21 19:27:00.000000000 +0100
++++ B/src/usb_desc.c	2020-05-01 15:14:14.374550398 +0200
 @@ -49,10 +49,10 @@ const uint8_t CustomHID_DeviceDescriptor
      0x00,                       /*bDeviceSubClass*/
      0x00,                       /*bDeviceProtocol*/
@@ -340,19 +340,19 @@ diff -Nrup usb_hid.orig/src/usb_desc.c usb_hid.new/src/usb_desc.c
 +    0x75, 0x08,            /*     REPORT_SIZE (8)            */
 +
 +    /* STM32->PC */
-+    0x85, 0x01,            /*     REPORT_ID (1)              */
++    0x85, REPORT_ID_IR,    /*     REPORT_ID                  */
 +    0x09, 0x02,            /*     USAGE (2)                  */
 +    0x95, HID_IN_BUFFER_SIZE-1, /* REPORT_COUNT              */
 +    0x81, 0x82,            /*     INPUT (Data,Var,Abs,Vol)   */
 +
 +    /* STM32->PC */
-+    0x85, 0x02,            /*     REPORT_ID (2)              */
++    0x85, REPORT_ID_CONFIG_IN, /* REPORT_ID                  */
 +    0x09, 0x03,            /*     USAGE (3)                  */
 +    0x95, HID_IN_BUFFER_SIZE-1, /* REPORT_COUNT              */
 +    0x81, 0x82,            /*     INPUT (Data,Var,Abs,Vol)   */
 +
 +    /* PC->STM32 */
-+    0x85, 0x03,            /*     REPORT_ID (3)              */
++    0x85, REPORT_ID_CONFIG_OUT, /* REPORT_ID                 */
 +    0x09, 0x04,            /*     USAGE (4)                  */
 +    0x95, HID_OUT_BUFFER_SIZE-1, /* REPORT_COUNT             */
 +    0x91, 0x82,            /*     OUTPUT (Data,Var,Abs,Vol)  */
@@ -380,9 +380,9 @@ diff -Nrup usb_hid.orig/src/usb_desc.c usb_hid.new/src/usb_desc.c
      'S', 0, 'T', 0, 'M', 0,'3', 0,'2', 0
    };
  
-diff -Nrup usb_hid.orig/src/usb_endp.c usb_hid.new/src/usb_endp.c
---- usb_hid.orig/src/usb_endp.c	2013-01-21 19:27:28.000000000 +0100
-+++ usb_hid.new/src/usb_endp.c	2018-02-20 22:20:43.000000000 +0100
+diff -Nrup A/src/usb_endp.c B/src/usb_endp.c
+--- A/src/usb_endp.c	2013-01-21 19:27:00.000000000 +0100
++++ B/src/usb_endp.c	2020-05-01 15:06:24.416406723 +0200
 @@ -29,6 +29,7 @@
  /* Includes ------------------------------------------------------------------*/
  
@@ -432,9 +432,9 @@ diff -Nrup usb_hid.orig/src/usb_endp.c usb_hid.new/src/usb_endp.c
    SetEPRxStatus(ENDP1, EP_RX_VALID);
   
  }
-diff -Nrup usb_hid.orig/src/usb_prop.c usb_hid.new/src/usb_prop.c
---- usb_hid.orig/src/usb_prop.c	2013-01-21 19:27:28.000000000 +0100
-+++ usb_hid.new/src/usb_prop.c	2018-02-20 22:20:43.000000000 +0100
+diff -Nrup A/src/usb_prop.c B/src/usb_prop.c
+--- A/src/usb_prop.c	2013-01-21 19:27:00.000000000 +0100
++++ B/src/usb_prop.c	2020-05-01 15:06:24.416406723 +0200
 @@ -43,7 +43,7 @@
  uint32_t ProtocolValue;
  __IO uint8_t EXTI_Enable;
@@ -498,9 +498,9 @@ diff -Nrup usb_hid.orig/src/usb_prop.c usb_hid.new/src/usb_prop.c
    {
      return NULL;
    }
-diff -Nrup usb_hid.orig/src/usb_regs.c usb_hid.new/src/usb_regs.c
---- usb_hid.orig/src/usb_regs.c	2013-01-21 19:27:32.000000000 +0100
-+++ usb_hid.new/src/usb_regs.c	2018-02-20 22:20:43.000000000 +0100
+diff -Nrup A/src/usb_regs.c B/src/usb_regs.c
+--- A/src/usb_regs.c	2013-01-21 19:27:00.000000000 +0100
++++ B/src/usb_regs.c	2020-05-01 15:06:24.417406670 +0200
 @@ -476,7 +476,7 @@ uint8_t GetEPAddress(uint8_t bEpNum)
  * Output         : None.
  * Return         : None.
