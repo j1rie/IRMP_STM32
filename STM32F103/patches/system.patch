@@ -1,7 +1,7 @@
-diff -Nrup a/system_stm32f10x.c b/system_stm32f10x.c
---- a/system_stm32f10x.c	2013-01-21 19:27:28.000000000 +0100
-+++ b/system_stm32f10x.c	2017-01-12 00:37:59.000000000 +0100
-@@ -69,6 +69,7 @@
+diff -Nrup A/system_stm32f10x.c B/system_stm32f10x.c
+--- A/system_stm32f10x.c	2017-06-16 10:14:04.000000000 +0200
++++ B/system_stm32f10x.c	2020-04-30 02:58:38.658638774 +0200
+@@ -79,6 +79,7 @@
    */
  
  #include "stm32f10x.h"
@@ -9,7 +9,7 @@ diff -Nrup a/system_stm32f10x.c b/system_stm32f10x.c
  
  /**
    * @}
-@@ -131,8 +132,16 @@
+@@ -141,8 +142,16 @@
  /*!< Uncomment the following line if you need to relocate your vector Table in
       Internal SRAM. */ 
  /* #define VECT_TAB_SRAM */

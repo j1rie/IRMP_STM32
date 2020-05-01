@@ -1,9 +1,18 @@
-diff -Nrup a/startup/startup_stm32f10x_md.s b/startup/startup_stm32f10x_md.s
---- a/startup/startup_stm32f10x_md.s	2013-01-21 19:27:50.000000000 +0100
-+++ b/startup/startup_stm32f10x_md.s	2014-11-30 22:46:51.927448648 +0100
-@@ -128,7 +128,7 @@ Infinite_Loop:
-     
-     
+diff -Nrup A/startup/startup_stm32f10x_md.s B/startup/startup_stm32f10x_md.s
+--- A/startup/startup_stm32f10x_md.s	2017-05-05 16:10:18.000000000 +0200
++++ B/startup/startup_stm32f10x_md.s	2020-04-30 03:52:33.915828904 +0200
+@@ -100,7 +100,7 @@ LoopFillZerobss:
+ /* Call the clock system intitialization function.*/
+     bl  SystemInit
+ /* Call static constructors */
+-    bl __libc_init_array
++//    bl __libc_init_array
+ /* Call the application's entry point.*/
+ 	bl	main
+ 	bx	lr
+@@ -132,7 +132,7 @@ Infinite_Loop:
+ 
+ 
  g_pfnVectors:
 -	.word	_estack
 +	.word	_eram
