@@ -20,7 +20,7 @@
 #include <inttypes.h>
 #include <FXArray.h>
 #include "icons.h"
-extern "C" int upgrade(const char* file, int TransferSize, char* print);
+extern "C" int upgrade(const char* file, char* print);
 
 // Headers needed for sleeping.
 #ifdef _WIN32
@@ -789,6 +789,7 @@ MainWindow::onDisconnect(FXObject *sender, FXSelector sel, void *ptr)
 long
 MainWindow::onRescan(FXObject *sender, FXSelector sel, void *ptr)
 {
+	//TODO remember previous device and mark it when finished
 	struct hid_device_info *cur_dev;
 
 	device_list->clearItems();
@@ -1683,24 +1684,11 @@ MainWindow::onUpgrade(FXObject *sender, FXSelector sel, void *ptr)
 {
 	const FXchar patterns[]="All Files (*)\nfirmware Files (*.bin)";
 	FXString s, v, Filename, FilenameText;
-	int TransferSize = 1024;
 	FXFileDialog open(this,"Open a firmware file");
 	open.setPatternList(patterns);
 	open.setCurrentPattern(1);
 	if(open.execute()){
 		Filename = open.getFilename();
-		FilenameText = Filename.text();
-		if(FilenameText.contains("F105") || FilenameText.contains("F303")){
-			TransferSize = 2048;
-		}
-#if (FOX_MINOR >= 7)
-		v.fromInt(TransferSize, 10);
-#else
-		v = FXStringVal(TransferSize, 10);
-#endif
-		s = "TransferSize: ";
-		s += v;
-		s += "\n";
 #ifdef WIN32
 #define PATHSEP '\\'
 #else
@@ -1709,8 +1697,6 @@ MainWindow::onUpgrade(FXObject *sender, FXSelector sel, void *ptr)
 		FXint pos = Filename.rfind(PATHSEP);
 		FXint endpos = Filename.length();
 		FXString Firmwarename = Filename.mid(pos + 1, endpos - pos - 5);
-		input_text->appendText(s);
-		input_text->setBottomLine(INT_MAX);
 		if(MBOX_CLICKED_NO==FXMessageBox::question(this,MBOX_YES_NO,"Really upgrade?","Old Firmware: %s\nNew Firmware: %s", firmware1.text(),  Firmwarename.text())) return 1;
 		s.format("%d %d %d %d", REPORT_ID_CONFIG_OUT, STAT_CMD, ACC_SET, CMD_REBOOT);
 		output_text->setText(s);
@@ -1720,7 +1706,7 @@ MainWindow::onUpgrade(FXObject *sender, FXSelector sel, void *ptr)
 		FXThread::sleep(1000000000);
 		char* print;
 		print = (char*)malloc(3200);
-		upgrade(open.getFilename().text(), TransferSize, print);
+		upgrade(open.getFilename().text(), print);
 		FXThread::sleep(1000000000);
 		onRescan(NULL, 0, NULL);
 		device_list->setCurrentItem(cur_item);
