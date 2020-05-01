@@ -7,8 +7,8 @@ cd ..
 mkdir -p ext_src
 [[ -e ./ext_src/prepared ]] && exit 0
 cd ./ext_src
-for i in 32010 32121; do
-	if [[ ! -s stsw-stm$i.zip ]]; then
+for i in stsw-stm32010 en.stsw-stm32121; do
+	if [[ ! -s $i.zip ]]; then
 		echo 'unfortunately you have to download these files from ST manually and put them into ext_src'
 		echo 'http://www.st.com/en/embedded-software/stsw-stm32121.html'
 		echo 'http://www.st.com/en/embedded-software/stsw-stm32010.html'
@@ -22,9 +22,9 @@ fi
 
 # extract
 cd ..
-ar2='../../ext_src/stsw-stm32121.zip'
-ar1='../ext_src/stsw-stm32121.zip'
-ver='4.0.0'
+ar2='../../ext_src/en.stsw-stm32121.zip'
+ar1='../ext_src/en.stsw-stm32121.zip'
+ver='4.1.0'
 path="STM32_USB-FS-Device_Lib_V$ver"
 mkdir -p cmsis_boot
 cd cmsis_boot
@@ -35,7 +35,7 @@ unzip -j $ar1 \
       $path/Projects/Custom_HID/inc/stm32f10x_conf.h
 mkdir -p startup
 cd startup
-unzip -j $ar2 $path/Libraries/CMSIS/Device/ST/STM32F10x/Source/Templates/gcc_ride7/startup_stm32f10x_md.s
+unzip -j $ar2 $path/Libraries/CMSIS/Device/ST/STM32F10x/Source/Templates/gcc/startup_stm32f10x_md.s
 cd ../..
 mkdir -p cmsis
 cd cmsis
