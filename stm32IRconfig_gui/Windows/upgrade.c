@@ -17,12 +17,14 @@
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 #include <stdio.h>
+#include <stdlib.h>
 #include <string.h>
 #include "dfu.h"
 #include "stm32mem.h"
 #include <fcntl.h>
 #include <errno.h>
 #include <time.h>
+#include <unistd.h>
 
 #define LOAD_ADDRESS 0x8002000
 
@@ -43,7 +45,16 @@ struct libusb_device * find_dev(void)
 	return NULL;
 }
 
-libusb_device_handle * get_dfu_interface(struct libusb_device *dev, uint16_t *interface)
+struct usb_dfu_descriptor {
+	uint8_t bLength;
+	uint8_t bDescriptorType;
+	uint8_t bmAttributes;
+	uint16_t wDetachTimeout;
+	uint16_t wTransferSize;
+	uint16_t bcdDFUVersion;
+} __attribute__ ((__packed__)) ;
+
+libusb_device_handle * get_dfu_interface(struct libusb_device *dev, uint16_t *interface, uint16_t *wTransferSize)
 {
 	int i, j, k;
 	struct libusb_device_descriptor desc;
@@ -59,10 +70,9 @@ libusb_device_handle * get_dfu_interface(struct libusb_device *dev, uint16_t *in
 				if((iface->bInterfaceClass == 0xFE) &&
 				   (iface->bInterfaceSubClass = 0x01)) {
 					libusb_open(dev, &handle); //
-					//usb_set_configuration(handle, i);
+					struct usb_dfu_descriptor *dfu_function = iface->extra;
+					*wTransferSize = dfu_function->wTransferSize;
 					libusb_claim_interface(handle, j);
-					//usb_set_altinterface(handle, k);
-					//*interface = j;
 					*interface = iface->bInterfaceNumber;
 					return handle;
 				}
@@ -72,7 +82,7 @@ libusb_device_handle * get_dfu_interface(struct libusb_device *dev, uint16_t *in
 	return NULL;
 }
 
-int upgrade(const char* firmwarefile, int TransferSize, char* print)
+int upgrade(const char* firmwarefile, char* print)
 {
 	struct libusb_device *dev;
 	libusb_device_handle *handle;
@@ -82,6 +92,7 @@ int upgrade(const char* firmwarefile, int TransferSize, char* print)
 	FILE *fpFirmware;
   	int firmwareSize;
 	uint8_t *fw_buf;
+	uint16_t wTransferSize;
 
 	char* printbuf;
 	printbuf = (char*)malloc(80);
@@ -130,12 +141,12 @@ int upgrade(const char* firmwarefile, int TransferSize, char* print)
 
 	libusb_init(NULL);
 
-	printf("Waiting for device\n");
-	sprintf(printbuf, "Waiting for device\n");
+	printf("Waiting for device ...\n");
+	sprintf(printbuf, "Waiting for device ...\n");
 	strcat(print, printbuf);
 
 retry:
-	if(!(dev = find_dev()) || !(handle = get_dfu_interface(dev, &iface))) {
+	if(!(dev = find_dev()) || !(handle = get_dfu_interface(dev, &iface, &wTransferSize))) {
 
 #ifdef WIN32
 		Sleep(3);
@@ -165,21 +176,21 @@ retry:
 	sprintf(printbuf, "Found device at %d:%d\n", libusb_get_bus_number(dev), libusb_get_device_address(dev));
 	strcat(print, printbuf);
 
-	printf("Transfer Size:%d\n", TransferSize);
-	sprintf(printbuf, "Transfer Size:%d\n", TransferSize);
+	printf("wTransfer Size = %d\n", wTransferSize);
+	sprintf(printbuf, "wTransfer Size = %d\n", wTransferSize);
 	strcat(print, printbuf);
 
 	dfu_makeidle(handle, iface);
 
-	for(offset = 0; offset < firmwareSize; offset += TransferSize) {
+	for(offset = 0; offset < firmwareSize; offset += wTransferSize) {
 		printf("Progress: %d%%\n", (offset*100)/firmwareSize);
 		sprintf(printbuf, "Progress: %d%%\n", (offset*100)/firmwareSize);
 		strcat(print, printbuf);
 		fflush(stdout);
-		if(firmwareSize - offset > TransferSize)
-		    stm32_mem_write(handle, iface, offset/TransferSize, (void*)&fw_buf[offset], TransferSize);
+		if(firmwareSize - offset > wTransferSize)
+		    stm32_mem_write(handle, iface, offset/wTransferSize, (void*)&fw_buf[offset], wTransferSize);
 		else
-		    stm32_mem_write(handle, iface, offset/TransferSize, (void*)&fw_buf[offset], firmwareSize - offset);
+		    stm32_mem_write(handle, iface, offset/wTransferSize, (void*)&fw_buf[offset], firmwareSize - offset);
 	}
 
 	puts("Progress: 100%");
