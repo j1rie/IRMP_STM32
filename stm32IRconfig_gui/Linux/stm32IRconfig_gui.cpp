@@ -1111,7 +1111,7 @@ long
 MainWindow::Write_and_Check()
 {
 	FXString s;
-	int read;
+	int read, count = 0;
 	s = "";
     if(Write() == -1) {
 		s += "W&C Write(): -1\n";
@@ -1130,7 +1130,7 @@ MainWindow::Write_and_Check()
 		return -1;
 	}
 
-    while (buf[0] == REPORT_ID_IR || read == 0) {
+    while ((buf[0] == REPORT_ID_IR || read == 0) && count < 10000) {
 		read = Read();
 		if(read == -1) {
 			s += "W&C loop Read(): -1\n";
@@ -1138,6 +1138,8 @@ MainWindow::Write_and_Check()
 			input_text->setBottomLine(INT_MAX);
 			return -1;
 		}
+		count++;
+		FXThread::sleep(2000);
 	}
 
 	if(buf[1] == STAT_SUCCESS) {
