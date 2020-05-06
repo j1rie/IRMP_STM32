@@ -2,8 +2,8 @@ all: stm32IRconfig_gui
 
 CC=gcc
 CXX=g++
-COBJS=hid.o dfu.o stm32mem.o upgrade.o
-CPPOBJS=stm32IRconfig_gui.o icons.o
+COBJS=hid.o
+CPPOBJS=stm32IRconfig_gui.o icons.o upgrade.o stm32mem.o dfu.o
 OBJS=$(COBJS) $(CPPOBJS)
 ifeq ($(MSYSTEM),MINGW32)
 CFLAGS=-I/mingw32/include/fox-1.6 -I/mingw64/include/libusb-1.0 -g -c -s -Wall -O0 -MD -mno-ms-bitfields
