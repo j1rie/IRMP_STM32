@@ -70,9 +70,9 @@ typedef struct dfu_status {
 
 
 int dfu_detach(libusb_device_handle *dev, uint16_t iface, uint16_t wTimeout);
-int dfu_dnload(libusb_device_handle *dev, uint16_t iface, 
+int dfu_dnload(libusb_device_handle *dev, uint16_t iface,
 		 uint16_t wBlockNum, void *data, uint16_t size);
-int dfu_upload(libusb_device_handle *dev, uint16_t iface, 
+int dfu_upload(libusb_device_handle *dev, uint16_t iface,
 		 uint16_t wBlockNum, void *data, uint16_t size);
 int dfu_getstatus(libusb_device_handle *dev, uint16_t iface, dfu_status *status);
 int dfu_clrstatus(libusb_device_handle *dev, uint16_t iface);
