@@ -181,8 +181,8 @@ private:
 	int max;
 	int count;
 	char* print;
+	char* printcollect;
 	FXint cur_item;
-	FXString printbuf;
 
 protected:
 	MainWindow() {};
@@ -543,7 +543,8 @@ MainWindow::MainWindow(FXApp *app)
 	firmware1 = "";
 	max = 0;
 	count = 0;
-	print = (char*)malloc(80);
+	print = (char*)malloc(512);
+	printcollect = (char*)malloc(512);
 
 }
 
@@ -553,6 +554,7 @@ MainWindow::~MainWindow()
 		hid_close(connected_device);
 	hid_exit();
 	delete print;
+	delete printcollect;
 	delete guisignal;
 }
 
@@ -1712,9 +1714,10 @@ MainWindow::onUpgrade(FXObject *sender, FXSelector sel, void *ptr)
 		Write_and_Check();
 		onDisconnect(NULL, 0, NULL);
 		FXThread::sleep(1200000000);
-		printbuf = "";
+		sprintf(printcollect, "");
 		doUpgrade.set_firmwarefile(open.getFilename().text()); // TODO utfFilename
 		doUpgrade.set_print(print);
+		doUpgrade.set_printcollect(printcollect);
 		doUpgrade.set_signal(guisignal);
 		doUpgrade.start();
 	}
@@ -1726,17 +1729,17 @@ long
 MainWindow::onPrint(FXObject *sender, FXSelector sel, void *ptr)
 {
 		FXString t = print;
-		printbuf += t;
 		input_text->appendText(t);
 		input_text->setBottomLine(INT_MAX);
 		if(t == "=== Firmware Upgrade successful! ===\n"){
-			FXThread::sleep(500000000);
+			FXThread::sleep(700000000);
 			onRescan(NULL, 0, NULL);
 			device_list->setCurrentItem(cur_item);
 			device_list->deselectItem(0);
 			device_list->selectItem(cur_item);
 			onConnect(NULL, 0, NULL);
-			input_text->appendText(printbuf);
+			FXString u = printcollect;
+			input_text->appendText(u);
 			input_text->setBottomLine(INT_MAX);
 		}
 
