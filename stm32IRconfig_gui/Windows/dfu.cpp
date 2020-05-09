@@ -94,7 +94,7 @@ int dfu_getstate(libusb_device_handle *dev, uint16_t iface)
 
 int dfu_abort(libusb_device_handle *dev, uint16_t iface)
 {
-	return libusb_control_transfer(dev, 
+	return libusb_control_transfer(dev,
 			LIBUSB_ENDPOINT_OUT | LIBUSB_REQUEST_TYPE_CLASS | LIBUSB_RECIPIENT_INTERFACE,
 			DFU_ABORT, 0, iface, NULL, 0, USB_DEFAULT_TIMEOUT);
 }
@@ -147,5 +147,3 @@ int dfu_makeidle(libusb_device_handle *dev, uint16_t iface)
 
 	return -1;
 }
-
-

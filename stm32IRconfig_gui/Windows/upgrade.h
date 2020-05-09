@@ -5,10 +5,10 @@
 
 class Upgrade : public FXThread {
 private:
-	const char* firmwarefile;
-	char* print;
-	char* printcollect;
-	FXGUISignal* guisignal;
+	const char* firmwarefile{NULL};
+	char* print{NULL};
+	char* printcollect{NULL};
+	FXGUISignal* guisignal{NULL};
 public:
 	Upgrade();
 	Upgrade(const char* pfirmwarefile, char* pprint, char* pprintcollect, FXGUISignal* pguisignal);
