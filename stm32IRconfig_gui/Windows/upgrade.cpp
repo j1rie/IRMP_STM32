@@ -1,7 +1,7 @@
 /*
  * Copyright (C) 2020 Joerg Riechardt
  * Copyright (C) 2011  Black Sphere Technologies Ltd.
- * Written by Gareth McMullin <gareth@blacksphere.co.nz>
+ * Originally written by Gareth McMullin <gareth@blacksphere.co.nz>
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -30,12 +30,12 @@
 
 #define LOAD_ADDRESS 0x8002000
 
-int upgrade(const char* firmwarefile, char* print, char* pprintcollect, FXGUISignal* guisignal);
+int upgrade(const char* firmwarefile, char* print, char* printcollect, FXGUISignal* guisignal);
+
+Upgrade::Upgrade() : firmwarefile{NULL}, print{NULL}, printcollect{NULL}, guisignal{NULL} {}
 
 Upgrade::Upgrade(const char* pfirmwarefile, char* pprint, char* pprintcollect, FXGUISignal* pguisignal)
 : firmwarefile{pfirmwarefile}, print{pprint}, printcollect{pprintcollect}, guisignal{pguisignal} {}
-
-Upgrade::Upgrade() {}
 
 void Upgrade::set_firmwarefile(const char* pfirmwarefile) {
 	firmwarefile = pfirmwarefile;
@@ -58,14 +58,15 @@ FXint Upgrade::run() {
   return 0;
 }
 
-Upgrade::~Upgrade(){}
+Upgrade::~Upgrade() {}
 
-struct libusb_device * find_dev(void)
+struct libusb_device * find_dev()
 {
 	struct libusb_device *dev, **devs;
 	libusb_get_device_list(NULL, &devs);
 	for (int i=0; (dev=devs[i]) != NULL; i++) {
 		struct libusb_device_descriptor desc;
+		//printf("%04X %04X \n", desc.idVendor, desc.idProduct);
 		libusb_get_device_descriptor(dev, &desc);
 		/* Check for vendor ID */
 			if (desc.idVendor != 0x1209)
@@ -187,9 +188,9 @@ retry:
 	if(!(dev = find_dev()) || !(handle = get_dfu_interface(dev, &iface, &wTransferSize))) {
 
 #ifdef WIN32
-		Sleep(3);
+		Sleep(20);
 #else
-		usleep(3000);
+		usleep(20000);
 #endif
 		goto retry;
 	}
@@ -224,14 +225,13 @@ retry:
 	dfu_makeidle(handle, iface);
 
 	for(offset = 0; offset < firmwareSize; offset += wTransferSize) {
-
 		if(firmwareSize - offset > wTransferSize)
 		    stm32_mem_write(handle, iface, offset/wTransferSize, (void*)&fw_buf[offset], wTransferSize);
 		else
 		    stm32_mem_write(handle, iface, offset/wTransferSize, (void*)&fw_buf[offset], firmwareSize - offset);
-		printf("Progress: %d%%\n", (std::max(100,(offset+wTransferSize)*100)/firmwareSize));
+		printf("Progress: %d%%\n", std::min(100, (offset+wTransferSize)*100/firmwareSize));
 		fflush(stdout);
-		sprintf(print, "Progress: %d%%\n", (std::max(100,(offset+wTransferSize)*100)/firmwareSize));
+		sprintf(print, "Progress: %d%%\n", std::min(100, (offset+wTransferSize)*100/firmwareSize));
 		strcat(printcollect, print);
 		guisignal->signal();
 	}
@@ -240,7 +240,9 @@ retry:
 
 	libusb_release_interface(handle, iface);
 	libusb_close(handle);
+	libusb_exit(NULL);
 	free(fw_buf);
+	free(printbuf);
 
 	printf("=== Firmware Upgrade successful! ===\n");
 	fflush(stdout);
