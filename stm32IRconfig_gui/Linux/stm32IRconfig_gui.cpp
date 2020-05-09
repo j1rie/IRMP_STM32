@@ -1716,14 +1716,12 @@ MainWindow::onUpgrade(FXObject *sender, FXSelector sel, void *ptr)
 		doUpgrade.set_printcollect(printcollect);
 		doUpgrade.set_signal(guisignal);
 		doUpgrade.start();
-		FXThread::sleep(100000000); // 100 ms TODO warum nötig???
 
 		cur_item = device_list->getCurrentItem();
 		s.format("%d %d %d %d", REPORT_ID_CONFIG_OUT, STAT_CMD, ACC_SET, CMD_REBOOT);
 		output_text->setText(s);
 		Write_and_Check();
 		onDisconnect(NULL, 0, NULL);
-		FXThread::sleep(100000000); // 100 ms TODO warum nötig???
 	}
 
 	return 1;
