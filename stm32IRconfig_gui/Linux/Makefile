@@ -2,8 +2,8 @@ all: stm32IRconfig_gui
 
 CC=gcc
 CXX=g++
-COBJS=hid.o dfu.o stm32mem.o upgrade.o
-CPPOBJS=stm32IRconfig_gui.o icons.o
+COBJS=hid.o
+CPPOBJS=stm32IRconfig_gui.o icons.o dfu.o stm32mem.o upgrade.o
 OBJS=$(COBJS) $(CPPOBJS)
 CFLAGS=-Wall -g -c `fox-config --cflags` -I/usr/include/libusb-1.0
 LIBS=-ludev -lrt `fox-config --libs` -lusb-1.0

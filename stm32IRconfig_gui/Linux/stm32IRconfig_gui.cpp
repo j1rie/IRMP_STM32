@@ -20,17 +20,13 @@
 #include <inttypes.h>
 #include <FXArray.h>
 #include "icons.h"
-extern "C" int upgrade(const char* file, char* print);
+#include "upgrade.h"
 
 // Headers needed for sleeping.
 #ifdef _WIN32
 	#include <windows.h>
 #else
 	#include <unistd.h>
-#endif
-
-#ifdef _WIN32
-	#pragma warning(disable:4996)
 #endif
 
 class MainWindow : public FXMainWindow {
@@ -59,6 +55,7 @@ public:
 		ID_SEND,
 		ID_READ_CONT,
 		ID_UPGRADE,
+		ID_PRINT,
 		ID_CLEAR,
 		ID_TIMER,
 		ID_READIR_TIMER,
@@ -103,6 +100,9 @@ enum report_id {
 	REPORT_ID_CONFIG_IN = 2,
 	REPORT_ID_CONFIG_OUT = 3
 };
+
+	FXGUISignal *guisignal = new FXGUISignal(getApp(), this, ID_PRINT);
+	Upgrade doUpgrade;
 	
 private:
 	FXList *device_list;
@@ -180,6 +180,10 @@ private:
 	int active_lines;
 	int max;
 	int count;
+	const char* firmwarefile;
+	char* print;
+	char* printcollect;
+	FXint cur_item;
 
 protected:
 	MainWindow() {};
@@ -209,6 +213,7 @@ public:
 	long onReadIR(FXObject *sender, FXSelector sel, void *ptr);
 	long onReadIRcont(FXObject *sender, FXSelector sel, void *ptr);
 	long onUpgrade(FXObject *sender, FXSelector sel, void *ptr);
+	long onPrint(FXObject *sender, FXSelector sel, void *ptr);
 	long onClear(FXObject *sender, FXSelector sel, void *ptr);
 	long onTimeout(FXObject *sender, FXSelector sel, void *ptr);
 	long onReadIRTimeout(FXObject *sender, FXSelector sel, void *ptr);
@@ -240,7 +245,6 @@ public:
 #endif
 
 FXMainWindow *g_main_window;
-
 
 FXDEFMAP(MainWindow) MainWindowMap [] = {
 	FXMAPFUNC(SEL_COMMAND, MainWindow::ID_CONNECT, MainWindow::onConnect ),
@@ -280,12 +284,13 @@ FXDEFMAP(MainWindow) MainWindowMap [] = {
 	FXMAPFUNC(SEL_COMMAND, MainWindow::ID_APPEND, MainWindow::onAppend ),
 	FXMAPFUNC(SEL_COMMAND, MainWindow::ID_WRITE_IR, MainWindow::onWrite_IR ),
 	FXMAPFUNC(SEL_CLOSE,   0, MainWindow::onCmdQuit ),
+	FXMAPFUNC(SEL_IO_READ, MainWindow::ID_PRINT, MainWindow::onPrint),
 };
 
 FXIMPLEMENT(MainWindow, FXMainWindow, MainWindowMap, ARRAYNUMBER(MainWindowMap));
 
 MainWindow::MainWindow(FXApp *app)
-	: FXMainWindow(app, "IRMP STM32 Configuration", NULL, NULL, DECOR_ALL, 275, 50, 730, 950)  // for 1280x1024
+	: FXMainWindow(app, "IRMP STM32 Configuration", NULL, NULL, DECOR_ALL, 275, 50, 790, 950)  // for 1280x1024
 {
 	this->setIcon(new FXGIFIcon(app,Icon)); // for taskbar
 	this->setMiniIcon(new FXICOIcon(app,MiniIcon)); // for titlebar
@@ -344,7 +349,7 @@ MainWindow::MainWindow(FXApp *app)
 
 	//IR Group Box
 	FXGroupBox *gb131 = new FXGroupBox(s131, "IR (hex)", FRAME_GROOVE|LAYOUT_FILL_X);
-	FXMatrix *m131 = new FXMatrix(gb131, 6, MATRIX_BY_COLUMNS,0,0,0,0, 0,0,0,0, 0,0);
+	FXMatrix *m131 = new FXMatrix(gb131, 6, MATRIX_BY_COLUMNS,0,0,0,0);
 	new FXLabel(m131, "");
 	new FXLabel(m131, "protocol");
 	new FXLabel(m131, "address");
@@ -538,7 +543,9 @@ MainWindow::MainWindow(FXApp *app)
 	firmware1 = "";
 	max = 0;
 	count = 0;
-
+	firmwarefile = (const char*)malloc(512);
+	print = (char*)malloc(512);
+	printcollect = (char*)malloc(512);
 }
 
 MainWindow::~MainWindow()
@@ -546,6 +553,9 @@ MainWindow::~MainWindow()
 	if (connected_device)
 		hid_close(connected_device);
 	hid_exit();
+	delete print;
+	delete printcollect;
+	delete guisignal;
 }
 
 long
@@ -1698,25 +1708,44 @@ MainWindow::onUpgrade(FXObject *sender, FXSelector sel, void *ptr)
 		FXint endpos = Filename.length();
 		FXString Firmwarename = Filename.mid(pos + 1, endpos - pos - 5);
 		if(MBOX_CLICKED_NO==FXMessageBox::question(this,MBOX_YES_NO,"Really upgrade?","Old Firmware: %s\nNew Firmware: %s", firmware1.text(),  Firmwarename.text())) return 1;
+		sprintf(printcollect, "");
+		firmwarefile = Filename.text();
+
+		doUpgrade.set_firmwarefile(firmwarefile);
+		doUpgrade.set_print(print);
+		doUpgrade.set_printcollect(printcollect);
+		doUpgrade.set_signal(guisignal);
+		doUpgrade.start();
+		FXThread::sleep(100000000); // 100 ms TODO warum nötig???
+
+		cur_item = device_list->getCurrentItem();
 		s.format("%d %d %d %d", REPORT_ID_CONFIG_OUT, STAT_CMD, ACC_SET, CMD_REBOOT);
 		output_text->setText(s);
-		FXint cur_item = device_list->getCurrentItem();
 		Write_and_Check();
 		onDisconnect(NULL, 0, NULL);
-		FXThread::sleep(1000000000);
-		char* print;
-		print = (char*)malloc(3200);
-		upgrade(open.getFilename().text(), print); // TODO make thread, start earlier
-		FXThread::sleep(1000000000);
-		onRescan(NULL, 0, NULL);
-		device_list->setCurrentItem(cur_item);
-		device_list->deselectItem(0);
-		device_list->selectItem(cur_item);
-		onConnect(NULL, 0, NULL);
+		FXThread::sleep(100000000); // 100 ms TODO warum nötig???
+	}
+
+	return 1;
+}
+
+long
+MainWindow::onPrint(FXObject *sender, FXSelector sel, void *ptr)
+{
 		FXString t = print;
 		input_text->appendText(t);
 		input_text->setBottomLine(INT_MAX);
-	}
+		if(t == "=== Firmware Upgrade successful! ===\n"){
+			FXThread::sleep(700000000); // 700 ms
+			onRescan(NULL, 0, NULL);
+			device_list->setCurrentItem(cur_item);
+			device_list->deselectItem(0);
+			device_list->selectItem(cur_item);
+			onConnect(NULL, 0, NULL);
+			FXString u = printcollect;
+			input_text->appendText(u);
+			input_text->setBottomLine(INT_MAX);
+		}
 
 	return 1;
 }
@@ -1983,7 +2012,6 @@ MainWindow::onTimeout(FXObject *sender, FXSelector sel, void *ptr)
 
 	return 1;
 }
-
 
 long
 MainWindow::onReadIRTimeout(FXObject *sender, FXSelector sel, void *ptr)
