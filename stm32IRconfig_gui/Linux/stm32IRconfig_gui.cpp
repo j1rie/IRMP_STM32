@@ -588,7 +588,7 @@ MainWindow::create()
 long
 MainWindow::onConnect(FXObject *sender, FXSelector sel, void *ptr)
 {
-	if (connected_device != NULL)
+	if (connected_device)
 		return 1;
 	
 	FXint cur_item = device_list->getCurrentItem();
@@ -755,6 +755,8 @@ MainWindow::onConnect(FXObject *sender, FXSelector sel, void *ptr)
 long
 MainWindow::onDisconnect(FXObject *sender, FXSelector sel, void *ptr)
 {
+	if (!connected_device)
+		return 1;
 	if(ReadIRcontActive)
 		onReadIRcont(NULL, 0, NULL);
 	hid_close(connected_device);
@@ -799,7 +801,9 @@ MainWindow::onDisconnect(FXObject *sender, FXSelector sel, void *ptr)
 long
 MainWindow::onRescan(FXObject *sender, FXSelector sel, void *ptr)
 {
-	//TODO remember previous device and mark it when finished
+	// the selected device's position in the list may change, so make a new onConnect() mandatory
+	onDisconnect(NULL, 0, NULL);
+
 	struct hid_device_info *cur_dev;
 
 	device_list->clearItems();
@@ -840,7 +844,6 @@ MainWindow::onReboot(FXObject *sender, FXSelector sel, void *ptr)
 	FXint cur_item = device_list->getCurrentItem();
 	Write_and_Check();
 	FXThread::sleep(2500000000);
-	onDisconnect(NULL, 0, NULL);
 	onRescan(NULL, 0, NULL);
 	device_list->setCurrentItem(cur_item);
 	device_list->deselectItem(0);
@@ -897,7 +900,6 @@ MainWindow::Read()
 	
 	if (res < 0) {
 		FXMessageBox::error(this, MBOX_OK, "Error Reading", "Could not read from device. Error reported was: %ls", hid_error(connected_device));
-		onDisconnect(NULL, 0, NULL);
 		onRescan(NULL, 0, NULL);
 		input_text->appendText("read error\n");
 		input_text->setBottomLine(INT_MAX);
@@ -1100,7 +1102,6 @@ MainWindow::Write()
 		FXMessageBox::error(this, MBOX_OK, "Error Writing", "Could not write to device. Error reported was: %ls", hid_error(connected_device));
 		input_text->appendText("write error\n");
 		input_text->setBottomLine(INT_MAX);
-		onDisconnect(NULL, 0, NULL);
 		onRescan(NULL, 0, NULL);
 		return -1;
 	} else {
@@ -1124,7 +1125,7 @@ MainWindow::Write_and_Check()
 	FXString s;
 	int read, count = 0;
 	s = "";
-    if(Write() == -1) {
+	if(Write() == -1) {
 		s += "W&C Write(): -1\n";
 		input_text->appendText(s);
 		input_text->setBottomLine(INT_MAX);
@@ -1134,14 +1135,14 @@ MainWindow::Write_and_Check()
 	FXThread::sleep(2000);
 
 	read = Read();
-    if(read  == -1) {
+	if(read  == -1) {
 		s += "W&C first Read(): -1\n";
 		input_text->appendText(s);
 		input_text->setBottomLine(INT_MAX);
 		return -1;
 	}
 
-    while ((buf[0] == REPORT_ID_IR || read == 0) && count < 10000) {
+	while ((buf[0] == REPORT_ID_IR || read == 0) && count < 100000) {
 		read = Read();
 		if(read == -1) {
 			s += "W&C loop Read(): -1\n";
@@ -1692,23 +1693,19 @@ MainWindow::onSendIR(FXObject *sender, FXSelector sel, void *ptr)
 long
 MainWindow::onUpgrade(FXObject *sender, FXSelector sel, void *ptr)
 {
-	const FXchar patterns[]="All Files (*)\nfirmware Files (*.bin)";
+	const FXchar patterns[]="All Files (*)\nFirmware Files (*.bin)";
 	FXString s, v, Filename, FilenameText;
 	FXFileDialog open(this,"Open a firmware file");
 	open.setPatternList(patterns);
 	open.setCurrentPattern(1);
 	if(open.execute()){
 		Filename = open.getFilename();
-#ifdef WIN32
-#define PATHSEP '\\'
-#else
-#define PATHSEP '/'
-#endif
 		FXint pos = Filename.rfind(PATHSEP);
 		FXint endpos = Filename.length();
-		FXString Firmwarename = Filename.mid(pos + 1, endpos - pos - 5);
+		FXint suffix_length = open.getCurrentPattern() ? 4 : 0;
+		FXString Firmwarename = Filename.mid(pos + 1, endpos - pos - 1 - suffix_length);
 		if(MBOX_CLICKED_NO==FXMessageBox::question(this,MBOX_YES_NO,"Really upgrade?","Old Firmware: %s\nNew Firmware: %s", firmware1.text(),  Firmwarename.text())) return 1;
-		sprintf(printcollect, "");
+		sprintf(printcollect, "%s", "");
 		firmwarefile = Filename.text();
 
 		doUpgrade.set_firmwarefile(firmwarefile);
@@ -1716,12 +1713,18 @@ MainWindow::onUpgrade(FXObject *sender, FXSelector sel, void *ptr)
 		doUpgrade.set_printcollect(printcollect);
 		doUpgrade.set_signal(guisignal);
 		doUpgrade.start();
+#ifdef _WIN32
+		FXThread::sleep(100000000); // 100 ms needed for Windows
+#endif
 
 		cur_item = device_list->getCurrentItem();
 		s.format("%d %d %d %d", REPORT_ID_CONFIG_OUT, STAT_CMD, ACC_SET, CMD_REBOOT);
 		output_text->setText(s);
 		Write_and_Check();
 		onDisconnect(NULL, 0, NULL);
+#ifdef _WIN32
+		FXThread::sleep(100000000); // 100 ms needed for Windows
+#endif
 	}
 
 	return 1;

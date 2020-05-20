@@ -36,25 +36,25 @@
 
 int dfu_detach(libusb_device_handle *dev, uint16_t iface, uint16_t wTimeout)
 {
-	return libusb_control_transfer(dev, 
+	return libusb_control_transfer(dev,
 			LIBUSB_ENDPOINT_OUT | LIBUSB_REQUEST_TYPE_CLASS | LIBUSB_RECIPIENT_INTERFACE,
-			DFU_DETACH, wTimeout, iface, NULL, 0, 
+			DFU_DETACH, wTimeout, iface, NULL, 0,
 			USB_DEFAULT_TIMEOUT);
 }
 
-int dfu_dnload(libusb_device_handle *dev, uint16_t iface, 
+int dfu_dnload(libusb_device_handle *dev, uint16_t iface,
 		 uint16_t wBlockNum, void *data, uint16_t size)
 {
-	return libusb_control_transfer(dev, 
+	return libusb_control_transfer(dev,
 			LIBUSB_ENDPOINT_OUT | LIBUSB_REQUEST_TYPE_CLASS | LIBUSB_RECIPIENT_INTERFACE,
 			DFU_DNLOAD, wBlockNum, iface, (unsigned char*)data, size,
 			USB_DEFAULT_TIMEOUT);
 }
 
-int dfu_upload(libusb_device_handle *dev, uint16_t iface, 
+int dfu_upload(libusb_device_handle *dev, uint16_t iface,
 		 uint16_t wBlockNum, void *data, uint16_t size)
 {
-	return libusb_control_transfer(dev, 
+	return libusb_control_transfer(dev,
 			LIBUSB_ENDPOINT_IN | LIBUSB_REQUEST_TYPE_CLASS | LIBUSB_RECIPIENT_INTERFACE,
 			DFU_DNLOAD, wBlockNum, iface, (unsigned char*)data, size,
 			USB_DEFAULT_TIMEOUT);
@@ -62,7 +62,7 @@ int dfu_upload(libusb_device_handle *dev, uint16_t iface,
 
 int dfu_getstatus(libusb_device_handle *dev, uint16_t iface, dfu_status *status)
 {
-	return libusb_control_transfer(dev, 
+	return libusb_control_transfer(dev,
 			LIBUSB_ENDPOINT_IN | LIBUSB_REQUEST_TYPE_CLASS | LIBUSB_RECIPIENT_INTERFACE,
 			DFU_GETSTATUS, 0, iface, (unsigned char*)status, sizeof(dfu_status),
 			USB_DEFAULT_TIMEOUT);
@@ -70,7 +70,7 @@ int dfu_getstatus(libusb_device_handle *dev, uint16_t iface, dfu_status *status)
 
 int dfu_clrstatus(libusb_device_handle *dev, uint16_t iface)
 {
-	return libusb_control_transfer(dev, 
+	return libusb_control_transfer(dev,
 			LIBUSB_ENDPOINT_OUT | LIBUSB_REQUEST_TYPE_CLASS | LIBUSB_RECIPIENT_INTERFACE,
 			DFU_CLRSTATUS, 0, iface, NULL, 0, USB_DEFAULT_TIMEOUT);
 }

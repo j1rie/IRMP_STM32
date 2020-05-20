@@ -32,11 +32,6 @@
 
 int upgrade(const char* firmwarefile, char* print, char* printcollect, FXGUISignal* guisignal);
 
-Upgrade::Upgrade() : firmwarefile{NULL}, print{NULL}, printcollect{NULL}, guisignal{NULL} {}
-
-Upgrade::Upgrade(const char* pfirmwarefile, char* pprint, char* pprintcollect, FXGUISignal* pguisignal)
-: firmwarefile{pfirmwarefile}, print{pprint}, printcollect{pprintcollect}, guisignal{pguisignal} {}
-
 void Upgrade::set_firmwarefile(const char* pfirmwarefile) {
 	firmwarefile = pfirmwarefile;
 }
@@ -57,8 +52,6 @@ FXint Upgrade::run() {
 	upgrade(firmwarefile, print, printcollect, guisignal);
   return 0;
 }
-
-Upgrade::~Upgrade() {}
 
 struct libusb_device * find_dev()
 {
