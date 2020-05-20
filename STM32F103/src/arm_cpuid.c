@@ -91,7 +91,7 @@ void parse_romtable() {
 	if (romtable_pid.identity_code == 59
 			&& romtable_pid.continuation_code == 4) {
 		// APM or CS
-		cortex_m_romtable_t *rom = (romtable_id_t*) (ROMTABLE);
+		cortex_m_romtable_t *rom = (cortex_m_romtable_t *)((romtable_id_t*) (ROMTABLE));
 		if (rom->etm & 1) {
 			prob = "CS32";
 		} else {
