@@ -1,5 +1,6 @@
 The compiler is from
 https://developer.arm.com/open-source/gnu-toolchain/gnu-rm/downloads
+I am still using gcc-arm-none-eabi-6-2017-q2-update.
 
 For complete eeprom and firmware reset flash the file "ZEROS".
 Afterwards a new firmware needs to be flashed.
