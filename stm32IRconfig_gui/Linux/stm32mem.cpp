@@ -17,13 +17,12 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-#include <string.h>
 
-#include <libusb.h>
 #ifdef WIN32
 #   include <windows.h>
 #else
 #   include <unistd.h>
+#   include <string.h>
 #endif
 
 #include "dfu.h"

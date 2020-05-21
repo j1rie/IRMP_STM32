@@ -18,8 +18,6 @@
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-#include <libusb.h>
-
 #include "dfu.h"
 
 /* DFU Requests: Refer to Table 3.2 */

@@ -27,6 +27,6 @@ $(CPPOBJS): %.o: %.cpp
 	$(CXX) $(CFLAGS) $< -o $@
 
 clean:
-	rm -f *.o stm32IRconfig_gui.exe *.d
+	rm -f *.o stm32IRconfig_gui.exe
 
 .PHONY: clean

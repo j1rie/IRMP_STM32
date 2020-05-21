@@ -16,15 +16,14 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-#include <stdio.h>
-#include <stdlib.h>
-#include <string.h>
+
+#ifdef WIN32
+#   #include <stdio.h>
+#else
+#   include <unistd.h>
+#endif
 #include "dfu.h"
 #include "stm32mem.h"
-#include <fcntl.h>
-#include <errno.h>
-#include <time.h>
-#include <unistd.h>
 #include "upgrade.h"
 #include <algorithm>
 
@@ -116,7 +115,7 @@ int upgrade(const char* firmwarefile, char* print, char* printcollect, FXGUISign
 	int state;
 	int offset;
 	FILE *fpFirmware;
-  	int firmwareSize;
+	int firmwareSize;
 	uint8_t *fw_buf;
 	uint16_t wTransferSize;
 

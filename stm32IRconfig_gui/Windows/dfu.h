@@ -20,8 +20,6 @@
 #ifndef __DFU_H
 #define __DFU_H
 
-#include <stdint.h>
-
 #include <libusb.h>
 
 /* DFU states as returned by DFU_GETSTATE and DFU_GETSTATUS request in bState field.
