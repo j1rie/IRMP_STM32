@@ -1,5 +1,8 @@
 /*
  * Copyright (C) 2020 Joerg Riechardt
+ *
+ * This file is part of the Black Magic Debug project.
+ *
  * Copyright (C) 2011  Black Sphere Technologies Ltd.
  * Originally written by Gareth McMullin <gareth@blacksphere.co.nz>
  *
@@ -17,48 +20,24 @@
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-#ifdef WIN32
-#   include <stdio.h>
-#else
-#   include <unistd.h>
-#endif
+#include <stdio.h>
+#include <stdlib.h>
+//#include <string.h>
+//#include <fcntl.h>
+//#include <errno.h>
+//#include <time.h>
+#include <unistd.h>
 #include "dfu.h"
 #include "stm32mem.h"
-#include "upgrade.h"
-#include <algorithm>
 
 #define LOAD_ADDRESS 0x8002000
 
-int upgrade(const char* firmwarefile, char* print, char* printcollect, FXGUISignal* guisignal);
-
-void Upgrade::set_firmwarefile(const char* pfirmwarefile) {
-	firmwarefile = pfirmwarefile;
-}
-
-void Upgrade::set_print(char* pprint) {
-	print = pprint;
-}
-
-void Upgrade::set_printcollect(char* pprintcollect) {
-	printcollect = pprintcollect;
-}
-
-void Upgrade::set_signal(FXGUISignal* pguisignal) {
-	guisignal = pguisignal;
-}
-
-FXint Upgrade::run() {
-	upgrade(firmwarefile, print, printcollect, guisignal);
-  return 0;
-}
-
-struct libusb_device * find_dev()
+struct libusb_device * find_dev(void)
 {
 	struct libusb_device *dev, **devs;
 	libusb_get_device_list(NULL, &devs);
 	for (int i=0; (dev=devs[i]) != NULL; i++) {
 		struct libusb_device_descriptor desc;
-		//printf("%04X %04X \n", desc.idVendor, desc.idProduct);
 		libusb_get_device_descriptor(dev, &desc);
 		/* Check for vendor ID */
 			if (desc.idVendor != 0x1209)
@@ -91,7 +70,7 @@ libusb_device_handle * get_dfu_interface(struct libusb_device *dev, uint16_t *in
 		libusb_get_config_descriptor(dev, i, &config);
 		for(j = 0; j < config->bNumInterfaces; j++) {
 			for(k = 0; k < config->interface[j].num_altsetting; k++) {
-				iface = (libusb_interface_descriptor*)&config->interface[j].altsetting[k];
+				iface = (void*)&config->interface[j].altsetting[k];
 				if((iface->bInterfaceClass == 0xFE) &&
 				   (iface->bInterfaceSubClass = 0x01)) {
 					libusb_open(dev, &handle); //
@@ -107,7 +86,7 @@ libusb_device_handle * get_dfu_interface(struct libusb_device *dev, uint16_t *in
 	return NULL;
 }
 
-int upgrade(const char* firmwarefile, char* print, char* printcollect, FXGUISignal* guisignal)
+int main(int argc, const char **argv)
 {
 	struct libusb_device *dev;
 	libusb_device_handle *handle;
@@ -119,53 +98,38 @@ int upgrade(const char* firmwarefile, char* print, char* printcollect, FXGUISign
 	uint8_t *fw_buf;
 	uint16_t wTransferSize;
 
-	char* printbuf;
-	printbuf = (char*)malloc(80);
-	if (printbuf == NULL) {
-		printf("printbuf: error allocating memory\n");
-		return 0;
+	puts("\n=== STM32 Firmware Upgrade Utility ===\n");
+
+	if(argc != 2){
+		puts("Usage: stm32FWupgrade firmware-file.bin\n");
+		return 1;
 	}
 
-	fpFirmware = fopen (firmwarefile, "rb");
+	fpFirmware = fopen (argv[1], "rb");
 	if(fpFirmware == NULL) {
-		printf("error opening firmware file: %s\n",firmwarefile);
-		sprintf(print, "error opening firmware file: %s\n",firmwarefile);
-		guisignal->signal();
+		printf("error opening firmware file: %s\n",argv[1]);
 		return 0;
 	} else {
-		printf("opened firmware file %s\n", firmwarefile);
-		sprintf(print, "opened firmware file %s\n", firmwarefile);
+		printf("opened firmware file %s\n", argv[1]);
 	}
 
-	if((fseek(fpFirmware, 0, SEEK_END) != 0) ||
-			((firmwareSize = ftell(fpFirmware)) < 0) ||
-			(fseek(fpFirmware, 0, SEEK_SET) != 0)) {
+	if((fseek(fpFirmware, 0, SEEK_END) != 0) || ((firmwareSize = ftell(fpFirmware)) < 0) ||
+							(fseek(fpFirmware, 0, SEEK_SET) != 0)) {
 		printf("error determining firmware size\n");
-		sprintf(printbuf, "error determining firmware size\n");
-		strcat(print, printbuf);
-		guisignal->signal();
 		return 0;
 	}
 
-	fw_buf = (uint8_t*)malloc(firmwareSize);
+	fw_buf = malloc(firmwareSize);
 	if (fw_buf == NULL) {
 		fclose(fpFirmware);
 		printf("error allocating memory\n");
-		sprintf(printbuf, "error allocating memory\n");
-		strcat(print, printbuf);
-		guisignal->signal();
 		return 0;
 	}
 
 	if(fread(fw_buf,firmwareSize,1,fpFirmware) != 1) {
 		printf("read firmware error\n");
-		sprintf(printbuf, "read firmware error\n");
-		strcat(print, printbuf);
-		guisignal->signal();
 	} else {
 		printf("read %d bytes of firmware\n", firmwareSize);
-		sprintf(printbuf, "read %d bytes of firmware\n", firmwareSize);
-		strcat(print, printbuf);
 	}
 
 	fclose(fpFirmware);
@@ -173,8 +137,6 @@ int upgrade(const char* firmwarefile, char* print, char* printcollect, FXGUISign
 	libusb_init(NULL);
 
 	printf("Waiting for device ...\n");
-	sprintf(printbuf, "Waiting for device ...\n");
-	strcat(print, printbuf);
 
 retry:
 	if(!(dev = find_dev()) || !(handle = get_dfu_interface(dev, &iface, &wTransferSize))) {
@@ -190,8 +152,6 @@ retry:
 	state = dfu_getstate(handle, iface);
 	if((state < 0) || (state == STATE_APP_IDLE)) {
 		printf("Resetting device in firmware upgrade mode...\n");
-		sprintf(print, "Resetting device in firmware upgrade mode...\n");
-		guisignal->signal();
 		dfu_detach(handle, iface, 1000);
 		libusb_release_interface(handle, iface);
 		libusb_close(handle);
@@ -204,43 +164,32 @@ retry:
 	}
 
 	printf("Found device at %d:%d\n", libusb_get_bus_number(dev), libusb_get_device_address(dev));
-	sprintf(printbuf, "Found device at %d:%d\n", libusb_get_bus_number(dev), libusb_get_device_address(dev));
-	strcat(print, printbuf);
 
 	printf("wTransfer Size = %d\n", wTransferSize);
 	fflush(stdout);
-	sprintf(printbuf, "wTransfer Size = %d\n", wTransferSize);
-	strcat(print, printbuf);
-	strcat(printcollect, print);
-	guisignal->signal();
 
 	dfu_makeidle(handle, iface);
 
 	for(offset = 0; offset < firmwareSize; offset += wTransferSize) {
-		if(firmwareSize - offset > wTransferSize)
-		    stm32_mem_write(handle, iface, offset/wTransferSize, (void*)&fw_buf[offset], wTransferSize);
-		else
-		    stm32_mem_write(handle, iface, offset/wTransferSize, (void*)&fw_buf[offset], firmwareSize - offset);
-		printf("Progress: %d%%\n", std::min(100, (offset+wTransferSize)*100/firmwareSize));
+		if(firmwareSize - offset > wTransferSize) {
+			stm32_mem_write(handle, iface, offset/wTransferSize, (void*)&fw_buf[offset], wTransferSize);
+			printf("Progress: %d%%\n", (offset+wTransferSize)*100/firmwareSize);
+		} else {
+			stm32_mem_write(handle, iface, offset/wTransferSize, (void*)&fw_buf[offset], firmwareSize - offset);
+			printf("Progress: 100%%\n");
+		}
 		fflush(stdout);
-		sprintf(print, "Progress: %d%%\n", std::min(100, (offset+wTransferSize)*100/firmwareSize));
-		strcat(printcollect, print);
-		guisignal->signal();
 	}
-	
+
 	stm32_mem_manifest(handle, iface);
 
 	libusb_release_interface(handle, iface);
 	libusb_close(handle);
 	libusb_exit(NULL);
 	free(fw_buf);
-	free(printbuf);
 
 	printf("=== Firmware Upgrade successful! ===\n");
 	fflush(stdout);
-	sprintf(print, "=== Firmware Upgrade successful! ===\n");
-	strcat(printcollect, print);
-	guisignal->signal();
 
-	return 1;
+	return 0;
 }
