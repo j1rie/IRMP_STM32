@@ -20,9 +20,7 @@
 #ifndef __DFU_H
 #define __DFU_H
 
-#include <stdint.h>
-
-#include <usb.h>
+#include <libusb.h>
 
 /* DFU states as returned by DFU_GETSTATE and DFU_GETSTATUS request in bState field.
  * Refer to Section 6.1.2
@@ -69,17 +67,17 @@ typedef struct dfu_status {
 } __attribute__((packed)) dfu_status;
 
 
-int dfu_detach(usb_dev_handle *dev, uint16_t iface, uint16_t wTimeout);
-int dfu_dnload(usb_dev_handle *dev, uint16_t iface, 
+int dfu_detach(libusb_device_handle *dev, uint16_t iface, uint16_t wTimeout);
+int dfu_dnload(libusb_device_handle *dev, uint16_t iface,
 		 uint16_t wBlockNum, void *data, uint16_t size);
-int dfu_upload(usb_dev_handle *dev, uint16_t iface, 
+int dfu_upload(libusb_device_handle *dev, uint16_t iface,
 		 uint16_t wBlockNum, void *data, uint16_t size);
-int dfu_getstatus(usb_dev_handle *dev, uint16_t iface, dfu_status *status);
-int dfu_clrstatus(usb_dev_handle *dev, uint16_t iface);
-int dfu_getstate(usb_dev_handle *dev, uint16_t iface);
-int dfu_abort(usb_dev_handle *dev, uint16_t iface);
+int dfu_getstatus(libusb_device_handle *dev, uint16_t iface, dfu_status *status);
+int dfu_clrstatus(libusb_device_handle *dev, uint16_t iface);
+int dfu_getstate(libusb_device_handle *dev, uint16_t iface);
+int dfu_abort(libusb_device_handle *dev, uint16_t iface);
 
-int dfu_makeidle(usb_dev_handle *dev, uint16_t iface);
+int dfu_makeidle(libusb_device_handle *dev, uint16_t iface);
 
 
 #endif

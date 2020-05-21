@@ -1,14 +1,11 @@
-OUTFILE = blackmagic_upgrade
+OUTFILE = stm32FWupgrade
 
-CC = $(CROSS_COMPILE)gcc
+CC = gcc
 
-CFLAGS = -Wall -Wextra -std=gnu99 -O0 -g -MD -mno-ms-bitfields
-LDFLAGS = -lusb
+CFLAGS = -I/mingw64/include/libusb-1.0 -Wall -Wextra -g -s -mno-ms-bitfields
+LDFLAGS = -Wl,-Bstatic -lusb-1.0
 
-OBJ =	bindata.o	\
-	dfu.o		\
-	stm32mem.o	\
-	main.o
+OBJ = dfu.o stm32mem.o main.o
 
 all: $(OUTFILE)
 
@@ -17,7 +14,4 @@ $(OUTFILE) $(OUTFILE).exe: $(OBJ)
 
 .PHONY: clean
 clean:
-	-rm -rf $(OUTFILE) $(OUTFILE).exe *.d *.o
-
--include *.d
-
+	rm -f $(OUTFILE) $(OUTFILE).exe *.o

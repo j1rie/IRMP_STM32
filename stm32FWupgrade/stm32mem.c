@@ -17,14 +17,12 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-#include <string.h>
 
 #ifdef WIN32
 #   include <windows.h>
-#   include <lusb0_usb.h>
 #else
 #   include <unistd.h>
-#   include <usb.h>
+#   include <string.h>
 #endif
 
 #include "dfu.h"
@@ -34,7 +32,7 @@
 #define STM32_CMD_SETADDRESSPOINTER	0x21
 #define STM32_CMD_ERASE			0x41
 
-static int stm32_download(usb_dev_handle *dev, uint16_t iface, 
+static int stm32_download(libusb_device_handle *dev, uint16_t iface,
 			  uint16_t wBlockNum, void *data, int size)
 {
 	dfu_status status;
@@ -59,7 +57,7 @@ static int stm32_download(usb_dev_handle *dev, uint16_t iface,
 	}
 }
 
-int stm32_mem_erase(usb_dev_handle *dev, uint16_t iface, uint32_t addr)
+int stm32_mem_erase(libusb_device_handle *dev, uint16_t iface, uint32_t addr)
 {
 	uint8_t request[5];
 
@@ -69,12 +67,12 @@ int stm32_mem_erase(usb_dev_handle *dev, uint16_t iface, uint32_t addr)
 	return stm32_download(dev, iface, 0, request, sizeof(request));
 }
 
-int stm32_mem_write(usb_dev_handle *dev, uint16_t iface, void *data, int size)
+int stm32_mem_write(libusb_device_handle *dev, uint16_t iface, uint16_t wBlockNum, void *data, int size)
 {
-	return stm32_download(dev, iface, 2, data, size);
+	return stm32_download(dev, iface, wBlockNum, data, size);
 }
 
-int stm32_mem_manifest(usb_dev_handle *dev, uint16_t iface)
+int stm32_mem_manifest(libusb_device_handle *dev, uint16_t iface)
 {
 	dfu_status status;
 	int i;
@@ -95,4 +93,3 @@ int stm32_mem_manifest(usb_dev_handle *dev, uint16_t iface)
 		}
 	}
 }
-

@@ -1,8 +1,10 @@
 /*
+ * Copyright (C) 2020 Joerg Riechardt
+ *
  * This file is part of the Black Magic Debug project.
  *
  * Copyright (C) 2011  Black Sphere Technologies Ltd.
- * Written by Gareth McMullin <gareth@blacksphere.co.nz>
+ * Originally written by Gareth McMullin <gareth@blacksphere.co.nz>
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -17,96 +19,62 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-#include <stdio.h>
-#include <string.h>
+
 #ifdef WIN32
-#   include <lusb0_usb.h>
+#   include <stdio.h>
 #else
-#   include <usb.h>
+#   include <unistd.h>
 #endif
-
-#include <assert.h>
-
 #include "dfu.h"
 #include "stm32mem.h"
-#include "bindata.h"
-
-#define VERSION "1.0"
 
 #define LOAD_ADDRESS 0x8002000
 
-void banner(void)
+struct libusb_device * find_dev(void)
 {
-	puts("\nBlack Magic Probe -- Firmware Upgrade Utility -- Version " VERSION);
-	puts("Copyright (C) 2011  Black Sphere Technologies Ltd.");
-	puts("License GPLv3+: GNU GPL version 3 or later <http://gnu.org/licenses/gpl.html>\n");
-}
-
-
-struct usb_device * find_dev(void)
-{
-	struct usb_bus *bus;
-	struct usb_device *dev;
-	struct usb_dev_handle *handle;
-	char man[40];
-	char prod[40];
-
-	usb_find_busses();
-	usb_find_devices();
-
-	for(bus = usb_get_busses(); bus; bus = bus->next) {
-		for(dev = bus->devices; dev; dev = dev->next) {
-			/* Check for ST Microelectronics vendor ID */
-			if ((dev->descriptor.idVendor != 0x483) &&
-			    (dev->descriptor.idVendor != 0x1d50))
+	struct libusb_device *dev, **devs;
+	libusb_get_device_list(NULL, &devs);
+	for (int i=0; (dev=devs[i]) != NULL; i++) {
+		struct libusb_device_descriptor desc;
+		libusb_get_device_descriptor(dev, &desc);
+		/* Check for vendor ID */
+			if (desc.idVendor != 0x1209)
 				continue;
-
-			handle = usb_open(dev);
-			usb_get_string_simple(handle, dev->descriptor.iManufacturer, man,
-						sizeof(man));
-			usb_get_string_simple(handle, dev->descriptor.iProduct, prod,
-						sizeof(prod));
-#if 0
-			printf("%s:%s [%04X:%04X] %s : %s\n", bus->dirname, dev->filename,
-				dev->descriptor.idVendor, dev->descriptor.idProduct, man, prod);
-#endif
-			usb_close(handle);
-
-			if (((dev->descriptor.idProduct == 0x5740) ||
-			     (dev->descriptor.idProduct == 0x6018)) &&
-			   !strcmp(man, "Black Sphere Technologies"))
+			/* Check for product ID */
+			if (desc.idProduct == 0x4443)
 				return dev;
-
-			if (((dev->descriptor.idProduct == 0xDF11) ||
-			     (dev->descriptor.idProduct == 0x6017)) &&
-			   !strcmp(man, "Black Sphere Technologies"))
-				return dev;
-		}
 	}
 	return NULL;
 }
 
-usb_dev_handle * get_dfu_interface(struct usb_device *dev, uint16_t *interface)
+struct usb_dfu_descriptor {
+	uint8_t bLength;
+	uint8_t bDescriptorType;
+	uint8_t bmAttributes;
+	uint16_t wDetachTimeout;
+	uint16_t wTransferSize;
+	uint16_t bcdDFUVersion;
+} __attribute__ ((__packed__)) ;
+
+libusb_device_handle * get_dfu_interface(struct libusb_device *dev, uint16_t *interface, uint16_t *wTransferSize)
 {
 	int i, j, k;
-	struct usb_config_descriptor *config;
-	struct usb_interface_descriptor *iface;
-
-	usb_dev_handle *handle;
-
-	for(i = 0; i < dev->descriptor.bNumConfigurations; i++) {
-		config = &dev->config[i];
-
+	struct libusb_device_descriptor desc;
+	struct libusb_interface_descriptor *iface;
+	libusb_device_handle *handle;
+	libusb_get_device_descriptor(dev, &desc);
+	for(i = 0; i < desc.bNumConfigurations; i++) {
+		struct libusb_config_descriptor *config;
+		libusb_get_config_descriptor(dev, i, &config);
 		for(j = 0; j < config->bNumInterfaces; j++) {
 			for(k = 0; k < config->interface[j].num_altsetting; k++) {
-				iface = &config->interface[j].altsetting[k];
+				iface = (void*)&config->interface[j].altsetting[k];
 				if((iface->bInterfaceClass == 0xFE) &&
 				   (iface->bInterfaceSubClass = 0x01)) {
-					handle = usb_open(dev);
-					//usb_set_configuration(handle, i);
-					usb_claim_interface(handle, j);
-					//usb_set_altinterface(handle, k);
-					//*interface = j;
+					libusb_open(dev, &handle); //
+					struct usb_dfu_descriptor *dfu_function = (struct usb_dfu_descriptor*)iface->extra;
+					*wTransferSize = dfu_function->wTransferSize;
+					libusb_claim_interface(handle, j);
 					*interface = iface->bInterfaceNumber;
 					return handle;
 				}
@@ -116,32 +84,75 @@ usb_dev_handle * get_dfu_interface(struct usb_device *dev, uint16_t *interface)
 	return NULL;
 }
 
-int main(void)
+int main(int argc, const char **argv)
 {
-	struct usb_device *dev;
-	usb_dev_handle *handle;
+	struct libusb_device *dev;
+	libusb_device_handle *handle;
 	uint16_t iface;
 	int state;
-	uint32_t offset;
+	int offset;
+	FILE *fpFirmware;
+	int firmwareSize;
+	uint8_t *fw_buf;
+	uint16_t wTransferSize;
 
-	banner();
-	usb_init();
+	puts("\n=== STM32 Firmware Upgrade Utility ===\n");
+
+	if(argc != 2){
+		puts("Usage: stm32FWupgrade firmware-file.bin\n");
+		return 1;
+	}
+
+	fpFirmware = fopen (argv[1], "rb");
+	if(fpFirmware == NULL) {
+		printf("error opening firmware file: %s\n",argv[1]);
+		return 0;
+	} else {
+		printf("opened firmware file %s\n", argv[1]);
+	}
+
+	if((fseek(fpFirmware, 0, SEEK_END) != 0) || ((firmwareSize = ftell(fpFirmware)) < 0) ||
+							(fseek(fpFirmware, 0, SEEK_SET) != 0)) {
+		printf("error determining firmware size\n");
+		return 0;
+	}
+
+	fw_buf = malloc(firmwareSize);
+	if (fw_buf == NULL) {
+		fclose(fpFirmware);
+		printf("error allocating memory\n");
+		return 0;
+	}
+
+	if(fread(fw_buf,firmwareSize,1,fpFirmware) != 1) {
+		printf("read firmware error\n");
+	} else {
+		printf("read %d bytes of firmware\n", firmwareSize);
+	}
+
+	fclose(fpFirmware);
+
+	libusb_init(NULL);
+
+	printf("Waiting for device ...\n");
 
 retry:
-	if(!(dev = find_dev()) || !(handle = get_dfu_interface(dev, &iface))) {
-		puts("FATAL: No compatible device found!\n");
+	if(!(dev = find_dev()) || !(handle = get_dfu_interface(dev, &iface, &wTransferSize))) {
+
 #ifdef WIN32
-		system("pause");
+		Sleep(20);
+#else
+		usleep(20000);
 #endif
-		return -1;
+		goto retry;
 	}
 
 	state = dfu_getstate(handle, iface);
 	if((state < 0) || (state == STATE_APP_IDLE)) {
-		puts("Resetting device in firmware upgrade mode...");
+		printf("Resetting device in firmware upgrade mode...\n");
 		dfu_detach(handle, iface, 1000);
-		usb_release_interface(handle, iface);
-		usb_close(handle);
+		libusb_release_interface(handle, iface);
+		libusb_close(handle);
 #ifdef WIN32
 		Sleep(5000);
 #else
@@ -149,27 +160,32 @@ retry:
 #endif
 		goto retry;
 	}
-	printf("Found device at %s:%s\n", dev->bus->dirname, dev->filename);
+
+	printf("Found device at %d:%d\n", libusb_get_bus_number(dev), libusb_get_device_address(dev));
+
+	printf("wTransfer Size = %d\n", wTransferSize);
+	fflush(stdout);
 
 	dfu_makeidle(handle, iface);
 
-	for(offset = 0; offset < bindatalen; offset += 1024) {
-		printf("Progress: %d%%\r", (offset*100)/bindatalen);
+	for(offset = 0; offset < firmwareSize; offset += wTransferSize) {
+		if(firmwareSize - offset > wTransferSize)
+		    stm32_mem_write(handle, iface, offset/wTransferSize, (void*)&fw_buf[offset], wTransferSize);
+		else
+		    stm32_mem_write(handle, iface, offset/wTransferSize, (void*)&fw_buf[offset], firmwareSize - offset);
+		printf("Progress: %d%%\n", min(100, (offset+wTransferSize)*100/firmwareSize));
 		fflush(stdout);
-		assert(stm32_mem_erase(handle, iface, LOAD_ADDRESS + offset) == 0);
-		stm32_mem_write(handle, iface, (void*)&bindata[offset], 1024);
 	}
+
 	stm32_mem_manifest(handle, iface);
 
-	usb_release_interface(handle, iface);
-	usb_close(handle);
+	libusb_release_interface(handle, iface);
+	libusb_close(handle);
+	libusb_exit(NULL);
+	free(fw_buf);
 
-	puts("All operations complete!\n");
-
-#ifdef WIN32
-		system("pause");
-#endif
+	printf("=== Firmware Upgrade successful! ===\n");
+	fflush(stdout);
 
 	return 0;
 }
-
