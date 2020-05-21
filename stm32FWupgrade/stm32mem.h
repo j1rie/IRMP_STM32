@@ -20,15 +20,10 @@
 #ifndef __STM32MEM_H
 #define __STM32MEM_H
 
-#ifdef WIN32
-#   include <lusb0_usb.h>
-#else
-#   include <usb.h>
-#endif
+#include <libusb.h>
 
-int stm32_mem_erase(usb_dev_handle *dev, uint16_t iface, uint32_t addr);
-int stm32_mem_write(usb_dev_handle *dev, uint16_t iface, void *data, int size);
-int stm32_mem_manifest(usb_dev_handle *dev, uint16_t iface);
+int stm32_mem_erase(libusb_device_handle *dev, uint16_t iface, uint32_t addr);
+int stm32_mem_write(libusb_device_handle *dev, uint16_t iface, uint16_t wBlockNum, void *data, int size);
+int stm32_mem_manifest(libusb_device_handle *dev, uint16_t iface);
 
 #endif
-

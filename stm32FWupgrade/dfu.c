@@ -18,12 +18,6 @@
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-#ifdef WIN32
-#   include <lusb0_usb.h>
-#else
-#   include <usb.h>
-#endif
-
 #include "dfu.h"
 
 /* DFU Requests: Refer to Table 3.2 */
@@ -38,55 +32,55 @@
 #define USB_DEFAULT_TIMEOUT 1000
 #define DFU_DETACH_TIMEOUT 1000
 
-int dfu_detach(usb_dev_handle *dev, uint16_t iface, uint16_t wTimeout)
+int dfu_detach(libusb_device_handle *dev, uint16_t iface, uint16_t wTimeout)
 {
-	return usb_control_msg(dev, 
-			USB_ENDPOINT_OUT | USB_TYPE_CLASS | USB_RECIP_INTERFACE,
-			DFU_DETACH, wTimeout, iface, NULL, 0, 
+	return libusb_control_transfer(dev,
+			LIBUSB_ENDPOINT_OUT | LIBUSB_REQUEST_TYPE_CLASS | LIBUSB_RECIPIENT_INTERFACE,
+			DFU_DETACH, wTimeout, iface, NULL, 0,
 			USB_DEFAULT_TIMEOUT);
 }
 
-int dfu_dnload(usb_dev_handle *dev, uint16_t iface, 
+int dfu_dnload(libusb_device_handle *dev, uint16_t iface,
 		 uint16_t wBlockNum, void *data, uint16_t size)
 {
-	return usb_control_msg(dev, 
-			USB_ENDPOINT_OUT | USB_TYPE_CLASS | USB_RECIP_INTERFACE,
-			DFU_DNLOAD, wBlockNum, iface, data, size, 
+	return libusb_control_transfer(dev,
+			LIBUSB_ENDPOINT_OUT | LIBUSB_REQUEST_TYPE_CLASS | LIBUSB_RECIPIENT_INTERFACE,
+			DFU_DNLOAD, wBlockNum, iface, data, size,
 			USB_DEFAULT_TIMEOUT);
 }
 
-int dfu_upload(usb_dev_handle *dev, uint16_t iface, 
+int dfu_upload(libusb_device_handle *dev, uint16_t iface,
 		 uint16_t wBlockNum, void *data, uint16_t size)
 {
-	return usb_control_msg(dev, 
-			USB_ENDPOINT_IN | USB_TYPE_CLASS | USB_RECIP_INTERFACE,
-			DFU_DNLOAD, wBlockNum, iface, data, size, 
+	return libusb_control_transfer(dev,
+			LIBUSB_ENDPOINT_IN | LIBUSB_REQUEST_TYPE_CLASS | LIBUSB_RECIPIENT_INTERFACE,
+			DFU_DNLOAD, wBlockNum, iface, data, size,
 			USB_DEFAULT_TIMEOUT);
 }
 
-int dfu_getstatus(usb_dev_handle *dev, uint16_t iface, dfu_status *status)
+int dfu_getstatus(libusb_device_handle *dev, uint16_t iface, dfu_status *status)
 {
-	return usb_control_msg(dev, 
-			USB_ENDPOINT_IN | USB_TYPE_CLASS | USB_RECIP_INTERFACE,
-			DFU_GETSTATUS, 0, iface, (void*)status, sizeof(dfu_status), 
+	return libusb_control_transfer(dev,
+			LIBUSB_ENDPOINT_IN | LIBUSB_REQUEST_TYPE_CLASS | LIBUSB_RECIPIENT_INTERFACE,
+			DFU_GETSTATUS, 0, iface, (void*)status, sizeof(dfu_status),
 			USB_DEFAULT_TIMEOUT);
 }
 
-int dfu_clrstatus(usb_dev_handle *dev, uint16_t iface)
+int dfu_clrstatus(libusb_device_handle *dev, uint16_t iface)
 {
-	return usb_control_msg(dev, 
-			USB_ENDPOINT_OUT | USB_TYPE_CLASS | USB_RECIP_INTERFACE,
+	return libusb_control_transfer(dev,
+			LIBUSB_ENDPOINT_OUT | LIBUSB_REQUEST_TYPE_CLASS | LIBUSB_RECIPIENT_INTERFACE,
 			DFU_CLRSTATUS, 0, iface, NULL, 0, USB_DEFAULT_TIMEOUT);
 }
 
-int dfu_getstate(usb_dev_handle *dev, uint16_t iface)
+int dfu_getstate(libusb_device_handle *dev, uint16_t iface)
 {
 	int i;
 	uint8_t state;
 	do {
-		i = usb_control_msg(dev,
-			USB_ENDPOINT_IN | USB_TYPE_CLASS | USB_RECIP_INTERFACE,
-			DFU_GETSTATE, 0, iface, (char*)&state, 1,
+		i = libusb_control_transfer(dev,
+			LIBUSB_ENDPOINT_IN | LIBUSB_REQUEST_TYPE_CLASS | LIBUSB_RECIPIENT_INTERFACE,
+			DFU_GETSTATE, 0, iface, &state, 1,
 			USB_DEFAULT_TIMEOUT);
 	} while(i == 0);
 
@@ -96,15 +90,15 @@ int dfu_getstate(usb_dev_handle *dev, uint16_t iface)
 		return i;
 }
 
-int dfu_abort(usb_dev_handle *dev, uint16_t iface)
+int dfu_abort(libusb_device_handle *dev, uint16_t iface)
 {
-	return usb_control_msg(dev, 
-			USB_ENDPOINT_OUT | USB_TYPE_CLASS | USB_RECIP_INTERFACE,
+	return libusb_control_transfer(dev,
+			LIBUSB_ENDPOINT_OUT | LIBUSB_REQUEST_TYPE_CLASS | LIBUSB_RECIPIENT_INTERFACE,
 			DFU_ABORT, 0, iface, NULL, 0, USB_DEFAULT_TIMEOUT);
 }
 
 
-int dfu_makeidle(usb_dev_handle *dev, uint16_t iface)
+int dfu_makeidle(libusb_device_handle *dev, uint16_t iface)
 {
 	int i;
 	dfu_status status;
@@ -140,7 +134,7 @@ int dfu_makeidle(usb_dev_handle *dev, uint16_t iface)
 
 		    case STATE_APP_DETACH:
 		    case STATE_DFU_MANIFEST_WAIT_RESET:
-			usb_reset(dev);
+			libusb_reset_device(dev);
 			return -1;
 
 		    default:
@@ -151,5 +145,3 @@ int dfu_makeidle(usb_dev_handle *dev, uint16_t iface)
 
 	return -1;
 }
-
-

@@ -1,0 +1,5 @@
+IRMP STM32 Firmware Upgrade Utility
+
+very simple tool, usage: ./stm32FWupgrade ./firmwarefile.bin
+
+for Windows WinUSB drivers from zadig are needed
