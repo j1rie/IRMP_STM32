@@ -21,9 +21,9 @@ INCLUDES += -Isemihosting -Istdio
 endif
 DEFINES = -D$(PLATFORM) -DSTM32F10X_MD -DUSE_STDPERIPH_DRIVER -DSOF_CALLBACK
 
-OBJS = src/irmpmain.o src/st_link_leds.o src/usb_hid.o src/main.o\
+OBJS = cmsis_boot/startup/startup_stm32f10x_md.o cmsis_boot/system_stm32f10x.o\
+       src/irmpmain.o src/st_link_leds.o src/usb_hid.o src/main.o\
        irmp/irmp.o irmp/irsnd.o\
-       cmsis_boot/startup/startup_stm32f10x_md.o cmsis_boot/system_stm32f10x.o\
        stm_lib/src/misc.o stm_lib/src/stm32f10x_exti.o\
        stm_lib/src/stm32f10x_flash.o stm_lib/src/stm32f10x_gpio.o\
        stm_lib/src/stm32f10x_pwr.o stm_lib/src/stm32f10x_rcc.o\
