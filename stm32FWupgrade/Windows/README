@@ -1,5 +1,10 @@
 IRMP STM32 Firmware Upgrade Utility
 
-very simple tool, usage: ./stm32FWupgrade ./firmwarefile.bin
+very simple tool
+in case of problems try dfu-util
 
-for Windows WinUSB drivers from zadig are needed
+disconnect device
+run ./stm32FWupgrade ./firmwarefile.bin
+connect device
+
+for Windows WinUSB drivers from zadig are needed (see binaries/bootloader/Windows)
