@@ -20,10 +20,10 @@
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-#ifdef WIN32
-#   include <stdio.h>
-#else
-#   include <unistd.h>
+#include <stdio.h>
+#ifndef WIN32
+#include <stdlib.h>
+#include <unistd.h>
 #endif
 #include "dfu.h"
 #include "stm32mem.h"
@@ -169,11 +169,13 @@ retry:
 	dfu_makeidle(handle, iface);
 
 	for(offset = 0; offset < firmwareSize; offset += wTransferSize) {
-		if(firmwareSize - offset > wTransferSize)
-		    stm32_mem_write(handle, iface, offset/wTransferSize, (void*)&fw_buf[offset], wTransferSize);
-		else
-		    stm32_mem_write(handle, iface, offset/wTransferSize, (void*)&fw_buf[offset], firmwareSize - offset);
-		printf("Progress: %d%%\n", min(100, (offset+wTransferSize)*100/firmwareSize));
+		if(firmwareSize - offset > wTransferSize) {
+			stm32_mem_write(handle, iface, offset/wTransferSize, (void*)&fw_buf[offset], wTransferSize);
+			printf("Progress: %d%%\n", (offset+wTransferSize)*100/firmwareSize);
+		} else {
+			stm32_mem_write(handle, iface, offset/wTransferSize, (void*)&fw_buf[offset], firmwareSize - offset);
+			printf("Progress: 100%%\n");
+		}
 		fflush(stdout);
 	}
 

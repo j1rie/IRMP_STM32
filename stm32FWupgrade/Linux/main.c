@@ -21,12 +21,10 @@
  */
 
 #include <stdio.h>
+#ifndef WIN32
 #include <stdlib.h>
-//#include <string.h>
-//#include <fcntl.h>
-//#include <errno.h>
-//#include <time.h>
 #include <unistd.h>
+#endif
 #include "dfu.h"
 #include "stm32mem.h"
 
