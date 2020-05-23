@@ -1,8 +1,6 @@
 /*
  * Copyright (C) 2020 Joerg Riechardt
  *
- * This file is part of the Black Magic Debug project.
- *
  * Copyright (C) 2011  Black Sphere Technologies Ltd.
  * Originally written by Gareth McMullin <gareth@blacksphere.co.nz>
  *
@@ -33,17 +31,33 @@
 struct libusb_device * find_dev(void)
 {
 	struct libusb_device *dev, **devs;
-	libusb_get_device_list(NULL, &devs);
+	int ret;
+	ret = libusb_get_device_list(NULL, &devs);
+	if(ret < 0) {
+		printf("error getting device list(): %s\n", libusb_error_name(ret));
+		return NULL;
+	}
+
 	for (int i=0; (dev=devs[i]) != NULL; i++) {
 		struct libusb_device_descriptor desc;
-		libusb_get_device_descriptor(dev, &desc);
+		if(libusb_get_device_descriptor(dev, &desc) < 0) {
+			printf("couldn't get device descriptor\n");
+			continue;
+		}
+
 		/* Check for vendor ID */
-			if (desc.idVendor != 0x1209)
-				continue;
-			/* Check for product ID */
-			if (desc.idProduct == 0x4443)
-				return dev;
+		if (desc.idVendor != 0x1209)
+			continue;
+
+		/* Check for product ID */
+		if (desc.idProduct == 0x4443) {
+			libusb_ref_device(dev);
+			libusb_free_device_list(devs, 0);
+			return dev;
+		}
 	}
+
+	libusb_free_device_list(devs, 0);
 	return NULL;
 }
 
@@ -58,24 +72,40 @@ struct usb_dfu_descriptor {
 
 libusb_device_handle * get_dfu_interface(struct libusb_device *dev, uint16_t *interface, uint16_t *wTransferSize)
 {
-	int i, j, k;
+	int i, j, k, ret;
 	struct libusb_device_descriptor desc;
 	struct libusb_interface_descriptor *iface;
 	libusb_device_handle *handle;
-	libusb_get_device_descriptor(dev, &desc);
+	if(libusb_get_device_descriptor(dev, &desc) < 0) {
+		printf("couldn't get device descriptor\n");
+		return NULL;
+	}
+
 	for(i = 0; i < desc.bNumConfigurations; i++) {
 		struct libusb_config_descriptor *config;
-		libusb_get_config_descriptor(dev, i, &config);
+		if(libusb_get_config_descriptor(dev, i, &config) != LIBUSB_SUCCESS) {
+			printf("couldn't get config descriptor\n");
+			continue;
+		}
 		for(j = 0; j < config->bNumInterfaces; j++) {
 			for(k = 0; k < config->interface[j].num_altsetting; k++) {
 				iface = (void*)&config->interface[j].altsetting[k];
-				if((iface->bInterfaceClass == 0xFE) &&
-				   (iface->bInterfaceSubClass = 0x01)) {
-					libusb_open(dev, &handle); //
+				if((iface->bInterfaceClass == 0xFE) && (iface->bInterfaceSubClass = 1)) {
+					ret = libusb_open(dev, &handle);
+					if(ret < 0) {
+						printf("error opening device: %s\n", libusb_error_name(ret));
+						continue; //
+					}
+					ret = libusb_claim_interface(handle, j);
+					if (ret != LIBUSB_SUCCESS) {
+						printf("error claiming interface %d: %s\n", j, libusb_error_name(ret));
+						libusb_close(handle);
+						continue; //
+					}
 					struct usb_dfu_descriptor *dfu_function = (struct usb_dfu_descriptor*)iface->extra;
 					*wTransferSize = dfu_function->wTransferSize;
-					libusb_claim_interface(handle, j);
 					*interface = iface->bInterfaceNumber;
+					libusb_free_config_descriptor(config);
 					return handle;
 				}
 			}
@@ -95,6 +125,7 @@ int main(int argc, const char **argv)
 	int firmwareSize;
 	uint8_t *fw_buf;
 	uint16_t wTransferSize;
+	int ret;
 
 	puts("\n=== STM32 Firmware Upgrade Utility ===\n");
 
@@ -132,9 +163,13 @@ int main(int argc, const char **argv)
 
 	fclose(fpFirmware);
 
-	libusb_init(NULL);
-
 	printf("Waiting for device ...\n");
+
+	ret = libusb_init(NULL);
+	if(ret < 0) {
+		printf("Error initializing libusb: %s\n", libusb_error_name(ret));
+		return -1;
+	}
 
 retry:
 	if(!(dev = find_dev()) || !(handle = get_dfu_interface(dev, &iface, &wTransferSize))) {
