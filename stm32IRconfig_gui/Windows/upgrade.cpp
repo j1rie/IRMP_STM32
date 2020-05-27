@@ -260,6 +260,7 @@ retry:
 
 	libusb_release_interface(handle, 0);
 	libusb_close(handle);
+	libusb_unref_device(dev);
 	libusb_exit(NULL);
 	free(fw_buf);
 	free(printbuf);
