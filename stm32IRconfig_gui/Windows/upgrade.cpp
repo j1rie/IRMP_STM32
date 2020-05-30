@@ -102,11 +102,11 @@ libusb_device_handle * get_dfu_interface(struct libusb_device *dev, uint16_t *wT
 	libusb_device_handle *handle = NULL;
 	struct libusb_config_descriptor *config;
 
+	// bNumConfigurations = 1, bNumInterfaces = 1, num_altsetting = 1
 	if(libusb_get_config_descriptor(dev, 0, &config) != LIBUSB_SUCCESS) {
 		printf("couldn't get config descriptor\n");
 		return NULL;
 	}
-	// bNumConfigurations = 1, bNumInterfaces = 1, num_altsetting = 1
 	iface = (libusb_interface_descriptor*)&config->interface[0].altsetting[0];
 	if((iface->bInterfaceClass == 0xFE) && (iface->bInterfaceSubClass = 1)) { // for safety only
 		struct usb_dfu_descriptor *dfu_function = (struct usb_dfu_descriptor*)iface->extra;
@@ -130,79 +130,86 @@ error:
 	return handle;
 }
 
+uint8_t * get_firmware(const char *firmwarefile, int *firmwareSize, char* print)
+{
+	FILE *fpFirmware;
+	uint8_t *fw_buf;
+	char printbuf[512];
+
+	fpFirmware = fopen (firmwarefile, "rb");
+	if(fpFirmware == NULL) {
+		printf("error opening firmware file: %s\n",firmwarefile);
+		return NULL;
+	} else {
+		printf("opened firmware file %s\n", firmwarefile);
+#ifndef WIN32
+		sprintf(print, "opened firmware file %s\n", firmwarefile);
+#else
+		FXCP1252Codec codec;
+		FXString utfstring=codec.mb2utf(firmwarefile);
+		sprintf(print, "opened firmware file %s\n", utfstring.text());
+#endif
+	}
+
+	if((fseek(fpFirmware, 0, SEEK_END) != 0) || ((*firmwareSize = ftell(fpFirmware)) < 0) ||
+							(fseek(fpFirmware, 0, SEEK_SET) != 0)) {
+		printf("error determining firmware size\n");
+		return NULL;
+	}
+
+	fw_buf = (uint8_t*)malloc(*firmwareSize);
+	if (fw_buf == NULL) {
+		fclose(fpFirmware);
+		printf("error allocating memory\n");
+		return NULL;
+	}
+
+	if(fread(fw_buf,*firmwareSize,1,fpFirmware) != 1) {
+		printf("read firmware error\n");
+		return NULL;
+	} else {
+		printf("read %d bytes of firmware\n", *firmwareSize);
+		sprintf(printbuf, "read %d bytes of firmware\n", *firmwareSize);
+		strcat(print, printbuf);
+	}
+
+	fclose(fpFirmware);
+	return fw_buf;
+}
+
 int upgrade(const char* firmwarefile, char* print, char* printcollect, FXGUISignal* guisignal)
 {
 	struct libusb_device *dev;
 	libusb_device_handle *handle;
 	int state;
 	int offset;
-	FILE *fpFirmware;
 	int firmwareSize;
 	uint8_t *fw_buf;
 	uint16_t wTransferSize;
 	int ret;
 
-	char* printbuf;
-	printbuf = (char*)malloc(80);
-	if (printbuf == NULL) {
-		printf("printbuf: error allocating memory\n");
-		return 0;
-	}
+	char printbuf[512];
 
-	fpFirmware = fopen (firmwarefile, "rb");
-	if(fpFirmware == NULL) {
-		printf("error opening firmware file: %s\n",firmwarefile);
-		sprintf(print, "error opening firmware file: %s\n",firmwarefile);
-		guisignal->signal();
-		return 0;
-	} else {
-		printf("opened firmware file %s\n", firmwarefile);
-		sprintf(print, "opened firmware file %s\n", firmwarefile);
-	}
-
-	if((fseek(fpFirmware, 0, SEEK_END) != 0) ||
-			((firmwareSize = ftell(fpFirmware)) < 0) ||
-			(fseek(fpFirmware, 0, SEEK_SET) != 0)) {
-		printf("error determining firmware size\n");
-		sprintf(printbuf, "error determining firmware size\n");
+	if(!(fw_buf = get_firmware(firmwarefile, &firmwareSize, print))) {
+		sprintf(printbuf, "couldn't get firmware buffer\n");
 		strcat(print, printbuf);
 		guisignal->signal();
-		return 0;
+		return -1;
 	}
-
-	fw_buf = (uint8_t*)malloc(firmwareSize);
-	if (fw_buf == NULL) {
-		fclose(fpFirmware);
-		printf("error allocating memory\n");
-		sprintf(printbuf, "error allocating memory\n");
-		strcat(print, printbuf);
-		guisignal->signal();
-		return 0;
-	}
-
-	if(fread(fw_buf,firmwareSize,1,fpFirmware) != 1) {
-		printf("read firmware error\n");
-		sprintf(printbuf, "read firmware error\n");
-		strcat(print, printbuf);
-		guisignal->signal();
-	} else {
-		printf("read %d bytes of firmware\n", firmwareSize);
-		sprintf(printbuf, "read %d bytes of firmware\n", firmwareSize);
-		strcat(print, printbuf);
-	}
-
-	fclose(fpFirmware);
 
 	printf("Waiting for device ...\n");
 	sprintf(printbuf, "Waiting for device ...\n");
 	strcat(print, printbuf);
+	strcat(printcollect, print);
+	guisignal->signal();
 
 	ret = libusb_init(NULL);
 	if(ret < 0) {
 		printf("Error initializing libusb: %s\n", libusb_error_name(ret));
 		return -1;
 	}
-	libusb_set_option(NULL, LIBUSB_OPTION_LOG_LEVEL, LIBUSB_LOG_LEVEL_WARNING);
+	//libusb_set_option(NULL, LIBUSB_OPTION_LOG_LEVEL, LIBUSB_LOG_LEVEL_WARNING);
+	//libusb_set_debug(NULL, LIBUSB_LOG_LEVEL_WARNING);
 
 retry:
 	if(!(dev = find_dev()) || !(handle = get_dfu_interface(dev, &wTransferSize))) {
@@ -219,6 +226,7 @@ retry:
 	if((state < 0) || (state == STATE_APP_IDLE)) {
 		printf("Resetting device in firmware upgrade mode...\n");
 		sprintf(print, "Resetting device in firmware upgrade mode...\n");
+		strcat(printcollect, print);
 		guisignal->signal();
 		dfu_detach(handle, 0, 1000);
 		libusb_release_interface(handle, 0);
@@ -232,8 +240,7 @@ retry:
 	}
 
 	printf("Found device at %d:%d\n", libusb_get_bus_number(dev), libusb_get_device_address(dev));
-	sprintf(printbuf, "Found device at %d:%d\n", libusb_get_bus_number(dev), libusb_get_device_address(dev));
-	strcat(print, printbuf);
+	sprintf(print, "Found device at %d:%d\n", libusb_get_bus_number(dev), libusb_get_device_address(dev));
 
 	printf("wTransfer Size = %d\n", wTransferSize);
 	fflush(stdout);
@@ -255,7 +262,7 @@ retry:
 		strcat(printcollect, print);
 		guisignal->signal();
 	}
-	
+
 	stm32_mem_manifest(handle, 0);
 
 	libusb_release_interface(handle, 0);
@@ -263,7 +270,6 @@ retry:
 	libusb_unref_device(dev);
 	libusb_exit(NULL);
 	free(fw_buf);
-	free(printbuf);
 
 	printf("=== Firmware Upgrade successful! ===\n");
 	fflush(stdout);

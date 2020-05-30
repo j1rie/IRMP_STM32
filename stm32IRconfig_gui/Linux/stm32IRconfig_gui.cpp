@@ -25,6 +25,7 @@
 // Headers needed for sleeping.
 #ifdef _WIN32
 	#include <windows.h>
+	#include <FXCP1252Codec.h>
 #else
 	#include <unistd.h>
 #endif
@@ -180,10 +181,12 @@ private:
 	int active_lines;
 	int max;
 	int count;
-	const char* firmwarefile;
-	char* print;
-	char* printcollect;
+	char firmwarefile[512];
+	char print[1024];
+	char printcollect[1024];
 	FXint cur_item;
+	FXint num_devices_before_upgrade;
+	FXint num_devices_after_rescan;
 
 protected:
 	MainWindow() {};
@@ -543,9 +546,6 @@ MainWindow::MainWindow(FXApp *app)
 	firmware1 = "";
 	max = 0;
 	count = 0;
-	firmwarefile = (const char*)malloc(512);
-	print = (char*)malloc(512);
-	printcollect = (char*)malloc(512);
 }
 
 MainWindow::~MainWindow()
@@ -553,8 +553,6 @@ MainWindow::~MainWindow()
 	if (connected_device)
 		hid_close(connected_device);
 	hid_exit();
-	delete print;
-	delete printcollect;
 	delete guisignal;
 }
 
@@ -815,20 +813,22 @@ MainWindow::onRescan(FXObject *sender, FXSelector sel, void *ptr)
 	while (cur_dev) {
 		// Add it to the List Box.
 		FXString s;
-		FXString usage_str;
 		s.format("%04hx:%04hx -", cur_dev->vendor_id, cur_dev->product_id);
 		s += FXString(" ") + cur_dev->manufacturer_string;
 		s += FXString(" ") + cur_dev->product_string;
 		FXListItem *li = new FXListItem(s, NULL, cur_dev);
 		device_list->appendItem(li);
-		
+
 		cur_dev = cur_dev->next;
 	}
 
-	if (device_list->getNumItems() == 0)
+	if (device_list->getNumItems() == 0) {
 		device_list->appendItem("*** No Devices Connected ***");
+		num_devices_after_rescan = 0;
+	}
 	else {
 		device_list->selectItem(0);
+		num_devices_after_rescan = device_list->getNumItems();
 	}
 
 	return 1;
@@ -1706,7 +1706,13 @@ MainWindow::onUpgrade(FXObject *sender, FXSelector sel, void *ptr)
 		FXString Firmwarename = Filename.mid(pos + 1, endpos - pos - 1 - suffix_length);
 		if(MBOX_CLICKED_NO==FXMessageBox::question(this,MBOX_YES_NO,"Really upgrade?","Old Firmware: %s\nNew Firmware: %s", firmware1.text(),  Firmwarename.text())) return 1;
 		sprintf(printcollect, "%s", "");
-		firmwarefile = Filename.text();
+#ifndef WIN32
+		sprintf(firmwarefile, "%s", Filename.text());
+#else
+		FXCP1252Codec codec;
+		FXString mbstring=codec.utf2mb(Filename); // on Windows file encoding is cp1252, needed for umlaut
+		sprintf(firmwarefile, "%s", mbstring.text());
+#endif
 
 		doUpgrade.set_firmwarefile(firmwarefile);
 		doUpgrade.set_print(print);
@@ -1715,6 +1721,7 @@ MainWindow::onUpgrade(FXObject *sender, FXSelector sel, void *ptr)
 		doUpgrade.start();
 
 		cur_item = device_list->getCurrentItem();
+		num_devices_before_upgrade = device_list->getNumItems();
 		s.format("%d %d %d %d", REPORT_ID_CONFIG_OUT, STAT_CMD, ACC_SET, CMD_REBOOT);
 		output_text->setText(s);
 		Write_and_Check();
@@ -1727,12 +1734,20 @@ MainWindow::onUpgrade(FXObject *sender, FXSelector sel, void *ptr)
 long
 MainWindow::onPrint(FXObject *sender, FXSelector sel, void *ptr)
 {
+		int count = 0;
 		FXString t = print;
 		input_text->appendText(t);
 		input_text->setBottomLine(INT_MAX);
 		if(t == "=== Firmware Upgrade successful! ===\n"){
-			FXThread::sleep(700000000); // 700 ms
-			onRescan(NULL, 0, NULL);
+			 do { // wait for device to reappear
+				FXThread::sleep(100000000); // 100 ms
+				onRescan(NULL, 0, NULL);
+				count++;
+				if(count > 20) {
+					printf("stopped waiting\n");
+					break;
+				}
+			} while(num_devices_after_rescan != num_devices_before_upgrade);
 			device_list->setCurrentItem(cur_item);
 			device_list->deselectItem(0);
 			device_list->selectItem(cur_item);
