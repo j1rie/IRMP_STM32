@@ -77,11 +77,11 @@ libusb_device_handle * get_dfu_interface(struct libusb_device *dev, uint16_t *wT
 	libusb_device_handle *handle = NULL;
 	struct libusb_config_descriptor *config;
 
+	// bNumConfigurations = 1, bNumInterfaces = 1, num_altsetting = 1
 	if(libusb_get_config_descriptor(dev, 0, &config) != LIBUSB_SUCCESS) {
 		printf("couldn't get config descriptor\n");
 		return NULL;
 	}
-	// bNumConfigurations = 1, bNumInterfaces = 1, num_altsetting = 1
 	iface = (void*)&config->interface[0].altsetting[0];
 	if((iface->bInterfaceClass == 0xFE) && (iface->bInterfaceSubClass = 1)) { // for safety only
 		struct usb_dfu_descriptor *dfu_function = (struct usb_dfu_descriptor*)iface->extra;
@@ -160,7 +160,8 @@ int main(int argc, const char **argv)
 		return 1;
 	}
 
-	fw_buf = get_firmware(argv[1], &firmwareSize);
+	if(!(fw_buf = get_firmware(argv[1], &firmwareSize)))
+		return -1;
 
 	printf("Waiting for device ...\n");
 
@@ -170,7 +171,7 @@ int main(int argc, const char **argv)
 		return -1;
 	}
 	//libusb_set_option(NULL, LIBUSB_OPTION_LOG_LEVEL, LIBUSB_LOG_LEVEL_WARNING);
-	libusb_set_debug(NULL, LIBUSB_LOG_LEVEL_WARNING);
+	//libusb_set_debug(NULL, LIBUSB_LOG_LEVEL_WARNING);
 
 retry:
 	if(!(dev = find_dev()) || !(handle = get_dfu_interface(dev, &wTransferSize))) {
