@@ -2,6 +2,9 @@
 #define _UPGRADE_h_
 #include "dfu.h"
 #include <fx.h>
+#ifdef WIN32
+#include <FXCP1252Codec.h>
+#endif
 
 class Upgrade : public FXThread {
 private:
