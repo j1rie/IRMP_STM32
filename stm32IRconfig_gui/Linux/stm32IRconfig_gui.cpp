@@ -69,6 +69,7 @@ public:
 		ID_RPLISTBOX,
 		ID_OPEN,
 		ID_SAVE,
+		ID_SAVE_LOG,
 		ID_APPEND,
 		ID_WRITE_IR,
 		ID_DEVLIST
@@ -228,10 +229,12 @@ public:
 	long onNew(FXObject *sender, FXSelector sel, void *ptr);
 	long onOpen(FXObject *sender, FXSelector sel, void *ptr);
 	long onSave(FXObject *sender, FXSelector sel, void *ptr);
+	long onSaveLog(FXObject *sender, FXSelector sel, void *ptr);
 	long Write();
 	long Read();
 	long Write_and_Check();
 	long saveFile(const FXString& file);
+	long saveLogFile(const FXString& file);
 	long onAppend(FXObject *sender, FXSelector sel, void *ptr);
 	long onApply(FXObject *sender, FXSelector sel, void *ptr);
 	long onWrite_IR(FXObject *sender, FXSelector sel, void *ptr);
@@ -284,6 +287,7 @@ FXDEFMAP(MainWindow) MainWindowMap [] = {
 	FXMAPFUNC(SEL_COMMAND, MainWindow::ID_MSLISTBOX, MainWindow::onCmdmsListBox),
 	FXMAPFUNC(SEL_COMMAND, MainWindow::ID_OPEN, MainWindow::onOpen ),
 	FXMAPFUNC(SEL_COMMAND, MainWindow::ID_SAVE, MainWindow::onSave ),
+	FXMAPFUNC(SEL_COMMAND, MainWindow::ID_SAVE_LOG, MainWindow::onSaveLog ),
 	FXMAPFUNC(SEL_COMMAND, MainWindow::ID_APPEND, MainWindow::onAppend ),
 	FXMAPFUNC(SEL_COMMAND, MainWindow::ID_WRITE_IR, MainWindow::onWrite_IR ),
 	FXMAPFUNC(SEL_CLOSE,   0, MainWindow::onCmdQuit ),
@@ -351,7 +355,7 @@ MainWindow::MainWindow(FXApp *app)
 	FXSpring *s132 = new FXSpring(hf13, LAYOUT_FILL_X, 100, 0, 0,0,0,0, 2,4,2,2, 2,2);
 
 	//IR Group Box
-	FXGroupBox *gb131 = new FXGroupBox(s131, "IR (hex)", FRAME_GROOVE|LAYOUT_FILL_X);
+	FXGroupBox *gb131 = new FXGroupBox(s131, "IR (hex)", FRAME_GROOVE|LAYOUT_FILL_X, 0,0,0,0, 0,0,0,0);
 	FXMatrix *m131 = new FXMatrix(gb131, 6, MATRIX_BY_COLUMNS,0,0,0,0);
 	new FXLabel(m131, "");
 	new FXLabel(m131, "protocol");
@@ -392,7 +396,7 @@ MainWindow::MainWindow(FXApp *app)
 	// horizontal frame for alarm Group Box and select listboxes
 	FXHorizontalFrame *hf143 = new FXHorizontalFrame(vf141, LAYOUT_FILL_X/*,0,0,0,0, 0,0,0,0*/);
 	//alarm Group Box
-	FXGroupBox *gb14 = new FXGroupBox(hf143, "alarm (dec)", FRAME_GROOVE|LAYOUT_FILL_X);
+	FXGroupBox *gb14 = new FXGroupBox(hf143, "alarm (dec)", FRAME_GROOVE|LAYOUT_FILL_X, 0,0,0,0, 0,0,0,0);
 	FXMatrix *m14 = new FXMatrix(gb14, 5, MATRIX_BY_COLUMNS|LAYOUT_FILL_X);
 	new FXLabel(m14, "days");
 	new FXLabel(m14, "hours");
@@ -437,7 +441,7 @@ MainWindow::MainWindow(FXApp *app)
 	// horizontal frame for Output Group Box
 	FXHorizontalFrame *hf15 = new FXHorizontalFrame(vf141, LAYOUT_FILL_X);
 	// Output Group Box
-	FXGroupBox *gb15 = new FXGroupBox(hf15, "PC->STM32", FRAME_GROOVE|LAYOUT_FILL_X);
+	FXGroupBox *gb15 = new FXGroupBox(hf15, "PC->STM32", FRAME_GROOVE|LAYOUT_FILL_X, 0,0,0,0, 0,0,0,0);
 	FXMatrix *m3 = new FXMatrix(gb15, 2, MATRIX_BY_COLUMNS|LAYOUT_FILL_X);
 	new FXLabel(m3, "Data");
 	new FXLabel(m3, "");
@@ -447,11 +451,13 @@ MainWindow::MainWindow(FXApp *app)
 	// horizontal frame for Input Group Box
 	FXHorizontalFrame *hf16 = new FXHorizontalFrame(vf1, LAYOUT_FILL_X|LAYOUT_FILL_Y);
 	// Input Group Box
-	FXGroupBox *gb16 = new FXGroupBox(hf16, "debug messages", FRAME_GROOVE|LAYOUT_FILL_X|LAYOUT_FILL_Y);
-	FXVerticalFrame *innerVF16 = new FXVerticalFrame(gb16, LAYOUT_FILL_X|LAYOUT_FILL_Y);
-	input_text = new FXText(new FXHorizontalFrame(innerVF16,LAYOUT_FILL_X|LAYOUT_FILL_Y|FRAME_SUNKEN|FRAME_THICK, 0,0,0,0, 0,0,0,0), NULL, 0, LAYOUT_FILL_X|LAYOUT_FILL_Y);
+	FXGroupBox *gb16 = new FXGroupBox(hf16, "debug messages", FRAME_GROOVE|LAYOUT_FILL_X|LAYOUT_FILL_Y, 0,0,0,0, 0,0,0,0);
+	FXHorizontalFrame *innerHF16 = new FXHorizontalFrame(gb16, LAYOUT_FILL_X|LAYOUT_FILL_Y);
+	input_text = new FXText(new FXHorizontalFrame(innerHF16,LAYOUT_FILL_X|LAYOUT_FILL_Y|FRAME_SUNKEN|FRAME_THICK, 0,0,0,0, 0,0,0,0), NULL, 0, LAYOUT_FILL_X|LAYOUT_FILL_Y);
 	input_text->setEditable(false);
-	FXButton *clear_button = new FXButton(innerVF16, "Clear", NULL, this, ID_CLEAR, BUTTON_NORMAL|LAYOUT_RIGHT);
+	FXVerticalFrame *innerVF16 = new FXVerticalFrame(innerHF16,LAYOUT_FILL_Y, 0,0,0,0, 0,0,0,0);
+	FXButton *clear_button = new FXButton(innerVF16, "Clear", NULL, this, ID_CLEAR, BUTTON_NORMAL|LAYOUT_FILL_X);
+	FXButton *save_log_button = new FXButton(innerVF16, "Save", NULL, this, ID_SAVE_LOG, BUTTON_NORMAL|LAYOUT_FILL_X);
 
 	// horizontal frame for Status Bar
 	FXHorizontalFrame *hf17 = new FXHorizontalFrame(vf1, LAYOUT_SIDE_BOTTOM|LAYOUT_FILL_X,0,0,0,0, 1,2,0,3);
@@ -502,6 +508,7 @@ MainWindow::MainWindow(FXApp *app)
 	output_button->setHelpText("send to device");
 	input_text->setHelpText("debug messages");
 	clear_button->setHelpText("clear debug messages");
+	save_log_button->setHelpText("save debug messages");
 	open_button->setHelpText("open translation map");
 	map_text->setHelpText("key (translated received IR)");
 	save_button->setHelpText("save translation map");
@@ -838,17 +845,30 @@ long
 MainWindow::onReboot(FXObject *sender, FXSelector sel, void *ptr)
 {
 	FXString s;
+	FXint success = 1;
 	s.format("%d %d %d %d", REPORT_ID_CONFIG_OUT, STAT_CMD, ACC_SET, CMD_REBOOT);
 	output_text->setText(s);
 
 	FXint cur_item = device_list->getCurrentItem();
+	FXint num_devices_before_reboot = device_list->getNumItems();
 	Write_and_Check();
-	FXThread::sleep(2500000000);
-	onRescan(NULL, 0, NULL);
-	device_list->setCurrentItem(cur_item);
-	device_list->deselectItem(0);
-	device_list->selectItem(cur_item);
-	onConnect(NULL, 0, NULL);
+	FXThread::sleep(1500000000); // 1,5 s
+	do { // wait for device to reappear
+		FXThread::sleep(100000000); // 100 ms
+		onRescan(NULL, 0, NULL);
+		count++;
+		if(count > 30) {
+			printf("stopped waiting\n");
+			success = 0;
+			break;
+		}
+	} while(num_devices_after_rescan != num_devices_before_reboot);
+	if(success) {
+		device_list->setCurrentItem(cur_item);
+		device_list->deselectItem(0);
+		device_list->selectItem(cur_item);
+		onConnect(NULL, 0, NULL);
+	}
 
 	return 1;
 }
@@ -1735,6 +1755,7 @@ long
 MainWindow::onPrint(FXObject *sender, FXSelector sel, void *ptr)
 {
 		int count = 0;
+		FXint success = 1;
 		FXString t = print;
 		input_text->appendText(t);
 		input_text->setBottomLine(INT_MAX);
@@ -1745,13 +1766,16 @@ MainWindow::onPrint(FXObject *sender, FXSelector sel, void *ptr)
 				count++;
 				if(count > 20) {
 					printf("stopped waiting\n");
+					success = 0;
 					break;
 				}
 			} while(num_devices_after_rescan != num_devices_before_upgrade);
-			device_list->setCurrentItem(cur_item);
-			device_list->deselectItem(0);
-			device_list->selectItem(cur_item);
-			onConnect(NULL, 0, NULL);
+			if(success){
+				device_list->setCurrentItem(cur_item);
+				device_list->deselectItem(0);
+				device_list->selectItem(cur_item);
+				onConnect(NULL, 0, NULL);
+			}
 			FXString u = printcollect;
 			input_text->appendText(u);
 			input_text->setBottomLine(INT_MAX);
@@ -1854,7 +1878,7 @@ MainWindow::onSave(FXObject *sender, FXSelector sel, void *ptr){
 		onApply(NULL, 0, NULL);
 		map_text21->setModified(0);
 		FXString u;
-		u = "saved: ";
+		u = "save map to ";
 		u += file;
 		u += "\n";
 		input_text->appendText(u);
@@ -1864,7 +1888,36 @@ MainWindow::onSave(FXObject *sender, FXSelector sel, void *ptr){
 	return 1;
 }
 
-// Save file
+long
+MainWindow::onSaveLog(FXObject *sender, FXSelector sel, void *ptr){
+	const FXchar patterns[]="All Files (*)\nlog Files (*.log)";
+	FXFileDialog save(this,"save the log file");
+	FXString file;
+	save.setPatternList(patterns);
+	save.setCurrentPattern(1);
+	if(save.execute()){
+		file=save.getFilename();
+		if(compare(file.right(4), ".log") && (save.getCurrentPattern() == 1))
+			file += ".log";
+		if(FXStat::exists(file)){
+			if(MBOX_CLICKED_NO==FXMessageBox::question(this,MBOX_YES_NO,tr("Overwrite Document"),tr("Overwrite existing document: %s?"),file.text())) return 1;
+		}
+		if(!saveLogFile(file)){
+			getApp()->beep();
+			FXMessageBox::error(this,MBOX_OK,tr("Error Saving File"),tr("Unable to save file: %s"),file.text());
+			return 1;
+		}
+		FXString u;
+		u = "save debug messages to ";
+		u += file;
+		u += "\n";
+		input_text->appendText(u);
+		input_text->setBottomLine(INT_MAX);
+    }
+
+	return 1;
+}
+
 long 
 MainWindow::saveFile(const FXString& file){
 	FXFile textfile(file,FXFile::Writing);
@@ -1885,6 +1938,58 @@ MainWindow::saveFile(const FXString& file){
 
 			// Get text from editor
 			map_text21->getText(text,size);
+
+			// Write the file
+			n=textfile.writeBlock(text,size);
+			if(n==size){
+
+				// Success
+				saved=1;
+			}
+
+			// Kill wait cursor
+			getApp()->endWaitCursor();
+
+			// Free buffer
+			freeElms(text);
+
+			FXString u;
+			FXString v;
+			u = "saved size: ";
+#if (FOX_MINOR >= 7)
+			v.fromInt(size, 10);
+#else
+			v = FXStringVal(size, 10);
+#endif
+			u += v;
+			u += "\n";
+			input_text->appendText(u);
+			input_text->setBottomLine(INT_MAX);
+		}
+	}
+	return saved;
+}
+
+long
+MainWindow::saveLogFile(const FXString& file){
+	FXFile textfile(file,FXFile::Writing);
+	long saved=0;
+
+	// Opened file?
+	if(textfile.isOpen()){
+		FXchar *text; FXint size,n;
+
+		// Get size
+		size=input_text->getLength();
+
+		// Alloc buffer
+		if(allocElms(text,size+1)){
+
+			// Set wait cursor
+			getApp()->beginWaitCursor();
+
+			// Get text from debug messages field
+			input_text->getText(text,size);
 
 			// Write the file
 			n=textfile.writeBlock(text,size);
