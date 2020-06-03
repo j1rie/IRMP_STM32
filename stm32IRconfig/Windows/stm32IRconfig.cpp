@@ -93,10 +93,9 @@ int main(int argc, char* argv[])
 {
 	uint64_t i;
 	char c, d;
-	uint8_t s, m, k, l, idx;
+	uint8_t k, l, idx;
+	unsigned int s, m;
 	int retValm, jump_to_firmware, jump_to_romtable;
-	jump_to_firmware = 0;
-	jump_to_romtable = 0;
 
 #ifdef WIN32
 	UNREFERENCED_PARAMETER(argc);
@@ -179,7 +178,7 @@ Prog:		printf("set wakeup with remote control(w)\nset macro with remote control(
 		}
 		printf("enter IRData by pressing a button on the remote control\n");
 		read_stm32();
-		/* it is necessary, to have *all* IR codes received, *before* calling 
+		/* it is necessary, to have *all* IR codes received, *before* calling
 		* write_and_check(), in order to avoid, that these disturb later! */
 		#ifdef WIN32
 		Sleep(500); 
@@ -218,6 +217,8 @@ get:		printf("get wakeup(w)\nget macro slot(m)\nget caps(c)\n");
 			outBuf[idx++] = s;    // (s+1)-th slot
 			break;
 		case 'c':
+			jump_to_firmware = 0;
+			jump_to_romtable = 0;
 			outBuf[idx++] = 0x01; // CMD_CAPS
 			for (l = 0; l < 20; l++) { // for safety stop after 20 loops
 				outBuf[idx] = l;
@@ -238,7 +239,7 @@ get:		printf("get wakeup(w)\nget macro slot(m)\nget caps(c)\n");
 					if(!jump_to_firmware) { // queries for supported_protocols
 						printf("protocols: ");
 						for (k = 4; k < 17; k++) {
-							if (!inBuf[k]) {
+							if (!inBuf[k]) { // NULL termination
 								printf("\n\n");
 								jump_to_firmware = 1;
 								goto again;
@@ -248,12 +249,15 @@ get:		printf("get wakeup(w)\nget macro slot(m)\nget caps(c)\n");
 					} else if(!jump_to_romtable) { // queries for firmware
 						printf("firmware: ");
 						for (k = 4; k < 17; k++) {
-							if (inBuf[k] == 42) { // *
+							if (!inBuf[k]) { // NULL termination for legacy
+								printf("\n\n");
+								goto out;
+							}
+							if (inBuf[k] == 42) { // * termination
 								printf("\n\n");
 								printf("romtable: ");
 								jump_to_romtable = 1;
-							}
-							if(inBuf[k] != 42) {
+							} else {
 								printf("%c", inBuf[k]);
 							}
 						}
@@ -264,7 +268,7 @@ get:		printf("get wakeup(w)\nget macro slot(m)\nget caps(c)\n");
 					} else { // queries for romtable
 						printf("romtable: ");
 						for (k = 4; k < 17; k++) {
-							if (!inBuf[k]) {
+							if (!inBuf[k]) { // NULL termination
 								printf("\n\n");
 								goto out;
 							}
@@ -280,7 +284,8 @@ again:			;
 			goto get;
 		}
 		write_and_check();
-out:		break;
+out:
+		break;
 
 	case 'r':
 reset:		printf("reset wakeup(w)\nreset macro slot(m)\nreset alarm(a)\n");
@@ -354,13 +359,21 @@ reset:		printf("reset wakeup(w)\nreset macro slot(m)\nreset alarm(a)\n");
 		outBuf[idx++] = 0x01; // ACC_SET
 		outBuf[idx++] = 0x06; // CMD_REBOOT
 		write_and_check();
-		#ifdef WIN32
-		Sleep(2500);
-		#else
-		usleep(2500000);
-		#endif
 		hid_close(handle);
-		open_stm32();
+		#ifdef WIN32
+		Sleep(1900);
+		#else
+		usleep(1900000);
+		#endif
+		for(l=0;l<6;l++) {
+			if(open_stm32() == true)
+				break;
+			#ifdef WIN32
+			Sleep(100);
+			#else
+			usleep(100000);
+			#endif
+		}
 		break;
 
 	case 'm':

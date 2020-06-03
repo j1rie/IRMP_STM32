@@ -1152,7 +1152,7 @@ MainWindow::Write_and_Check()
 		return -1;
 	}
 
-	FXThread::sleep(2000);
+	FXThread::sleep(2000000); // 2ms
 
 	read = Read();
 	if(read  == -1) {
@@ -1162,7 +1162,7 @@ MainWindow::Write_and_Check()
 		return -1;
 	}
 
-	while ((buf[0] == REPORT_ID_IR || read == 0) && count < 100000) {
+	while ((buf[0] == REPORT_ID_IR || read == 0) && count < 100) {
 		read = Read();
 		if(read == -1) {
 			s += "W&C loop Read(): -1\n";
@@ -1171,7 +1171,7 @@ MainWindow::Write_and_Check()
 			return -1;
 		}
 		count++;
-		FXThread::sleep(2000);
+		FXThread::sleep(1000000); // 1ms
 	}
 
 	if(buf[1] == STAT_SUCCESS) {
