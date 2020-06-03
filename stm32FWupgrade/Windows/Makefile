@@ -2,8 +2,13 @@ OUTFILE = stm32FWupgrade
 
 CC = gcc
 
-CFLAGS = -I/mingw64/include/libusb-1.0 -Wall -Wextra -g -s -mno-ms-bitfields
+ifeq ($(OS),Windows_NT)
+CFLAGS = -I/mingw64/include/libusb-1.0 -Wall -Wextra -g -s -mno-ms-bitfields -O2
 LDFLAGS = -Wl,-Bstatic -lusb-1.0
+else
+CFLAGS = -I/usr/include/libusb-1.0 -Wall -Wextra -g -s -O2
+LDFLAGS = -lusb-1.0
+endif
 
 OBJ = dfu.o stm32mem.o main.o
 
