@@ -24,9 +24,10 @@ A macro makes it possible to send a sequence of IR commands via the send diode o
  macroslot0 is the trigger, macroslot1 … macroslot7 are the commands to be sent.
 
 ## Software Linux
-* GUI config-tool stm32IRconfig_gui for configuration: set, get and reset wakeup codes, macros, alarm time, send IR and show the received IR code. It is possible to program wakeups and macros via remote control. Create the translation table with remote control and mouse, as well test and edit. Comprehensive debug messages.
+* GUI config-tool stm32IRconfig_gui for configuration: set, get and reset wakeup codes, macros, alarm time, send IR and show the received IR code. It is possible to program wakeups and macros via remote control. Create the translation table with remote control and mouse, as well test and edit. Comprehensive debug messages. Firmware update.
 * interactive command line program stm32IRconfig for configuration: set, get and reset wakeups, macros, alarm time, send IR and show the received IR code. It is possible to program wakeups and macros via remote control.
 * stm32IRalarm for setting and reading alarm time via script 
+* stm32FWupgrade for firmware update on the command line
 * irmplircd is a daemon, running in background as an independent lirc server and passing the IR codes/events on to the application https://github.com/realglotzi/irmplircd
 * Software ready for LibreELEC, Ubuntu, yaVDR, easyVDR, MLD, OpenELEC.
 
@@ -34,6 +35,7 @@ A macro makes it possible to send a sequence of IR commands via the send diode o
 * GUI config-tool stm32IRconfig_gui (same as linux)
 * interactive command line programm stm32IRconfig (same as linux)
 * stm32IRalarm for setting and reading alarm time via script
+* stm32FWupgrade for firmware update on the command line
 * MediaPortal plugin: https://github.com/pikim/HIDIRT-host/tree/master/hidirt.MePo
 * EventGhost with Generic HID
 
