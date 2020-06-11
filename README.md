@@ -89,17 +89,20 @@ File - Open File - boot.blackDev.bin (https://github.com/j1rie/STM32F103-bootloa
 )  
 Target - Program & Verify (confirm a message about read out protection, if it appears)  
 https://github.com/j1rie/IRMP_STM32_KBD/wiki/Herstellungsprozess-Schwarze#bootloader-flashen  
+
 ## Flashing the firmware
 Disconnect from USB.  
-Linux: Start ./FlashDFUjrie.sh ./2019-07-06_16-32_blackDev_BL_SC_jrie.bin  
-Windows: Start FlashDFUjrie.bat 2020-02-15_00-29_blueDev_BL_SC_jrie.bin  
+Linux: Start ./stm32FWupgrade ./2019-07-06_16-32_blackDev_BL_SC_jrie.bin  
+Windows: Start stm32FWupgrade.exe 2020-02-15_00-29_blueDev_BL_SC_jrie.bin  
 Attach to USB.  
-You need dfu-util from git (https://sourceforge.net/p/dfu-util/dfu-util/ci/master/tree/).  
+Instead of stm32FWupgrade you can use stm32IRconfig_gui.  
 https://github.com/j1rie/IRMP_STM32_KBD/wiki/Herstellungsprozess-Schwarze#firmware-flashen  
+
 ## Other ways how to flash
 Flashing with an USB-serial-TTL is possible on the developer boards.  
 Flashing over USB is possible on those boards, which support it.  
 See https://www.mikrocontroller.net/articles/IRMP_auf_STM32_-_ein_USB_IR_Empf%C3%A4nger/Sender/Einschalter_mit_Wakeup-Timer#Firmware_Flashing  
+
 ## irmplircd, eventlircd, udev and systemd
 See /irmplircd/README.
 
