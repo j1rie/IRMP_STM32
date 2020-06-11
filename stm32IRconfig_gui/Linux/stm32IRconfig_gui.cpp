@@ -105,7 +105,7 @@ enum report_id {
 
 	FXGUISignal *guisignal = new FXGUISignal(getApp(), this, ID_PRINT);
 	Upgrade doUpgrade;
-	
+
 private:
 	FXList *device_list;
 	FXButton *connect_button;
@@ -329,7 +329,7 @@ MainWindow::MainWindow(FXApp *app)
 	connected_label3 = new FXLabel(vf1, "Protocols:");
 	
 	// horizontal frame of group boxes
-	FXHorizontalFrame *hf12 = new FXHorizontalFrame(vf1, LAYOUT_FILL_X|PACK_UNIFORM_WIDTH);	//
+	FXHorizontalFrame *hf12 = new FXHorizontalFrame(vf1, LAYOUT_FILL_X|PACK_UNIFORM_WIDTH);
 	//set Group Box
 	FXGroupBox *gb121 = new FXGroupBox(hf12, "set", FRAME_GROOVE|LAYOUT_FILL_X);
 	pwakeup_button = new FXButton(gb121, "wakeup", NULL, this, ID_PWAKEUP, BUTTON_NORMAL|LAYOUT_FILL_X);
@@ -525,7 +525,6 @@ MainWindow::MainWindow(FXApp *app)
 	gwakeup_button->disable();
 	gmacro_button->disable();
 	gcap_button->disable();
-	upgrade_button->disable();
 	aget_button->disable();
 	aset_button->disable();
 	rwakeup_button->disable();
@@ -687,7 +686,6 @@ MainWindow::onConnect(FXObject *sender, FXSelector sel, void *ptr)
 	connect_button->disable();
 	disconnect_button->enable();
 	reboot_button->enable();
-	upgrade_button->enable();
 	input_text->setText("");
 	output_text->setText("");
 
@@ -792,7 +790,6 @@ MainWindow::onDisconnect(FXObject *sender, FXSelector sel, void *ptr)
 	ralarm_button->disable();
 	send_button->disable();
 	read_cont_button->disable();
-	upgrade_button->disable();
 	connect_button->enable();
 	disconnect_button->disable();
 	reboot_button->disable();
@@ -1051,7 +1048,6 @@ MainWindow::onReadIRcont(FXObject *sender, FXSelector sel, void *ptr)
 		rmacro_button->disable();
 		ralarm_button->disable();
 		send_button->disable();
-		upgrade_button->disable();
 		/* consume IR */
 		int read;
 		read = Read();
@@ -1090,7 +1086,6 @@ MainWindow::onReadIRcont(FXObject *sender, FXSelector sel, void *ptr)
 		rmacro_button->enable();
 		ralarm_button->enable();
 		send_button->enable();
-		upgrade_button->enable();
 		ReadIRcontActive = 0;
 		read_cont_button->setBaseColor(storedBaseColor);
 		read_cont_button->setShadowColor(storedShadowColor);
@@ -1162,7 +1157,7 @@ MainWindow::Write_and_Check()
 		return -1;
 	}
 
-	while ((buf[0] == REPORT_ID_IR || read == 0) && count < 100) {
+	while ((buf[0] == REPORT_ID_IR || read == 0) && count < 5000) { // 5000ms needed in case of "set by remote"
 		read = Read();
 		if(read == -1) {
 			s += "W&C loop Read(): -1\n";
