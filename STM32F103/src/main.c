@@ -19,7 +19,7 @@
 #ifdef DEBUG
 #include <stdio.h>
 #endif
-#include "arm_cpuid.h"
+#include "romtable.h"
 
 #define BYTES_PER_QUERY	(HID_IN_BUFFER_SIZE - 4)
 /* after plugging in, it takes some time, until SOF's are being sent to the device */
@@ -48,7 +48,7 @@ enum status {
 };
 
 const char firmwarestring[] = FW_STR;
-char firmware[128];
+char firmware[80];
 
 const char supported_protocols[] = {
 #if IRMP_SUPPORT_SIRCS_PROTOCOL==1
@@ -731,7 +731,7 @@ int main(void)
 	parse_romtable();
 	memcpy(&firmware, &firmwarestring, sizeof(firmwarestring));
 	firmware[sizeof(firmwarestring) - 1] = 42; // *
-	memcpy(&firmware[sizeof(firmwarestring)], &rt, 128 - sizeof(firmwarestring));
+	memcpy(&firmware[sizeof(firmwarestring)], &rt, sizeof(firmware) - sizeof(firmwarestring));
 
 	while (1) {
 		if (!AlarmValue && !host_running())
