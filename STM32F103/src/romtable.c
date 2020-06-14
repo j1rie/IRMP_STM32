@@ -53,6 +53,10 @@ void parse_romtable() {
 			prob = "APM32";
 		}
 	}
+	if (identity_code == 0x55
+			&& continuation_code == 5) {
+		prob = "HK32";
+	}
 
 	sprintf(rt, "%s", prob);
 }
