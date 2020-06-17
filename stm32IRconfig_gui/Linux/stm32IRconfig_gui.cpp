@@ -192,7 +192,7 @@ private:
 protected:
 	MainWindow() {};
 public:
-	MainWindow(FXApp *a);
+	MainWindow(FXApp *app);
 	~MainWindow();
 	virtual void create();
 	
@@ -559,7 +559,6 @@ MainWindow::~MainWindow()
 	if (connected_device)
 		hid_close(connected_device);
 	hid_exit();
-	delete guisignal;
 }
 
 long
@@ -630,7 +629,6 @@ MainWindow::onConnect(FXObject *sender, FXSelector sel, void *ptr)
 	s += protocols;
 	connected_label3->setText(s);
 	for(int i = 0; i < wakeupslots; i++) {
-		FXString s;
 		s = (i < wakeupslots-1) ? "wakeup" : "reboot";
 #if (FOX_MINOR >= 7)
 		FXString t;
@@ -643,7 +641,6 @@ MainWindow::onConnect(FXObject *sender, FXSelector sel, void *ptr)
 	}
 	wslistbox->setNumVisible(wakeupslots);
 	for(int i = 0; i < macrodepth; i++) {
-		FXString s;
 		s = "macro";
 #if (FOX_MINOR >= 7)
 		FXString t;
@@ -656,7 +653,6 @@ MainWindow::onConnect(FXObject *sender, FXSelector sel, void *ptr)
 	}
 	mnlistbox->setNumVisible(macrodepth);
 	for(int i = 0; i < macroslots; i++) {
-		FXString s;
 		s = "macroslot";
 #if (FOX_MINOR >= 7)
 		FXString t;
@@ -692,7 +688,7 @@ MainWindow::onConnect(FXObject *sender, FXSelector sel, void *ptr)
 	//list wakeups and alarm and warn if no STM32
 	FXString u;
 	for(int i = 0; i < wakeupslots; i++) {
-		FXString s, t, v;
+		FXString t, v;
 #if (FOX_MINOR >= 7)
 		t.fromInt(i,10);
 #else
@@ -1422,10 +1418,9 @@ MainWindow::onGcaps(FXObject *sender, FXSelector sel, void *ptr)
 {
 	FXString s;
 	FXString t;
-	int jump_to_firmware, jump_to_romtable, stop;
+	int jump_to_firmware, romtable;
 	jump_to_firmware = 0;
-	jump_to_romtable = 0;
-	stop = 0;
+	romtable = 0;
 	uC = "";
 	for(int i = 0; i < 20; i++) { // for safety stop after 20 loops
 		s.format("%d %d %d %d ", REPORT_ID_CONFIG_OUT, STAT_CMD, ACC_GET, CMD_CAPS);
@@ -1464,41 +1459,8 @@ MainWindow::onGcaps(FXObject *sender, FXSelector sel, void *ptr)
 					protocols += t;
 					s += t;
 				}
-			} else if(!jump_to_romtable) { // queries for firmware
+			} else { // queries for firmware
 				s = "firmware: ";
-				for (int k = 4; k < 17; k++) {
-					if (!buf[k]) { // NULL termination for legacy
-						s += "\n";
-						input_text->appendText(s);
-						input_text->setBottomLine(INT_MAX);
-						return 1;
-					}
-					if (buf[k] == 42) { // * termination
-						s += "\n";
-						s += "romtable: ";
-						jump_to_romtable = 1;
-						firmware += "   uC: ";
-					} else {
-						t.format("%c", buf[k]);
-						if(jump_to_romtable && t == " ") {
-							stop = 1;
-						}
-						if(!stop) {
-							firmware += t;
-							if(jump_to_romtable)
-								uC += t;
-						}
-						s += t;
-					}
-				}
-				if(jump_to_romtable) {
-					s += "\n";
-					input_text->appendText(s);
-					input_text->setBottomLine(INT_MAX);
-					goto again;
-				}
-			} else { // queries for romtable
-				s = "romtable: ";
 				for (int k = 4; k < 17; k++) {
 					if (!buf[k]) { // NULL termination
 						s += "\n";
@@ -1506,15 +1468,17 @@ MainWindow::onGcaps(FXObject *sender, FXSelector sel, void *ptr)
 						input_text->setBottomLine(INT_MAX);
 						return 1;
 					}
-					t.format("%c", buf[k]);
-					if(!stop && t == " ") {
-						stop = 1;
-					}
-					if(!stop) {
+					if (buf[k] == 42) { // * separator
+						romtable = 1;
+						firmware += "   uC: ";
+						s += "*";
+					} else {
+						t.format("%c", buf[k]);
 						firmware += t;
-						uC += t;
+						if(romtable)
+							uC += t;
+						s += t;
 					}
-					s += t;
 				}
 			}
 		}
@@ -1788,7 +1752,7 @@ MainWindow::onOpen(FXObject *sender, FXSelector sel, void *ptr)
 	const FXchar patterns[]="All Files (*)\nmap Files (*.map)";
 	long loaded = 0;
 	FXint size = 0;
-	FXint n = 0;
+	FXint n;
 	FXFileDialog open(this,"Open a map file");
 	open.setPatternList(patterns);
 	open.setCurrentPattern(1);
@@ -2043,7 +2007,7 @@ MainWindow::onApply(FXObject *sender, FXSelector sel, void *ptr){
 	const char *delim = " \t\r\n"; // Space, Tab, CR and LF
 	FXString data = map_text21->getText();
 	const FXchar *d = data.text();
-	size_t i = 0;
+	size_t k = 0;
 	size_t sz = strlen(d);
 	char *str = (char*) malloc(sz+1);
 	strcpy(str, d);
@@ -2051,14 +2015,14 @@ MainWindow::onApply(FXObject *sender, FXSelector sel, void *ptr){
 	memset(mapbeg, 0, sizeof(mapbeg));
 	int count = 0;
 	while (token) {
-		map[i++] = token;
-		count += map[i-1].length() + 1;
-		if(!(i%2))
-			mapbeg[(i+1)/2] = count;
+		map[k++] = token;
+		count += map[k-1].length() + 1;
+		if(!(k%2))
+			mapbeg[(k+1)/2] = count;
 		token = strtok(NULL, delim);
 	}
 	free(str);
-	active_lines = i / 2;
+	active_lines = k / 2;
 
 	FXString u;
 	FXString v;

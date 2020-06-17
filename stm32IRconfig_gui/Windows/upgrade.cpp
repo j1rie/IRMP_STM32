@@ -154,6 +154,7 @@ uint8_t * get_firmware(const char *firmwarefile, int *firmwareSize, char* print)
 	if((fseek(fpFirmware, 0, SEEK_END) != 0) || ((*firmwareSize = ftell(fpFirmware)) < 0) ||
 							(fseek(fpFirmware, 0, SEEK_SET) != 0)) {
 		printf("error determining firmware size\n");
+		fclose(fpFirmware);
 		return NULL;
 	}
 
@@ -166,6 +167,8 @@ uint8_t * get_firmware(const char *firmwarefile, int *firmwareSize, char* print)
 
 	if(fread(fw_buf,*firmwareSize,1,fpFirmware) != 1) {
 		printf("read firmware error\n");
+		fclose(fpFirmware);
+		free(fw_buf);
 		return NULL;
 	} else {
 		printf("read %d bytes of firmware\n", *firmwareSize);

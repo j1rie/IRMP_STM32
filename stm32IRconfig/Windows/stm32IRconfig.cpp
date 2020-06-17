@@ -1,7 +1,7 @@
 /**********************************************************************************************************
 	stm32config: configure and monitor STM32IR
 
-	Copyright (C) 2014-2020 Jörg Riechardt
+	Copyright (C) 2014-2020 Joerg Riechardt
 
 	based on work by Alan Ott
 	Copyright 2010  Alan Ott
@@ -106,7 +106,7 @@ void write_and_check() {
 	usleep(2000);
 	#endif
 	read_stm32();
-	while (inBuf[0] == 0x01)
+	while (inBuf[0] == REPORT_ID_IR)
 		read_stm32();
 	if (inBuf[1] == STAT_SUCCESS) {
 		puts("*****************************OK********************************\n");
@@ -121,7 +121,7 @@ int main(int argc, char* argv[])
 	char c, d;
 	uint8_t k, l, idx;
 	unsigned int s, m;
-	int retValm, jump_to_firmware, jump_to_romtable;
+	int retValm, jump_to_firmware;
 
 #ifdef WIN32
 	UNREFERENCED_PARAMETER(argc);
@@ -244,7 +244,6 @@ get:		printf("get wakeup(w)\nget macro slot(m)\nget caps(c)\n");
 			break;
 		case 'c':
 			jump_to_firmware = 0;
-			jump_to_romtable = 0;
 			outBuf[idx++] = CMD_CAPS;
 			for (l = 0; l < 20; l++) { // for safety stop after 20 loops
 				outBuf[idx] = l;
@@ -272,27 +271,8 @@ get:		printf("get wakeup(w)\nget macro slot(m)\nget caps(c)\n");
 							}
 							printf("%u ", inBuf[k]);
 						}
-					} else if(!jump_to_romtable) { // queries for firmware
+					} else { // queries for firmware
 						printf("firmware: ");
-						for (k = 4; k < 17; k++) {
-							if (!inBuf[k]) { // NULL termination for legacy
-								printf("\n\n");
-								goto out;
-							}
-							if (inBuf[k] == 42) { // * termination
-								printf("\n\n");
-								printf("romtable: ");
-								jump_to_romtable = 1;
-							} else {
-								printf("%c", inBuf[k]);
-							}
-						}
-						if(jump_to_romtable) {
-							printf("\n\n");
-							goto again;
-						}
-					} else { // queries for romtable
-						printf("romtable: ");
 						for (k = 4; k < 17; k++) {
 							if (!inBuf[k]) { // NULL termination
 								printf("\n\n");

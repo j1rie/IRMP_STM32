@@ -1,7 +1,7 @@
 /*
  Copyright (C) 2020 Joerg Riechardt
 
- File:		arm_cpuid.c
+ File:		main.c
  License: 	MIT
 
  Copyright (c) 2020 André van Schoubroeck
@@ -32,29 +32,24 @@
 char rt[8];
 
 void parse_romtable() {
-	int * pid = (int*)(0xE00FFFE4);
-	uint8_t identity_code = ((pid[0] & 0xF0) >> 4) | ((pid[1] & 0x07) << 4);
+	// ARM v7-M Architecture Reference Manual D1.1 and C1.2.2: peripheral ID at offset 0xFD0, ETM at offset 0x14
+	// STM32 Reference manual RM0008 31.6.4: romtable base at  0xE00FF000
 	uint8_t continuation_code = (*(int*)(0xE00FFFD0)) & 0x0F;
 	uint8_t etm = (*(int*)(0xE00FF014)) & 0x01;
+
 	char *prob = "Unknown";
-	if (identity_code == 32
-			&& continuation_code == 0) {
+	if (continuation_code == 0)
 		prob = "STM32";
-	}
-	if (identity_code == 81
-			&& continuation_code == 7) {
+	if (continuation_code == 7)
 		prob = "GD32";
-	}
-	if (identity_code == 59
-			&& continuation_code == 4) {
+	if (continuation_code == 4) {
 		if (etm) {
 			prob = "CS32";
 		} else {
 			prob = "APM32";
 		}
 	}
-	if (identity_code == 0x55
-			&& continuation_code == 5) {
+	if (continuation_code == 5) {
 		prob = "HK32";
 	}
 
