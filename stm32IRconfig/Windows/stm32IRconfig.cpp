@@ -157,7 +157,7 @@ prog:		printf("set wakeup(w)\nset macro(m)\n");
 		case 'm':
 			printf("enter macro number (starting with 0)\n");
 			scanf("%u", &m);
-			outBuf[idx++] = CMD_MACRO
+			outBuf[idx++] = CMD_MACRO;
 			outBuf[idx++] = m;    // (m+1)-th macro
 			printf("enter slot number, 0 for trigger\n");
 			scanf("%u", &s);
