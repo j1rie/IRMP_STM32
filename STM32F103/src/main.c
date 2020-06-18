@@ -47,8 +47,7 @@ enum status {
 	STAT_FAILURE
 };
 
-const char firmwarestring[] = FW_STR;
-char firmware[80];
+char firmware[sizeof(FW_STR) + 8];
 
 const char supported_protocols[] = {
 #if IRMP_SUPPORT_SIRCS_PROTOCOL==1
@@ -729,9 +728,9 @@ int main(void)
 	EE_Init();
 	irmp_set_callback_ptr (led_callback);
 	parse_romtable();
-	memcpy(&firmware, &firmwarestring, sizeof(firmwarestring));
-	firmware[sizeof(firmwarestring) - 1] = 42; // *
-	memcpy(&firmware[sizeof(firmwarestring)], &rt, sizeof(firmware) - sizeof(firmwarestring));
+	memcpy(&firmware, FW_STR, sizeof(FW_STR));
+	firmware[sizeof(FW_STR) - 1] = 42; // * separator
+	memcpy(&firmware[sizeof(FW_STR)], &rt, 8);
 
 	while (1) {
 		if (!AlarmValue && !host_running())
