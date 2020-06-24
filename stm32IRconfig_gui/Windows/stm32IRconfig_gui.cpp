@@ -909,7 +909,7 @@ MainWindow::Read()
 		return -1;
 	}
 
-	int res = hid_read(connected_device, buf, sizeof(buf));
+	int res = hid_read(connected_device, buf, sizeof(buf)); // nonblocking
 	
 	if (res < 0) {
 		FXMessageBox::error(this, MBOX_OK, "Error Reading", "Could not read from device. Error reported was: %ls", hid_error(connected_device));
@@ -1145,7 +1145,7 @@ MainWindow::Write_and_Check()
 
 	FXThread::sleep(2000000); // 2ms
 
-	read = Read();
+	read = Read(); // nonblocking
 	if(read  == -1) {
 		s += "W&C first Read(): -1\n";
 		input_text->appendText(s);
@@ -1153,7 +1153,7 @@ MainWindow::Write_and_Check()
 		return -1;
 	}
 
-	while ((buf[0] == REPORT_ID_IR || read == 0) && count < 5000) { // 5000ms needed in case of "set by remote"
+	while ((buf[0] == REPORT_ID_IR || read == 0) && count < 5000) { // 5000ms needed in case of "set by remote", this is done by a timer
 		read = Read();
 		if(read == -1) {
 			s += "W&C loop Read(): -1\n";

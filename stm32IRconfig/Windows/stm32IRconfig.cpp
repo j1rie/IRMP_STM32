@@ -105,7 +105,7 @@ void write_and_check() {
 	#else
 	usleep(2000);
 	#endif
-	read_stm32();
+	read_stm32(); // blocking per default, waits until data arrive
 	while (inBuf[0] == REPORT_ID_IR)
 		read_stm32();
 	if (inBuf[1] == STAT_SUCCESS) {
