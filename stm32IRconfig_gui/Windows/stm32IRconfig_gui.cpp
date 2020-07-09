@@ -184,7 +184,7 @@ private:
 	int count;
 	char firmwarefile[512];
 	char print[1024];
-	char printcollect[1024];
+	char printcollect[4096];
 	FXint cur_item;
 	FXint num_devices_before_upgrade;
 	FXint num_devices_after_rescan;
@@ -1703,7 +1703,8 @@ MainWindow::onUpgrade(FXObject *sender, FXSelector sel, void *ptr)
 		num_devices_before_upgrade = device_list->getNumItems();
 		s.format("%d %d %d %d", REPORT_ID_CONFIG_OUT, STAT_CMD, ACC_SET, CMD_REBOOT);
 		output_text->setText(s);
-		Write_and_Check();
+		if(connected_device)
+			Write_and_Check();
 		onDisconnect(NULL, 0, NULL);
 	}
 
