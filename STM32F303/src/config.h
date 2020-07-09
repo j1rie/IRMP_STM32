@@ -101,7 +101,7 @@
 	#define WAKEUP_RESET_PORT	GPIOB
 	#define WAKEUP_RESET_PIN	GPIO_Pin_14 /* TMS */
 	#define USB_DISC_PORT		GPIOB
-	#define USB_DISC_RCC_APB2Periph	RCC_APB2Periph_GPIOB /* TODO use concat */
+	#define USB_DISC_RCC_APB2Periph	RCC_APB2Periph_GPIOB
 	#define USB_DISC_PIN		GPIO_Pin_13 /* TCK */
 #elif defined(RedLink) /* red ST-Link, IRSND = NRST */
 	#define WAKEUP_PORT		GPIOB
@@ -118,7 +118,7 @@
 	#define WAKEUP_RESET_PORT	GPIOA
 	#define WAKEUP_RESET_PIN	GPIO_Pin_14
 	#define USB_DISC_PORT		GPIOA
-	#define USB_DISC_RCC_APB2Periph	RCC_APB2Periph_GPIOA /* TODO use concat */
+	#define USB_DISC_RCC_APB2Periph	RCC_APB2Periph_GPIOA
 	#define USB_DISC_PIN		GPIO_Pin_13
 #elif defined(RedLinkCrap) /* red ST-Link without PB11 connection */
 	#define WAKEUP_PORT		GPIOB
@@ -135,7 +135,7 @@
 	#define WAKEUP_RESET_PORT	GPIOA
 	#define WAKEUP_RESET_PIN	GPIO_Pin_14
 	#define USB_DISC_PORT		GPIOA
-	#define USB_DISC_RCC_APB2Periph	RCC_APB2Periph_GPIOA /* TODO use concat */
+	#define USB_DISC_RCC_APB2Periph	RCC_APB2Periph_GPIOA
 	#define USB_DISC_PIN		GPIO_Pin_13
 #elif defined(StickLink) /* ST-Link stick, IRSND = RST */
 	#define WAKEUP_PORT		GPIOB
@@ -235,7 +235,7 @@
 	#define WAKEUP_RESET_PORT	GPIOB
 	#define WAKEUP_RESET_PIN	GPIO_Pin_13
 	#define USB_DISC_PORT		GPIOB
-	#define USB_DISC_RCC_APB2Periph	RCC_APB2Periph_GPIOB /* TODO use concat */
+	#define USB_DISC_RCC_APB2Periph	RCC_APB2Periph_GPIOB
 	#define USB_DISC_PIN		GPIO_Pin_9
 #elif defined(MapleMini_ExtBd) || defined(MapleMini_2k_ExtBd) /* Maple Mini with Extension Board */
 	#define WAKEUP_PORT		GPIOB
@@ -255,7 +255,7 @@
 	#define WAKEUP_RESET_PORT	GPIOB
 	#define WAKEUP_RESET_PIN	GPIO_Pin_13
 	#define USB_DISC_PORT		GPIOB
-	#define USB_DISC_RCC_APB2Periph	RCC_APB2Periph_GPIOB /* TODO use concat */
+	#define USB_DISC_RCC_APB2Periph	RCC_APB2Periph_GPIOB
 	#define USB_DISC_PIN		GPIO_Pin_9
 #else
 	#error "Missing define for board"
