@@ -8,6 +8,7 @@
         <Option name="UseFPU" value="0"/>
         <Option name="UserEditCompiler" value=""/>
         <Option name="SupportCPlusplus" value="0"/>
+        <Option name="CompileBeforeDebug" value="0"/>
         <Includepaths>
           <Includepath path="."/>
         </Includepaths>
@@ -24,10 +25,10 @@
         <Option name="UserEditLinkder" value=""/>
         <Option name="UseMemoryLayout" value="1"/>
         <Option name="nostartfiles" value="1"/>
-        <Option name="LTO" value="1"/>
+        <Option name="LTO" value="0"/>
         <Option name="IsNewStartupCode" value="1"/>
         <Option name="Library" value="Not use C Library"/>
-        <Option name="UserEditLinker" value="--entry=main; "/>
+        <Option name="UserEditLinker" value="--entry=main; --specs=nano.specs; "/>
         <Option name="DiscardUnusedSections" value="1"/>
         <LinkedLibraries/>
         <MemoryAreas debugInFlashNotRAM="1">
@@ -42,7 +43,7 @@
         <Option name="OutputFileType" value="0"/>
         <Option name="Path" value="./"/>
         <Option name="Name" value="IR"/>
-        <Option name="HEX" value="1"/>
+        <Option name="HEX" value="0"/>
         <Option name="BIN" value="1"/>
       </Output>
       <User>
@@ -64,7 +65,7 @@
       <Option name="org.coocox.codebugger.gdbjtag.core.ifCacheRom" value="1"/>
       <Option name="org.coocox.codebugger.gdbjtag.core.ipAddress" value="127.0.0.1"/>
       <Option name="org.coocox.codebugger.gdbjtag.core.portNumber" value="2009"/>
-      <Option name="org.coocox.codebugger.gdbjtag.core.autoDownload" value="1"/>
+      <Option name="org.coocox.codebugger.gdbjtag.core.autoDownload" value="0"/>
       <Option name="org.coocox.codebugger.gdbjtag.core.verify" value="1"/>
       <Option name="org.coocox.codebugger.gdbjtag.core.downloadFuction" value="Erase Effected"/>
       <Option name="org.coocox.codebugger.gdbjtag.core.defaultAlgorithm" value="STM32F10x_CL_256.elf"/>

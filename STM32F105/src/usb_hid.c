@@ -72,7 +72,11 @@ USB_HID_RXSTATUS_t USB_HID_ReceiveData(uint8_t *ptr)
 		return(RX_EMPTY);
 	}
 
-	/* USB_HID_OUT_BUF[0] is Report ID */
+	/* receive only configuration data */
+	if(USB_HID_OUT_BUF[0] != REPORT_ID_CONFIG_OUT) {
+		return(RX_EMPTY);
+	}
+
 	for(n = 1; n < HID_OUT_BUFFER_SIZE; n++) {
 		if(n <= check) {
 			ptr[n-1] = USB_HID_OUT_BUF[n];

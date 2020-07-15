@@ -1,7 +1,7 @@
 diff -Nrup A/stm32f10x_conf.h B/stm32f10x_conf.h
 --- A/stm32f10x_conf.h	2015-06-25 10:27:58.000000000 +0200
 +++ B/stm32f10x_conf.h	2017-03-16 17:32:40.227277509 +0100
-@@ -31,6 +31,7 @@
+@@ -25,6 +25,7 @@
  
  /* Includes ------------------------------------------------------------------*/
  /* Uncomment the line below to enable peripheral header file inclusion */
@@ -9,7 +9,7 @@ diff -Nrup A/stm32f10x_conf.h B/stm32f10x_conf.h
  #include "stm32f10x_adc.h" 
  #include "stm32f10x_bkp.h"
  #include "stm32f10x_can.h"
-@@ -54,6 +55,14 @@
+@@ -48,6 +49,14 @@
  #include "stm32f10x_usart.h"
  #include "stm32f10x_wwdg.h"
  #include "misc.h"   /* High level functions for NVIC and SysTick (add-on to CMSIS functions) */

@@ -1,5 +1,5 @@
 /*
- *  Copyright (C) 2014-2017 Joerg Riechardt
+ *  Copyright (C) 2014-2020 Joerg Riechardt
  *
  *  based on work by Uwe Becker - http://mikrocontroller.bplaced.net
  *
@@ -7,11 +7,10 @@
  *  it under the terms of the GNU General Public License as published by
  *  the Free Software Foundation; either version 2 of the License, or
  *  (at your option) any later version.
- */
-diff -Nrup a/inc/usb_bsp.h b/inc/usb_bsp.h
---- a/inc/usb_bsp.h	2015-11-09 14:42:58.000000000 +0100
-+++ b/inc/usb_bsp.h	2017-03-17 15:06:36.000000000 +0100
-@@ -31,6 +31,7 @@
+ */diff -Nrup A/inc/usb_bsp.h B/inc/usb_bsp.h
+--- A/inc/usb_bsp.h	2018-09-05 14:57:38.000000000 +0200
++++ B/inc/usb_bsp.h	2020-07-15 18:42:08.747378100 +0200
+@@ -25,6 +25,7 @@
  
  /* Includes ------------------------------------------------------------------*/
  #include "usb_core.h"
@@ -19,10 +18,10 @@ diff -Nrup a/inc/usb_bsp.h b/inc/usb_bsp.h
  
  /** @addtogroup USB_OTG_DRIVER
    * @{
-diff -Nrup a/inc/usb_conf.h b/inc/usb_conf.h
---- a/inc/usb_conf.h	2015-11-09 14:42:58.000000000 +0100
-+++ b/inc/usb_conf.h	2017-03-17 14:59:00.000000000 +0100
-@@ -30,6 +30,7 @@
+diff -Nrup A/inc/usb_conf.h B/inc/usb_conf.h
+--- A/inc/usb_conf.h	2018-09-05 14:48:36.000000000 +0200
++++ B/inc/usb_conf.h	2020-07-15 19:17:55.023960300 +0200
+@@ -24,6 +24,7 @@
  #define __USB_CONF__H__
  
  /* Includes ------------------------------------------------------------------*/
@@ -30,7 +29,7 @@ diff -Nrup a/inc/usb_conf.h b/inc/usb_conf.h
  #if defined (USE_STM322xG_EVAL)
   #include "stm322xg_eval.h"
   #include "stm322xg_eval_lcd.h"
-@@ -54,7 +55,7 @@
+@@ -48,7 +49,7 @@
   #include "stm3210c_eval_ioe.h"
  
  #else
@@ -39,7 +38,7 @@ diff -Nrup a/inc/usb_conf.h b/inc/usb_conf.h
  #endif
  
  
-@@ -83,7 +84,7 @@
+@@ -77,7 +78,7 @@
  *  when FS core is used.
  *******************************************************************************/
  #ifndef USE_USB_OTG_FS
@@ -47,8 +46,8 @@ diff -Nrup a/inc/usb_conf.h b/inc/usb_conf.h
 + #define USE_USB_OTG_FS
  #endif /* USE_USB_OTG_FS */
  
- #ifdef USE_USB_OTG_FS 
-@@ -186,12 +187,12 @@
+ #ifdef USE_USB_OTG_FS
+@@ -179,12 +180,12 @@
  /****************** USB OTG FS CONFIGURATION **********************************/
  #ifdef USB_OTG_FS_CORE
   #define RX_FIFO_FS_SIZE                          128
@@ -61,13 +60,13 @@ diff -Nrup a/inc/usb_conf.h b/inc/usb_conf.h
  
 -#define USB_OTG_FS_LOW_PWR_MGMT_SUPPORT
 +//#define USB_OTG_FS_LOW_PWR_MGMT_SUPPORT
+ 
  /* #define USB_OTG_FS_SOF_OUTPUT_ENABLED */
  #endif
- 
-diff -Nrup a/inc/usbd_conf.h b/inc/usbd_conf.h
---- a/inc/usbd_conf.h	2015-11-09 14:42:58.000000000 +0100
-+++ b/inc/usbd_conf.h	2017-03-17 15:02:34.000000000 +0100
-@@ -55,7 +55,9 @@
+diff -Nrup A/inc/usbd_conf.h B/inc/usbd_conf.h
+--- A/inc/usbd_conf.h	2018-09-05 14:48:36.000000000 +0200
++++ B/inc/usbd_conf.h	2020-07-15 18:46:23.148998500 +0200
+@@ -49,7 +49,9 @@
    * @{
    */ 
  #define HID_IN_EP                    0x81
@@ -77,10 +76,10 @@ diff -Nrup a/inc/usbd_conf.h b/inc/usbd_conf.h
  
  /**
    * @}
-diff -Nrup a/inc/usbd_desc.h b/inc/usbd_desc.h
---- a/inc/usbd_desc.h	2015-11-09 14:42:58.000000000 +0100
-+++ b/inc/usbd_desc.h	2017-04-25 20:38:25.000000000 +0200
-@@ -31,6 +31,7 @@
+diff -Nrup A/inc/usbd_desc.h B/inc/usbd_desc.h
+--- A/inc/usbd_desc.h	2018-09-05 14:48:36.000000000 +0200
++++ B/inc/usbd_desc.h	2020-07-15 18:56:56.737190400 +0200
+@@ -25,6 +25,7 @@
  #define __USB_DESC_H
  
  /* Includes ------------------------------------------------------------------*/
@@ -88,7 +87,7 @@ diff -Nrup a/inc/usbd_desc.h b/inc/usbd_desc.h
  #include "usbd_req.h"
  
  /** @addtogroup STM32_USB_OTG_DEVICE_LIBRARY
-@@ -53,7 +54,8 @@
+@@ -47,7 +48,8 @@
  #define USB_SIZ_DEVICE_DESC                     18
  #define USB_SIZ_STRING_LANGID                   4
  
@@ -98,10 +97,10 @@ diff -Nrup a/inc/usbd_desc.h b/inc/usbd_desc.h
  #define         DEVICE_ID1          (0x1FFF7A10)
  #define         DEVICE_ID2          (0x1FFF7A14)
  #define         DEVICE_ID3          (0x1FFF7A18)
-diff -Nrup a/inc/usbd_hid_core.h b/inc/usbd_hid_core.h
---- a/inc/usbd_hid_core.h	2015-11-09 14:42:58.000000000 +0100
-+++ b/inc/usbd_hid_core.h	2017-03-17 15:01:15.000000000 +0100
-@@ -45,9 +45,9 @@
+diff -Nrup A/inc/usbd_hid_core.h B/inc/usbd_hid_core.h
+--- A/inc/usbd_hid_core.h	2018-09-05 14:57:38.000000000 +0200
++++ B/inc/usbd_hid_core.h	2020-07-15 18:53:42.538176300 +0200
+@@ -39,9 +39,9 @@
  /** @defgroup USBD_HID_Exported_Defines
    * @{
    */ 
@@ -113,7 +112,7 @@ diff -Nrup a/inc/usbd_hid_core.h b/inc/usbd_hid_core.h
  
  #define HID_DESCRIPTOR_TYPE           0x21
  #define HID_REPORT_DESC               0x22
-@@ -92,6 +92,7 @@
+@@ -86,6 +86,7 @@
    */ 
  
  extern USBD_Class_cb_TypeDef  USBD_HID_cb;
@@ -121,7 +120,7 @@ diff -Nrup a/inc/usbd_hid_core.h b/inc/usbd_hid_core.h
  /**
    * @}
    */ 
-@@ -103,6 +104,8 @@ uint8_t USBD_HID_SendReport (USB_OTG_COR
+@@ -97,6 +98,8 @@ uint8_t USBD_HID_SendReport (USB_OTG_COR
                                   uint8_t *report,
                                   uint16_t len);
  
@@ -130,10 +129,10 @@ diff -Nrup a/inc/usbd_hid_core.h b/inc/usbd_hid_core.h
  uint32_t USBD_HID_GetPollingInterval (USB_OTG_CORE_HANDLE *pdev);
  
  /**
-diff -Nrup a/inc/usbd_usr.h b/inc/usbd_usr.h
---- a/inc/usbd_usr.h	2015-11-12 10:01:12.000000000 +0100
-+++ b/inc/usbd_usr.h	2017-03-17 15:00:19.000000000 +0100
-@@ -30,9 +30,11 @@
+diff -Nrup A/inc/usbd_usr.h B/inc/usbd_usr.h
+--- A/inc/usbd_usr.h	2018-09-05 14:57:38.000000000 +0200
++++ B/inc/usbd_usr.h	2020-07-15 18:54:45.071256000 +0200
+@@ -24,9 +24,11 @@
  #define __USBD_USR_H__
  
  /* Includes ------------------------------------------------------------------*/
@@ -146,12 +145,12 @@ diff -Nrup a/inc/usbd_usr.h b/inc/usbd_usr.h
  #endif
  /** @addtogroup USBD_USER
    * @{
-diff -Nrup a/src/usb_bsp.c b/src/usb_bsp.c
---- a/src/usb_bsp.c	2015-11-09 14:42:58.000000000 +0100
-+++ b/src/usb_bsp.c	2017-03-17 15:13:39.000000000 +0100
-@@ -28,6 +28,10 @@
+diff -Nrup A/src/usb_bsp.c B/src/usb_bsp.c
+--- A/src/usb_bsp.c	2018-09-05 14:48:20.000000000 +0200
++++ B/src/usb_bsp.c	2020-07-15 22:36:46.691518400 +0200
+@@ -22,6 +22,10 @@
  
- /* Includes ------------------------------------------------------------------*/
+ /* Includes ------------------------------------------------------------------ */
  #include "usb_bsp.h"
 +#include "usbd_conf.h"
 +
@@ -160,49 +159,48 @@ diff -Nrup a/src/usb_bsp.c b/src/usb_bsp.c
  
  /** @addtogroup STM32_USB_OTG_DEVICE_LIBRARY
  * @{
-@@ -93,6 +97,7 @@
+@@ -87,6 +91,7 @@
  
- void USB_OTG_BSP_Init(USB_OTG_CORE_HANDLE *pdev)
+ void USB_OTG_BSP_Init(USB_OTG_CORE_HANDLE * pdev)
  {
 +#if 0
  #ifndef USE_STM3210C_EVAL
-   GPIO_InitTypeDef GPIO_InitStructure;    
+   GPIO_InitTypeDef GPIO_InitStructure;
  #endif
-@@ -101,8 +106,10 @@ void USB_OTG_BSP_Init(USB_OTG_CORE_HANDL
+@@ -95,8 +100,10 @@ void USB_OTG_BSP_Init(USB_OTG_CORE_HANDL
    EXTI_InitTypeDef EXTI_InitStructure;
-   NVIC_InitTypeDef NVIC_InitStructure; 
+   NVIC_InitTypeDef NVIC_InitStructure;
  #endif
 +#endif
-   
+ 
 -#ifdef USE_STM3210C_EVAL
 +//#ifdef USE_STM3210C_EVAL
 +#if 1
  
    RCC_OTGFSCLKConfig(RCC_OTGFSCLKSource_PLLVCO_Div3);
-   RCC_AHBPeriphClockCmd(RCC_AHBPeriph_OTG_FS, ENABLE) ;
-@@ -258,7 +265,7 @@ void USB_OTG_BSP_Init(USB_OTG_CORE_HANDL
-   RCC_APB1PeriphClockCmd(RCC_APB1Periph_PWR, ENABLE);   
-   
+   RCC_AHBPeriphClockCmd(RCC_AHBPeriph_OTG_FS, ENABLE);
+@@ -247,7 +254,7 @@ void USB_OTG_BSP_Init(USB_OTG_CORE_HANDL
+   RCC_APB1PeriphClockCmd(RCC_APB1Periph_PWR, ENABLE);
+ 
    /* Configure the Key button in EXTI mode */
 -  STM_EVAL_PBInit(Button_KEY, Mode_EXTI);
 +  //STM_EVAL_PBInit(Button_KEY, Mode_EXTI);
-   
+ 
  #ifdef USB_OTG_FS_LOW_PWR_MGMT_SUPPORT
    EXTI_ClearITPendingBit(EXTI_Line18);
-@@ -300,7 +307,7 @@ void USB_OTG_BSP_Init(USB_OTG_CORE_HANDL
-   EXTI_ClearITPendingBit(EXTI_Line20);    
- #endif   
+@@ -289,7 +296,7 @@ void USB_OTG_BSP_Init(USB_OTG_CORE_HANDL
+   EXTI_ClearITPendingBit(EXTI_Line20);
+ #endif
  
--  EXTI_ClearITPendingBit(KEY_BUTTON_EXTI_LINE);  
-+  //EXTI_ClearITPendingBit(KEY_BUTTON_EXTI_LINE);  
+-  EXTI_ClearITPendingBit(KEY_BUTTON_EXTI_LINE);
++  //EXTI_ClearITPendingBit(KEY_BUTTON_EXTI_LINE);
  }
+ 
  /**
- * @brief  USB_OTG_BSP_EnableInterrupt
-@@ -369,6 +376,12 @@ void USB_OTG_BSP_mDelay (const uint32_t
- {
-   USB_OTG_BSP_uDelay(msec * 1000);   
+@@ -376,6 +383,11 @@ void USB_OTG_BSP_mDelay(const uint32_t m
+   USB_OTG_BSP_uDelay(msec * 1000);
  }
-+
+ 
 +void OTG_FS_IRQHandler(void)
 +{
 +  USBD_OTG_ISR_Handler (&USB_OTG_dev);
@@ -210,21 +208,21 @@ diff -Nrup a/src/usb_bsp.c b/src/usb_bsp.c
 +
  /**
  * @}
- */ 
-diff -Nrup a/src/usb_core.c b/src/usb_core.c
---- a/src/usb_core.c	2015-11-12 10:01:12.000000000 +0100
-+++ b/src/usb_core.c	2017-03-17 14:49:00.000000000 +0100
-@@ -200,7 +200,8 @@ void *USB_OTG_ReadPacket(USB_OTG_CORE_HA
+ */
+diff -Nrup A/src/usb_core.c B/src/usb_core.c
+--- A/src/usb_core.c	2018-09-05 17:04:16.000000000 +0200
++++ B/src/usb_core.c	2020-07-15 22:49:12.664661700 +0200
+@@ -194,7 +194,8 @@ void *USB_OTG_ReadPacket(USB_OTG_CORE_HA
                           uint16_t len)
  {
    uint32_t i=0;
 -  uint32_t count32b = (len + 3) / 4;
 +  uint32_t count32b = (len) / 4;
 +  uint32_t count8b = (len) & 3;
-   
+ 
    __IO uint32_t *fifo = pdev->regs.DFIFO[0];
-   
-@@ -209,6 +210,19 @@ void *USB_OTG_ReadPacket(USB_OTG_CORE_HA
+ 
+@@ -203,6 +204,19 @@ void *USB_OTG_ReadPacket(USB_OTG_CORE_HA
      *(__packed uint32_t *)dest = USB_OTG_READ_REG32(fifo);
      dest += 4 ;
    }
@@ -244,10 +242,10 @@ diff -Nrup a/src/usb_core.c b/src/usb_core.c
    return ((void *)dest);
  }
  
-diff -Nrup a/src/usb_dcd_int.c b/src/usb_dcd_int.c
---- a/src/usb_dcd_int.c	2015-11-09 14:42:58.000000000 +0100
-+++ b/src/usb_dcd_int.c	2017-03-17 14:49:00.000000000 +0100
-@@ -668,6 +668,12 @@ static uint32_t DCD_WriteEmptyTxFifo(USB
+diff -Nrup A/src/usb_dcd_int.c B/src/usb_dcd_int.c
+--- A/src/usb_dcd_int.c	2018-09-05 14:58:08.000000000 +0200
++++ B/src/usb_dcd_int.c	2020-07-15 22:27:12.385746000 +0200
+@@ -662,6 +662,12 @@ static uint32_t DCD_WriteEmptyTxFifo(USB
      
      ep->xfer_buff  += len;
      ep->xfer_count += len;
@@ -260,12 +258,12 @@ diff -Nrup a/src/usb_dcd_int.c b/src/usb_dcd_int.c
      
      txstatus.d32 = USB_OTG_READ_REG32(&pdev->regs.INEP_REGS[epnum]->DTXFSTS);
      
-diff -Nrup a/src/usbd_desc.c b/src/usbd_desc.c
---- a/src/usbd_desc.c	2015-11-09 14:42:58.000000000 +0100
-+++ b/src/usbd_desc.c	2017-03-17 14:54:03.000000000 +0100
-@@ -50,13 +50,13 @@
+diff -Nrup A/src/usbd_desc.c B/src/usbd_desc.c
+--- A/src/usbd_desc.c	2018-09-05 14:48:20.000000000 +0200
++++ B/src/usbd_desc.c	2020-07-15 19:59:19.321327300 +0200
+@@ -44,13 +44,13 @@
    * @{
-   */ 
+   */
  
 -#define USBD_VID                     0x0483
 -#define USBD_PID                     0x5710
@@ -280,40 +278,40 @@ diff -Nrup a/src/usbd_desc.c b/src/usbd_desc.c
  #define USBD_CONFIGURATION_HS_STRING  "HID Config"
  #define USBD_INTERFACE_HS_STRING      "HID Interface"
  #define USBD_CONFIGURATION_FS_STRING  "HID Config"
-@@ -219,7 +219,8 @@ uint8_t *  USBD_USR_LangIDStrDescriptor(
+@@ -209,7 +209,8 @@ uint8_t *USBD_USR_LangIDStrDescriptor(ui
  */
- uint8_t *  USBD_USR_ProductStrDescriptor( uint8_t speed , uint16_t *length)
+ uint8_t *USBD_USR_ProductStrDescriptor(uint8_t speed, uint16_t * length)
  {
--  if(speed == 0)
-+  //if(speed == 0)
-+  if(0)
-   {   
-     USBD_GetString((uint8_t *)(uint8_t *)USBD_PRODUCT_HS_STRING, USBD_StrDesc, length);
-   }
-@@ -269,7 +270,8 @@ uint8_t *  USBD_USR_SerialStrDescriptor(
- */
- uint8_t *  USBD_USR_ConfigStrDescriptor( uint8_t speed , uint16_t *length)
- {
--  if(speed  == USB_OTG_SPEED_HIGH)
-+  //if(speed  == USB_OTG_SPEED_HIGH)
-+  if(0)
-   {  
-     USBD_GetString((uint8_t *)(uint8_t *)USBD_CONFIGURATION_HS_STRING, USBD_StrDesc, length);
-   }
-@@ -290,7 +292,8 @@ uint8_t *  USBD_USR_ConfigStrDescriptor(
- */
- uint8_t *  USBD_USR_InterfaceStrDescriptor( uint8_t speed , uint16_t *length)
- {
--  if(speed == 0)
-+  //if(speed == 0)
+-  if (speed == 0)
++  //if (speed == 0)
 +  if(0)
    {
-     USBD_GetString((uint8_t *)(uint8_t *)USBD_INTERFACE_HS_STRING, USBD_StrDesc, length);
-   }
-diff -Nrup a/src/usbd_hid_core.c b/src/usbd_hid_core.c
---- a/src/usbd_hid_core.c	2015-11-09 14:42:58.000000000 +0100
-+++ b/src/usbd_hid_core.c	2017-03-17 17:01:16.000000000 +0100
-@@ -50,6 +50,7 @@
+     USBD_GetString((uint8_t *) (uint8_t *) USBD_PRODUCT_HS_STRING, USBD_StrDesc,
+                    length);
+@@ -263,7 +264,8 @@ uint8_t *USBD_USR_SerialStrDescriptor(ui
+ */
+ uint8_t *USBD_USR_ConfigStrDescriptor(uint8_t speed, uint16_t * length)
+ {
+-  if (speed == USB_OTG_SPEED_HIGH)
++  //if (speed == USB_OTG_SPEED_HIGH)
++  if(0)
+   {
+     USBD_GetString((uint8_t *) (uint8_t *) USBD_CONFIGURATION_HS_STRING,
+                    USBD_StrDesc, length);
+@@ -286,7 +288,8 @@ uint8_t *USBD_USR_ConfigStrDescriptor(ui
+ */
+ uint8_t *USBD_USR_InterfaceStrDescriptor(uint8_t speed, uint16_t * length)
+ {
+-  if (speed == 0)
++  //if (speed == 0)
++  if(0)
+   {
+     USBD_GetString((uint8_t *) (uint8_t *) USBD_INTERFACE_HS_STRING,
+                    USBD_StrDesc, length);
+diff -Nrup A/src/usbd_hid_core.c B/src/usbd_hid_core.c
+--- A/src/usbd_hid_core.c	2018-09-05 14:58:08.000000000 +0200
++++ B/src/usbd_hid_core.c	2020-07-15 20:52:24.486610227 +0200
+@@ -44,6 +44,7 @@
  #include "usbd_hid_core.h"
  #include "usbd_desc.h"
  #include "usbd_req.h"
@@ -321,7 +319,7 @@ diff -Nrup a/src/usbd_hid_core.c b/src/usbd_hid_core.c
  
  
  /** @addtogroup STM32_USB_OTG_DEVICE_LIBRARY
-@@ -106,6 +107,12 @@ uint8_t  USBD_HID_Setup (void  *pdev,
+@@ -100,6 +101,12 @@ uint8_t  USBD_HID_Setup (void  *pdev,
  static uint8_t  *USBD_HID_GetCfgDesc (uint8_t speed, uint16_t *length);
  
  uint8_t  USBD_HID_DataIn (void  *pdev, uint8_t epnum);
@@ -334,7 +332,7 @@ diff -Nrup a/src/usbd_hid_core.c b/src/usbd_hid_core.c
  /**
    * @}
    */ 
-@@ -122,8 +129,8 @@ USBD_Class_cb_TypeDef  USBD_HID_cb =
+@@ -116,8 +123,8 @@ USBD_Class_cb_TypeDef  USBD_HID_cb =
    NULL, /*EP0_TxSent*/  
    NULL, /*EP0_RxReady*/
    USBD_HID_DataIn, /*DataIn*/
@@ -345,7 +343,7 @@ diff -Nrup a/src/usbd_hid_core.c b/src/usbd_hid_core.c
    NULL,
    NULL,      
    USBD_HID_GetCfgDesc,
-@@ -179,10 +186,10 @@ __ALIGN_BEGIN static uint8_t USBD_HID_Cf
+@@ -173,10 +180,10 @@ __ALIGN_BEGIN static uint8_t USBD_HID_Cf
    USB_INTERFACE_DESCRIPTOR_TYPE,/*bDescriptorType: Interface descriptor type*/
    0x00,         /*bInterfaceNumber: Number of Interface*/
    0x00,         /*bAlternateSetting: Alternate setting*/
@@ -359,7 +357,7 @@ diff -Nrup a/src/usbd_hid_core.c b/src/usbd_hid_core.c
    0,            /*iInterface: Index of string descriptor*/
    /******************** Descriptor of Joystick Mouse HID ********************/
    /* 18 */
-@@ -202,10 +209,19 @@ __ALIGN_BEGIN static uint8_t USBD_HID_Cf
+@@ -196,10 +203,19 @@ __ALIGN_BEGIN static uint8_t USBD_HID_Cf
    
    HID_IN_EP,     /*bEndpointAddress: Endpoint Address (IN)*/
    0x03,          /*bmAttributes: Interrupt endpoint*/
@@ -381,7 +379,7 @@ diff -Nrup a/src/usbd_hid_core.c b/src/usbd_hid_core.c
  } ;
  
  #ifdef USB_OTG_HS_INTERNAL_DMA_ENABLED
-@@ -236,6 +252,7 @@ __ALIGN_BEGIN static uint8_t USBD_HID_De
+@@ -230,6 +246,7 @@ __ALIGN_BEGIN static uint8_t USBD_HID_De
  #endif /* USB_OTG_HS_INTERNAL_DMA_ENABLED */  
  __ALIGN_BEGIN static uint8_t HID_MOUSE_ReportDesc[HID_MOUSE_REPORT_DESC_SIZE] __ALIGN_END =
  {
@@ -389,7 +387,7 @@ diff -Nrup a/src/usbd_hid_core.c b/src/usbd_hid_core.c
    0x05,   0x01,
    0x09,   0x02,
    0xA1,   0x01,
-@@ -282,6 +299,36 @@ __ALIGN_BEGIN static uint8_t HID_MOUSE_R
+@@ -276,6 +293,36 @@ __ALIGN_BEGIN static uint8_t HID_MOUSE_R
    0x01,   0xb1,
    
    0x01,   0xc0
@@ -404,19 +402,19 @@ diff -Nrup a/src/usbd_hid_core.c b/src/usbd_hid_core.c
 +  0x75, 0x08,            /*     REPORT_SIZE (8)            */
 +
 +  /* STM32->PC */
-+  0x85, 0x01,            /*     REPORT_ID (1)              */
++  0x85, REPORT_ID_IR,    /*     REPORT_ID                  */
 +  0x09, 0x02,            /*     USAGE (2)                  */
 +  0x95, HID_IN_BUFFER_SIZE-1, /* REPORT_COUNT              */
 +  0x81, 0x02,            /*     INPUT (Data,Var,Abs,Vol)   */
 +
 +  /* STM32->PC */
-+  0x85, 0x02,            /*     REPORT_ID (2)              */
++  0x85, REPORT_ID_CONFIG_IN, /* REPORT_ID                  */
 +  0x09, 0x03,            /*     USAGE (3)                  */
 +  0x95, HID_IN_BUFFER_SIZE-1, /* REPORT_COUNT              */
 +  0x81, 0x02,            /*     INPUT (Data,Var,Abs,Vol)   */
 +
 +  /* PC->STM32 */
-+  0x85, 0x03,            /*     REPORT_ID (3)              */
++  0x85, REPORT_ID_CONFIG_OUT, /* REPORT_ID                 */
 +  0x09, 0x04,            /*     USAGE (4)                  */
 +  0x95, HID_OUT_BUFFER_SIZE-1, /* REPORT_COUNT             */
 +  0x91, 0x02,            /*     OUTPUT (Data,Var,Abs,Vol)  */
@@ -426,7 +424,7 @@ diff -Nrup a/src/usbd_hid_core.c b/src/usbd_hid_core.c
  }; 
  
  /**
-@@ -302,12 +349,26 @@ __ALIGN_BEGIN static uint8_t HID_MOUSE_R
+@@ -296,12 +343,26 @@ __ALIGN_BEGIN static uint8_t HID_MOUSE_R
  uint8_t  USBD_HID_Init (void  *pdev, 
                                 uint8_t cfgidx)
  {
@@ -454,7 +452,7 @@ diff -Nrup a/src/usbd_hid_core.c b/src/usbd_hid_core.c
    
    return USBD_OK;
  }
-@@ -324,6 +385,7 @@ uint8_t  USBD_HID_DeInit (void  *pdev,
+@@ -318,6 +379,7 @@ uint8_t  USBD_HID_DeInit (void  *pdev,
  {
    /* Close HID EPs */
    DCD_EP_Close (pdev , HID_IN_EP);  
@@ -462,7 +460,7 @@ diff -Nrup a/src/usbd_hid_core.c b/src/usbd_hid_core.c
    return USBD_OK;
  }
  
-@@ -441,9 +503,23 @@ uint8_t USBD_HID_SendReport     (USB_OTG
+@@ -435,9 +497,23 @@ uint8_t USBD_HID_SendReport     (USB_OTG
    {
      DCD_EP_Tx (pdev, HID_IN_EP, report, len);
    }
@@ -486,7 +484,7 @@ diff -Nrup a/src/usbd_hid_core.c b/src/usbd_hid_core.c
  /**
    * @brief  USBD_HID_GetCfgDesc 
    *         return configuration descriptor
-@@ -496,12 +572,40 @@ uint32_t USBD_HID_GetPollingInterval (US
+@@ -490,12 +566,40 @@ uint32_t USBD_HID_GetPollingInterval (US
    {
      /* Sets the data transfer polling interval for low and full 
      speed transfers */
@@ -528,12 +526,12 @@ diff -Nrup a/src/usbd_hid_core.c b/src/usbd_hid_core.c
  /**
    * @}
    */ 
-diff -Nrup a/src/usbd_usr.c b/src/usbd_usr.c
---- a/src/usbd_usr.c	2015-11-09 14:42:58.000000000 +0100
-+++ b/src/usbd_usr.c	2017-03-17 15:10:32.000000000 +0100
-@@ -27,6 +27,9 @@
+diff -Nrup A/src/usbd_usr.c B/src/usbd_usr.c
+--- A/src/usbd_usr.c	2018-09-05 14:48:20.000000000 +0200
++++ B/src/usbd_usr.c	2020-07-15 19:40:56.164404400 +0200
+@@ -21,6 +21,9 @@
  
- /* Includes ------------------------------------------------------------------*/
+ /* Includes ------------------------------------------------------------------ */
  #include "usbd_usr.h"
 +#include "usb_hid.h"
 +#include "usbd_ioreq.h"
@@ -541,49 +539,48 @@ diff -Nrup a/src/usbd_usr.c b/src/usbd_usr.c
  
  /** @addtogroup STM32_USB_OTG_DEVICE_LIBRARY
  * @{
-@@ -119,6 +122,8 @@ USBD_Usr_cb_TypeDef USR_cb =
+@@ -112,6 +115,8 @@ USBD_Usr_cb_TypeDef USR_cb = {
  */
  void USBD_USR_Init(void)
- {  
+ {
 +USB_HID_STATUS=USB_HID_DETACHED;
 +#if 0
    /* Initialize LEDs */
    STM_EVAL_LEDInit(LED1);
    STM_EVAL_LEDInit(LED2);
-@@ -179,6 +184,7 @@ void USBD_USR_Init(void)
+@@ -176,6 +181,7 @@ void USBD_USR_Init(void)
    LCD_SetTextColor(Green);
-   LCD_DisplayStringLine( LCD_PIXEL_HEIGHT - 42, USER_INFORMATION1);
-   LCD_DisplayStringLine( LCD_PIXEL_HEIGHT - 30, USER_INFORMATION2);
+   LCD_DisplayStringLine(LCD_PIXEL_HEIGHT - 42, USER_INFORMATION1);
+   LCD_DisplayStringLine(LCD_PIXEL_HEIGHT - 30, USER_INFORMATION2);
 +#endif  
  }
  
  /**
-@@ -189,17 +195,19 @@ void USBD_USR_Init(void)
+@@ -186,17 +192,18 @@ void USBD_USR_Init(void)
  */
- void USBD_USR_DeviceReset(uint8_t speed )
+ void USBD_USR_DeviceReset(uint8_t speed)
  {
 + USB_HID_STATUS = USB_HID_DETACHED;
-  switch (speed)
-  {
-    case USB_OTG_SPEED_HIGH: 
--     LCD_LOG_SetFooter ((uint8_t*)"     USB Device Library v1.2.0 [HS]" );
-+     //LCD_LOG_SetFooter ((uint8_t*)"     USB Device Library v1.2.0 [HS]" );
-      break;
+   switch (speed)
+   {
+   case USB_OTG_SPEED_HIGH:
+-    LCD_LOG_SetFooter((uint8_t *) "     USB Device Library V1.2.1 [HS]");
++    //LCD_LOG_SetFooter((uint8_t *) "     USB Device Library V1.2.1 [HS]");
+     break;
  
-   case USB_OTG_SPEED_FULL: 
--     LCD_LOG_SetFooter ((uint8_t*)"     USB Device Library v1.2.0 [FS]" );
-+     //LCD_LOG_SetFooter ((uint8_t*)"     USB Device Library v1.2.0 [FS]" );
-      break;
-  default:
--     LCD_LOG_SetFooter ((uint8_t*)"     USB Device Library v1.2.0 [??]" );
-+     //LCD_LOG_SetFooter ((uint8_t*)"     USB Device Library v1.2.0 [??]" );
-+     ;
-      break;  
-  }
+   case USB_OTG_SPEED_FULL:
+-    LCD_LOG_SetFooter((uint8_t *) "     USB Device Library V1.2.1 [FS]");
++    //LCD_LOG_SetFooter((uint8_t *) "     USB Device Library V1.2.1 [FS]");
+     break;
+   default:
+-    LCD_LOG_SetFooter((uint8_t *) "     USB Device Library V1.2.1 [??]");
++    //LCD_LOG_SetFooter((uint8_t *) "     USB Device Library V1.2.1 [??]");
+     break;
+   }
  }
-@@ -213,7 +221,8 @@ void USBD_USR_DeviceReset(uint8_t speed
+@@ -210,7 +217,8 @@ void USBD_USR_DeviceReset(uint8_t speed)
  */
- void USBD_USR_DeviceConfigured (void)
+ void USBD_USR_DeviceConfigured(void)
  {
 -  LCD_UsrLog("> HID Interface started.\n");
 +  //LCD_UsrLog("> HID Interface started.\n");
@@ -591,9 +588,9 @@ diff -Nrup a/src/usbd_usr.c b/src/usbd_usr.c
  }
  
  
-@@ -225,7 +234,8 @@ void USBD_USR_DeviceConfigured (void)
+@@ -222,7 +230,8 @@ void USBD_USR_DeviceConfigured(void)
  */
- void USBD_USR_DeviceConnected (void)
+ void USBD_USR_DeviceConnected(void)
  {
 -  LCD_UsrLog("> USB Device Connected.\n");
 +  //LCD_UsrLog("> USB Device Connected.\n");
@@ -601,9 +598,9 @@ diff -Nrup a/src/usbd_usr.c b/src/usbd_usr.c
  }
  
  
-@@ -237,7 +247,8 @@ void USBD_USR_DeviceConnected (void)
+@@ -234,7 +243,8 @@ void USBD_USR_DeviceConnected(void)
  */
- void USBD_USR_DeviceDisconnected (void)
+ void USBD_USR_DeviceDisconnected(void)
  {
 -  LCD_UsrLog("> USB Device Disconnected.\n");
 +  //LCD_UsrLog("> USB Device Disconnected.\n");
@@ -611,7 +608,7 @@ diff -Nrup a/src/usbd_usr.c b/src/usbd_usr.c
  }
  
  /**
-@@ -248,7 +259,8 @@ void USBD_USR_DeviceDisconnected (void)
+@@ -245,7 +255,8 @@ void USBD_USR_DeviceDisconnected(void)
  */
  void USBD_USR_DeviceSuspended(void)
  {
@@ -621,12 +618,12 @@ diff -Nrup a/src/usbd_usr.c b/src/usbd_usr.c
    /* Users can do their application actions here for the USB-Reset */
  }
  
-@@ -261,7 +273,8 @@ void USBD_USR_DeviceSuspended(void)
+@@ -258,7 +269,8 @@ void USBD_USR_DeviceSuspended(void)
  */
  void USBD_USR_DeviceResumed(void)
  {
--    LCD_UsrLog("> USB Device in Idle Mode.\n");
-+    //LCD_UsrLog("> USB Device in Idle Mode.\n");
+-  LCD_UsrLog("> USB Device in Idle Mode.\n");
++  //LCD_UsrLog("> USB Device in Idle Mode.\n");
 +    USB_HID_STATUS = USB_HID_DETACHED;
    /* Users can do their application actions here for the USB-Reset */
  }

@@ -24,88 +24,88 @@ fi
 cd ..
 ar2='../../ext_src/en.stm32_f105-07_f2_f4_usb-host-device_lib.zip'
 ar1='../ext_src/en.stm32_f105-07_f2_f4_usb-host-device_lib.zip'
-ver='2.2.0'
+ver='2.2.1'
 path="STM32_USB-Host-Device_Lib_V$ver"
 mkdir -p cmsis_boot
 cd cmsis_boot
 unzip -j $ar1 \
-      $path/Libraries/CMSIS/Device/ST/STM32F10x/Include/stm32f10x.h \
-      $path/Libraries/CMSIS/Device/ST/STM32F10x/Include/system_stm32f10x.h \
-      $path/Project/USB_Device_Examples/CustomHID/inc/stm32f10x_conf.h
+      Libraries/CMSIS/Device/ST/STM32F10x/Include/stm32f10x.h \
+      Libraries/CMSIS/Device/ST/STM32F10x/Include/system_stm32f10x.h \
+      Project/USB_Device_Examples/CustomHID/inc/stm32f10x_conf.h
 mkdir -p startup
 cd startup
-unzip -j $ar2 $path/Libraries/CMSIS/Device/ST/STM32F10x/Source/Templates/gcc_ride7/startup_stm32f10x_cl.s
+unzip -j $ar2 Libraries/CMSIS/Device/ST/STM32F10x/Source/Templates/gcc_ride7/startup_stm32f10x_cl.s
 cd ../..
 mkdir -p cmsis
 cd cmsis
 unzip -j $ar1 \
-       $path/Libraries/CMSIS/Include/core_cm3.h \
-       $path/Libraries/CMSIS/Include/core_cmFunc.h \
-       $path/Libraries/CMSIS/Include/core_cmInstr.h \
-       $path/Libraries/CMSIS/Include/cmsis_gcc.h \
-       $path/Libraries/CMSIS/Include/cmsis_armcc.h \
-       $path/Libraries/CMSIS/Include/cmsis_armcc_V6.h
+       Libraries/CMSIS/Include/core_cm3.h \
+       Libraries/CMSIS/Include/core_cmFunc.h \
+       Libraries/CMSIS/Include/core_cmInstr.h \
+       Libraries/CMSIS/Include/cmsis_gcc.h \
+       Libraries/CMSIS/Include/cmsis_armcc.h \
+       Libraries/CMSIS/Include/cmsis_armcc_V6.h
 cd ..
 mkdir -p stm_lib
 cd  stm_lib
 mkdir -p inc
 cd inc
 unzip -j $ar2 \
-      $path/Libraries/STM32F10x_StdPeriph_Driver/inc/misc.h \
-      $path/Libraries/STM32F10x_StdPeriph_Driver/inc/stm32f10x_flash.h \
-      $path/Libraries/STM32F10x_StdPeriph_Driver/inc/stm32f10x_gpio.h \
-      $path/Libraries/STM32F10x_StdPeriph_Driver/inc/stm32f10x_rcc.h \
-      $path/Libraries/STM32F10x_StdPeriph_Driver/inc/stm32f10x_tim.h \
-      $path/Libraries/STM32F10x_StdPeriph_Driver/inc/stm32f10x_usart.h
+      Libraries/STM32F10x_StdPeriph_Driver/inc/misc.h \
+      Libraries/STM32F10x_StdPeriph_Driver/inc/stm32f10x_flash.h \
+      Libraries/STM32F10x_StdPeriph_Driver/inc/stm32f10x_gpio.h \
+      Libraries/STM32F10x_StdPeriph_Driver/inc/stm32f10x_rcc.h \
+      Libraries/STM32F10x_StdPeriph_Driver/inc/stm32f10x_tim.h \
+      Libraries/STM32F10x_StdPeriph_Driver/inc/stm32f10x_usart.h
 cd ..
 mkdir -p src
 cd src
 unzip -j $ar2 \
-      $path/Libraries/STM32F10x_StdPeriph_Driver/src/misc.c \
-      $path/Libraries/STM32F10x_StdPeriph_Driver/src/stm32f10x_flash.c \
-      $path/Libraries/STM32F10x_StdPeriph_Driver/src/stm32f10x_gpio.c \
-      $path/Libraries/STM32F10x_StdPeriph_Driver/src/stm32f10x_rcc.c \
-      $path/Libraries/STM32F10x_StdPeriph_Driver/src/stm32f10x_tim.c \
-      $path/Libraries/STM32F10x_StdPeriph_Driver/src/stm32f10x_usart.c
+      Libraries/STM32F10x_StdPeriph_Driver/src/misc.c \
+      Libraries/STM32F10x_StdPeriph_Driver/src/stm32f10x_flash.c \
+      Libraries/STM32F10x_StdPeriph_Driver/src/stm32f10x_gpio.c \
+      Libraries/STM32F10x_StdPeriph_Driver/src/stm32f10x_rcc.c \
+      Libraries/STM32F10x_StdPeriph_Driver/src/stm32f10x_tim.c \
+      Libraries/STM32F10x_StdPeriph_Driver/src/stm32f10x_usart.c
 cd ../..
 
 cd cmsis_boot
-unzip -j $ar1 $path/Libraries/CMSIS/Device/ST/STM32F10x/Source/Templates/system_stm32f10x.c
+unzip -j $ar1 Libraries/CMSIS/Device/ST/STM32F10x/Source/Templates/system_stm32f10x.c
 cd ..
 mkdir -p usb_hid
 cd usb_hid
 mkdir -p inc
 cd inc
 unzip -j $ar2 \
-      $path/Libraries/STM32_USB_Device_Library/Class/hid/inc/usbd_hid_core.h \
-      $path/Libraries/STM32_USB_Device_Library/Core/inc/usbd_core.h \
-      $path/Libraries/STM32_USB_Device_Library/Core/inc/usbd_def.h \
-      $path/Libraries/STM32_USB_Device_Library/Core/inc/usbd_ioreq.h \
-      $path/Libraries/STM32_USB_Device_Library/Core/inc/usbd_req.h \
-      $path/Libraries/STM32_USB_Device_Library/Core/inc/usbd_usr.h \
-      $path/Libraries/STM32_USB_OTG_Driver/inc/usb_bsp.h \
-      $path/Libraries/STM32_USB_OTG_Driver/inc/usb_core.h \
-      $path/Libraries/STM32_USB_OTG_Driver/inc/usb_dcd.h \
-      $path/Libraries/STM32_USB_OTG_Driver/inc/usb_dcd_int.h \
-      $path/Libraries/STM32_USB_OTG_Driver/inc/usb_defines.h \
-      $path/Libraries/STM32_USB_OTG_Driver/inc/usb_regs.h \
-      $path/Project/USB_Device_Examples/HID/inc/usb_conf.h \
-      $path/Project/USB_Device_Examples/HID/inc/usbd_conf.h \
-      $path/Project/USB_Device_Examples/HID/inc/usbd_desc.h
+      Libraries/STM32_USB_Device_Library/Class/hid/inc/usbd_hid_core.h \
+      Libraries/STM32_USB_Device_Library/Core/inc/usbd_core.h \
+      Libraries/STM32_USB_Device_Library/Core/inc/usbd_def.h \
+      Libraries/STM32_USB_Device_Library/Core/inc/usbd_ioreq.h \
+      Libraries/STM32_USB_Device_Library/Core/inc/usbd_req.h \
+      Libraries/STM32_USB_Device_Library/Core/inc/usbd_usr.h \
+      Libraries/STM32_USB_OTG_Driver/inc/usb_bsp.h \
+      Libraries/STM32_USB_OTG_Driver/inc/usb_core.h \
+      Libraries/STM32_USB_OTG_Driver/inc/usb_dcd.h \
+      Libraries/STM32_USB_OTG_Driver/inc/usb_dcd_int.h \
+      Libraries/STM32_USB_OTG_Driver/inc/usb_defines.h \
+      Libraries/STM32_USB_OTG_Driver/inc/usb_regs.h \
+      Project/USB_Device_Examples/HID/inc/usb_conf.h \
+      Project/USB_Device_Examples/HID/inc/usbd_conf.h \
+      Project/USB_Device_Examples/HID/inc/usbd_desc.h
 cd ..
 mkdir -p src 
 cd src
 unzip -j $ar2 \
-      $path/Libraries/STM32_USB_Device_Library/Class/hid/src/usbd_hid_core.c \
-      $path/Libraries/STM32_USB_Device_Library/Core/src/usbd_core.c \
-      $path/Libraries/STM32_USB_Device_Library/Core/src/usbd_ioreq.c \
-      $path/Libraries/STM32_USB_Device_Library/Core/src/usbd_req.c \
-      $path/Libraries/STM32_USB_OTG_Driver/src/usb_core.c \
-      $path/Libraries/STM32_USB_OTG_Driver/src/usb_dcd.c \
-      $path/Libraries/STM32_USB_OTG_Driver/src/usb_dcd_int.c \
-      $path/Project/USB_Device_Examples/HID/src/usb_bsp.c \
-      $path/Project/USB_Device_Examples/HID/src/usbd_desc.c \
-      $path/Project/USB_Device_Examples/HID/src/usbd_usr.c
+      Libraries/STM32_USB_Device_Library/Class/hid/src/usbd_hid_core.c \
+      Libraries/STM32_USB_Device_Library/Core/src/usbd_core.c \
+      Libraries/STM32_USB_Device_Library/Core/src/usbd_ioreq.c \
+      Libraries/STM32_USB_Device_Library/Core/src/usbd_req.c \
+      Libraries/STM32_USB_OTG_Driver/src/usb_core.c \
+      Libraries/STM32_USB_OTG_Driver/src/usb_dcd.c \
+      Libraries/STM32_USB_OTG_Driver/src/usb_dcd_int.c \
+      Project/USB_Device_Examples/HID/src/usb_bsp.c \
+      Project/USB_Device_Examples/HID/src/usbd_desc.c \
+      Project/USB_Device_Examples/HID/src/usbd_usr.c
 
 ar='../../ext_src/stsw-stm32010.zip'
 ver='3.1.0'

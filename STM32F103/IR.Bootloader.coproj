@@ -30,6 +30,7 @@
         <Option name="IsNewStartupCode" value="1"/>
         <Option name="Library" value="Not use C Library"/>
         <Option name="UserEditLinker" value="--entry=main; --specs=nano.specs; "/>
+        <Option name="DiscardUnusedSections" value="1"/>
         <LinkedLibraries/>
         <MemoryAreas debugInFlashNotRAM="1">
           <Memory name="IROM1" type="ReadOnly" size="0x0001D800" startValue="0x08002000"/>
