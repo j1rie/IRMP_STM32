@@ -1,9 +1,27 @@
-diff -Nrup a/startup/startup_stm32f30x.s b/startup/startup_stm32f30x.s
---- a/startup/startup_stm32f30x.s	2013-01-21 19:27:50.000000000 +0100
-+++ b/startup/startup_stm32f30x.s	2014-11-30 22:46:51.927448648 +0100
-@@ -131,7 +131,7 @@ Infinite_Loop:
-     
-     
+diff -Nrup A/startup/startup_stm32f30x.s B/startup/startup_stm32f30x.s
+--- A/startup/startup_stm32f30x.s	2017-05-05 16:36:28.000000000 +0200
++++ B/startup/startup_stm32f30x.s	2020-07-16 17:35:49.707891504 +0200
+@@ -67,7 +67,7 @@ defined in linker script */
+ 	.weak	Reset_Handler
+ 	.type	Reset_Handler, %function
+ Reset_Handler:
+-	ldr   sp, =_estack      /* Set stack pointer */
++	ldr   sp, =_eram      /* Set stack pointer */
+ 
+ /* Copy the data segment initializers from flash to SRAM */
+ 	movs	r1, #0
+@@ -100,7 +100,7 @@ LoopFillZerobss:
+ /* Call the clock system initialization function.*/
+ 	bl  SystemInit
+ /* Call static constructors */
+-	bl __libc_init_array
++//	bl __libc_init_array
+ /* Call the application's entry point.*/
+ 	bl	main
+ 
+@@ -135,7 +135,7 @@ Infinite_Loop:
+ 
+ 
  g_pfnVectors:
 -	.word	_estack
 +	.word	_eram

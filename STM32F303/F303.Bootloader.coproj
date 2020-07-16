@@ -24,10 +24,10 @@
         <Option name="UserEditLinkder" value=""/>
         <Option name="UseMemoryLayout" value="1"/>
         <Option name="nostartfiles" value="1"/>
-        <Option name="LTO" value="1"/>
+        <Option name="LTO" value="0"/>
         <Option name="IsNewStartupCode" value="1"/>
         <Option name="Library" value="Not use C Library"/>
-        <Option name="UserEditLinker" value="--entry=main; "/>
+        <Option name="UserEditLinker" value="--entry=main; --specs=nano.specs"/>
         <LinkedLibraries/>
         <MemoryAreas debugInFlashNotRAM="1">
           <Memory name="IROM1" type="ReadOnly" size="0x0003C000" startValue="0x08003000"/>
