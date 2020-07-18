@@ -1,52 +1,27 @@
-diff -Nrup A/irmp.c B/irmp.c
---- A/irmp.c	2018-09-10 14:26:02.000000000 +0200
-+++ B/irmp.c	2019-12-05 01:44:49.958376100 +0100
-@@ -2296,6 +2296,8 @@ irmp_init (void)
-     RCC_AHBPeriphClockCmd(IRMP_PORT_RCC, ENABLE);
- #  elif defined (ARM_STM32F10X)
-     RCC_APB2PeriphClockCmd(IRMP_PORT_RCC, ENABLE);
-+#  elif defined (ARM_STM32F30X)
-+    RCC_AHBPeriphClockCmd(IRMP_PORT_RCC, ENABLE);
- #  elif defined (ARM_STM32F4XX)
-     RCC_AHB1PeriphClockCmd(IRMP_PORT_RCC, ENABLE);
- #  endif
-@@ -2310,6 +2312,10 @@ irmp_init (void)
- #  elif defined (ARM_STM32F10X)
-     GPIO_InitStructure.GPIO_Speed = GPIO_Speed_2MHz;
-     GPIO_InitStructure.GPIO_Mode = GPIO_Mode_IN_FLOATING;
-+#  elif defined (ARM_STM32F30X)
-+    GPIO_InitStructure.GPIO_Mode = GPIO_Mode_IN;
-+    GPIO_InitStructure.GPIO_Speed = GPIO_Speed_2MHz;
-+    GPIO_InitStructure.GPIO_PuPd = GPIO_PuPd_NOPULL;
- #  endif
-     GPIO_Init(IRMP_PORT, &GPIO_InitStructure);
- 
-diff -Nrup A/irmp.h B/irmp.h
---- A/irmp.h	2018-09-10 14:26:02.000000000 +0200
-+++ B/irmp.h	2019-12-03 22:08:57.087122062 +0100
-@@ -51,6 +51,8 @@
- #    define IRMP_PORT_RCC                       CONCAT(RCC_AHBPeriph_GPIO, IRMP_PORT_LETTER)
- #  elif defined (ARM_STM32F10X)
- #    define IRMP_PORT_RCC                       CONCAT(RCC_APB2Periph_GPIO, IRMP_PORT_LETTER)
-+#  elif defined (ARM_STM32F30X)
-+#    define IRMP_PORT_RCC                       CONCAT(RCC_AHBPeriph_GPIO, IRMP_PORT_LETTER)
- #  elif defined (ARM_STM32F4XX)
- #    define IRMP_PORT_RCC                       CONCAT(RCC_AHB1Periph_GPIO, IRMP_PORT_LETTER)
- #  endif
 diff -Nrup A/irmpconfig.h B/irmpconfig.h
---- A/irmpconfig.h	2018-09-10 14:26:02.000000000 +0200
-+++ B/irmpconfig.h	2019-12-03 21:32:41.576118587 +0100
-@@ -28,7 +28,7 @@
+--- A/irmpconfig.h	2020-07-10 12:35:27.000000000 +0200
++++ B/irmpconfig.h	2020-07-18 15:49:29.579176574 +0200
+@@ -48,7 +48,7 @@
   *---------------------------------------------------------------------------------------------------------------------------------------------------
   */
  #ifndef F_INTERRUPTS
--#  define F_INTERRUPTS                          15000   // interrupts per second, min: 10000, max: 20000, typ: 15000
-+#  define F_INTERRUPTS                          20000   // interrupts per second, min: 10000, max: 20000, typ: 15000
+-#  define F_INTERRUPTS                          15000                           // interrupts per second, min: 10000, max: 20000, typ: 15000
++#  define F_INTERRUPTS                          20000                           // interrupts per second, min: 10000, max: 20000, typ: 15000
  #endif
  
  /*---------------------------------------------------------------------------------------------------------------------------------------------------
-@@ -54,17 +54,17 @@
- #define IRMP_SUPPORT_KASEIKYO_PROTOCOL          1       // Kaseikyo             >= 10000                 ~250 bytes
+@@ -73,23 +73,23 @@
+  *---------------------------------------------------------------------------------------------------------------------------------------------------
+  */
+ // typical protocols, disable here!             Enable  Remarks                 F_INTERRUPTS            Program Space
+-#define IRMP_SUPPORT_SIRCS_PROTOCOL             0       // Sony SIRCS           >= 10000                 ~150 bytes
+-#define IRMP_SUPPORT_NEC_PROTOCOL               0       // NEC + APPLE + ONKYO  >= 10000                 ~300 bytes
+-#define IRMP_SUPPORT_SAMSUNG_PROTOCOL           0       // Samsung + Samsg32    >= 10000                 ~300 bytes
+-#define IRMP_SUPPORT_KASEIKYO_PROTOCOL          0       // Kaseikyo             >= 10000                 ~250 bytes
++#define IRMP_SUPPORT_SIRCS_PROTOCOL             1       // Sony SIRCS           >= 10000                 ~150 bytes
++#define IRMP_SUPPORT_NEC_PROTOCOL               1       // NEC + APPLE + ONKYO  >= 10000                 ~300 bytes
++#define IRMP_SUPPORT_SAMSUNG_PROTOCOL           1       // Samsung + Samsg32    >= 10000                 ~300 bytes
++#define IRMP_SUPPORT_KASEIKYO_PROTOCOL          1       // Kaseikyo             >= 10000                 ~250 bytes
  
  // more protocols, enable here!                 Enable  Remarks                 F_INTERRUPTS            Program Space
 -#define IRMP_SUPPORT_JVC_PROTOCOL               0       // JVC                  >= 10000                 ~150 bytes
@@ -74,7 +49,7 @@ diff -Nrup A/irmpconfig.h B/irmpconfig.h
  
  // exotic protocols, enable here!               Enable  Remarks                 F_INTERRUPTS            Program Space
  #define IRMP_SUPPORT_BOSE_PROTOCOL              0       // BOSE                 >= 10000                 ~150 bytes
-@@ -86,7 +86,7 @@
+@@ -111,7 +111,7 @@
  #define IRMP_SUPPORT_RUWIDO_PROTOCOL            0       // RUWIDO, T-Home       >= 15000                 ~550 bytes
  #define IRMP_SUPPORT_A1TVBOX_PROTOCOL           0       // A1 TV BOX            >= 15000 (better 20000)  ~300 bytes
  #define IRMP_SUPPORT_LEGO_PROTOCOL              0       // LEGO Power RC        >= 20000                 ~150 bytes
@@ -83,16 +58,7 @@ diff -Nrup A/irmpconfig.h B/irmpconfig.h
  #define IRMP_SUPPORT_LGAIR_PROTOCOL             0       // LG Air Condition     >= 10000                 ~300 bytes
  #define IRMP_SUPPORT_SAMSUNG48_PROTOCOL         0       // Samsung48            >= 10000                 ~100 bytes (SAMSUNG must be enabled!)
  #define IRMP_SUPPORT_MERLIN_PROTOCOL            0       // Merlin               >= 15000 (better 20000)  ~300 bytes
-@@ -100,7 +100,7 @@
- #define IRMP_SUPPORT_SAMSUNGAH_PROTOCOL         0       // SAMSUNG AH           >= 10000                 ~250 bytes
- #define IRMP_SUPPORT_IRMP16_PROTOCOL            0       // IRMP specific        >= 15000                 ~250 bytes
- #define IRMP_SUPPORT_GREE_PROTOCOL              0       // GREE CLIMATE         >= 10000                 ~250 bytes
--#define IRMP_SUPPORT_RCII_PROTOCOL              1       // RCII T+A             >= 15000                 ~250 bytes
-+#define IRMP_SUPPORT_RCII_PROTOCOL              0       // RCII T+A             >= 15000                 ~250 bytes
- 
- #define IRMP_SUPPORT_RADIO1_PROTOCOL            0       // RADIO, e.g. TEVION   >= 10000                 ~250 bytes (experimental)
- 
-@@ -134,9 +134,9 @@
+@@ -174,9 +174,9 @@
   * Change hardware pin here for ARM STM32
   *---------------------------------------------------------------------------------------------------------------------------------------------------
   */
@@ -105,71 +71,18 @@ diff -Nrup A/irmpconfig.h B/irmpconfig.h
  
  /*---------------------------------------------------------------------------------------------------------------------------------------------------
   * Hardware pin for ARM STM32 (HAL) - don't change here, define IRMP_RECEIVE_GPIO_Port & IRMP_RECEIVE_PIN in STM32Cube (Main.h)
-@@ -232,7 +232,7 @@
+@@ -292,7 +292,7 @@
   *---------------------------------------------------------------------------------------------------------------------------------------------------
   */
  #ifndef IRMP_USE_CALLBACK
--#  define IRMP_USE_CALLBACK                     0       // 1: use callbacks. 0: do not. default is 0
-+#  define IRMP_USE_CALLBACK                     1       // 1: use callbacks. 0: do not. default is 0
+-#  define IRMP_USE_CALLBACK                     0                       // 1: use callbacks. 0: do not. default is 0
++#  define IRMP_USE_CALLBACK                     1                       // 1: use callbacks. 0: do not. default is 0
  #endif
  
  /*---------------------------------------------------------------------------------------------------------------------------------------------------
-diff -Nrup A/irmpsystem.h B/irmpsystem.h
---- A/irmpsystem.h	2018-09-06 16:52:14.000000000 +0200
-+++ B/irmpsystem.h	2019-12-05 01:45:46.026523800 +0100
-@@ -37,6 +37,11 @@
- #  define ARM_STM32
- #  define ARM_STM32F10X
- #  define F_CPU (SysCtlClockGet())
-+#elif defined(STM32F30X)                                                            // ARM STM32
-+#  include <stm32f30x.h>
-+#  define ARM_STM32
-+#  define ARM_STM32F30X
-+#  define F_CPU (SysCtlClockGet())
- #elif defined(STM32F4XX)                                                            // ARM STM32
- #  include <stm32f4xx.h>
- #  define ARM_STM32
-diff -Nrup A/irsnd.c B/irsnd.c
---- A/irsnd.c	2018-09-06 16:52:14.000000000 +0200
-+++ B/irsnd.c	2019-12-05 01:42:51.466724300 +0100
-@@ -864,6 +864,8 @@ irsnd_init (void)
- #    elif defined (ARM_STM32F10X)
-         RCC_APB2PeriphClockCmd(IRSND_PORT_RCC, ENABLE);
-         // RCC_APB2PeriphClockCmd(RCC_APB2Periph_AFIO, ENABLE); // only in case of remapping, not necessary for default port-timer mapping
-+#    elif defined (ARM_STM32F30X)
-+        RCC_AHBPeriphClockCmd(IRSND_PORT_RCC, ENABLE);
- #    elif defined (ARM_STM32F4XX)
-         RCC_AHB1PeriphClockCmd(IRSND_PORT_RCC, ENABLE);
- #    endif
-@@ -882,6 +884,13 @@ irsnd_init (void)
-         GPIO_InitStructure.GPIO_Mode = GPIO_Mode_AF_PP;
-         GPIO_Init(IRSND_PORT, &GPIO_InitStructure);
-         // GPIO_PinRemapConfig(GPIO_*Remap*_TIM[IRSND_TIMER_NUMBER], ENABLE); // only in case of remapping, not necessary for default port-timer mapping
-+#    elif defined (ARM_STM32F30X)
-+        GPIO_InitStructure.GPIO_Mode = GPIO_Mode_AF;
-+        GPIO_InitStructure.GPIO_Speed = GPIO_Speed_2MHz;
-+        GPIO_InitStructure.GPIO_OType = GPIO_OType_PP;
-+        GPIO_InitStructure.GPIO_PuPd = GPIO_PuPd_NOPULL;
-+        GPIO_Init(IRSND_PORT, &GPIO_InitStructure);
-+        // GPIO_PinRemapConfig(GPIO_*Remap*_TIM[IRSND_TIMER_NUMBER], ENABLE); // only in case of remapping, not necessary for default port-timer mapping
- #    endif
- 
-         /* TIMx clock enable */
-diff -Nrup A/irsnd.h B/irsnd.h
---- A/irsnd.h	2018-08-29 17:19:08.000000000 +0200
-+++ B/irsnd.h	2019-12-03 22:11:13.309728610 +0100
-@@ -27,6 +27,8 @@
- #    define IRSND_GPIO_AF                       CONCAT(GPIO_AF_TIM, IRSND_TIMER_NUMBER)
- #  elif defined (ARM_STM32F10X)
- #    define IRSND_PORT_RCC                      CONCAT(RCC_APB2Periph_GPIO, IRSND_PORT_LETTER)
-+#  elif  defined (ARM_STM32F30X)
-+#    define IRSND_PORT_RCC                      CONCAT(RCC_AHBPeriph_GPIO, IRSND_PORT_LETTER)
- #  elif defined (ARM_STM32F4XX)
- #    define IRSND_PORT_RCC                      CONCAT(RCC_AHB1Periph_GPIO, IRSND_PORT_LETTER)
- #    define IRSND_GPIO_AF                       CONCAT(GPIO_AF_TIM, IRSND_TIMER_NUMBER)
 diff -Nrup A/irsndconfig.h B/irsndconfig.h
---- A/irsndconfig.h	2018-09-06 16:52:14.000000000 +0200
-+++ B/irsndconfig.h	2019-12-03 21:17:50.206486948 +0100
+--- A/irsndconfig.h	2019-08-26 20:58:11.000000000 +0200
++++ B/irsndconfig.h	2020-07-18 15:38:58.430424215 +0200
 @@ -45,17 +45,17 @@
  #define IRSND_SUPPORT_KASEIKYO_PROTOCOL         1       // Kaseikyo             >= 10000                 ~300 bytes
  
@@ -198,6 +111,15 @@ diff -Nrup A/irsndconfig.h B/irsndconfig.h
  
  // exotic protocols, enable here!               Enable  Remarks                 F_INTERRUPTS            Program Space
  #define IRSND_SUPPORT_BOSE_PROTOCOL             0       // BOSE                 >= 10000                 ~100 bytes
+@@ -73,7 +73,7 @@
+ #define IRSND_SUPPORT_TELEFUNKEN_PROTOCOL       0       // Telefunken 1560      >= 10000                 ~150 bytes
+ #define IRSND_SUPPORT_FDC_PROTOCOL              0       // FDC IR keyboard      >= 10000 (better 15000)  ~150 bytes
+ #define IRSND_SUPPORT_RCCAR_PROTOCOL            0       // RC CAR               >= 10000 (better 15000)  ~150 bytes
+-#define IRSND_SUPPORT_ROOMBA_PROTOCOL           1       // iRobot Roomba        >= 10000                 ~150 bytes
++#define IRSND_SUPPORT_ROOMBA_PROTOCOL           0       // iRobot Roomba        >= 10000                 ~150 bytes
+ #define IRSND_SUPPORT_RUWIDO_PROTOCOL           0       // RUWIDO, T-Home       >= 15000                 ~250 bytes
+ #define IRSND_SUPPORT_A1TVBOX_PROTOCOL          0       // A1 TV BOX            >= 15000 (better 20000)  ~200 bytes
+ #define IRSND_SUPPORT_LEGO_PROTOCOL             0       // LEGO Power RC        >= 20000                 ~150 bytes
 @@ -144,9 +144,9 @@
   * ARM STM32 section:
   *---------------------------------------------------------------------------------------------------------------------------------------------------
