@@ -242,8 +242,8 @@ retry:
 		goto retry;
 	}
 
-	printf("Found device at %d:%d\n", libusb_get_bus_number(dev), libusb_get_device_address(dev));
-	sprintf(print, "Found device at %d:%d\n", libusb_get_bus_number(dev), libusb_get_device_address(dev));
+	printf("Found device at %u:%u\n", libusb_get_bus_number(dev), libusb_get_device_address(dev));
+	sprintf(print, "Found device at %u:%u\n", libusb_get_bus_number(dev), libusb_get_device_address(dev));
 
 	printf("wTransfer Size = %d\n", wTransferSize);
 	fflush(stdout);
