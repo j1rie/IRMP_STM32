@@ -2,7 +2,7 @@
  *  IR receiver, sender, USB wakeup, motherboard switch wakeup, wakeup timer,
  *  USB HID device, eeprom emulation
  *
- *  Copyright (C) 2014-2018 Joerg Riechardt
+ *  Copyright (C) 2014-2020 Joerg Riechardt
  *
  *  This program is free software; you can redistribute it and/or modify
  *  it under the terms of the GNU General Public License as published by
@@ -552,6 +552,7 @@ int8_t reset_handler(uint8_t *buf)
 	/* number of valid bytes in buf, -1 signifies error */
 	int8_t ret = 3;
 	uint16_t idx;
+	uint8_t tmp[SIZEOF_IR];
 	uint8_t zeros[SIZEOF_IR] = {0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF};
 	switch (buf[2]) {
 	case CMD_ALARM:
@@ -560,10 +561,18 @@ int8_t reset_handler(uint8_t *buf)
 	case CMD_MACRO:
 		idx = (MACRO_DEPTH + 1) * SIZEOF_IR/2 * buf[3] + SIZEOF_IR/2 * buf[4];
 		eeprom_store(idx, zeros);
+		/* validate stored value in eeprom */
+		eeprom_restore(tmp, idx);
+		if (memcmp(zeros, tmp, sizeof(tmp)))
+			ret = -1;
 		break;
 	case CMD_WAKE:
 		idx = (MACRO_DEPTH + 1) * SIZEOF_IR/2 * MACRO_SLOTS + SIZEOF_IR/2 * buf[3];
 		eeprom_store(idx, zeros);
+		/* validate stored value in eeprom */
+		eeprom_restore(tmp, idx);
+		if (memcmp(zeros, tmp, sizeof(tmp)))
+			ret = -1;
 		break;
 	default:
 		ret = -1;
