@@ -2,7 +2,7 @@ The receiver is installed automatically.
 If not, do a sudo apt-get install yavdr-hardware-irmp
 
 Get a template map:
-wget  https://raw.githubusercontent.com/j1rie/IRMP_STM32/master/irmplircd/yaVDR-0.6.2%20Xenial/irmp.map
+wget  https://raw.githubusercontent.com/j1rie/IRMP_STM32/master/irmplircd/yaVDR-0.6.2/irmp.map
 mv irmp.map /etc/irmplircd/irmplircd.map
 
 The stm32IRconfig_gui can be used for building a keymap from the template /etc/irmplircd/irmplircd.map with the remote control.
