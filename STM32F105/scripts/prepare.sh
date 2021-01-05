@@ -7,7 +7,7 @@ cd ..
 mkdir -p ext_src
 [[ -e ./ext_src/prepared ]] && exit 0
 cd ./ext_src
-for i in en.stm32_f105-07_f2_f4_usb-host-device_lib stsw-stm32010; do
+for i in en.stm32_f105-07_f2_f4_usb-host-device_lib en.stsw-stm32010; do
 	if [[ ! -s $i.zip ]]; then
 		echo 'unfortunately you have to download these files from ST manually and put them into ext_src'
 		echo 'http://www.st.com/en/embedded-software/stsw-stm32046.html'
@@ -107,7 +107,7 @@ unzip -j $ar2 \
       Project/USB_Device_Examples/HID/src/usbd_desc.c \
       Project/USB_Device_Examples/HID/src/usbd_usr.c
 
-ar='../../ext_src/stsw-stm32010.zip'
+ar='../../ext_src/en.stsw-stm32010.zip'
 ver='3.1.0'
 path="STM32F10x_AN2594_FW_V$ver"
 cd ../..

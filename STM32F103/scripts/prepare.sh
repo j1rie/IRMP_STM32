@@ -7,7 +7,7 @@ cd ..
 mkdir -p ext_src
 [[ -e ./ext_src/prepared ]] && exit 0
 cd ./ext_src
-for i in stsw-stm32010 en.stsw-stm32121; do
+for i in en.stsw-stm32010 en.stsw-stm32121; do
 	if [[ ! -s $i.zip ]]; then
 		echo 'unfortunately you have to download these files from ST manually and put them into ext_src'
 		echo 'http://www.st.com/en/embedded-software/stsw-stm32121.html'
@@ -110,7 +110,7 @@ unzip -j $ar2 \
       $path/Libraries/STM32_USB-FS-Device_Driver/src/usb_regs.c \
       $path/Libraries/STM32_USB-FS-Device_Driver/src/usb_sil.c
 
-ar='../../ext_src/stsw-stm32010.zip'
+ar='../../ext_src/en.stsw-stm32010.zip'
 ver='3.1.0'
 path="STM32F10x_AN2594_FW_V$ver"
 cd ../..
