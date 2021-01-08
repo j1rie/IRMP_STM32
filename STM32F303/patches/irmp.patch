@@ -10,18 +10,8 @@ diff -Nrup A/irmpconfig.h B/irmpconfig.h
  #endif
  
  /*---------------------------------------------------------------------------------------------------------------------------------------------------
-@@ -73,23 +73,23 @@
-  *---------------------------------------------------------------------------------------------------------------------------------------------------
-  */
- // typical protocols, disable here!             Enable  Remarks                 F_INTERRUPTS            Program Space
--#define IRMP_SUPPORT_SIRCS_PROTOCOL             0       // Sony SIRCS           >= 10000                 ~150 bytes
--#define IRMP_SUPPORT_NEC_PROTOCOL               0       // NEC + APPLE + ONKYO  >= 10000                 ~300 bytes
--#define IRMP_SUPPORT_SAMSUNG_PROTOCOL           0       // Samsung + Samsg32    >= 10000                 ~300 bytes
--#define IRMP_SUPPORT_KASEIKYO_PROTOCOL          0       // Kaseikyo             >= 10000                 ~250 bytes
-+#define IRMP_SUPPORT_SIRCS_PROTOCOL             1       // Sony SIRCS           >= 10000                 ~150 bytes
-+#define IRMP_SUPPORT_NEC_PROTOCOL               1       // NEC + APPLE + ONKYO  >= 10000                 ~300 bytes
-+#define IRMP_SUPPORT_SAMSUNG_PROTOCOL           1       // Samsung + Samsg32    >= 10000                 ~300 bytes
-+#define IRMP_SUPPORT_KASEIKYO_PROTOCOL          1       // Kaseikyo             >= 10000                 ~250 bytes
+@@ -79,17 +79,17 @@
+ #define IRMP_SUPPORT_KASEIKYO_PROTOCOL          1       // Kaseikyo             >= 10000                 ~250 bytes
  
  // more protocols, enable here!                 Enable  Remarks                 F_INTERRUPTS            Program Space
 -#define IRMP_SUPPORT_JVC_PROTOCOL               0       // JVC                  >= 10000                 ~150 bytes
@@ -58,7 +48,7 @@ diff -Nrup A/irmpconfig.h B/irmpconfig.h
  #define IRMP_SUPPORT_LGAIR_PROTOCOL             0       // LG Air Condition     >= 10000                 ~300 bytes
  #define IRMP_SUPPORT_SAMSUNG48_PROTOCOL         0       // Samsung48            >= 10000                 ~100 bytes (SAMSUNG must be enabled!)
  #define IRMP_SUPPORT_MERLIN_PROTOCOL            0       // Merlin               >= 15000 (better 20000)  ~300 bytes
-@@ -174,9 +174,9 @@
+@@ -175,9 +175,9 @@
   * Change hardware pin here for ARM STM32
   *---------------------------------------------------------------------------------------------------------------------------------------------------
   */
@@ -71,7 +61,7 @@ diff -Nrup A/irmpconfig.h B/irmpconfig.h
  
  /*---------------------------------------------------------------------------------------------------------------------------------------------------
   * Hardware pin for ARM STM32 (HAL) - don't change here, define IRMP_RECEIVE_GPIO_Port & IRMP_RECEIVE_PIN in STM32Cube (Main.h)
-@@ -292,7 +292,7 @@
+@@ -293,7 +293,7 @@
   *---------------------------------------------------------------------------------------------------------------------------------------------------
   */
  #ifndef IRMP_USE_CALLBACK
@@ -83,13 +73,12 @@ diff -Nrup A/irmpconfig.h B/irmpconfig.h
 diff -Nrup A/irsndconfig.h B/irsndconfig.h
 --- A/irsndconfig.h	2019-08-26 20:58:11.000000000 +0200
 +++ B/irsndconfig.h	2020-07-18 15:38:58.430424215 +0200
-@@ -45,17 +45,17 @@
+@@ -46,17 +46,17 @@
  #define IRSND_SUPPORT_KASEIKYO_PROTOCOL         1       // Kaseikyo             >= 10000                 ~300 bytes
  
  // more protocols, enable here!                 Enable  Remarks                 F_INTERRUPTS            Program Space
 -#define IRSND_SUPPORT_DENON_PROTOCOL            0       // DENON, Sharp         >= 10000                 ~200 bytes
-+#define IRSND_SUPPORT_DENON_PROTOCOL            1       // DENON, Sharp         >= 10000                 ~200 bytes
- #define IRSND_SUPPORT_RC5_PROTOCOL              1       // RC5                  >= 10000                 ~150 bytes
+-#define IRSND_SUPPORT_RC5_PROTOCOL              0       // RC5                  >= 10000                 ~150 bytes
 -#define IRSND_SUPPORT_RC6_PROTOCOL              0       // RC6                  >= 10000                 ~250 bytes
 -#define IRSND_SUPPORT_RC6A_PROTOCOL             0       // RC6A                 >= 10000                 ~250 bytes
 -#define IRSND_SUPPORT_JVC_PROTOCOL              0       // JVC                  >= 10000                 ~150 bytes
@@ -99,6 +88,8 @@ diff -Nrup A/irsndconfig.h B/irsndconfig.h
 -#define IRSND_SUPPORT_GRUNDIG_PROTOCOL          0       // Grundig              >= 10000                 ~300 bytes
 -#define IRSND_SUPPORT_SIEMENS_PROTOCOL          0       // Siemens, Gigaset     >= 15000                 ~150 bytes
 -#define IRSND_SUPPORT_NOKIA_PROTOCOL            0       // Nokia                >= 10000                 ~400 bytes
++#define IRSND_SUPPORT_DENON_PROTOCOL            1       // DENON, Sharp         >= 10000                 ~200 bytes
++#define IRSND_SUPPORT_RC5_PROTOCOL              1       // RC5                  >= 10000                 ~150 bytes
 +#define IRSND_SUPPORT_RC6_PROTOCOL              1       // RC6                  >= 10000                 ~250 bytes
 +#define IRSND_SUPPORT_RC6A_PROTOCOL             1       // RC6A                 >= 10000                 ~250 bytes
 +#define IRSND_SUPPORT_JVC_PROTOCOL              1       // JVC                  >= 10000                 ~150 bytes
@@ -111,16 +102,7 @@ diff -Nrup A/irsndconfig.h B/irsndconfig.h
  
  // exotic protocols, enable here!               Enable  Remarks                 F_INTERRUPTS            Program Space
  #define IRSND_SUPPORT_BOSE_PROTOCOL             0       // BOSE                 >= 10000                 ~100 bytes
-@@ -73,7 +73,7 @@
- #define IRSND_SUPPORT_TELEFUNKEN_PROTOCOL       0       // Telefunken 1560      >= 10000                 ~150 bytes
- #define IRSND_SUPPORT_FDC_PROTOCOL              0       // FDC IR keyboard      >= 10000 (better 15000)  ~150 bytes
- #define IRSND_SUPPORT_RCCAR_PROTOCOL            0       // RC CAR               >= 10000 (better 15000)  ~150 bytes
--#define IRSND_SUPPORT_ROOMBA_PROTOCOL           1       // iRobot Roomba        >= 10000                 ~150 bytes
-+#define IRSND_SUPPORT_ROOMBA_PROTOCOL           0       // iRobot Roomba        >= 10000                 ~150 bytes
- #define IRSND_SUPPORT_RUWIDO_PROTOCOL           0       // RUWIDO, T-Home       >= 15000                 ~250 bytes
- #define IRSND_SUPPORT_A1TVBOX_PROTOCOL          0       // A1 TV BOX            >= 15000 (better 20000)  ~200 bytes
- #define IRSND_SUPPORT_LEGO_PROTOCOL             0       // LEGO Power RC        >= 20000                 ~150 bytes
-@@ -144,9 +144,9 @@
+@@ -145,9 +145,9 @@
   * ARM STM32 section:
   *---------------------------------------------------------------------------------------------------------------------------------------------------
   */
