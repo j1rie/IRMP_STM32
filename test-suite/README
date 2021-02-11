@@ -1,0 +1,5 @@
+test_snd_rcv_all_loop.sh sends a set of infrared codes 200 times and stm32IRconfig 
+in test mode receives them and writes them into files.
+compare_testfiles.sh compares those files with a reference file and shows differences.
+
+For this you need irctl from https://github.com/olebowle/irctl

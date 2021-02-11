@@ -109,13 +109,16 @@ int main(int argc, const char **argv) {
 	char c, d;
 	uint8_t s, m, k, l, idx;
 	int retValm, jump_to_firmware;
+	FILE *fp;
+	char testfilename[10];
+	uint16_t j = 0;
 
 	open_stm32(argc>1 ? argv[1] : "/dev/irmp_stm32");
 
 	outBuf[0] = REPORT_ID_CONFIG_OUT;
 	outBuf[1] = STAT_CMD;
 
-cont:	printf("program eeprom: wakeups and macros (p)\nprogram eeprom: wakeups and macros with remote control(P)\nget eeprom (wakeups, macros and capabilities) (g)\nreset (wakeups, macros and alarm) (r)\nset alarm (s)\nget alarm (a)\nsend IR (i)\nreboot (b)\nmonitor until ^C (m)\nexit (x)\n");
+cont:	printf("program eeprom: wakeups and macros (p)\nprogram eeprom: wakeups and macros with remote control(P)\nget eeprom (wakeups, macros and capabilities) (g)\nreset (wakeups, macros and alarm) (r)\nset alarm (s)\nget alarm (a)\nsend IR (i)\nreboot (b)\nmonitor until ^C (m)\nrun test (t)\nexit (x)\n");
 	scanf("%s", &c);
 
 	switch (c) {
@@ -349,6 +352,10 @@ reset:		printf("reset wakeup(w)\nreset macro slot(m)\nreset alarm(a)\n");
 		goto monit;
 		break;
 
+	case 't':
+		goto test;
+		break;
+
 	case 'x':
 		goto exit;
 		break;
@@ -372,6 +379,26 @@ monit:	while(true) {
 		}
 	}
 	
+test:	sprintf(testfilename, "test%u", j); printf("write into %s\n", testfilename); // if directory, it needs to exist (or be created)!
+	fp = fopen(testfilename, "w");
+	while(true) {
+		retValm = read(stm32fd, inBuf, sizeof(inBuf));
+		if (retValm >= 0) {
+			printf("%02hhx%02hhx%02hhx%02hhx%02hhx%02hhx\n", inBuf[1],inBuf[3],inBuf[2],inBuf[5],inBuf[4],inBuf[6]);
+			fprintf(fp, "%02hhx%02hhx%02hhx%02hhx%02hhx%02hhx\n", inBuf[1],inBuf[3],inBuf[2],inBuf[5],inBuf[4],inBuf[6]);
+			if (inBuf[1] == 0x3c && inBuf[3] == 0 && inBuf[2] == 0 && inBuf[5] == 0 && inBuf[4] == 0x3f && inBuf[6] == 1) { // 3c0000003f01, stopsequence TODO make configurable
+				printf("received stopsequence\n");
+				fclose(fp);
+				j++;
+				if (j >= 200) { // TODO make number of tests configurable
+					printf("exit\n");
+					goto exit;
+				}
+				goto test;
+			}
+		}
+	}
+
 exit:	if (stm32fd >= 0) close(stm32fd);
 	return 0;
 }

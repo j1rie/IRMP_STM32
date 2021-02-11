@@ -29,6 +29,7 @@ A macro makes it possible to send a sequence of IR commands via the send diode o
 * stm32IRalarm for setting and reading alarm time via script 
 * stm32FWupgrade for firmware update on the command line
 * irmplircd is a daemon, running in background as an independent lirc server and passing the IR codes/events on to the application https://github.com/realglotzi/irmplircd
+* irctl for configuration: https://github.com/olebowle/irctl
 * Software ready for LibreELEC, Ubuntu, yaVDR, easyVDR, MLD, OpenELEC.
 
 ## Software Windows
