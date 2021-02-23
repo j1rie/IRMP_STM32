@@ -6,8 +6,8 @@ MEMORY
 	ram (rwx) : ORIGIN = 0x20000000, LENGTH = 0x00005000
 }
 
-_eram = 0x20000000 + 0x00005000;
-_estack = 0x20000000 + 0x00005000;
+_eram = ORIGIN(ram) + LENGTH(ram);  /* in CooCox used for _estack */
+_estack = _eram;
 SECTIONS
 {
 	.text :

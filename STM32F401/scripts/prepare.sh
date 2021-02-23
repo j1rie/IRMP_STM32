@@ -7,11 +7,11 @@ cd ..
 mkdir -p ext_src
 [[ -e ./ext_src/prepared ]] && exit 0
 cd ./ext_src
-for i in en.stm32_f105-07_f2_f4_usb-host-device_lib en.stsw-stm32010; do
+for i in en.stm32_f105-07_f2_f4_usb-host-device_lib en.stsw-stm32066; do
 	if [[ ! -s $i.zip ]]; then
 		echo 'unfortunately you have to download these files from ST manually and put them into ext_src'
-		echo 'http://www.st.com/en/embedded-software/stsw-stm32046.html'
-		echo 'http://www.st.com/en/embedded-software/stsw-stm32010.html'
+		echo 'https://www.st.com/en/embedded-software/stsw-stm32046.html'
+		echo 'https://www.st.com/en/embedded-software/stsw-stm32066.html'
 		exit
 		#wget "http://www.st.com/resource/en/firmware/$i.zip"
 	fi
@@ -29,19 +29,20 @@ path="STM32_USB-Host-Device_Lib_V$ver"
 mkdir -p cmsis_boot
 cd cmsis_boot
 unzip -j $ar1 \
-      Libraries/CMSIS/Device/ST/STM32F10x/Include/stm32f10x.h \
-      Libraries/CMSIS/Device/ST/STM32F10x/Include/system_stm32f10x.h \
-      Project/USB_Device_Examples/CustomHID/inc/stm32f10x_conf.h
+      Libraries/CMSIS/Device/ST/STM32F4xx/Include/stm32f4xx.h \
+      Libraries/CMSIS/Device/ST/STM32F4xx/Include/system_stm32f4xx.h \
+      Project/USB_Device_Examples/CustomHID/inc/stm32f4xx_conf.h
 mkdir -p startup
 cd startup
-unzip -j $ar2 Libraries/CMSIS/Device/ST/STM32F10x/Source/Templates/gcc_ride7/startup_stm32f10x_cl.s
+unzip -j $ar2 Libraries/CMSIS/Device/ST/STM32F4xx/Source/Templates/gcc_ride7/startup_stm32f401xx.s
 cd ../..
 mkdir -p cmsis
 cd cmsis
 unzip -j $ar1 \
-       Libraries/CMSIS/Include/core_cm3.h \
+       Libraries/CMSIS/Include/core_cm4.h \
        Libraries/CMSIS/Include/core_cmFunc.h \
        Libraries/CMSIS/Include/core_cmInstr.h \
+       Libraries/CMSIS/Include/core_cmSimd.h \
        Libraries/CMSIS/Include/cmsis_gcc.h
 #        \
 #       Libraries/CMSIS/Include/cmsis_armcc.h \
@@ -52,26 +53,26 @@ cd  stm_lib
 mkdir -p inc
 cd inc
 unzip -j $ar2 \
-      Libraries/STM32F10x_StdPeriph_Driver/inc/misc.h \
-      Libraries/STM32F10x_StdPeriph_Driver/inc/stm32f10x_flash.h \
-      Libraries/STM32F10x_StdPeriph_Driver/inc/stm32f10x_gpio.h \
-      Libraries/STM32F10x_StdPeriph_Driver/inc/stm32f10x_rcc.h \
-      Libraries/STM32F10x_StdPeriph_Driver/inc/stm32f10x_tim.h \
-      Libraries/STM32F10x_StdPeriph_Driver/inc/stm32f10x_usart.h
+      Libraries/STM32F4xx_StdPeriph_Driver/inc/misc.h \
+      Libraries/STM32F4xx_StdPeriph_Driver/inc/stm32f4xx_flash.h \
+      Libraries/STM32F4xx_StdPeriph_Driver/inc/stm32f4xx_gpio.h \
+      Libraries/STM32F4xx_StdPeriph_Driver/inc/stm32f4xx_rcc.h \
+      Libraries/STM32F4xx_StdPeriph_Driver/inc/stm32f4xx_tim.h \
+      Libraries/STM32F4xx_StdPeriph_Driver/inc/stm32f4xx_usart.h
 cd ..
 mkdir -p src
 cd src
 unzip -j $ar2 \
-      Libraries/STM32F10x_StdPeriph_Driver/src/misc.c \
-      Libraries/STM32F10x_StdPeriph_Driver/src/stm32f10x_flash.c \
-      Libraries/STM32F10x_StdPeriph_Driver/src/stm32f10x_gpio.c \
-      Libraries/STM32F10x_StdPeriph_Driver/src/stm32f10x_rcc.c \
-      Libraries/STM32F10x_StdPeriph_Driver/src/stm32f10x_tim.c \
-      Libraries/STM32F10x_StdPeriph_Driver/src/stm32f10x_usart.c
+      Libraries/STM32F4xx_StdPeriph_Driver/src/misc.c \
+      Libraries/STM32F4xx_StdPeriph_Driver/src/stm32f4xx_flash.c \
+      Libraries/STM32F4xx_StdPeriph_Driver/src/stm32f4xx_gpio.c \
+      Libraries/STM32F4xx_StdPeriph_Driver/src/stm32f4xx_rcc.c \
+      Libraries/STM32F4xx_StdPeriph_Driver/src/stm32f4xx_tim.c \
+      Libraries/STM32F4xx_StdPeriph_Driver/src/stm32f4xx_usart.c
 cd ../..
 
 cd cmsis_boot
-unzip -j $ar1 Libraries/CMSIS/Device/ST/STM32F10x/Source/Templates/system_stm32f10x.c
+unzip -j $ar1 Libraries/CMSIS/Device/ST/STM32F4xx/Source/Templates/system_stm32f4xx.c
 cd ..
 mkdir -p usb_hid
 cd usb_hid
@@ -108,16 +109,16 @@ unzip -j $ar2 \
       Project/USB_Device_Examples/HID/src/usbd_desc.c \
       Project/USB_Device_Examples/HID/src/usbd_usr.c
 
-ar='../../ext_src/en.stsw-stm32010.zip'
-ver='3.1.0'
-path="STM32F10x_AN2594_FW_V$ver"
+ar='../../ext_src/en.stsw-stm32066.zip'
+ver='1.0.0'
+path="STM32F4xx_AN3969_V$ver"
 cd ../..
 cd  stm_lib
 cd inc
-unzip -j $ar $path/Project/EEPROM_Emulation/inc/eeprom.h
+unzip -j $ar $path/Project/STM32F4xx_EEPROM_Emulation/inc/eeprom.h
 cd ..
 cd src
-unzip -j $ar $path/Project/EEPROM_Emulation/src/eeprom.c
+unzip -j $ar $path/Project/STM32F4xx_EEPROM_Emulation/src/eeprom.c
 cd ../..
 
 ar='../ext_src/irmp.tar.gz'
@@ -139,7 +140,8 @@ cd ..
 # patch
 patch -d usb_hid -p1 -i ../patches/usb_hid.patch
 patch -d stm_lib -p1 -i ../patches/eeprom.patch
-patch -d cmsis_boot -p1 -i ../patches/stm32f10x_conf.patch
+patch -d stm_lib -p1 -i ../patches/stm_lib.patch
+patch -d cmsis_boot -p1 -i ../patches/stm32f4xx_conf.patch
 patch -d cmsis_boot -p1 -i ../patches/startup.patch
 patch -d cmsis_boot -p1 -i ../patches/system.patch
 patch -d irmp -p1 -i ../patches/irmp.patch

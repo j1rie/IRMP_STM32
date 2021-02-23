@@ -1,0 +1,12 @@
+diff -Nrup A/startup/startup_stm32f401xx.s B/startup/startup_stm32f401xx.s
+--- A/startup/startup_stm32f401xx.s	2018-10-02 16:08:34.000000000 +0200
++++ B/startup/startup_stm32f401xx.s	2021-02-16 22:24:17.307611665 +0100
+@@ -129,7 +129,7 @@ Infinite_Loop:
+     
+     
+ g_pfnVectors:
+-  .word  _estack
++  .word  _eram
+   .word  Reset_Handler
+   .word  NMI_Handler
+   .word  HardFault_Handler

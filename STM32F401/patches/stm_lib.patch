@@ -1,0 +1,12 @@
+diff -Nrup A/inc/stm32f4xx_flash.h B/inc/stm32f4xx_flash.h
+--- A/inc/stm32f4xx_flash.h	2018-02-15 09:36:21.412420600 +0100
++++ B/inc/stm32f4xx_flash.h	2021-02-19 00:34:45.000000000 +0100
+@@ -177,7 +177,7 @@ typedef enum
+ #endif /* STM32F40_41xxx || STM32F412xG */
+ 
+ #if defined (STM32F401xx)
+-#define IS_FLASH_ADDRESS(ADDRESS) ((((ADDRESS) >= 0x08000000) && ((ADDRESS) <= 0x0803FFFF)) ||\
++#define IS_FLASH_ADDRESS(ADDRESS) ((((ADDRESS) >= 0x08000000) && ((ADDRESS) <= 0x0807FFFF)) ||\
+                                    (((ADDRESS) >= 0x1FFF7800) && ((ADDRESS) <= 0x1FFF7A0F)))
+ #endif /* STM32F401xx */
+ 

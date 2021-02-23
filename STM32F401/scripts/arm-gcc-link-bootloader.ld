@@ -2,11 +2,11 @@ OUTPUT_FORMAT ("elf32-littlearm", "elf32-bigarm", "elf32-littlearm")
 /* Internal Memory Map*/
 MEMORY
 {
-	rom (rx)  : ORIGIN = 0x08000000, LENGTH = 0x0003F000 /* -eeprom */
-	ram (rwx) : ORIGIN = 0x20000000, LENGTH = 0x00010000
+	rom (rx)  : ORIGIN = 0x08010000, LENGTH = 0x00070000 /* after eeprom */
+	ram (rwx) : ORIGIN = 0x20000000, LENGTH = 0x00018000
 }
 
-_eram = ORIGIN(ram) + LENGTH(ram);  /* in CooCox used for _estack */
+_eram = ORIGIN(ram) + LENGTH(ram) - 8;  /* in CooCox used for _estack, 8 for boot_flag */
 _estack = _eram;
 SECTIONS
 {
@@ -124,10 +124,15 @@ SECTIONS
 	
 	/* Set stack top to end of ram , and stack limit move down by
 	* size of stack_dummy section */
-	__StackTop = ORIGIN(ram ) + LENGTH(ram );
+	__StackTop = ORIGIN(ram ) + LENGTH(ram ) - 8;
 	__StackLimit = __StackTop - SIZEOF(.co_stack);
 	PROVIDE(__stack = __StackTop);
 	
 	/* Check if data + heap + stack exceeds ram  limit */
 	ASSERT(__StackLimit >= __HeapLimit, "region ram  overflowed with stack")
+
+ .noinit __StackTop (NOLOAD):
+    {
+        *(.noinit)
+    } > ram
 }
