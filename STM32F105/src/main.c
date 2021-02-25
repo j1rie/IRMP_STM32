@@ -55,81 +55,47 @@ IRMP_NEC_PROTOCOL,
 #if IRMP_SUPPORT_SAMSUNG_PROTOCOL==1
 IRMP_SAMSUNG_PROTOCOL,
 #endif
-#if IRMP_SUPPORT_KASEIKYO_PROTOCOL==1
-IRMP_KASEIKYO_PROTOCOL,
-#endif
-#if IRMP_SUPPORT_JVC_PROTOCOL==1
-IRMP_JVC_PROTOCOL,
-#endif
-#if IRMP_SUPPORT_NEC16_PROTOCOL==1
-IRMP_NEC16_PROTOCOL,
-#endif
-#if IRMP_SUPPORT_NEC42_PROTOCOL==1
-IRMP_NEC42_PROTOCOL,
-#endif
 #if IRMP_SUPPORT_MATSUSHITA_PROTOCOL==1
 IRMP_MATSUSHITA_PROTOCOL,
 #endif
-#if IRMP_SUPPORT_DENON_PROTOCOL==1
-IRMP_DENON_PROTOCOL,
-#endif
-#if IRMP_SUPPORT_RC5_PROTOCOL==1
-IRMP_RC5_PROTOCOL,
-#endif
-#if IRMP_SUPPORT_RC6_PROTOCOL==1
-IRMP_RC6_PROTOCOL,
-IRMP_RC6A_PROTOCOL,
-#endif
-#if IRMP_SUPPORT_IR60_PROTOCOL==1
-IRMP_IR60_PROTOCOL,
-#endif
-#if IRMP_SUPPORT_GRUNDIG_PROTOCOL==1
-IRMP_GRUNDIG_PROTOCOL,
-#endif
-#if IRMP_SUPPORT_SIEMENS_PROTOCOL==1
-IRMP_SIEMENS_PROTOCOL,
-#endif
-#if IRMP_SUPPORT_NOKIA_PROTOCOL==1
-IRMP_NOKIA_PROTOCOL,
-#endif
-#if IRMP_SUPPORT_BOSE_PROTOCOL==1
-IRMP_BOSE_PROTOCOL,
-#endif
-#if IRMP_SUPPORT_KATHREIN_PROTOCOL==1
-IRMP_KATHREIN_PROTOCOL,
-#endif
-#if IRMP_SUPPORT_NUBERT_PROTOCOL==1
-IRMP_NUBERT_PROTOCOL,
-#endif
-#if IRMP_SUPPORT_FAN_PROTOCOL==1
-IRMP_FAN_PROTOCOL,
-#endif
-#if IRMP_SUPPORT_SPEAKER_PROTOCOL==1
-IRMP_SPEAKER_PROTOCOL,
-#endif
-#if IRMP_SUPPORT_BANG_OLUFSEN_PROTOCOL==1
-IRMP_BANG_OLUFSEN_PROTOCOL,
+#if IRMP_SUPPORT_KASEIKYO_PROTOCOL==1
+IRMP_KASEIKYO_PROTOCOL,
 #endif
 #if IRMP_SUPPORT_RECS80_PROTOCOL==1
 IRMP_RECS80_PROTOCOL,
 #endif
+#if IRMP_SUPPORT_RC5_PROTOCOL==1
+IRMP_RC5_PROTOCOL,
+#endif
+#if IRMP_SUPPORT_DENON_PROTOCOL==1
+IRMP_DENON_PROTOCOL,
+#endif
+#if IRMP_SUPPORT_RC6_PROTOCOL==1
+IRMP_RC6_PROTOCOL,
+#endif
+#if IRMP_SUPPORT_SAMSUNG_PROTOCOL==1
+IRMP_SAMSUNG32_PROTOCOL,
+#endif
+#if IRMP_SUPPORT_NEC_PROTOCOL==1
+IRMP_APPLE_PROTOCOL,
+#endif
 #if IRMP_SUPPORT_RECS80EXT_PROTOCOL==1
 IRMP_RECS80EXT_PROTOCOL,
 #endif
-#if IRMP_SUPPORT_THOMSON_PROTOCOL==1
-IRMP_THOMSON_PROTOCOL,
+#if IRMP_SUPPORT_NUBERT_PROTOCOL==1
+IRMP_NUBERT_PROTOCOL,
 #endif
-#if IRMP_SUPPORT_NIKON_PROTOCOL==1
-IRMP_NIKON_PROTOCOL,
+#if IRMP_SUPPORT_BANG_OLUFSEN_PROTOCOL==1
+IRMP_BANG_OLUFSEN_PROTOCOL,
 #endif
-#if IRMP_SUPPORT_NETBOX_PROTOCOL==1
-IRMP_NETBOX_PROTOCOL,
+#if IRMP_SUPPORT_GRUNDIG_PROTOCOL==1
+IRMP_GRUNDIG_PROTOCOL,
 #endif
-#if IRMP_SUPPORT_ORTEK_PROTOCOL==1
-IRMP_ORTEK_PROTOCOL,
+#if IRMP_SUPPORT_NOKIA_PROTOCOL==1
+IRMP_NOKIA_PROTOCOL,
 #endif
-#if IRMP_SUPPORT_TELEFUNKEN_PROTOCOL==1
-IRMP_TELEFUNKEN_PROTOCOL,
+#if IRMP_SUPPORT_SIEMENS_PROTOCOL==1
+IRMP_SIEMENS_PROTOCOL,
 #endif
 #if IRMP_SUPPORT_FDC_PROTOCOL==1
 IRMP_FDC_PROTOCOL,
@@ -137,22 +103,61 @@ IRMP_FDC_PROTOCOL,
 #if IRMP_SUPPORT_RCCAR_PROTOCOL==1
 IRMP_RCCAR_PROTOCOL,
 #endif
-#if IRMP_SUPPORT_ROOMBA_PROTOCOL==1
-IRMP_ROOMBA_PROTOCOL,
+#if IRMP_SUPPORT_JVC_PROTOCOL==1
+IRMP_JVC_PROTOCOL,
+#endif
+#if IRMP_SUPPORT_RC6_PROTOCOL==1
+IRMP_RC6A_PROTOCOL,
+#endif
+#if IRMP_SUPPORT_NIKON_PROTOCOL==1
+IRMP_NIKON_PROTOCOL,
 #endif
 #if IRMP_SUPPORT_RUWIDO_PROTOCOL==1
 IRMP_RUWIDO_PROTOCOL,
 #endif
-#if IRMP_SUPPORT_A1TVBOX_PROTOCOL==1
-IRMP_A1TVBOX_PROTOCOL,
+#if IRMP_SUPPORT_IR60_PROTOCOL==1
+IRMP_IR60_PROTOCOL,
+#endif
+#if IRMP_SUPPORT_KATHREIN_PROTOCOL==1
+IRMP_KATHREIN_PROTOCOL,
+#endif
+#if IRMP_SUPPORT_NETBOX_PROTOCOL==1
+IRMP_NETBOX_PROTOCOL,
+#endif
+#if IRMP_SUPPORT_NEC16_PROTOCOL==1
+IRMP_NEC16_PROTOCOL,
+#endif
+#if IRMP_SUPPORT_NEC42_PROTOCOL==1
+IRMP_NEC42_PROTOCOL,
 #endif
 #if IRMP_SUPPORT_LEGO_PROTOCOL==1
 IRMP_LEGO_PROTOCOL,
+#endif
+#if IRMP_SUPPORT_THOMSON_PROTOCOL==1
+IRMP_THOMSON_PROTOCOL,
+#endif
+#if IRMP_SUPPORT_BOSE_PROTOCOL==1
+IRMP_BOSE_PROTOCOL,
+#endif
+#if IRMP_SUPPORT_A1TVBOX_PROTOCOL==1
+IRMP_A1TVBOX_PROTOCOL,
+#endif
+#if IRMP_SUPPORT_ORTEK_PROTOCOL==1
+IRMP_ORTEK_PROTOCOL,
+#endif
+#if IRMP_SUPPORT_TELEFUNKEN_PROTOCOL==1
+IRMP_TELEFUNKEN_PROTOCOL,
+#endif
+#if IRMP_SUPPORT_ROOMBA_PROTOCOL==1
+IRMP_ROOMBA_PROTOCOL,
 #endif
 #if IRMP_SUPPORT_RCMM_PROTOCOL==1
 IRMP_RCMM32_PROTOCOL,
 IRMP_RCMM24_PROTOCOL,
 IRMP_RCMM12_PROTOCOL,
+#endif
+#if IRMP_SUPPORT_SPEAKER_PROTOCOL==1
+IRMP_SPEAKER_PROTOCOL,
 #endif
 #if IRMP_SUPPORT_LGAIR_PROTOCOL==1
 IRMP_LGAIR_PROTOCOL,
@@ -165,6 +170,9 @@ IRMP_MERLIN_PROTOCOL,
 #endif
 #if IRMP_SUPPORT_PENTAX_PROTOCOL==1
 IRMP_PENTAX_PROTOCOL,
+#endif
+#if IRMP_SUPPORT_FAN_PROTOCOL==1
+IRMP_FAN_PROTOCOL,
 #endif
 #if IRMP_SUPPORT_S100_PROTOCOL==1
 IRMP_S100_PROTOCOL,
@@ -545,9 +553,13 @@ void check_wakeups(IRMP_DATA *ir)
 	uint8_t i;
 	uint16_t idx;
 	uint8_t buf[SIZEOF_IR];
+	uint8_t zeros[SIZEOF_IR] = {0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF};
 	for (i=0; i < WAKE_SLOTS/2; i++) {
 		idx = (MACRO_DEPTH + 1) * SIZEOF_IR/2 * MACRO_SLOTS + SIZEOF_IR/2 * i;
 		if (!eeprom_restore(buf, idx)) {
+			/* first encounter of zero in check_wakeups() means end of check */
+			if (!memcmp(buf, &zeros, sizeof(zeros))) //
+				break;
 			if (!memcmp(buf, ir, sizeof(buf)))
 				Wakeup();
 		}
@@ -560,9 +572,13 @@ void check_resets(IRMP_DATA *ir)
 	uint8_t i;
 	uint16_t idx;
 	uint8_t buf[SIZEOF_IR];
+	uint8_t zeros[SIZEOF_IR] = {0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF};
 	for (i=WAKE_SLOTS/2; i < WAKE_SLOTS - 1; i++) {
 		idx = (MACRO_DEPTH + 1) * SIZEOF_IR/2 * MACRO_SLOTS + SIZEOF_IR/2 * i;
 		if (!eeprom_restore(buf, idx)) {
+			/* first encounter of zero in check_resets() means end of check */
+			if (!memcmp(buf, &zeros, sizeof(zeros))) //
+				break;
 			if (!memcmp(buf, ir, sizeof(buf)))
 				Reset();
 		}
@@ -597,16 +613,17 @@ void transmit_macro(uint8_t macro)
 	/* we start from 1, since we don't want to tx the trigger code of the macro*/
 	for (i=1; i < MACRO_DEPTH + 1; i++) {
 		idx = (MACRO_DEPTH + 1) * SIZEOF_IR/2 * macro + SIZEOF_IR/2 * i;
-		eeprom_restore(buf, idx);
-		/* first encounter of zero in macro means end of macro */
-		if (!memcmp(buf, &zeros, sizeof(zeros)))
-			break;
-		/* if macros are sent already, while the trigger IR data are still repeated,
-		 * the receiving device may crash
-		 * Depending on the protocol we need a pause between the trigger and the transmission
-		 * and between two transmissions. The highest known pause is 130 ms for Denon. */
-		yellow_short_on();
-		irsnd_send_data((IRMP_DATA *) buf, 1);
+		if (!eeprom_restore(buf, idx)) {
+			/* first encounter of zero in macro means end of macro */
+			if (!memcmp(buf, &zeros, sizeof(zeros)))
+				break;
+			/* if macros are sent already, while the trigger IR data are still repeated,
+			* the receiving device may crash
+			* Depending on the protocol we need a pause between the trigger and the transmission
+			* and between two transmissions. The highest known pause is 130 ms for Denon. */
+			yellow_short_on();
+			irsnd_send_data((IRMP_DATA *) buf, 1);
+		}
 	}
 }
 
@@ -616,11 +633,16 @@ void check_macros(IRMP_DATA *ir)
 	uint8_t i;
 	uint16_t idx;
 	uint8_t buf[SIZEOF_IR];
+	uint8_t zeros[SIZEOF_IR] = {0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF};
 	for (i=0; i < MACRO_SLOTS; i++) {
 		idx = (MACRO_DEPTH + 1) * SIZEOF_IR/2 * i;
-		eeprom_restore(buf, idx);
-		if (!memcmp(buf, ir, sizeof(buf)))
+		if (!eeprom_restore(buf, idx)) {
+			/* first encounter of zero in check_macros() means end of check */
+			if (!memcmp(buf, &zeros, sizeof(zeros))) //
+				break;
+		    if (!memcmp(buf, ir, sizeof(buf)))
 			transmit_macro(i);
+		}
 	}
 }
 

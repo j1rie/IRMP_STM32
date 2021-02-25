@@ -7,7 +7,8 @@
  *  it under the terms of the GNU General Public License as published by
  *  the Free Software Foundation; either version 2 of the License, or
  *  (at your option) any later version.
- */diff -Nrup A/inc/usb_bsp.h B/inc/usb_bsp.h
+ */
+ diff -Nrup A/inc/usb_bsp.h B/inc/usb_bsp.h
 --- A/inc/usb_bsp.h	2018-09-05 14:57:38.000000000 +0200
 +++ B/inc/usb_bsp.h	2020-07-15 18:42:08.747378100 +0200
 @@ -25,6 +25,7 @@
