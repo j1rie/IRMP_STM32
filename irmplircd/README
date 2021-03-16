@@ -14,3 +14,7 @@ You may use this in VDR's shutdownscript in order to not shut down on the first 
 computer is already running. See the example script.
 This is handy if you have a remote control with macros as the logitech and use one button to power
 on not only VDR but other devices as well.
+
+irmpexec executes commands on an IR signal decoded by irmplircd.
+For example an irmplircd.map line "070000000100 KEY_1" and an
+irmpexec.map line "KEY_1 ls -l" executes "ls -l" on 070000000100.
