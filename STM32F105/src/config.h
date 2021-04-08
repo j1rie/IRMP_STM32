@@ -29,6 +29,10 @@
 #define EXTLED
 
 /* C6 IRMP (irmpconfig.h), B6 IRSND (irsndconfig.h) Yaw-right, B10 Logging (irmp.c) */
+#define IR_IN_PORT	C
+#define IR_IN_PIN	6
+#define IR_OUT_PORT	B
+#define IR_OUT_PIN	6
 
 /* On this board activate for pull high the A{0,1,2} pins and for pull low the B{6,7,8} pins, BUT NEVER BOTH,
  * due to the level shifting complementary MOSFETs and the level shifting transistors in the A{0,1,2} paths.

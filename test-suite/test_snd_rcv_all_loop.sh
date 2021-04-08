@@ -27,11 +27,11 @@
 # 25 RCMM24 can't send
 # 26 RCMM12 can't send
 # 27 Speaker 0 address bits
-# 29 Samsung48 doppelt
+# 29 Samsung48 double
 # 2a Merlin
 # 2b Pentax max 16kHz
 # 2c Fan conflicts with Nubert
-# 2d S100 conflicts with RC5
+# 2d S100 conflicts with RC5, can't send
 # 2e ACP24 conflicts with Denon
 # 2f Technics can't send
 # 30 Panasonic conflicts with Kaseikyo and Mitsu-Heavy 

@@ -32,7 +32,7 @@ typedef enum {
  	USB_HID_CONNECTED
 }USB_HID_STATUS_t;
 
-USB_HID_STATUS_t USB_HID_STATUS; 
+extern USB_HID_STATUS_t USB_HID_STATUS;
 
 
 typedef enum {
