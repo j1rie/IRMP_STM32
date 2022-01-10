@@ -1,4 +1,4 @@
-TARGET ?= F105
+TARGET ?= F105xC
 PLATFORM ?= STM32F105RC
 #STM32F105RC
 #	CL - connectivity line

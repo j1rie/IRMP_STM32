@@ -1,0 +1,24 @@
+diff -Nrup A/system_stm32f4xx.c B/system_stm32f4xx.c
+--- A/system_stm32f4xx.c	2018-10-02 16:08:46.000000000 +0200
++++ B/system_stm32f4xx.c	2021-02-23 19:43:52.448924815 +0100
+@@ -315,6 +315,7 @@
+   */
+ 
+ #include "stm32f4xx.h"
++#include "config.h" /* CooCox workaround */
+ 
+ /**
+   * @}
+@@ -361,8 +362,12 @@
+ /*!< Uncomment the following line if you need to relocate your vector Table in
+      Internal SRAM. */
+ /* #define VECT_TAB_SRAM */
++#if defined(Bootloader)
++#define VECT_TAB_OFFSET  0x10000
++#else
+ #define VECT_TAB_OFFSET  0x00 /*!< Vector Table base offset field. 
+                                    This value must be a multiple of 0x200. */
++#endif
+ /******************************************************************************/
+ 
+ /************************* PLL Parameters *************************************/

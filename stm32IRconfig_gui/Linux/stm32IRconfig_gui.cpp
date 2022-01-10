@@ -1102,8 +1102,8 @@ MainWindow::Write()
 	getDataFromTextField(output_text, bufw, sizeof(bufw));
 
 	if (!connected_device) {
-		FXMessageBox::error(this, MBOX_OK, "Device Error W", "Unable To Connect to Device");
-		s = "Unable To Connect to Device W\n";//
+		FXMessageBox::error(this, MBOX_OK, "Device Error W", "Unable to Connect to Device");
+		s = "Unable to Connect to Device W\n";//
 		input_text->appendText(s);
 		input_text->setBottomLine(INT_MAX);
 		return -1;

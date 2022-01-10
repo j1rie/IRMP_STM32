@@ -5,7 +5,7 @@ diff -Nrup A/inc/eeprom.h B/inc/eeprom.h
  /* Exported constants --------------------------------------------------------*/
  /* Define the size of the sectors to be used */
  #define PAGE_SIZE               (uint32_t)0x4000  /* Page size = 16KByte */
-+                                                  for bigger page size eeprom may
++                                                  /* for bigger page size eeprom may
 +						    need to be cached in sram */
  
  /* Device voltage range supposed to be [2.7V to 3.6V], the operation will 

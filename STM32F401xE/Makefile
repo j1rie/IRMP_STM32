@@ -1,5 +1,5 @@
 -include Make.config
-TARGET ?= F401
+TARGET ?= F401xE
 PLATFORM ?= STM32F4XX
 #STM32F401CE
 #	

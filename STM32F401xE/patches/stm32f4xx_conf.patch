@@ -1,0 +1,27 @@
+diff -Nrup A/stm32f4xx_conf.h B/stm32f4xx_conf.h
+--- A/stm32f4xx_conf.h	2021-02-16 19:34:37.475939454 +0100
++++ B/stm32f4xx_conf.h	2021-02-17 00:23:23.876876646 +0100
+@@ -26,6 +26,8 @@
+ 
+ /* Includes ------------------------------------------------------------------*/
+ /* Uncomment the line below to enable peripheral header file inclusion */
++
++#if 0
+ #include "stm32f4xx_adc.h"
+ #include "stm32f4xx_can.h"
+ #include "stm32f4xx_crc.h"
+@@ -55,6 +57,14 @@
+ #include "misc.h" /* High level functions for NVIC and SysTick (add-on to CMSIS functions) */
+ #include "stm32f4xx_dma2d.h"
+ #include "stm32f4xx_ltdc.h"
++#endif
++#include "stm32f4xx_flash.h"
++#include "stm32f4xx_gpio.h"
++#include "stm32f4xx_rcc.h"
++#include "stm32f4xx_tim.h"
++#include "stm32f4xx_usart.h"
++#include "misc.h"
++#include "config.h"
+ 
+ /* Exported types ------------------------------------------------------------*/
+ /* Exported constants --------------------------------------------------------*/
