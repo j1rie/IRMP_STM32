@@ -7,3 +7,5 @@ https://github.com/ranseyer/STM32-IRMP-Hardware/tree/master/1_Small_ST-Link/STl-
 
 I strongly recommend the optocoupler version. It is not very likely that you actually need it, but
 in case you do have a motherboard, which needs it, it will save you much debugging effort.
+
+If you like a tiny design, look at https://github.com/Sl-Alex/IRMP_STM32_MINI
