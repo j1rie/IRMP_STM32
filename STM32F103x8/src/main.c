@@ -20,6 +20,7 @@
 #include <stdio.h>
 #endif
 #include "romtable.h"
+#include "stm32_tm1637.h"
 
 #define BYTES_PER_QUERY	(HID_IN_BUFFER_SIZE - 4)
 /* after plugging in, it takes some time, until SOF's are being sent to the device */
@@ -225,6 +226,7 @@ volatile unsigned int i = 0;
 uint8_t Reboot = 0;
 volatile uint32_t boot_flag __attribute__((__section__(".noinit")));
 volatile unsigned int send_ir_on_delay = 0;
+volatile unsigned int dim_delay;
 
 void delay_ms(unsigned int msec)
 {
@@ -377,6 +379,10 @@ void SysTick_Handler(void)
 			AlarmValue--;
 		if (send_ir_on_delay)
 			send_ir_on_delay--;
+		if (dim_delay){
+			dim_delay--;
+			tm1637SetBrightness(dim_delay);
+		}
 		i = 0;
 	} else {
 		i++;
@@ -771,6 +777,7 @@ int main(void)
 	memcpy(&firmware, FW_STR, sizeof(FW_STR));
 	firmware[sizeof(FW_STR) - 1] = 42; // * separator
 	memcpy(&firmware[sizeof(FW_STR)], &rt, sizeof(rt));
+	tm1637Init();
 
 	while (1) {
 		if (!AlarmValue && !host_running())
@@ -827,6 +834,9 @@ int main(void)
 
 			/* send IR-data */
 			USB_HID_SendData(REPORT_ID_IR, (uint8_t *) &myIRData, sizeof(myIRData));
+
+			/* send IR-data to 4-digit-display */
+			tm1637DisplayHex(myIRData.command);
 		}
 	}
 }

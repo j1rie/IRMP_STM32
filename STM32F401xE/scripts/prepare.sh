@@ -16,8 +16,12 @@ for i in en.stm32_f105-07_f2_f4_usb-host-device_lib en.stsw-stm32066; do
 		#wget "http://www.st.com/resource/en/firmware/$i.zip"
 	fi
 done
-if [[ ! -s irmp.tar.gz ]]; then
-	wget "http://www.mikrocontroller.net/svnbrowser/irmp/?view=tar" -O irmp.tar.gz
+#if [[ ! -s irmp.tar.gz ]]; then
+#	wget "http://www.mikrocontroller.net/svnbrowser/irmp/?view=tar" -O irmp.tar.gz
+#fi
+
+if [[ ! -s IRMP-master.zip ]]; then
+	wget "https://github.com/j1rie/IRMP/archive/refs/heads/master.zip"  -O IRMP-master.zip
 fi
 
 # extract
@@ -121,24 +125,38 @@ cd src
 unzip -j $ar $path/Project/STM32F4xx_EEPROM_Emulation/src/eeprom.c
 cd ../..
 
-ar='../ext_src/irmp.tar.gz'
-path="irmp"
+#ar='../ext_src/irmp.tar.gz'
+ar='../ext_src/IRMP-master.zip'
+#path="irmp"
+path="IRMP-master"
 mkdir -p irmp
 cd irmp
-tar -xvf $ar --strip-components=1 \
+#tar -xvf $ar --strip-components=1 \
+#    $path/irmp.c \
+#    $path/irmp.h \
+#    $path/irmpconfig.h \
+#    $path/irmpprotocols.h \
+#    $path/irmpsystem.h \
+#    $path/irsnd.c \
+#    $path/irsnd.h \
+#    $path/irsndconfig.h \
+#    $path/README.txt
+unzip -j $ar \
     $path/irmp.c \
     $path/irmp.h \
-    $path/irmpconfig.h \
+    $path/irmpconfig.h.max \
     $path/irmpprotocols.h \
     $path/irmpsystem.h \
     $path/irsnd.c \
     $path/irsnd.h \
-    $path/irsndconfig.h \
+    $path/irsndconfig.h.max \
     $path/README.txt
+mv irmpconfig.h.max irmpconfig.h
+mv irsndconfig.h.max irsndconfig.h
 cd ..
 
 # patch
-patch -d usb_hid -p1 -i ../patches/usb_hid.patch
+patch -d usb_hid -p1 -i ../patches/usb_hid.patch --binary
 patch -d stm_lib -p1 -i ../patches/eeprom.patch
 patch -d stm_lib -p1 -i ../patches/stm_lib.patch
 patch -d cmsis_boot -p1 -i ../patches/stm32f4xx_conf.patch
