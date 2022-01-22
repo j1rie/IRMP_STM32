@@ -1,6 +1,6 @@
 -include Make.config
 
-TARGET ?= STM32F103x8
+TARGET ?= F103x8
 PLATFORM ?= STM32F103C8
 #STM32F103C8
 #	MD PL - medium density performance line
