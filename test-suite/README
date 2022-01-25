@@ -8,3 +8,5 @@ You get error free test results only under good conditions.
 Best is daylight, a weak standard light bulb is already worse, and a strong LED light even more worse.
 Distance and angle from sending LED to TSOP have an influence on the result, too. To close with strong sender is bad.
 With identical TSOPs under difficult conditions one lost more and other protocols than the other.
+
+In order to receive all protocols, the IR receiver needs to be able to decode short bursts/gaps. I used a TSOP 34338.
