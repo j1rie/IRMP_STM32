@@ -47,6 +47,7 @@
 ### These are the mainboards known so far to really need optocouplers:
 ### Up Squared (UP2)
 ### H110M-A/M.2 (ASUS)
+### For the new opto-coupler extension board this needs to be enabled, too, in spite of the name.
 #SimpleCircuit=1
 
 ### Enable this, if you have a pulldown resistor for USB reset (legacy boards).
