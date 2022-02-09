@@ -24,6 +24,10 @@ if [[ ! -s IRMP-master.zip ]]; then
 	wget "https://github.com/j1rie/IRMP/archive/refs/heads/master.zip"  -O IRMP-master.zip
 fi
 
+if [[ ! -s stm32-tm1637-master.zip ]]; then
+	wget "https://github.com/j1rie/stm32-tm1637/archive/refs/heads/master.zip"  -O stm32-tm1637-master.zip
+fi
+
 # extract
 cd ..
 ar2='../../ext_src/en.stsw-stm32121.zip'
@@ -154,6 +158,17 @@ unzip -j $ar \
     $path/README.txt
 mv irmpconfig.h.max irmpconfig.h
 mv irsndconfig.h.max irsndconfig.h
+cd ..
+
+ar='../ext_src/stm32-tm1637-master.zip'
+path="stm32-tm1637-master"
+mkdir -p tm1637
+cd tm1637
+unzip -j $ar \
+    $path/tm1637.c \
+    $path/tm1637.h \
+    $path/README.md\
+    $path/LICENSE.md
 cd ..
 
 # patch

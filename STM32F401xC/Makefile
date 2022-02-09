@@ -17,7 +17,7 @@ OBJCP = $(CROSS_COMPILE)objcopy
 
 ARCH = -mcpu=cortex-m4 -mthumb
 COMMON = -g -Os -flto
-INCLUDES = -Icmsis -Icmsis_boot -Istm_lib/inc -Iusb_hid/inc -Iirmp -Isrc
+INCLUDES = -Icmsis -Icmsis_boot -Istm_lib/inc -Iusb_hid/inc -Iirmp -Isrc -Itm1637
 ifdef DEBUG
 INCLUDES += -Isemihosting -Istdio
 endif
@@ -35,7 +35,7 @@ OBJS = cmsis_boot/startup/startup_stm32f401xx.o cmsis_boot/system_stm32f4xx.o\
        usb_hid/src/usb_dcd_int.o usb_hid/src/usbd_core.o\
        usb_hid/src/usbd_desc.o\
        usb_hid/src/usbd_hid_core.o usb_hid/src/usbd_ioreq.o\
-       usb_hid/src/usbd_req.o usb_hid/src/usbd_usr.o
+       usb_hid/src/usbd_req.o usb_hid/src/usbd_usr.o tm1637/tm1637.o
 ifdef DEBUG
 OBJS += semihosting/semihosting.o semihosting/sh_cmd.o  stdio/printf.o
 endif

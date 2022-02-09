@@ -20,7 +20,7 @@
 #include <stdio.h>
 #endif
 #include "romtable.h"
-#include "stm32_tm1637.h"
+#include "tm1637.h"
 
 #define BYTES_PER_QUERY	(HID_IN_BUFFER_SIZE - 4)
 /* after plugging in, it takes some time, until SOF's are being sent to the device */

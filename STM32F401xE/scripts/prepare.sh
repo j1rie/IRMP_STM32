@@ -24,6 +24,10 @@ if [[ ! -s IRMP-master.zip ]]; then
 	wget "https://github.com/j1rie/IRMP/archive/refs/heads/master.zip"  -O IRMP-master.zip
 fi
 
+if [[ ! -s stm32-tm1637-master.zip ]]; then
+	wget "https://github.com/j1rie/stm32-tm1637/archive/refs/heads/master.zip"  -O stm32-tm1637-master.zip
+fi
+
 # extract
 cd ..
 ar2='../../ext_src/en.stm32_f105-07_f2_f4_usb-host-device_lib.zip'
@@ -153,6 +157,25 @@ unzip -j $ar \
     $path/README.txt
 mv irmpconfig.h.max irmpconfig.h
 mv irsndconfig.h.max irsndconfig.h
+cd ..
+
+ar='../ext_src/stm32-tm1637-master.zip'
+path="stm32-tm1637-master"
+mkdir -p tm1637
+cd tm1637
+unzip -j $ar \
+    $path/tm1637.c \
+    $path/tm1637.h \
+    $path/README.md\
+    $path/LICENSE.md
+sed -i 's|include "stm32f10x.h"|include "stm32f4xx.h"|' ./tm1637.h
+sed -i 's|include "stm32f10x.h"|include "stm32f4xx.h"|' ./tm1637.c
+sed -i 's|APB2|AHB1|g' ./tm1637.h
+sed -i 's|Out_PP|OUT|' ./tm1637.c
+sed -i 's|BSRR = ((uint32_t)CLK_PIN << 16U);|BSRRH = CLK_PIN;|' ./tm1637.h
+sed -i 's|BSRR = ((uint32_t)DIO_PIN << 16U);|BSRRH = DIO_PIN;|' ./tm1637.h
+sed -i 's|BSRR |BSRRL |g' ./tm1637.h
+
 cd ..
 
 # patch

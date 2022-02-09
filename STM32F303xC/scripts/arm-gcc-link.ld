@@ -6,7 +6,7 @@ MEMORY
 	ram (rwx) : ORIGIN = 0x20000000, LENGTH = 0x0000A000
 }
 
-eram = ORIGIN(ram) + LENGTH(ram);  /* in CooCox used for _estack */
+_eram = ORIGIN(ram) + LENGTH(ram);  /* in CooCox used for _estack */
 _estack = _eram;
 SECTIONS
 {
