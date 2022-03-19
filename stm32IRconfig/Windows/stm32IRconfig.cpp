@@ -94,8 +94,8 @@ static void write_stm32(int out_size) {
 	if (retVal < 0) {
 		printf("write error: %ls\n", hid_error(handle));
 	} else {
-		printf("written %d bytes:\n\t", retVal);
-		for (int i = 0; i < retVal; i++)
+		printf("written %d bytes:\n\t", out_size);
+		for (int i = 0; i < out_size; i++)
 			printf("%02x ", (unsigned int)outBuf[i]);
 		puts("\n");
 	}
