@@ -1,7 +1,7 @@
 /**********************************************************************************************************
-	stm32config: configure and monitor STM32IR
+	stm32IRconfig: configure and monitor IRMP_STM32
 
-	Copyright (C) 2014-2020 Jörg Riechardt
+	Copyright (C) 2014-2022 Jörg Riechardt
 
 	This program is free software; you can redistribute it and/or modify
 	it under the terms of the GNU General Public License as published by
@@ -22,7 +22,8 @@
 #include <termios.h>
 #include <fcntl.h>
 
-#define HID_BUFFER_SIZE 17
+#define	HID_IN_REPORT_COUNT	17 /* STM32->PC */
+#define	HID_OUT_REPORT_COUNT	17 /* PC->STM32 */
 
 enum access {
 	ACC_GET,
@@ -33,7 +34,7 @@ enum access {
 enum command {
 	CMD_EMIT,
 	CMD_CAPS,
-	CMD_FW,
+	CMD_HID_TEST,
 	CMD_ALARM,
 	CMD_MACRO,
 	CMD_WAKE,
@@ -53,8 +54,8 @@ enum report_id {
 };
 
 static int stm32fd = -1;
-uint8_t inBuf[HID_BUFFER_SIZE];
-uint8_t outBuf[HID_BUFFER_SIZE];
+uint8_t inBuf[HID_IN_REPORT_COUNT];
+uint8_t outBuf[HID_OUT_REPORT_COUNT];
 
 static bool open_stm32(const char *devicename) {
 	stm32fd = open(devicename, O_RDWR );
@@ -79,9 +80,9 @@ static void read_stm32() {
 	}
 } 
 
-static void write_stm32() {
+static void write_stm32(int out_size) {
 	int retVal;
-	retVal = write(stm32fd, outBuf, sizeof(outBuf));
+	retVal = write(stm32fd, outBuf, out_size);
 	if (retVal < 0) {
 		printf("write error\n");
 	} else {
@@ -92,9 +93,9 @@ static void write_stm32() {
 	}
 }
 
-void write_and_check() {
-	write_stm32();
-	usleep(2000);
+void write_and_check(int idx) {
+	write_stm32(idx);
+	usleep(3000);
 	read_stm32(); // blocking per default, waits until data arrive
 	while (inBuf[0] == REPORT_ID_IR)
 		read_stm32();
@@ -128,7 +129,7 @@ cont:	printf("program eeprom: wakeups and macros (p)\nprogram eeprom: wakeups an
 	case 'p':
 prog:		printf("set wakeup(w)\nset macro(m)\n");
 		scanf("%s", &d);
-		memset(&outBuf[2], 0, HID_BUFFER_SIZE - 2);
+		memset(&outBuf[2], 0, sizeof(outBuf) - 2);
 		idx = 2;
 		outBuf[idx++] = ACC_SET;
 		switch (d) {
@@ -158,13 +159,13 @@ prog:		printf("set wakeup(w)\nset macro(m)\n");
 		outBuf[idx++] = (i>>8) & 0xFF;
 		outBuf[idx++] = (i>>16) & 0xFF;
 		outBuf[idx++] = i & 0xFF;
-		write_and_check();
+		write_and_check(idx);
 		break;
 
 		case 'P':
 Prog:		printf("set wakeup with remote control(w)\nset macro with remote control(m)\n");
 		scanf("%s", &d);
-		memset(&outBuf[2], 0, HID_BUFFER_SIZE - 2);
+		memset(&outBuf[2], 0, sizeof(outBuf) - 2);
 		idx = 2;
 		outBuf[idx++] = ACC_SET;
 		switch (d) {
@@ -197,13 +198,13 @@ Prog:		printf("set wakeup with remote control(w)\nset macro with remote control(
 		outBuf[idx++] = inBuf[4];
 		outBuf[idx++] = inBuf[5];
 		outBuf[idx++] = inBuf[6];
-		write_and_check();
+		write_and_check(idx);
 		break;
 
 		case 'g':
 get:		printf("get wakeup(w)\nget macro slot(m)\nget caps(c)\n");
 		scanf("%s", &d);
-		memset(&outBuf[2], 0, HID_BUFFER_SIZE - 2);
+		memset(&outBuf[2], 0, sizeof(outBuf) - 2);
 		idx = 2;
 		outBuf[idx++] = ACC_GET;
 		switch (d) {
@@ -227,8 +228,8 @@ get:		printf("get wakeup(w)\nget macro slot(m)\nget caps(c)\n");
 			outBuf[idx++] = CMD_CAPS;
 			for (l = 0; l < 20; l++) { // for safety stop after 20 loops
 				outBuf[idx] = l;
-				write_stm32();
-				usleep(2000);
+				write_stm32(idx+1);
+				usleep(3000);
 				read_stm32();
 				while (inBuf[0] == 0x01)
 					read_stm32();
@@ -239,7 +240,7 @@ get:		printf("get wakeup(w)\nget macro slot(m)\nget caps(c)\n");
 				} else {
 					if(!jump_to_firmware) { // queries for supported_protocols
 						printf("protocols: ");
-						for (k = 4; k < HID_BUFFER_SIZE; k++) {
+						for (k = 4; k < sizeof(inBuf); k++) {
 							if (!inBuf[k]) { // NULL termination
 								printf("\n\n");
 								jump_to_firmware = 1;
@@ -249,7 +250,7 @@ get:		printf("get wakeup(w)\nget macro slot(m)\nget caps(c)\n");
 						}
 					} else { // queries for firmware
 						printf("firmware: ");
-						for (k = 4; k < HID_BUFFER_SIZE; k++) {
+						for (k = 4; k < sizeof(inBuf); k++) {
 							if (!inBuf[k]) { // NULL termination
 								printf("\n\n");
 								goto out;
@@ -265,14 +266,14 @@ again:			;
 		default:
 			goto get;
 		}
-		write_and_check();
+		write_and_check(idx);
 out:
 		break;
 
 		case 'r':
 reset:		printf("reset wakeup(w)\nreset macro slot(m)\nreset alarm(a)\n");
 		scanf("%s", &d);
-		memset(&outBuf[2], 0, HID_BUFFER_SIZE - 2);
+		memset(&outBuf[2], 0, sizeof(outBuf) - 2);
 		idx = 2;
 		outBuf[idx++] = ACC_RESET;
 		switch (d) {
@@ -297,32 +298,32 @@ reset:		printf("reset wakeup(w)\nreset macro slot(m)\nreset alarm(a)\n");
 		default:
 			goto reset;
 		}
-		write_and_check();
+		write_and_check(idx);
 		break;
 
 	case 's':
-		memset(&outBuf[2], 0, HID_BUFFER_SIZE - 2);
+		memset(&outBuf[2], 0, sizeof(outBuf) - 2);
 		idx = 2;
 		outBuf[idx++] = ACC_SET;
 		outBuf[idx++] = CMD_ALARM;
 		printf("enter alarm\n");
 		scanf("%" SCNx64 "", &i);
 		memcpy(&outBuf[idx++], &i, 4);
-		write_and_check();
+		write_and_check(idx);
 		break;
 
 	case 'a':
-		memset(&outBuf[2], 0, HID_BUFFER_SIZE - 2);
+		memset(&outBuf[2], 0, sizeof(outBuf) - 2);
 		idx = 2;
 		outBuf[idx++] = ACC_GET;
 		outBuf[idx++] = CMD_ALARM;
-		write_and_check();
+		write_and_check(idx);
 		break;
 
 	case 'i':
 		printf("enter IRData (protocoladdresscommandflag)\n");
 		scanf("%" SCNx64 "", &i);
-		memset(&outBuf[2], 0, HID_BUFFER_SIZE - 2);
+		memset(&outBuf[2], 0, sizeof(outBuf) - 2);
 		idx = 2;
 		outBuf[idx++] = ACC_SET;
 		outBuf[idx++] = CMD_EMIT;
@@ -332,15 +333,15 @@ reset:		printf("reset wakeup(w)\nreset macro slot(m)\nreset alarm(a)\n");
 		outBuf[idx++] = (i>>8) & 0xFF;
 		outBuf[idx++] = (i>>16) & 0xFF;
 		outBuf[idx++] = i & 0xFF;
-		write_and_check();
+		write_and_check(idx);
 		break;
 
 	case 'b':
-		memset(&outBuf[2], 0, HID_BUFFER_SIZE - 2);
+		memset(&outBuf[2], 0, sizeof(outBuf) - 2);
 		idx = 2;
 		outBuf[idx++] = ACC_SET;
 		outBuf[idx++] = CMD_REBOOT;
-		write_and_check();
+		write_and_check(idx);
 		close(stm32fd);
 		usleep(1900000);
 		for(l=0;l<6;l++) {
@@ -363,27 +364,11 @@ reset:		printf("reset wakeup(w)\nreset macro slot(m)\nreset alarm(a)\n");
 		break;
 
 	case 'h':
-		memset(&outBuf[0], 0, HID_BUFFER_SIZE - 2);
-		idx = 0;
-		outBuf[idx++] = 0x03;
-		outBuf[idx++] = 0x01;
-		outBuf[idx++] = 0x98;
-		outBuf[idx++] = 0x76;
-		outBuf[idx++] = 0x12;
-		outBuf[idx++] = 0x34;
-		outBuf[idx++] = 0x56;
-		outBuf[idx++] = 0x78;
-		outBuf[idx++] = 0x90;
-		outBuf[idx++] = 0xab;
-		outBuf[idx++] = 0xcd;
-		outBuf[idx++] = 0xef;
-		outBuf[idx++] = 0x12;
-		outBuf[idx++] = 0x34;
-		outBuf[idx++] = 0x56;
-		outBuf[idx++] = 0x78;
-		outBuf[idx++] = 0x9a;
-		outBuf[idx++] = 0xbc;
-		write_and_check();
+		memset(&outBuf[2], 0, sizeof(outBuf) - 2);
+		for(l = 2; l < sizeof(outBuf); l++){
+			outBuf[l] = l - 1; // ACC_SET CMD_HID_TEST ...
+		}
+		write_and_check(sizeof(outBuf));
 		break;
 
 	default:

@@ -35,7 +35,7 @@ enum access {
 enum command {
 	CMD_EMIT,
 	CMD_CAPS,
-	CMD_FW,
+	CMD_HID_TEST,
 	CMD_ALARM,
 	CMD_MACRO,
 	CMD_WAKE,

@@ -1,7 +1,7 @@
 /**********************************************************************************************************
-	stm32config: configure and monitor STM32IR
+	stm32IRconfig: configure and monitor IRMP_STM32
 
-	Copyright (C) 2014-2020 Joerg Riechardt
+	Copyright (C) 2014-2022 Jörg Riechardt
 
 	based on work by Alan Ott
 	Copyright 2010  Alan Ott
@@ -29,6 +29,9 @@
 	#include <unistd.h>
 #endif
 
+#define	HID_IN_REPORT_COUNT	17 /* STM32->PC */
+#define	HID_OUT_REPORT_COUNT	17 /* PC->STM32 */
+
 enum access {
 	ACC_GET,
 	ACC_SET,
@@ -38,7 +41,7 @@ enum access {
 enum command {
 	CMD_EMIT,
 	CMD_CAPS,
-	CMD_FW,
+	CMD_HID_TEST,
 	CMD_ALARM,
 	CMD_MACRO,
 	CMD_WAKE,
@@ -58,8 +61,8 @@ enum report_id {
 };
 
 hid_device *handle;
-unsigned char inBuf[17];
-unsigned char outBuf[17];
+unsigned char inBuf[HID_IN_REPORT_COUNT];
+unsigned char outBuf[HID_OUT_REPORT_COUNT];
 
 static bool open_stm32() {
 	// Open the device using the VID, PID.
@@ -85,9 +88,9 @@ static void read_stm32() {
 	}
 } 
 
-static void write_stm32() {
+static void write_stm32(int out_size) {
 	int retVal;
-	retVal = hid_write(handle, outBuf, sizeof(outBuf));
+	retVal = hid_write(handle, outBuf, out_size);
 	if (retVal < 0) {
 		printf("write error: %ls\n", hid_error(handle));
 	} else {
@@ -98,12 +101,12 @@ static void write_stm32() {
 	}
 }
 
-void write_and_check() {
-	write_stm32();
+void write_and_check(int idx) {
+	write_stm32(idx);
 	#ifdef WIN32
-	Sleep(2);
+	Sleep(3);
 	#else
-	usleep(2000);
+	usleep(3000);
 	#endif
 	read_stm32(); // blocking per default, waits until data arrive
 	while (inBuf[0] == REPORT_ID_IR)
@@ -122,6 +125,9 @@ int main(int argc, char* argv[])
 	uint8_t k, l, idx;
 	unsigned int s, m;
 	int retValm, jump_to_firmware;
+	FILE *fp;
+	char testfilename[10];
+	uint16_t j = 0;
 
 #ifdef WIN32
 	UNREFERENCED_PARAMETER(argc);
@@ -136,7 +142,7 @@ int main(int argc, char* argv[])
 	outBuf[0] = REPORT_ID_CONFIG_OUT;
 	outBuf[1] = STAT_CMD;
 
-cont:	printf("program eeprom: wakeups and macros (p)\nprogram eeprom: wakeups and macros with remote control(P)\nget eeprom (wakeups, macros and capabilities) (g)\nreset (wakeups, macros and alarm) (r)\nset alarm (s)\nget alarm (a)\nsend IR (i)\nreboot (b)\nmonitor until ^C (m)\nexit (x)\n");
+cont:	printf("program eeprom: wakeups and macros (p)\nprogram eeprom: wakeups and macros with remote control(P)\nget eeprom (wakeups, macros and capabilities) (g)\nreset (wakeups, macros and alarm) (r)\nset alarm (s)\nget alarm (a)\nsend IR (i)\nreboot (b)\nmonitor until ^C (m)\nrun test (t)\nhid test (h)\nexit (x)\n");
 	scanf("%s", &c);
 
 	switch (c) {
@@ -144,7 +150,7 @@ cont:	printf("program eeprom: wakeups and macros (p)\nprogram eeprom: wakeups an
 	case 'p':
 prog:		printf("set wakeup(w)\nset macro(m)\n");
 		scanf("%s", &d);
-		memset(&outBuf[2], 0, 15);
+		memset(&outBuf[2], 0, sizeof(outBuf) - 2);
 		idx = 2;
 		outBuf[idx++] = ACC_SET;
 		switch (d) {
@@ -174,13 +180,13 @@ prog:		printf("set wakeup(w)\nset macro(m)\n");
 		outBuf[idx++] = (i>>8) & 0xFF;
 		outBuf[idx++] = (i>>16) & 0xFF;
 		outBuf[idx++] = i & 0xFF;
-		write_and_check();
+		write_and_check(idx);
 		break;
 
 	case 'P':
 Prog:		printf("set wakeup with remote control(w)\nset macro with remote control(m)\n");
 		scanf("%s", &d);
-		memset(&outBuf[2], 0, 15);
+		memset(&outBuf[2], 0, sizeof(outBuf) - 2);
 		idx = 2;
 		outBuf[idx++] = ACC_SET;
 		switch (d) {
@@ -217,13 +223,13 @@ Prog:		printf("set wakeup with remote control(w)\nset macro with remote control(
 		outBuf[idx++] = inBuf[4];
 		outBuf[idx++] = inBuf[5];
 		outBuf[idx++] = inBuf[6];
-		write_and_check();
+		write_and_check(idx);
 		break;
 
 	case 'g':
 get:		printf("get wakeup(w)\nget macro slot(m)\nget caps(c)\n");
 		scanf("%s", &d);
-		memset(&outBuf[2], 0, 15);
+		memset(&outBuf[2], 0, sizeof(outBuf) - 2);
 		idx = 2;
 		outBuf[idx++] = ACC_GET;
 		switch (d) {
@@ -247,11 +253,11 @@ get:		printf("get wakeup(w)\nget macro slot(m)\nget caps(c)\n");
 			outBuf[idx++] = CMD_CAPS;
 			for (l = 0; l < 20; l++) { // for safety stop after 20 loops
 				outBuf[idx] = l;
-				write_stm32();
+				write_stm32(idx+1);
 				#ifdef WIN32
-				Sleep(2);
+				Sleep(3);
 				#else
-				usleep(2000);
+				usleep(3000);
 				#endif
 				read_stm32();
 				while (inBuf[0] == 0x01)
@@ -263,7 +269,7 @@ get:		printf("get wakeup(w)\nget macro slot(m)\nget caps(c)\n");
 				} else {
 					if(!jump_to_firmware) { // queries for supported_protocols
 						printf("protocols: ");
-						for (k = 4; k < 17; k++) {
+						for (k = 4; k < sizeof(inBuf); k++) {
 							if (!inBuf[k]) { // NULL termination
 								printf("\n\n");
 								jump_to_firmware = 1;
@@ -273,7 +279,7 @@ get:		printf("get wakeup(w)\nget macro slot(m)\nget caps(c)\n");
 						}
 					} else { // queries for firmware
 						printf("firmware: ");
-						for (k = 4; k < 17; k++) {
+						for (k = 4; k < sizeof(inBuf); k++) {
 							if (!inBuf[k]) { // NULL termination
 								printf("\n\n");
 								goto out;
@@ -289,14 +295,14 @@ again:			;
 		default:
 			goto get;
 		}
-		write_and_check();
+		write_and_check(idx);
 out:
 		break;
 
 	case 'r':
 reset:		printf("reset wakeup(w)\nreset macro slot(m)\nreset alarm(a)\n");
 		scanf("%s", &d);
-		memset(&outBuf[2], 0, 15);
+		memset(&outBuf[2], 0, sizeof(outBuf) - 2);
 		idx = 2;
 		outBuf[idx++] = ACC_RESET;
 		switch (d) {
@@ -321,32 +327,32 @@ reset:		printf("reset wakeup(w)\nreset macro slot(m)\nreset alarm(a)\n");
 		default:
 			goto reset;
 		}
-		write_and_check();
+		write_and_check(idx);
 		break;
 
 	case 's':
-		memset(&outBuf[2], 0, 15);
+		memset(&outBuf[2], 0, sizeof(outBuf) - 2);
 		idx = 2;
 		outBuf[idx++] = ACC_SET;
 		outBuf[idx++] = CMD_ALARM;
 		printf("enter alarm\n");
 		scanf("%I64x", &i);
 		memcpy(&outBuf[idx++], &i, 4);
-		write_and_check();
+		write_and_check(idx);
 		break;
 
 	case 'a':
-		memset(&outBuf[2], 0, 15);
+		memset(&outBuf[2], 0, sizeof(outBuf) - 2);
 		idx = 2;
 		outBuf[idx++] = ACC_GET;
 		outBuf[idx++] = CMD_ALARM;
-		write_and_check();
+		write_and_check(idx);
 		break;
 
 	case 'i':
 		printf("enter IRData (protocoladdresscommandflag)\n");
 		scanf("%I64x", &i);
-		memset(&outBuf[2], 0, 15);
+		memset(&outBuf[2], 0, sizeof(outBuf) - 2);
 		idx = 2;
 		outBuf[idx++] = ACC_SET;
 		outBuf[idx++] = CMD_EMIT;
@@ -356,15 +362,15 @@ reset:		printf("reset wakeup(w)\nreset macro slot(m)\nreset alarm(a)\n");
 		outBuf[idx++] = (i>>8) & 0xFF;
 		outBuf[idx++] = (i>>16) & 0xFF;
 		outBuf[idx++] = i & 0xFF;
-		write_and_check();
+		write_and_check(idx);
 		break;
 
 	case 'b':
-		memset(&outBuf[2], 0, 15);
+		memset(&outBuf[2], 0, sizeof(outBuf) - 2);
 		idx = 2;
 		outBuf[idx++] = ACC_SET;
 		outBuf[idx++] = CMD_REBOOT;
-		write_and_check();
+		write_and_check(idx);
 		hid_close(handle);
 		#ifdef WIN32
 		Sleep(1900);
@@ -386,8 +392,20 @@ reset:		printf("reset wakeup(w)\nreset macro slot(m)\nreset alarm(a)\n");
 		goto monit;
 		break;
 
+	case 't':
+		goto test;
+		break;
+
 	case 'x':
 		goto exit;
+		break;
+
+	case 'h':
+		memset(&outBuf[2], 0, sizeof(outBuf) - 2);
+		for(l = 2; l < sizeof(outBuf); l++){
+			outBuf[l] = l - 1; // ACC_SET CMD_HID_TEST ...
+		}
+		write_and_check(sizeof(outBuf));
 		break;
 
 	default:
@@ -408,7 +426,28 @@ monit:	while(true) {
 			printf("\n\n");
 		}
 	}
-	
+
+test:	sprintf(testfilename, "test%u", j); printf("write into %s\n", testfilename); // if directory, it needs to exist (or be created)!
+	fp = fopen(testfilename, "w");
+	while(true) {
+		retValm = hid_read(handle, inBuf, sizeof(inBuf));
+		if (retValm >= 0) {
+			printf("%02x%02x%02x%02x%02x%02x", (unsigned int)inBuf[1],(unsigned int)inBuf[3],(unsigned int)inBuf[2],(unsigned int)inBuf[5],(unsigned int)inBuf[4],(unsigned int)inBuf[6]);
+			fprintf(fp, "%02x%02x%02x%02x%02x%02x", (unsigned int)inBuf[1],(unsigned int)inBuf[3],(unsigned int)inBuf[2],(unsigned int)inBuf[5],(unsigned int)inBuf[4],(unsigned int)inBuf[6]);
+			if (inBuf[1] == 0x3c && inBuf[3] == 0 && inBuf[2] == 0 && inBuf[5] == 0 && inBuf[4] == 0x3f && inBuf[6] == 1) { // 3c0000003f01, stopsequence TODO make configurable
+				printf("received stopsequence\n");
+				fclose(fp);
+				j++;
+				if (j >= 200) { // TODO make number of tests configurable
+					printf("exit\n");
+					goto exit;
+				}
+				goto test;
+			}
+		}
+	}
+
+
 exit:	hid_close(handle);
 
 	/* Free static HIDAPI objects. */
