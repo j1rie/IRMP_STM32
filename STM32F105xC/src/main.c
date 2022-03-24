@@ -433,7 +433,9 @@ int8_t get_handler(uint8_t *buf)
 			buf[4] = MACRO_SLOTS;
 			buf[5] = MACRO_DEPTH;
 			buf[6] = WAKE_SLOTS;
-			ret += 3;
+			buf[7] = HID_IN_REPORT_COUNT;
+			buf[8] = HID_OUT_REPORT_COUNT;
+			ret += 5;
 			break;
 		}
 		/* in later queries we give information about supported protocols and firmware */

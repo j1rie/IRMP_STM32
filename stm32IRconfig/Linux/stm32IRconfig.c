@@ -22,9 +22,6 @@
 #include <termios.h>
 #include <fcntl.h>
 
-#define	HID_IN_REPORT_COUNT	17 /* STM32->PC */
-#define	HID_OUT_REPORT_COUNT	17 /* PC->STM32 */
-
 enum access {
 	ACC_GET,
 	ACC_SET,
@@ -54,8 +51,9 @@ enum report_id {
 };
 
 static int stm32fd = -1;
-uint8_t inBuf[HID_IN_REPORT_COUNT];
-uint8_t outBuf[HID_OUT_REPORT_COUNT];
+uint8_t inBuf[64];
+uint8_t outBuf[64];
+unsigned int in_size, out_size;
 
 static bool open_stm32(const char *devicename) {
 	stm32fd = open(devicename, O_RDWR );
@@ -67,14 +65,14 @@ static bool open_stm32(const char *devicename) {
 	return true;
 }
 
-static void read_stm32() {
+static void read_stm32(int in_size, int show_len) {
 	int retVal;
-	retVal = read(stm32fd, inBuf, sizeof(inBuf));
+	retVal = read(stm32fd, inBuf, in_size);
 	if (retVal < 0) {
 		printf("read error\n");
 	} else {
 		printf("read %d bytes:\n\t", retVal);
-		for (int i = 0; i < retVal; i++)
+		for (int i = 0; i < show_len; i++)
 			printf("%02hhx ", inBuf[i]);
 		puts("\n");
 	}
@@ -87,18 +85,18 @@ static void write_stm32(int out_size) {
 		printf("write error\n");
 	} else {
 		printf("written %d bytes:\n\t", retVal);
-		for (int i = 0; i < retVal; i++)
+		for (int i = 0; i < out_size; i++)
 			printf("%02hhx ", outBuf[i]);
 		puts("\n");
 	}
 }
 
-void write_and_check(int idx) {
+void write_and_check(int idx, int show_len) {
 	write_stm32(idx);
 	usleep(3000);
-	read_stm32(); // blocking per default, waits until data arrive
+	read_stm32(in_size, show_len); // blocking per default, waits until data arrive
 	while (inBuf[0] == REPORT_ID_IR)
-		read_stm32();
+		read_stm32(in_size, show_len);
 	if (inBuf[1] == STAT_SUCCESS) {
 		puts("*****************************OK********************************\n");
 	} else {
@@ -121,6 +119,22 @@ int main(int argc, const char **argv) {
 	outBuf[0] = REPORT_ID_CONFIG_OUT;
 	outBuf[1] = STAT_CMD;
 
+	outBuf[2] = ACC_GET;
+	outBuf[3] = CMD_CAPS;
+	outBuf[4] = 0;
+	write(stm32fd, outBuf, 5);
+	usleep(3000);
+	read(stm32fd, inBuf, 9);
+	while (inBuf[0] == 0x01)
+		read(stm32fd, inBuf, 9);
+	in_size = inBuf[7] ? inBuf[7] : 17;
+	out_size = inBuf[8] ? inBuf[8] : 17;
+	printf("hid in report count: %u\n", in_size);
+	printf("hid out report count: %u\n", out_size);
+	if(!inBuf[7] || !inBuf[8])
+		printf("old firmware!\n");
+	puts("");
+
 cont:	printf("program eeprom: wakeups and macros (p)\nprogram eeprom: wakeups and macros with remote control(P)\nget eeprom (wakeups, macros and capabilities) (g)\nreset (wakeups, macros and alarm) (r)\nset alarm (s)\nget alarm (a)\nsend IR (i)\nreboot (b)\nmonitor until ^C (m)\nrun test (t)\nhid test (h)\nexit (x)\n");
 	scanf("%s", &c);
 
@@ -129,7 +143,7 @@ cont:	printf("program eeprom: wakeups and macros (p)\nprogram eeprom: wakeups an
 	case 'p':
 prog:		printf("set wakeup(w)\nset macro(m)\n");
 		scanf("%s", &d);
-		memset(&outBuf[2], 0, sizeof(outBuf) - 2);
+		memset(&outBuf[2], 0, out_size - 2);
 		idx = 2;
 		outBuf[idx++] = ACC_SET;
 		switch (d) {
@@ -159,13 +173,13 @@ prog:		printf("set wakeup(w)\nset macro(m)\n");
 		outBuf[idx++] = (i>>8) & 0xFF;
 		outBuf[idx++] = (i>>16) & 0xFF;
 		outBuf[idx++] = i & 0xFF;
-		write_and_check(idx);
+		write_and_check(idx, 4);
 		break;
 
-		case 'P':
+	case 'P':
 Prog:		printf("set wakeup with remote control(w)\nset macro with remote control(m)\n");
 		scanf("%s", &d);
-		memset(&outBuf[2], 0, sizeof(outBuf) - 2);
+		memset(&outBuf[2], 0, out_size - 2);
 		idx = 2;
 		outBuf[idx++] = ACC_SET;
 		switch (d) {
@@ -188,7 +202,7 @@ Prog:		printf("set wakeup with remote control(w)\nset macro with remote control(
 			goto Prog;
 		}
 		printf("enter IRData by pressing a button on the remote control\n");
-		read_stm32();
+		read_stm32(in_size, 10);
 		/* it is necessary, to have *all* IR codes received, *before* calling
 		* write_and_check(), in order to avoid, that these disturb later! */
 		usleep(500000);
@@ -198,13 +212,13 @@ Prog:		printf("set wakeup with remote control(w)\nset macro with remote control(
 		outBuf[idx++] = inBuf[4];
 		outBuf[idx++] = inBuf[5];
 		outBuf[idx++] = inBuf[6];
-		write_and_check(idx);
+		write_and_check(idx, 4);
 		break;
 
-		case 'g':
+	case 'g':
 get:		printf("get wakeup(w)\nget macro slot(m)\nget caps(c)\n");
 		scanf("%s", &d);
-		memset(&outBuf[2], 0, sizeof(outBuf) - 2);
+		memset(&outBuf[2], 0, out_size - 2);
 		idx = 2;
 		outBuf[idx++] = ACC_GET;
 		switch (d) {
@@ -230,9 +244,9 @@ get:		printf("get wakeup(w)\nget macro slot(m)\nget caps(c)\n");
 				outBuf[idx] = l;
 				write_stm32(idx+1);
 				usleep(3000);
-				read_stm32();
+				read_stm32(in_size, l == 0 ? 7 : in_size);
 				while (inBuf[0] == 0x01)
-					read_stm32();
+					read_stm32(in_size, l == 0 ? 7 : in_size);
 				if (!l) { // first query for slots and depth
 					printf("macro_slots: %u\n", inBuf[4]);
 					printf("macro_depth: %u\n", inBuf[5]);
@@ -240,7 +254,7 @@ get:		printf("get wakeup(w)\nget macro slot(m)\nget caps(c)\n");
 				} else {
 					if(!jump_to_firmware) { // queries for supported_protocols
 						printf("protocols: ");
-						for (k = 4; k < sizeof(inBuf); k++) {
+						for (k = 4; k < in_size; k++) {
 							if (!inBuf[k]) { // NULL termination
 								printf("\n\n");
 								jump_to_firmware = 1;
@@ -250,7 +264,7 @@ get:		printf("get wakeup(w)\nget macro slot(m)\nget caps(c)\n");
 						}
 					} else { // queries for firmware
 						printf("firmware: ");
-						for (k = 4; k < sizeof(inBuf); k++) {
+						for (k = 4; k < in_size; k++) {
 							if (!inBuf[k]) { // NULL termination
 								printf("\n\n");
 								goto out;
@@ -266,14 +280,14 @@ again:			;
 		default:
 			goto get;
 		}
-		write_and_check(idx);
+		write_and_check(idx, 10);
 out:
 		break;
 
-		case 'r':
+	case 'r':
 reset:		printf("reset wakeup(w)\nreset macro slot(m)\nreset alarm(a)\n");
 		scanf("%s", &d);
-		memset(&outBuf[2], 0, sizeof(outBuf) - 2);
+		memset(&outBuf[2], 0, out_size - 2);
 		idx = 2;
 		outBuf[idx++] = ACC_RESET;
 		switch (d) {
@@ -298,32 +312,32 @@ reset:		printf("reset wakeup(w)\nreset macro slot(m)\nreset alarm(a)\n");
 		default:
 			goto reset;
 		}
-		write_and_check(idx);
+		write_and_check(idx, 4);
 		break;
 
 	case 's':
-		memset(&outBuf[2], 0, sizeof(outBuf) - 2);
+		memset(&outBuf[2], 0, out_size - 2);
 		idx = 2;
 		outBuf[idx++] = ACC_SET;
 		outBuf[idx++] = CMD_ALARM;
 		printf("enter alarm\n");
 		scanf("%" SCNx64 "", &i);
-		memcpy(&outBuf[idx++], &i, 4);
-		write_and_check(idx);
+		memcpy(&outBuf[idx], &i, 4);
+		write_and_check(idx + 4, 4);
 		break;
 
 	case 'a':
-		memset(&outBuf[2], 0, sizeof(outBuf) - 2);
+		memset(&outBuf[2], 0, out_size - 2);
 		idx = 2;
 		outBuf[idx++] = ACC_GET;
 		outBuf[idx++] = CMD_ALARM;
-		write_and_check(idx);
+		write_and_check(idx, 8);
 		break;
 
 	case 'i':
 		printf("enter IRData (protocoladdresscommandflag)\n");
 		scanf("%" SCNx64 "", &i);
-		memset(&outBuf[2], 0, sizeof(outBuf) - 2);
+		memset(&outBuf[2], 0, out_size - 2);
 		idx = 2;
 		outBuf[idx++] = ACC_SET;
 		outBuf[idx++] = CMD_EMIT;
@@ -333,15 +347,15 @@ reset:		printf("reset wakeup(w)\nreset macro slot(m)\nreset alarm(a)\n");
 		outBuf[idx++] = (i>>8) & 0xFF;
 		outBuf[idx++] = (i>>16) & 0xFF;
 		outBuf[idx++] = i & 0xFF;
-		write_and_check(idx);
+		write_and_check(idx, 4);
 		break;
 
 	case 'b':
-		memset(&outBuf[2], 0, sizeof(outBuf) - 2);
+		memset(&outBuf[2], 0, out_size - 2);
 		idx = 2;
 		outBuf[idx++] = ACC_SET;
 		outBuf[idx++] = CMD_REBOOT;
-		write_and_check(idx);
+		write_and_check(idx, 4);
 		close(stm32fd);
 		usleep(1900000);
 		for(l=0;l<6;l++) {
@@ -364,11 +378,11 @@ reset:		printf("reset wakeup(w)\nreset macro slot(m)\nreset alarm(a)\n");
 		break;
 
 	case 'h':
-		memset(&outBuf[2], 0, sizeof(outBuf) - 2);
-		for(l = 2; l < sizeof(outBuf); l++){
+		memset(&outBuf[2], 0, out_size - 2);
+		for(l = 2; l < out_size; l++){
 			outBuf[l] = l - 1; // ACC_SET CMD_HID_TEST ...
 		}
-		write_and_check(sizeof(outBuf));
+		write_and_check(out_size, in_size);
 		break;
 
 	default:
@@ -378,10 +392,10 @@ reset:		printf("reset wakeup(w)\nreset macro slot(m)\nreset alarm(a)\n");
 	goto cont;
 
 monit:	while(true) {
-		retValm = read(stm32fd, inBuf, sizeof(inBuf));
+		retValm = read(stm32fd, inBuf, in_size);
 		if (retValm >= 0) {
 			printf("read %d bytes:\n\t", retValm);
-			for (l = 0; l < retValm; l++)
+			for (l = 0; l < 7; l++)
 				printf("%02hhx ", inBuf[l]);
 			printf("\n");
 			printf("converted to protocoladdresscommandflag:\n\t");
@@ -389,11 +403,11 @@ monit:	while(true) {
 			printf("\n\n");
 		}
 	}
-	
+
 test:	sprintf(testfilename, "test%u", j); printf("write into %s\n", testfilename); // if directory, it needs to exist (or be created)!
 	fp = fopen(testfilename, "w");
 	while(true) {
-		retValm = read(stm32fd, inBuf, sizeof(inBuf));
+		retValm = read(stm32fd, inBuf, in_size);
 		if (retValm >= 0) {
 			printf("%02hhx%02hhx%02hhx%02hhx%02hhx%02hhx\n", inBuf[1],inBuf[3],inBuf[2],inBuf[5],inBuf[4],inBuf[6]);
 			fprintf(fp, "%02hhx%02hhx%02hhx%02hhx%02hhx%02hhx\n", inBuf[1],inBuf[3],inBuf[2],inBuf[5],inBuf[4],inBuf[6]);
