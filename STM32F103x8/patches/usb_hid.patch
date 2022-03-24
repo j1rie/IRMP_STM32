@@ -1,5 +1,5 @@
 /*
- *  Copyright (C) 2014-2020 Joerg Riechardt
+ *  Copyright (C) 2014-2022 Joerg Riechardt
  *
  *  inspired by work from Andrew Kambaroff - http://sysmagazine.com/posts/208026
  *
@@ -10,12 +10,11 @@
  */
 diff -Nrup A/inc/platform_config.h B/inc/platform_config.h
 --- A/inc/platform_config.h	2017-06-16 10:14:00.000000000 +0200
-+++ B/inc/platform_config.h	2020-04-30 02:37:15.234117251 +0200
-@@ -59,7 +59,8 @@
- 
++++ B/inc/platform_config.h	2022-03-15 20:09:14.608920525 +0100
+@@ -60,6 +60,8 @@
  #elif defined (USE_STM32303C_EVAL) || defined (USE_STM32303xE_EVAL)
   #include "stm32303c_eval.h"
--
+ 
 +#elif defined (STM32F10X_MD) || defined (STM32F10X_HD) || defined (STM32F10X_XL)
 + #include "stm32f10x.h"
  #else
@@ -23,13 +22,13 @@ diff -Nrup A/inc/platform_config.h B/inc/platform_config.h
  #endif
 diff -Nrup A/inc/usb_conf.h B/inc/usb_conf.h
 --- A/inc/usb_conf.h	2017-06-16 10:14:00.000000000 +0200
-+++ B/inc/usb_conf.h	2020-04-30 02:24:00.972256110 +0200
++++ B/inc/usb_conf.h	2022-03-19 16:38:09.122368578 +0100
 @@ -67,7 +67,7 @@
  /* EP1  */
  /* tx buffer base address */
  #define ENDP1_TXADDR        (0x100)
 -#define ENDP1_RXADDR        (0x104)
-+#define ENDP1_RXADDR        (0x100 + HID_OUT_BUFFER_SIZE)
++#define ENDP1_RXADDR        (0x100 + HID_OUT_REPORT_COUNT)
  
  /*-------------------------------------------------------------*/
  /* -------------------   ISTR events  -------------------------*/
@@ -44,7 +43,7 @@ diff -Nrup A/inc/usb_conf.h B/inc/usb_conf.h
  /* CTR service routines */
 diff -Nrup A/inc/usb_desc.h B/inc/usb_desc.h
 --- A/inc/usb_desc.h	2017-06-16 10:14:00.000000000 +0200
-+++ B/inc/usb_desc.h	2020-04-30 02:24:00.972256110 +0200
++++ B/inc/usb_desc.h	2022-03-15 20:10:41.107204002 +0100
 @@ -41,6 +41,7 @@
  #define __USB_DESC_H
  
@@ -66,20 +65,9 @@ diff -Nrup A/inc/usb_desc.h B/inc/usb_desc.h
  #define CUSTOMHID_SIZ_STRING_SERIAL             26
  
  #define STANDARD_ENDPOINT_DESC_SIZE             0x09
-diff -Nrup A/inc/usb_pwr.h B/inc/usb_pwr.h
---- A/inc/usb_pwr.h	2017-06-16 10:14:00.000000000 +0200
-+++ B/inc/usb_pwr.h	2020-04-30 02:24:00.972256110 +0200
-@@ -40,6 +40,7 @@
- #define __USB_PWR_H
- 
- /* Includes ------------------------------------------------------------------*/
-+#include "usb_type.h"
- /* Exported types ------------------------------------------------------------*/
- typedef enum _RESUME_STATE
- {
 diff -Nrup A/inc/usb_regs.h B/inc/usb_regs.h
 --- A/inc/usb_regs.h	2017-06-16 10:14:00.000000000 +0200
-+++ B/inc/usb_regs.h	2020-04-30 02:24:00.973256057 +0200
++++ B/inc/usb_regs.h	2022-02-09 12:32:03.511575655 +0100
 @@ -724,8 +724,8 @@ void ClearDTOG_RX(uint8_t /*bEpNum*/);
  void ClearDTOG_TX(uint8_t /*bEpNum*/);
  void SetEPAddress(uint8_t /*bEpNum*/, uint8_t /*bAddr*/);
@@ -93,7 +81,7 @@ diff -Nrup A/inc/usb_regs.h B/inc/usb_regs.h
  #if defined STM32F303xE || defined STM32F302x8 
 diff -Nrup A/src/hw_config.c B/src/hw_config.c
 --- A/src/hw_config.c	2017-06-16 10:14:00.000000000 +0200
-+++ B/src/hw_config.c	2020-05-01 19:01:30.517174536 +0200
++++ B/src/hw_config.c	2022-03-15 20:13:14.595834664 +0100
 @@ -107,7 +107,7 @@ void Set_System(void)
    GPIO_Init(GPIOA, &GPIO_InitStructure);
    
@@ -103,12 +91,10 @@ diff -Nrup A/src/hw_config.c B/src/hw_config.c
  
  #else /* defined(STM32F37X) || defined(STM32F303xC) */
    
-@@ -134,7 +134,8 @@ void Set_System(void)
-   RCC_APB2PeriphClockCmd(RCC_APB2Periph_SYSCFG, ENABLE);
+@@ -135,6 +135,7 @@ void Set_System(void)
    
  #elif defined(STM32F10X_HD) || defined(STM32F10X_MD)  || defined(STM32F10X_XL)
--  
-+
+   
 +#if 0  
    /* USB_DISCONNECT used as USB pull-up */
    GPIO_InitStructure.GPIO_Pin = USB_DISCONNECT_PIN;
@@ -209,7 +195,7 @@ diff -Nrup A/src/hw_config.c B/src/hw_config.c
  /*******************************************************************************
 diff -Nrup A/src/stm32_it.c B/src/stm32_it.c
 --- A/src/stm32_it.c	2017-06-16 10:14:00.000000000 +0200
-+++ B/src/stm32_it.c	2020-04-30 02:24:00.974256005 +0200
++++ B/src/stm32_it.c	2022-02-09 12:32:03.512575600 +0100
 @@ -81,6 +81,7 @@ void NMI_Handler(void)
  * Output         : None
  * Return         : None
@@ -257,7 +243,7 @@ diff -Nrup A/src/stm32_it.c B/src/stm32_it.c
  * Function Name  : USB_FS_WKUP_IRQHandler
 diff -Nrup A/src/usb_desc.c B/src/usb_desc.c
 --- A/src/usb_desc.c	2017-06-16 10:14:00.000000000 +0200
-+++ B/src/usb_desc.c	2020-04-30 04:04:28.024183511 +0200
++++ B/src/usb_desc.c	2022-03-19 16:37:56.039162716 +0100
 @@ -59,10 +59,10 @@ const uint8_t CustomHID_DeviceDescriptor
      0x00,                       /*bDeviceSubClass*/
      0x00,                       /*bDeviceProtocol*/
@@ -287,7 +273,7 @@ diff -Nrup A/src/usb_desc.c B/src/usb_desc.c
      0x81,          /* bEndpointAddress: Endpoint Address (IN) */
      0x03,          /* bmAttributes: Interrupt endpoint */
 -    0x02,          /* wMaxPacketSize: 2 Bytes max */
-+    HID_IN_BUFFER_SIZE, /* wMaxPacketSize */
++    HID_IN_REPORT_COUNT, /* wMaxPacketSize */
      0x00,
 -    0x20,          /* bInterval: Polling Interval (32 ms) */
 +    HID_IN_INTERVAL, /* bInterval: Polling Interval */
@@ -299,7 +285,7 @@ diff -Nrup A/src/usb_desc.c B/src/usb_desc.c
  			/*	Endpoint Address (OUT) */
      0x03,	/* bmAttributes: Interrupt endpoint */
 -    0x02,	/* wMaxPacketSize: 2 Bytes max  */
-+    HID_OUT_BUFFER_SIZE, /* wMaxPacketSize */
++    HID_OUT_REPORT_COUNT, /* wMaxPacketSize */
      0x00,
 -    0x20,	/* bInterval: Polling Interval (20 ms) */
 +    HID_OUT_INTERVAL /* bInterval: Polling Interval */
@@ -328,19 +314,19 @@ diff -Nrup A/src/usb_desc.c B/src/usb_desc.c
 +    /* STM32->PC */
 +    0x85, REPORT_ID_IR,    /*     REPORT_ID                  */
 +    0x09, 0x02,            /*     USAGE (2)                  */
-+    0x95, HID_IN_BUFFER_SIZE-1, /* REPORT_COUNT              */
++    0x95, HID_IN_REPORT_COUNT-1, /* REPORT_COUNT             */
 +    0x81, 0x82,            /*     INPUT (Data,Var,Abs,Vol)   */
 +
 +    /* STM32->PC */
 +    0x85, REPORT_ID_CONFIG_IN, /* REPORT_ID                  */
 +    0x09, 0x03,            /*     USAGE (3)                  */
-+    0x95, HID_IN_BUFFER_SIZE-1, /* REPORT_COUNT              */
++    0x95, HID_IN_REPORT_COUNT-1, /* REPORT_COUNT             */
 +    0x81, 0x82,            /*     INPUT (Data,Var,Abs,Vol)   */
 +
 +    /* PC->STM32 */
 +    0x85, REPORT_ID_CONFIG_OUT, /* REPORT_ID                 */
 +    0x09, 0x04,            /*     USAGE (4)                  */
-+    0x95, HID_OUT_BUFFER_SIZE-1, /* REPORT_COUNT             */
++    0x95, HID_OUT_REPORT_COUNT-1, /* REPORT_COUNT            */
 +    0x91, 0x82,            /*     OUTPUT (Data,Var,Abs,Vol)  */
 +    /* 38 */
  
@@ -368,7 +354,7 @@ diff -Nrup A/src/usb_desc.c B/src/usb_desc.c
  
 diff -Nrup A/src/usb_endp.c B/src/usb_endp.c
 --- A/src/usb_endp.c	2017-06-16 10:14:00.000000000 +0200
-+++ B/src/usb_endp.c	2020-04-30 02:24:00.974256005 +0200
++++ B/src/usb_endp.c	2022-03-15 20:52:32.602549552 +0100
 @@ -39,6 +39,7 @@
  /* Includes ------------------------------------------------------------------*/
  
@@ -377,29 +363,7 @@ diff -Nrup A/src/usb_endp.c B/src/usb_endp.c
  #include "usb_lib.h"
  #include "usb_istr.h"
  
-@@ -48,8 +49,21 @@
- /* Private variables ---------------------------------------------------------*/
- uint8_t Receive_Buffer[2];
- extern __IO uint8_t PrevXferComplete;
-+extern uint8_t USB_HID_IN_BUF[HID_IN_BUFFER_SIZE];
-+extern uint8_t USB_HID_OUT_BUF[HID_OUT_BUFFER_SIZE];
-+extern uint16_t USB_HID_RecData_Len;
-+extern uint8_t USB_HID_RecData_Ready;
- /* Private function prototypes -----------------------------------------------*/
- /* Private functions ---------------------------------------------------------*/
-+/* Send data */
-+uint8_t HID_SendData(void)
-+{
-+    uint8_t retVal;
-+    retVal = USB_SIL_Write(EP1_IN, USB_HID_IN_BUF, HID_IN_BUFFER_SIZE);
-+    SetEPTxValid(ENDP1);
-+    PrevXferComplete = 0;
-+    return retVal;
-+}
- /*******************************************************************************
- * Function Name  : EP1_OUT_Callback.
- * Description    : EP1 OUT Callback Routine.
-@@ -59,6 +73,7 @@ extern __IO uint8_t PrevXferComplete;
+@@ -59,6 +60,7 @@ extern __IO uint8_t PrevXferComplete;
  *******************************************************************************/
  void EP1_OUT_Callback(void)
  {
@@ -407,37 +371,28 @@ diff -Nrup A/src/usb_endp.c B/src/usb_endp.c
    BitAction Led_State;
  
    /* Read received data (2 bytes) */  
-@@ -124,6 +139,10 @@ void EP1_OUT_Callback(void)
+@@ -124,6 +126,10 @@ void EP1_OUT_Callback(void)
      break;
    }
   
 +#endif
 +  /* Read received data */
-+  USB_HID_RecData_Len = USB_SIL_Read(EP1_OUT, USB_HID_OUT_BUF);
-+  USB_HID_RecData_Ready=1;
++  USB_SIL_Read(EP1_OUT, buf);
++  USB_HID_Data_Received = 1;
    SetEPRxStatus(ENDP1, EP_RX_VALID);
   
  }
 diff -Nrup A/src/usb_prop.c B/src/usb_prop.c
 --- A/src/usb_prop.c	2017-06-16 10:14:00.000000000 +0200
-+++ B/src/usb_prop.c	2020-04-30 04:10:49.882346215 +0200
-@@ -53,7 +53,7 @@
- uint32_t ProtocolValue;
- __IO uint8_t EXTI_Enable;
- __IO uint8_t Request = 0;
--uint8_t Report_Buf[2];   
-+uint8_t Report_Buf[HID_IN_BUFFER_SIZE];
- /* -------------------------------------------------------------------------- */
- /*  Structures initializations */
- /* -------------------------------------------------------------------------- */
++++ B/src/usb_prop.c	2022-03-19 16:36:31.157298830 +0100
 @@ -187,8 +187,8 @@ void CustomHID_Reset(void)
    SetEPType(ENDP1, EP_INTERRUPT);
    SetEPTxAddr(ENDP1, ENDP1_TXADDR);
    SetEPRxAddr(ENDP1, ENDP1_RXADDR);
 -  SetEPTxCount(ENDP1, 2);
 -  SetEPRxCount(ENDP1, 2);
-+  SetEPTxCount(ENDP1, HID_IN_BUFFER_SIZE);
-+  SetEPRxCount(ENDP1, HID_OUT_BUFFER_SIZE);
++  SetEPTxCount(ENDP1, HID_IN_REPORT_COUNT);
++  SetEPRxCount(ENDP1, HID_OUT_REPORT_COUNT);
    SetEPRxStatus(ENDP1, EP_RX_VALID);
    SetEPTxStatus(ENDP1, EP_TX_NAK);
  
@@ -471,13 +426,13 @@ diff -Nrup A/src/usb_prop.c B/src/usb_prop.c
    if (Length == 0)
    {
 -    pInformation->Ctrl_Info.Usb_wLength = 2;
-+    pInformation->Ctrl_Info.Usb_wLength = HID_IN_BUFFER_SIZE;
++    pInformation->Ctrl_Info.Usb_wLength = HID_IN_REPORT_COUNT;
      return NULL;
    }
    else
 diff -Nrup A/src/usb_regs.c B/src/usb_regs.c
 --- A/src/usb_regs.c	2017-06-16 10:14:00.000000000 +0200
-+++ B/src/usb_regs.c	2020-04-30 02:27:20.392779605 +0200
++++ B/src/usb_regs.c	2022-02-09 12:32:03.512575600 +0100
 @@ -534,7 +534,7 @@ uint8_t GetEPAddress(uint8_t bEpNum)
    * Output         : None.
    * Return         : None.

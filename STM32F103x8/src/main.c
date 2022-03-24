@@ -22,7 +22,7 @@
 #include "romtable.h"
 #include "tm1637.h"
 
-#define BYTES_PER_QUERY	(HID_IN_BUFFER_SIZE - 4)
+#define BYTES_PER_QUERY	(HID_IN_REPORT_COUNT - 4)
 /* after plugging in, it takes some time, until SOF's are being sent to the device */
 #define SOF_TIMEOUT 500
 
@@ -218,7 +218,6 @@ IRMP_MELINERA_PROTOCOL,
 0
 };
 
-__IO uint8_t PrevXferComplete = 1;
 uint32_t AlarmValue = 0xFFFFFFFF;
 volatile unsigned int systicks = 0;
 volatile unsigned int sof_timeout = 0;
@@ -477,46 +476,46 @@ void wakeup_reset(void)
 int8_t get_handler(uint8_t *buf)
 {
 	/* number of valid bytes in buf, -1 signifies error */
-	int8_t ret = 3;
+	int8_t ret = 4;
 	uint16_t idx;
-	switch (buf[2]) {
+	switch (buf[3]) {
 	case CMD_CAPS:
 		/* in first query we give information about slots and depth */
-		if (!buf[3]) {
-			buf[3] = MACRO_SLOTS;
-			buf[4] = MACRO_DEPTH;
-			buf[5] = WAKE_SLOTS;
+		if (!buf[4]) {
+			buf[4] = MACRO_SLOTS;
+			buf[5] = MACRO_DEPTH;
+			buf[6] = WAKE_SLOTS;
 			ret += 3;
 			break;
 		}
 		/* in later queries we give information about supported protocols and firmware */
-		idx = BYTES_PER_QUERY * (buf[3] - 1);
+		idx = BYTES_PER_QUERY * (buf[4] - 1);
 		if (idx < sizeof(supported_protocols)) {
-			strncpy((char *) &buf[3], &supported_protocols[idx], BYTES_PER_QUERY);
+			strncpy((char *) &buf[4], &supported_protocols[idx], BYTES_PER_QUERY);
 			/* actually this is not true for the last transmission,
 			 * but it doesn't matter since it's NULL terminated
 			 */
-			ret = HID_IN_BUFFER_SIZE-1;
+			ret = HID_IN_REPORT_COUNT;
 			break;
 		}
 		if (idx >= sizeof(firmware) + (sizeof(supported_protocols) / BYTES_PER_QUERY + 1) * BYTES_PER_QUERY)
 			return -1;
-		strncpy((char *) &buf[3], &firmware[idx - (sizeof(supported_protocols) / BYTES_PER_QUERY + 1) * BYTES_PER_QUERY], BYTES_PER_QUERY);
-		ret = HID_IN_BUFFER_SIZE-1;
+		strncpy((char *) &buf[4], &firmware[idx - (sizeof(supported_protocols) / BYTES_PER_QUERY + 1) * BYTES_PER_QUERY], BYTES_PER_QUERY);
+		ret = HID_IN_REPORT_COUNT;
 		break;
 	case CMD_ALARM:
 		/* AlarmValue -> buf[3-6] */
-		memcpy(&buf[3], &AlarmValue, sizeof(AlarmValue));
+		memcpy(&buf[4], &AlarmValue, sizeof(AlarmValue));
 		ret += sizeof(AlarmValue);
 		break;
 	case CMD_MACRO:
-		idx = (MACRO_DEPTH + 1) * SIZEOF_IR/2 * buf[3] + SIZEOF_IR/2 * buf[4];
-		eeprom_restore(&buf[3], idx);
+		idx = (MACRO_DEPTH + 1) * SIZEOF_IR/2 * buf[4] + SIZEOF_IR/2 * buf[5];
+		eeprom_restore(&buf[4], idx);
 		ret += SIZEOF_IR;
 		break;
 	case CMD_WAKE:
-		idx = (MACRO_DEPTH + 1) * SIZEOF_IR/2 * MACRO_SLOTS + SIZEOF_IR/2 * buf[3];
-		eeprom_restore(&buf[3], idx);
+		idx = (MACRO_DEPTH + 1) * SIZEOF_IR/2 * MACRO_SLOTS + SIZEOF_IR/2 * buf[4];
+		eeprom_restore(&buf[4], idx);
 		ret += SIZEOF_IR;
 		break;
 	default:
@@ -528,35 +527,38 @@ int8_t get_handler(uint8_t *buf)
 int8_t set_handler(uint8_t *buf)
 {
 	/* number of valid bytes in buf, -1 signifies error */
-	int8_t ret = 3;
+	int8_t ret = 4;
 	uint16_t idx;
 	uint8_t tmp[SIZEOF_IR];
-	switch (buf[2]) {
+	switch (buf[3]) {
 	case CMD_EMIT:
 		yellow_short_on();
-		irsnd_send_data((IRMP_DATA *) &buf[3], 1);
+		irsnd_send_data((IRMP_DATA *) &buf[4], 1);
 		break;
 	case CMD_ALARM:
-		memcpy(&AlarmValue, &buf[3], sizeof(AlarmValue));
+		memcpy(&AlarmValue, &buf[4], sizeof(AlarmValue));
 		break;
 	case CMD_MACRO:
-		idx = (MACRO_DEPTH + 1) * SIZEOF_IR/2 * buf[3] + SIZEOF_IR/2 * buf[4];
+		idx = (MACRO_DEPTH + 1) * SIZEOF_IR/2 * buf[4] + SIZEOF_IR/2 * buf[5];
+		eeprom_store(idx, &buf[6]);
+		/* validate stored value in eeprom */
+		eeprom_restore(tmp, idx);
+		if (memcmp(&buf[6], tmp, sizeof(tmp)))
+			ret = -1;
+		break;
+	case CMD_WAKE:
+		idx = (MACRO_DEPTH + 1) * SIZEOF_IR/2 * MACRO_SLOTS + SIZEOF_IR/2 * buf[4];
 		eeprom_store(idx, &buf[5]);
 		/* validate stored value in eeprom */
 		eeprom_restore(tmp, idx);
 		if (memcmp(&buf[5], tmp, sizeof(tmp)))
 			ret = -1;
 		break;
-	case CMD_WAKE:
-		idx = (MACRO_DEPTH + 1) * SIZEOF_IR/2 * MACRO_SLOTS + SIZEOF_IR/2 * buf[3];
-		eeprom_store(idx, &buf[4]);
-		/* validate stored value in eeprom */
-		eeprom_restore(tmp, idx);
-		if (memcmp(&buf[4], tmp, sizeof(tmp)))
-			ret = -1;
-		break;
 	case CMD_REBOOT:
 		Reboot = 1;
+		break;
+	case CMD_HID_TEST:
+		ret = HID_IN_REPORT_COUNT;
 		break;
 	default:
 		ret = -1;
@@ -567,16 +569,16 @@ int8_t set_handler(uint8_t *buf)
 int8_t reset_handler(uint8_t *buf)
 {
 	/* number of valid bytes in buf, -1 signifies error */
-	int8_t ret = 3;
+	int8_t ret = 4;
 	uint16_t idx;
 	uint8_t tmp[SIZEOF_IR];
 	uint8_t zeros[SIZEOF_IR] = {0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF};
-	switch (buf[2]) {
+	switch (buf[3]) {
 	case CMD_ALARM:
 		AlarmValue = 0xFFFFFFFF;
 		break;
 	case CMD_MACRO:
-		idx = (MACRO_DEPTH + 1) * SIZEOF_IR/2 * buf[3] + SIZEOF_IR/2 * buf[4];
+		idx = (MACRO_DEPTH + 1) * SIZEOF_IR/2 * buf[4] + SIZEOF_IR/2 * buf[5];
 		eeprom_store(idx, zeros);
 		/* validate stored value in eeprom */
 		eeprom_restore(tmp, idx);
@@ -584,7 +586,7 @@ int8_t reset_handler(uint8_t *buf)
 			ret = -1;
 		break;
 	case CMD_WAKE:
-		idx = (MACRO_DEPTH + 1) * SIZEOF_IR/2 * MACRO_SLOTS + SIZEOF_IR/2 * buf[3];
+		idx = (MACRO_DEPTH + 1) * SIZEOF_IR/2 * MACRO_SLOTS + SIZEOF_IR/2 * buf[4];
 		eeprom_store(idx, zeros);
 		/* validate stored value in eeprom */
 		eeprom_restore(tmp, idx);
@@ -758,7 +760,6 @@ void send_magic(void)
 
 int main(void)
 {
-	uint8_t buf[HID_OUT_BUFFER_SIZE-1];
 	IRMP_DATA myIRData;
 	int8_t ret;
 	uint8_t last_magic_sent = 0;
@@ -790,10 +791,11 @@ int main(void)
 
 		wakeup_reset();
 
-		/* test if USB is connected to PC, sendtransfer is complete and configuration command is received */
-		if (USB_HID_GetStatus() == CONFIGURED && PrevXferComplete && USB_HID_ReceiveData(buf) == RX_READY && buf[0] == STAT_CMD) {
+		/* wait for previous transfer to complete before sending again and test if configuration command is received */
+		if(PrevXferComplete && USB_HID_Data_Received && buf[0] == REPORT_ID_CONFIG_OUT && buf[1] == STAT_CMD) {
+			USB_HID_Data_Received = 0;
 
-			switch (buf[1]) {
+			switch (buf[2]) {
 			case ACC_GET:
 				ret = get_handler(buf);
 				break;
@@ -808,10 +810,10 @@ int main(void)
 			}
 
 			if (ret == -1) {
-				buf[0] = STAT_FAILURE;
-				ret = 3;
+				buf[1] = STAT_FAILURE;
+				ret = 4;
 			} else {
-				buf[0] = STAT_SUCCESS;
+				buf[1] = STAT_SUCCESS;
 			}
 
 			/* send configuration data */
@@ -821,22 +823,25 @@ int main(void)
 				reboot();
 		}
 
-		/* poll IR-data */
-		if (irmp_get_data(&myIRData)) {
-			myIRData.flags = myIRData.flags & IRMP_FLAG_REPETITION;
-			if (!(myIRData.flags)) {
-				store_wakeup(&myIRData);
-				check_macros(&myIRData);
-				check_wakeups(&myIRData);
-				check_resets(&myIRData);
-				check_reboot(&myIRData);
+		/* wait for previous transfer to complete before sending again */
+		if (PrevXferComplete) {
+			/* poll IR-data */
+			if (irmp_get_data(&myIRData)) {
+				myIRData.flags = myIRData.flags & IRMP_FLAG_REPETITION;
+				if (!(myIRData.flags)) {
+					store_wakeup(&myIRData);
+					check_macros(&myIRData);
+					check_wakeups(&myIRData);
+					check_resets(&myIRData);
+					check_reboot(&myIRData);
+				}
+
+				/* send IR-data */
+				USB_HID_SendData(REPORT_ID_IR, (uint8_t *) &myIRData, sizeof(myIRData));
+
+				/* send IR-data to 4-digit-display */
+				tm1637DisplayHex(myIRData.command);
 			}
-
-			/* send IR-data */
-			USB_HID_SendData(REPORT_ID_IR, (uint8_t *) &myIRData, sizeof(myIRData));
-
-			/* send IR-data to 4-digit-display */
-			tm1637DisplayHex(myIRData.command);
 		}
 	}
 }
