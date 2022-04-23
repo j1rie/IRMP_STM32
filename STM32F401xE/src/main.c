@@ -388,10 +388,12 @@ void SysTick_Handler(void)
 			AlarmValue--;
 		if (send_ir_on_delay)
 			send_ir_on_delay--;
+#ifdef TM1637
 		if (dim_delay){
 			dim_delay--;
 			tm1637SetBrightness(dim_delay);
 		}
+#endif
 		i = 0;
 	} else {
 		i++;

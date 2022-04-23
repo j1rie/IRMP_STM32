@@ -17,8 +17,8 @@
 #include "usb_dcd_int.h"
 #include <string.h>
 
-#define HID_IN_REPORT_COUNT	17 /* STM32->PC */
-#define HID_OUT_REPORT_COUNT	17 /* PC->STM32 */
+#define HID_IN_REPORT_COUNT	64 /* STM32->PC */
+#define HID_OUT_REPORT_COUNT	64 /* PC->STM32 */
 #define BUFFER_SIZE (HID_IN_REPORT_COUNT < HID_OUT_REPORT_COUNT ? HID_OUT_REPORT_COUNT : HID_IN_REPORT_COUNT)
 
 #define HID_IN_INTERVAL		1
