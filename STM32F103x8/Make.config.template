@@ -53,9 +53,9 @@
 ### Enable this, if you have a pulldown resistor for USB reset (legacy boards).
 #PullDown=1
 
-### Uncomment this for an external LED instead of the reset functionality on Blue-, Red- or StickLink
+### Uncomment this for the reset functionality on Blue-, Red- or StickLink instead of an external LED
 ### For the external LED use a series resistor of 120 ohms
-EXTLED=1
+#NOEXTLED=1
 
-### Uncomment this in order to shortly flash the LED and EXTLED instead of toggle them
-SHORTFLASH=1
+### Uncomment this in order to drive a 4-digit-display
+#TM1637=1

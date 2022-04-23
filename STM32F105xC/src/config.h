@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2014-2017 Joerg Riechardt
+ * Copyright (C) 2014-2022 Joerg Riechardt
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -25,8 +25,8 @@
 /* uncomment this in order to pull down the "active" pin of the mainboard power button connector directly */
 //#define SimpleCircuit_F105
 
-/* uncomment this for an external LED instead of the reset functionality */
-#define EXTLED
+/* uncomment this for the reset functionality instead of an external LED */
+//#define NOEXTLED
 
 /* C6 IRMP (irmpconfig.h), B6 IRSND (irsndconfig.h) Yaw-right, B10 Logging (irmp.c) */
 #define IR_IN_PORT	C
@@ -40,7 +40,7 @@
 #ifdef SimpleCircuit_F105
 #define WAKEUP_PORT	GPIOB
 #define WAKEUP_PIN	GPIO_Pin_7 /* Yaw-middle */
-#ifndef EXTLED
+#ifdef NOEXTLED
 #define RESET_PORT	GPIOB
 #define RESET_PIN	GPIO_Pin_8 /* Yaw-left */
 #else
@@ -50,7 +50,7 @@
 #else
 #define WAKEUP_PORT	GPIOA
 #define WAKEUP_PIN	GPIO_Pin_1 /* Yaw-middle */
-#ifndef EXTLED
+#ifdef NOEXTLED
 #define RESET_PORT	GPIOA
 #define RESET_PIN	GPIO_Pin_2 /* Yaw-left */
 #else

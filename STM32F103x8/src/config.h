@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2014-2017 Joerg Riechardt
+ * Copyright (C) 2014-2022 Joerg Riechardt
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -64,11 +64,14 @@
 /* uncomment this in order to pull down the "active" pin of the mainboard power button connector directly */
 //#define SimpleCircuit
 
-/* uncomment this for an external LED instead of the reset functionality on Blue-, Red-, Green- or StickLink */
-#define EXTLED
+/* uncomment this for the reset functionality on Blue-, Red- or StickLink instead of an external LED */
+//#define NOEXTLED
 
 /* uncomment this for legacy boards with pulldown resistor for USB reset */
 //#define PullDown
+
+/* uncomment this in order to drive a 4-digit-display */
+//#define TM1637
 
 /* for ST-Link USB sticks with only one LED no extra LED handling is needed */
 #if defined(BlueLink) || defined(RedLink) || defined(RedLinkCrap)
@@ -89,7 +92,7 @@
 #if defined(BlueLink) /* blue ST-Link, IRSND = NRST */
 	#define WAKEUP_PORT		GPIOA
 	#define WAKEUP_PIN		GPIO_Pin_13 /* DIO */
-#ifndef EXTLED
+#ifdef NOEXTLED
 	#define RESET_PORT		GPIOA
 	#define RESET_PIN		GPIO_Pin_14 /* CLK */
 #else
@@ -106,7 +109,7 @@
 #elif defined(RedLink) /* red ST-Link, IRSND = NRST */
 	#define WAKEUP_PORT		GPIOB
 	#define WAKEUP_PIN		GPIO_Pin_14 /* DIO */
-#ifndef EXTLED
+#ifdef NOEXTLED
 	#define RESET_PORT		GPIOB
 	#define RESET_PIN		GPIO_Pin_13 /* CLK */
 #else
@@ -123,7 +126,7 @@
 #elif defined(RedLinkCrap) /* red ST-Link without PB11 connection */
 	#define WAKEUP_PORT		GPIOB
 	#define WAKEUP_PIN		GPIO_Pin_14 /* DIO */
-#ifndef EXTLED
+#ifdef NOEXTLED
 	#define RESET_PORT		GPIOB
 	#define RESET_PIN		GPIO_Pin_13 /* CLK */
 #else
@@ -140,7 +143,7 @@
 #elif defined(StickLink) /* ST-Link stick, IRSND = RST */
 	#define WAKEUP_PORT		GPIOB
 	#define WAKEUP_PIN		GPIO_Pin_14 /* DIO */
-#ifndef EXTLED
+#ifdef NOEXTLED
 	#define RESET_PORT		GPIOB
 	#define RESET_PIN		GPIO_Pin_13 /* CLK */
 #else
@@ -156,7 +159,7 @@
 #elif defined(GreenLink) /* green ST-Link stick, IRSND = RST */
 	#define WAKEUP_PORT		GPIOB
 	#define WAKEUP_PIN		GPIO_Pin_14 /* DIO */
-#ifndef EXTLED
+#ifdef NOEXTLED
 	#define RESET_PORT		GPIOB
 	#define RESET_PIN		GPIO_Pin_13 /* CLK */
 #else

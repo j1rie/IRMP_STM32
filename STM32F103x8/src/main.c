@@ -2,7 +2,7 @@
  *  IR receiver, sender, USB wakeup, motherboard switch wakeup, wakeup timer,
  *  USB HID device, eeprom emulation
  *
- *  Copyright (C) 2014-2020 Joerg Riechardt
+ *  Copyright (C) 2014-2022 Joerg Riechardt
  *
  *  This program is free software; you can redistribute it and/or modify
  *  it under the terms of the GNU General Public License as published by
@@ -20,7 +20,9 @@
 #include <stdio.h>
 #endif
 #include "romtable.h"
+#ifdef TM1637
 #include "tm1637.h"
+#endif
 
 #define BYTES_PER_QUERY	(HID_IN_REPORT_COUNT - 4)
 /* after plugging in, it takes some time, until SOF's are being sent to the device */
@@ -225,7 +227,9 @@ volatile unsigned int i = 0;
 uint8_t Reboot = 0;
 volatile uint32_t boot_flag __attribute__((__section__(".noinit")));
 volatile unsigned int send_ir_on_delay = 0;
+#ifdef TM1637
 volatile unsigned int dim_delay;
+#endif
 
 void delay_ms(unsigned int msec)
 {
@@ -378,10 +382,12 @@ void SysTick_Handler(void)
 			AlarmValue--;
 		if (send_ir_on_delay)
 			send_ir_on_delay--;
+#ifdef TM1637
 		if (dim_delay){
 			dim_delay--;
 			tm1637SetBrightness(dim_delay);
 		}
+#endif
 		i = 0;
 	} else {
 		i++;
@@ -780,7 +786,9 @@ int main(void)
 	memcpy(&firmware, FW_STR, sizeof(FW_STR));
 	firmware[sizeof(FW_STR) - 1] = 42; // * separator
 	memcpy(&firmware[sizeof(FW_STR)], &rt, sizeof(rt));
+#ifdef TM1637
 	tm1637Init();
+#endif
 
 	while (1) {
 		if (!AlarmValue && !host_running())
@@ -841,8 +849,10 @@ int main(void)
 				/* send IR-data */
 				USB_HID_SendData(REPORT_ID_IR, (uint8_t *) &myIRData, sizeof(myIRData));
 
+#ifdef TM1637
 				/* send IR-data to 4-digit-display */
 				tm1637DisplayHex(myIRData.command);
+#endif
 			}
 		}
 	}

@@ -59,6 +59,11 @@ DEFINES += -DSimpleCircuit_F105
 TARGET := $(TARGET)_SC
 endif
 
+ifdef NOEXTLED
+DEFINES += -DNOEXTLED
+TARGET := $(TARGET)_RS
+endif
+
 ifdef DEBUG
 DEFINES += -DDEBUG
 TARGET := $(TARGET)_DBG

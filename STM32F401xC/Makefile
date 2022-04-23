@@ -17,7 +17,7 @@ OBJCP = $(CROSS_COMPILE)objcopy
 
 ARCH = -mcpu=cortex-m4 -mthumb
 COMMON = -g -Os -flto
-INCLUDES = -Icmsis -Icmsis_boot -Istm_lib/inc -Iusb_hid/inc -Iirmp -Isrc -Itm1637
+INCLUDES = -Icmsis -Icmsis_boot -Istm_lib/inc -Iusb_hid/inc -Iirmp -Isrc
 ifdef DEBUG
 INCLUDES += -Isemihosting -Istdio
 endif
@@ -35,7 +35,7 @@ OBJS = cmsis_boot/startup/startup_stm32f401xx.o cmsis_boot/system_stm32f4xx.o\
        usb_hid/src/usb_dcd_int.o usb_hid/src/usbd_core.o\
        usb_hid/src/usbd_desc.o\
        usb_hid/src/usbd_hid_core.o usb_hid/src/usbd_ioreq.o\
-       usb_hid/src/usbd_req.o usb_hid/src/usbd_usr.o tm1637/tm1637.o
+       usb_hid/src/usbd_req.o usb_hid/src/usbd_usr.o
 ifdef DEBUG
 OBJS += semihosting/semihosting.o semihosting/sh_cmd.o  stdio/printf.o
 endif
@@ -67,14 +67,16 @@ DEFINES += -DSimpleCircuit
 TARGET := $(TARGET)_SC
 endif
 
-ifdef EXTLED
-DEFINES += -DEXTLED
-#TARGET := $(TARGET)_
+ifdef NOEXTLED
+DEFINES += -DNOEXTLED
+TARGET := $(TARGET)_RS
 endif
 
-ifdef SHORTFLASH
-DEFINES += -DSHORTFLASH
-#TARGET := $(TARGET)_
+ifdef TM1637
+INCLUDES += -Itm1637
+OBJS += tm1637/tm1637.o
+DEFINES += -DTM1637
+TARGET := $(TARGET)_TM
 endif
 
 ifdef DEBUG
