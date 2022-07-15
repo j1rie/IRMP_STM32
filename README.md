@@ -77,7 +77,7 @@ It is easier to see, what has been changed, too.
 Compile with arm-none-eabi-gcc.  
 
 ## Pin-Out
-See /STM32F10x/src/config.h.
+See /STM32Fxxxxx/src/config.h.
 
 ## Flashing the bootloader with a ST-Link
 Get the STM32 ST-Link Utility.  
@@ -132,4 +132,4 @@ https://www.mikrocontroller.net/articles/IRMP_auf_STM32_-_Bauanleitung
 
 Much fun with IRMP on STM32!
 
-Copyright (C) 2014-2020 Jörg Riechardt
+Copyright (C) 2014-2022 Jörg Riechardt
