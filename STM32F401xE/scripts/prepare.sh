@@ -16,10 +16,6 @@ for i in en.stm32_f105-07_f2_f4_usb-host-device_lib en.stsw-stm32066; do
 		#wget "http://www.st.com/resource/en/firmware/$i.zip"
 	fi
 done
-#if [[ ! -s irmp.tar.gz ]]; then
-#	wget "http://www.mikrocontroller.net/svnbrowser/irmp/?view=tar" -O irmp.tar.gz
-#fi
-
 if [[ ! -s IRMP-master.zip ]]; then
 	wget "https://github.com/j1rie/IRMP/archive/refs/heads/master.zip"  -O IRMP-master.zip
 fi
@@ -52,9 +48,6 @@ unzip -j $ar1 \
        Libraries/CMSIS/Include/core_cmInstr.h \
        Libraries/CMSIS/Include/core_cmSimd.h \
        Libraries/CMSIS/Include/cmsis_gcc.h
-#        \
-#       Libraries/CMSIS/Include/cmsis_armcc.h \
-#       Libraries/CMSIS/Include/cmsis_armcc_V6.h
 cd ..
 mkdir -p stm_lib
 cd  stm_lib
@@ -129,22 +122,10 @@ cd src
 unzip -j $ar $path/Project/STM32F4xx_EEPROM_Emulation/src/eeprom.c
 cd ../..
 
-#ar='../ext_src/irmp.tar.gz'
 ar='../ext_src/IRMP-master.zip'
-#path="irmp"
 path="IRMP-master"
 mkdir -p irmp
 cd irmp
-#tar -xvf $ar --strip-components=1 \
-#    $path/irmp.c \
-#    $path/irmp.h \
-#    $path/irmpconfig.h \
-#    $path/irmpprotocols.h \
-#    $path/irmpsystem.h \
-#    $path/irsnd.c \
-#    $path/irsnd.h \
-#    $path/irsndconfig.h \
-#    $path/README.txt
 unzip -j $ar \
     $path/irmp.c \
     $path/irmp.h \
