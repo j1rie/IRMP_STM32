@@ -263,7 +263,7 @@ diff -Nrup A/src/usbd_desc.c B/src/usbd_desc.c
                     USBD_StrDesc, length);
 diff -Nrup A/src/usbd_hid_core.c B/src/usbd_hid_core.c
 --- A/src/usbd_hid_core.c	2018-09-05 14:58:08.000000000 +0200
-+++ B/src/usbd_hid_core.c	2022-03-22 20:29:35.880816407 +0100
++++ B/src/usbd_hid_core.c	2022-07-20 12:05:22.972340389 +0200
 @@ -44,6 +44,7 @@
  #include "usbd_hid_core.h"
  #include "usbd_desc.h"
@@ -342,7 +342,7 @@ diff -Nrup A/src/usbd_hid_core.c B/src/usbd_hid_core.c
    
    0x01,   0xc0
 +#endif
-+  0x06, 0xFF, 0xFF,      /* USAGE_PAGE (Vendor Page: 0xFF00) */
++  0x06, 0xFF, 0x00,      /* USAGE_PAGE (Vendor Page: 0xFF00) */
 +  0x09, 0x01,            /* USAGE (Demo Kit)               */
 +  0xA1, 0x01,            /* COLLECTION (Application)       */
 +

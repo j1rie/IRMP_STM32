@@ -1,7 +1,7 @@
 /**********************************************************************************************************  
-    stm32IRalarm: set alarm to and get alarm from IRMP_STM32
+    stm32IRalarm: set alarm to and get alarm from STM32IR
 
-    Copyright (C) 2014-2022 Joerg Riechardt
+    Copyright (C) 2014-2015 Joerg Riechardt
 
     This program is free software; you can redistribute it and/or modify
     it under the terms of the GNU General Public License as published by
@@ -26,31 +26,9 @@
 #define _GETOPT_API
 #define _CRT_SECURE_NO_WARNINGS
 
-enum access {
-	ACC_GET,
-	ACC_SET,
-	ACC_RESET
-};
-
-enum command {
-	CMD_EMIT,
-	CMD_CAPS,
-	CMD_HID_TEST,
-	CMD_ALARM,
-	CMD_MACRO,
-	CMD_WAKE,
-	CMD_REBOOT
-};
-
-enum status {
-	STAT_CMD,
-	STAT_SUCCESS,
-	STAT_FAILURE
-};
-
 hid_device *handle;
-uint8_t inBuf[8];
-uint8_t outBuf[8];
+unsigned char inBuf[17];
+unsigned char outBuf[17];
 
 static bool open_stm32() {
 	// Open the device using the VID, PID.
@@ -120,15 +98,15 @@ int _tmain(int argc, TCHAR** argv) {
 
 	open_stm32();
         outBuf[0] = 0x03; // Report ID
-	outBuf[1] = STAT_CMD;
+	outBuf[1] = 0x00; // STAT_CMD
 
 	if (svalue != NULL) {
-	    outBuf[2] = ACC_SET;
-	    outBuf[3] = CMD_ALARM;
+	    outBuf[2] = 0x01; // ACC_SET
+	    outBuf[3] = 0x03; // CMD_ALARM
 	    setalarm = strtoul(svalue, NULL, 0);
 	    memcpy(&outBuf[4], &setalarm, sizeof(setalarm));
 	    write_stm32();
-	    Sleep(3);
+	    Sleep(2);
 	    read_stm32(); /* necessary to avoid, that echo is read by first alarm read */
 	    while (inBuf[0] == 0x01)
 		read_stm32();
@@ -136,15 +114,15 @@ int _tmain(int argc, TCHAR** argv) {
 
 	if (aflag) {
 	    //memset(&outBuf[3], 0, 14);
-	    outBuf[2] = ACC_GET;
-	    outBuf[3] = CMD_ALARM;
+	    outBuf[2] = 0x00; // ACC_GET
+	    outBuf[3] = 0x03; // CMD_ALARM
 	    write_stm32();
-	    Sleep(3);
+	    Sleep(2);
 	    read_stm32();
 	    while (inBuf[0] == 0x01)
 		read_stm32();
 	    alarm = *((uint32_t *)&inBuf[4]);
-	    printf("\tSTM32alarm: %u days %d hours %d minutes %d seconds\n", alarm/60/60/24, (alarm/60/60) % 24, (alarm/60) % 60, alarm % 60);
+	    printf("\tSTM32alarm: %"PRIu16" days %d hours %d minutes %d seconds\n", alarm/60/60/24, (alarm/60/60) % 24, (alarm/60) % 60, alarm % 60);
 	    wakeup = time(NULL);
 	    wakeup += alarm;
 	    ts = (localtime(&wakeup));
