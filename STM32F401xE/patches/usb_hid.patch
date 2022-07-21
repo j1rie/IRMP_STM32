@@ -350,7 +350,7 @@ diff -Nrup A/src/usbd_hid_core.c B/src/usbd_hid_core.c
    
    0x01,   0xc0
 +#endif
-+  0x06, 0xFF, 0xFF,      /* USAGE_PAGE (Vendor Page: 0xFF00) */
++  0x06, 0xFF, 0x00,      /* USAGE_PAGE (Vendor Page: 0xFF00) */
 +  0x09, 0x01,            /* USAGE (Demo Kit)               */
 +  0xA1, 0x01,            /* COLLECTION (Application)       */
 +

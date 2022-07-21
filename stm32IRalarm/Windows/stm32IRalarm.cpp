@@ -39,13 +39,20 @@ enum command {
 	CMD_ALARM,
 	CMD_MACRO,
 	CMD_WAKE,
-	CMD_REBOOT
+	CMD_REBOOT,
+	CMD_EEPROM_RESET
 };
 
 enum status {
 	STAT_CMD,
 	STAT_SUCCESS,
 	STAT_FAILURE
+};
+
+enum report_id {
+	REPORT_ID_IR = 1,
+	REPORT_ID_CONFIG_IN = 2,
+	REPORT_ID_CONFIG_OUT = 3
 };
 
 hid_device *handle;
@@ -141,7 +148,7 @@ int _tmain(int argc, TCHAR** argv) {
 	    write_stm32();
 	    Sleep(3);
 	    read_stm32();
-	    while (inBuf[0] == 0x01)
+	    while (inBuf[0] == REPORT_ID_IR)
 		read_stm32();
 	    alarm = *((uint32_t *)&inBuf[4]);
 	    printf("\tSTM32alarm: %u days %d hours %d minutes %d seconds\n", alarm/60/60/24, (alarm/60/60) % 24, (alarm/60) % 60, alarm % 60);

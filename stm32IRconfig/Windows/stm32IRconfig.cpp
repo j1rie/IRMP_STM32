@@ -42,7 +42,8 @@ enum command {
 	CMD_ALARM,
 	CMD_MACRO,
 	CMD_WAKE,
-	CMD_REBOOT
+	CMD_REBOOT,
+	CMD_EEPROM_RESET
 };
 
 enum status {
@@ -160,7 +161,7 @@ int main(int argc, char* argv[])
 		printf("old firmware!\n");
 	puts("");
 
-cont:	printf("program eeprom: wakeups and macros (p)\nprogram eeprom: wakeups and macros with remote control(P)\nget eeprom (wakeups, macros and capabilities) (g)\nreset (wakeups, macros and alarm) (r)\nset alarm (s)\nget alarm (a)\nsend IR (i)\nreboot (b)\nmonitor until ^C (m)\nrun test (t)\nhid test (h)\nexit (x)\n");
+cont:	printf("program eeprom: wakeups and macros (p)\nprogram eeprom: wakeups and macros with remote control(P)\nget eeprom (wakeups, macros and capabilities) (g)\nreset (wakeups, macros, alarm and eeprom) (r)\nset alarm (s)\nget alarm (a)\nsend IR (i)\nreboot (b)\nmonitor until ^C (m)\nrun test (t)\nhid test (h)\nexit (x)\n");
 	scanf("%s", &c);
 
 	switch (c) {
@@ -318,7 +319,7 @@ out:
 		break;
 
 	case 'r':
-reset:		printf("reset wakeup(w)\nreset macro slot(m)\nreset alarm(a)\n");
+reset:		printf("reset wakeup(w)\nreset macro slot(m)\nreset alarm(a)\nreset eeprom(e)\n");
 		scanf("%s", &d);
 		memset(&outBuf[2], 0, out_size - 2);
 		idx = 2;
@@ -341,6 +342,9 @@ reset:		printf("reset wakeup(w)\nreset macro slot(m)\nreset alarm(a)\n");
 			break;
 		case 'a':
 			outBuf[idx++] = CMD_ALARM;
+			break;
+		case 'e':
+			outBuf[idx++] = CMD_EEPROM_RESET;
 			break;
 		default:
 			goto reset;

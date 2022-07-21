@@ -41,7 +41,8 @@ enum command {
 	CMD_ALARM,
 	CMD_MACRO,
 	CMD_WAKE,
-	CMD_REBOOT
+	CMD_REBOOT,
+	CMD_EEPROM_RESET
 };
 
 enum status {
@@ -605,6 +606,10 @@ int8_t reset_handler(uint8_t *buf)
 		/* validate stored value in eeprom */
 		eeprom_restore(tmp, idx);
 		if (memcmp(zeros, tmp, sizeof(tmp)))
+			ret = -1;
+		break;
+	case CMD_EEPROM_RESET:
+		if(EE_Format() != FLASH_COMPLETE)
 			ret = -1;
 		break;
 	default:

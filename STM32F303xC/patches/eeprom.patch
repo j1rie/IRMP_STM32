@@ -1,6 +1,6 @@
-diff -Nrup C/inc/eeprom.h D/inc/eeprom.h
---- C/inc/eeprom.h	2009-08-04 16:25:00.000000000 +0200
-+++ D/inc/eeprom.h	2019-12-03 22:26:44.283699406 +0100
+diff -Nrup A/inc/eeprom.h B/inc/eeprom.h
+--- A/inc/eeprom.h	2009-08-04 16:25:00.000000000 +0200
++++ B/inc/eeprom.h	2022-07-21 20:16:04.976159267 +0200
 @@ -24,7 +24,7 @@
  #define __EEPROM_H
  
@@ -35,9 +35,26 @@ diff -Nrup C/inc/eeprom.h D/inc/eeprom.h
  
  /* Exported types ------------------------------------------------------------*/
  /* Exported macro ------------------------------------------------------------*/
-diff -Nrup C/src/eeprom.c D/src/eeprom.c
---- C/src/eeprom.c	2009-08-04 16:25:00.000000000 +0200
-+++ D/src/eeprom.c	2019-12-03 21:17:50.197487438 +0100
+@@ -73,6 +75,7 @@
+ uint16_t EE_Init(void);
+ uint16_t EE_ReadVariable(uint16_t VirtAddress, uint16_t* Data);
+ uint16_t EE_WriteVariable(uint16_t VirtAddress, uint16_t Data);
++FLASH_Status EE_Format(void);
+ 
+ #endif /* __EEPROM_H */
+ 
+diff -Nrup A/src/eeprom.c B/src/eeprom.c
+--- A/src/eeprom.c	2009-08-04 16:25:00.000000000 +0200
++++ B/src/eeprom.c	2022-07-20 17:04:25.058480799 +0200
+@@ -37,7 +37,7 @@ extern uint16_t VirtAddVarTab[NumbOfVar]
+ 
+ /* Private function prototypes -----------------------------------------------*/
+ /* Private functions ---------------------------------------------------------*/
+-static FLASH_Status EE_Format(void);
++//static FLASH_Status EE_Format(void);
+ static uint16_t EE_FindValidPage(uint8_t Operation);
+ static uint16_t EE_VerifyPageFullWriteVariable(uint16_t VirtAddress, uint16_t Data);
+ static uint16_t EE_PageTransfer(uint16_t VirtAddress, uint16_t Data);
 @@ -111,19 +111,19 @@ uint16_t EE_Init(void)
          /* Transfer data from Page1 to Page0 */
          for (VarIdx = 0; VarIdx < NumbOfVar; VarIdx++)
@@ -84,6 +101,15 @@ diff -Nrup C/src/eeprom.c D/src/eeprom.c
                /* If program operation was failed, a Flash error code is returned */
                if (EepromStatus != FLASH_COMPLETE)
                {
+@@ -347,7 +347,7 @@ uint16_t EE_WriteVariable(uint16_t VirtA
+   * @retval Status of the last operation (Flash write or erase) done during
+   *         EEPROM formating
+   */
+-static FLASH_Status EE_Format(void)
++FLASH_Status EE_Format(void)
+ {
+   FLASH_Status FlashStatus = FLASH_COMPLETE;
+ 
 @@ -568,15 +568,15 @@ static uint16_t EE_PageTransfer(uint16_t
    /* Transfer process: transfer variables from old to the new active page */
    for (VarIdx = 0; VarIdx < NumbOfVar; VarIdx++)

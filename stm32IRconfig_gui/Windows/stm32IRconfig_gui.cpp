@@ -84,11 +84,12 @@ enum access {
 enum command {
 	CMD_EMIT,
 	CMD_CAPS,
-	CMD_FW,
+	CMD_HID_TEST,
 	CMD_ALARM,
 	CMD_MACRO,
 	CMD_WAKE,
-	CMD_REBOOT
+	CMD_REBOOT,
+	CMD_EEPROM_RESET
 };
 
 enum status {
@@ -563,6 +564,7 @@ MainWindow::~MainWindow()
 	if (connected_device)
 		hid_close(connected_device);
 	hid_exit();
+	delete guisignal;
 }
 
 long
