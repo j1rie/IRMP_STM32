@@ -150,17 +150,17 @@ prog:		printf("set wakeup(w)\nset macro(m)\n");
 		switch (d) {
 		case 'w':
 			printf("enter slot number (starting with 0)\n");
-			scanf("%" SCNd8 "", &s);
+			scanf("%" SCNx8 "", &s);
 			outBuf[idx++] = CMD_WAKE;
 			outBuf[idx++] = s;    // (s+1)-th slot
 			break;
 		case 'm':
 			printf("enter macro number (starting with 0)\n");
-			scanf("%" SCNd8 "", &m);
+			scanf("%" SCNx8 "", &m);
 			outBuf[idx++] = CMD_MACRO;
 			outBuf[idx++] = m;    // (m+1)-th macro
 			printf("enter slot number, 0 for trigger\n");
-			scanf("%" SCNd8 "", &s);
+			scanf("%" SCNx8 "", &s);
 			outBuf[idx++] = s;    // (s+1)-th slot
 			break;
 		default:
@@ -186,17 +186,17 @@ Prog:		printf("set wakeup with remote control(w)\nset macro with remote control(
 		switch (d) {
 		case 'w':
 			printf("enter slot number (starting with 0)\n");
-			scanf("%" SCNd8 "", &s);
+			scanf("%" SCNx8 "", &s);
 			outBuf[idx++] = CMD_WAKE;
 			outBuf[idx++] = s;    // (s+1)-th slot
 			break;
 		case 'm':
 			printf("enter macro number (starting with 0)\n");
-			scanf("%" SCNd8 "", &m);
+			scanf("%" SCNx8 "", &m);
 			outBuf[idx++] = CMD_MACRO;
 			outBuf[idx++] = m;    // (m+1)-th macro
 			printf("enter slot number, 0 for trigger\n");
-			scanf("%" SCNd8 "", &s);
+			scanf("%" SCNx8 "", &s);
 			outBuf[idx++] = s;    // (s+1)-th slot
 			break;
 		default:
@@ -225,17 +225,17 @@ get:		printf("get wakeup(w)\nget macro slot(m)\nget caps(c)\n");
 		switch (d) {
 		case 'w':
 			printf("enter slot number (starting with 0)\n");
-			scanf("%" SCNd8 "", &s);
+			scanf("%" SCNx8 "", &s);
 			outBuf[idx++] = CMD_WAKE;
 			outBuf[idx++] = s;    // (s+1)-th slot
 			break;
 		case 'm':
 			printf("enter macro number (starting with 0)\n");
-			scanf("%" SCNd8 "", &m);
+			scanf("%" SCNx8 "", &m);
 			outBuf[idx++] = CMD_MACRO;
 			outBuf[idx++] = m;    // (m+1)-th macro
 			printf("enter slot number, 0 for trigger\n");
-			scanf("%" SCNd8 "", &s);
+			scanf("%" SCNx8 "", &s);
 			outBuf[idx++] = s;    // (s+1)-th slot
 			break;
 		case 'c':
@@ -294,17 +294,17 @@ reset:		printf("reset wakeup(w)\nreset macro slot(m)\nreset alarm(a)\nreset eepr
 		switch (d) {
 		case 'w':
 			printf("enter slot number (starting with 0)\n");
-			scanf("%" SCNd8 "", &s);
+			scanf("%" SCNx8 "", &s);
 			outBuf[idx++] = CMD_WAKE;
 			outBuf[idx++] = s;    // (s+1)-th slot
 			break;
 		case 'm':
 			printf("enter macro number (starting with 0)\n");
-			scanf("%" SCNd8 "", &m);
+			scanf("%" SCNx8 "", &m);
 			outBuf[idx++] = CMD_MACRO;
 			outBuf[idx++] = m;    // (m+1)-th macro
 			printf("enter slot number, 0 for trigger\n");
-			scanf("%" SCNd8 "", &s);
+			scanf("%" SCNx8 "", &s);
 			outBuf[idx++] = s;    // (s+1)-th slot
 			break;
 		case 'a':

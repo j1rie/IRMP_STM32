@@ -72,7 +72,8 @@ public:
 		ID_SAVE_LOG,
 		ID_APPEND,
 		ID_WRITE_IR,
-		ID_DEVLIST
+		ID_DEVLIST,
+		ID_REEPROM
 	};
 
 enum access {
@@ -129,6 +130,7 @@ private:
 	FXButton *send_button;
 	FXButton *read_cont_button;
 	FXButton *upgrade_button;
+	FXButton *reset_button;
 	FXButton *open_button;
 	FXButton *save_button;
 	FXButton *append_button;
@@ -243,6 +245,7 @@ public:
 	long onWrite_IR(FXObject *sender, FXSelector sel, void *ptr);
 	long onDevDClicked(FXObject *sender, FXSelector sel, void *ptr);
 	long onCmdQuit(FXObject *sender, FXSelector sel, void *ptr);
+	long onReeprom(FXObject *sender, FXSelector sel, void *ptr);
 };
 
 // FOX 1.7 changes the timeouts to all be nanoseconds.
@@ -295,6 +298,7 @@ FXDEFMAP(MainWindow) MainWindowMap [] = {
 	FXMAPFUNC(SEL_COMMAND, MainWindow::ID_WRITE_IR, MainWindow::onWrite_IR ),
 	FXMAPFUNC(SEL_CLOSE,   0, MainWindow::onCmdQuit ),
 	FXMAPFUNC(SEL_IO_READ, MainWindow::ID_PRINT, MainWindow::onPrint),
+	FXMAPFUNC(SEL_COMMAND, MainWindow::ID_REEPROM, MainWindow::onReeprom ),
 };
 
 FXIMPLEMENT(MainWindow, FXMainWindow, MainWindowMap, ARRAYNUMBER(MainWindowMap));
@@ -390,6 +394,10 @@ MainWindow::MainWindow(FXApp *app)
 	//firmware Group Box
 	FXGroupBox *gb132 = new FXGroupBox(s132, "firmware", FRAME_GROOVE|LAYOUT_FILL_X);
 	upgrade_button = new FXButton(gb132, "upgrade", NULL, this, ID_UPGRADE, BUTTON_NORMAL|LAYOUT_FILL_X);
+
+	//eeprom Group Box
+	FXGroupBox *gb133 = new FXGroupBox(s132, "eeprom", FRAME_GROOVE|LAYOUT_FILL_X);
+	reset_button = new FXButton(gb133, "reset", NULL, this, ID_REEPROM, BUTTON_NORMAL|LAYOUT_FILL_X);
 
 	// horizontal frame for alarm Group Box, select listboxes, Output Group Box and map group box
 	FXHorizontalFrame *hf14 = new FXHorizontalFrame(vf1, LAYOUT_FILL_X,0,0,0,0, 0,0,0,0, 0,0);
@@ -494,6 +502,7 @@ MainWindow::MainWindow(FXApp *app)
 	flag1_text->setHelpText("received IR flags");
 	read_cont_button->setHelpText("receive IR until pressed again");
 	upgrade_button->setHelpText("upgrade firmware");
+	reset_button->setHelpText("reset eeprom");
 	days_text->setHelpText("enter days to be set");
 	hours_text->setHelpText("enter hours to be set");
 	minutes_text->setHelpText("enter minutes to be set");
@@ -1552,15 +1561,15 @@ MainWindow::onAset(FXObject *sender, FXSelector sel, void *ptr)
 	unsigned int setalarm = 0;
 	FXString u = "";
 #if (FOX_MINOR >= 7)
-	setalarm += 60 * 60 * 24 * days_text->getText().toInt();
-	setalarm += 60 * 60 * hours_text->getText().toInt();
-	setalarm += 60 * minutes_text->getText().toInt();
-	setalarm += seconds_text->getText().toInt();
+	setalarm += 60 * 60 * 24 * days_text->getText().toUInt();
+	setalarm += 60 * 60 * hours_text->getText().toUInt();
+	setalarm += 60 * minutes_text->getText().toUInt();
+	setalarm += seconds_text->getText().toUInt();
 #else
-	setalarm += 60 * 60 * 24 * FXIntVal(days_text->getText(), 10);
-	setalarm += 60 * 60 * FXIntVal(hours_text->getText(), 10);
-	setalarm += 60 * FXIntVal(minutes_text->getText(), 10);
-	setalarm += FXIntVal(seconds_text->getText(), 10);
+	setalarm += 60 * 60 * 24 * FXUIntVal(days_text->getText(), 10);
+	setalarm += 60 * 60 * FXUIntVal(hours_text->getText(), 10);
+	setalarm += 60 * FXUIntVal(minutes_text->getText(), 10);
+	setalarm += FXUIntVal(seconds_text->getText(), 10);
 #endif
 	if(setalarm < 2) {
 		setalarm = 2;
@@ -2179,6 +2188,23 @@ long MainWindow::onCmdmsListBox(FXObject*,FXSelector sel,void* ptr){
 long MainWindow::onDevDClicked(FXObject *sender, FXSelector sel, void *ptr){
 	onDisconnect(NULL, 0, NULL);
 	onConnect(NULL, 0, NULL);
+	return 1;
+}
+
+long
+MainWindow::onReeprom(FXObject *sender, FXSelector sel, void *ptr){
+	if(map_text21->isModified()){
+		if(FXMessageBox::question(this,MBOX_YES_NO,tr("map was changed"),tr("Discard changes to map?"))==MBOX_CLICKED_NO) return 1;
+	}
+	if(FXMessageBox::question(this,MBOX_YES_NO,tr("reset eeprom"),tr("really reset eeprom?"))==MBOX_CLICKED_NO) return 1;
+
+	FXString s;
+	s.format("%d %d %d %d ", REPORT_ID_CONFIG_OUT, STAT_CMD, ACC_RESET, CMD_EEPROM_RESET);
+
+	output_text->setText(s);
+
+	Write_and_Check(4, 4);
+
 	return 1;
 }
 
