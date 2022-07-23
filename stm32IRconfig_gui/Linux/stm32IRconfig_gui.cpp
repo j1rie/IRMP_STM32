@@ -356,13 +356,13 @@ MainWindow::MainWindow(FXApp *app)
 	rmacro_button = new FXButton(gb124, "macro", NULL, this, ID_RMACRO, BUTTON_NORMAL|LAYOUT_FILL_X);
 	ralarm_button = new FXButton(gb124, "alarm", NULL, this, ID_RALARM, BUTTON_NORMAL|LAYOUT_FILL_X);
 
-	// horizontal frame for IR Group Box and firmware upgrade
+	// horizontal frame for IR Group Box and firmware upgrade and eeprom reset
 	FXHorizontalFrame *hf13 = new FXHorizontalFrame(vf1, LAYOUT_FILL_X,0,0,0,0, 0,0,0,0, 0,0);
 	FXSpring *s131 = new FXSpring(hf13, LAYOUT_FILL_X, 300, 0, 0,0,0,0, 4,2,2,2, 2,2);
 	FXSpring *s132 = new FXSpring(hf13, LAYOUT_FILL_X, 100, 0, 0,0,0,0, 2,4,2,2, 2,2);
 
 	//IR Group Box
-	FXGroupBox *gb131 = new FXGroupBox(s131, "IR (hex)", FRAME_GROOVE|LAYOUT_FILL_X, 0,0,0,0, 0,0,0,0);
+	FXGroupBox *gb131 = new FXGroupBox(s131, "IR (hex)", FRAME_GROOVE|LAYOUT_FILL_X, 0,0,0,0, 0,0,0,4);
 	FXMatrix *m131 = new FXMatrix(gb131, 6, MATRIX_BY_COLUMNS,0,0,0,0);
 	new FXLabel(m131, "");
 	new FXLabel(m131, "protocol");
@@ -407,7 +407,7 @@ MainWindow::MainWindow(FXApp *app)
 	// horizontal frame for alarm Group Box and select listboxes
 	FXHorizontalFrame *hf143 = new FXHorizontalFrame(vf141, LAYOUT_FILL_X/*,0,0,0,0, 0,0,0,0*/);
 	//alarm Group Box
-	FXGroupBox *gb14 = new FXGroupBox(hf143, "alarm (dec)", FRAME_GROOVE|LAYOUT_FILL_X, 0,0,0,0, 0,0,0,0);
+	FXGroupBox *gb14 = new FXGroupBox(hf143, "alarm (dec)", FRAME_GROOVE|LAYOUT_FILL_X, 0,0,0,0, 0,0,0,6);
 	FXMatrix *m14 = new FXMatrix(gb14, 5, MATRIX_BY_COLUMNS|LAYOUT_FILL_X);
 	new FXLabel(m14, "days");
 	new FXLabel(m14, "hours");
