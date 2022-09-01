@@ -356,7 +356,7 @@ uint8_t eeprom_restore(uint8_t *buf, uint16_t virt_addr)
 {
 	uint8_t i, retVal = 0;
 	for(i=0; i<3; i++) {
-		if (EE_ReadVariable(virt_addr + i, (uint16_t *) &buf[2*i])) {
+		if (EE_ReadVariable(virt_addr + i, (uint16_t *) &buf[2*i])) { // TODO cache eeprom (or wait for STM to do so)
 			/* the variable was not found or no valid page was found */
 			*((uint16_t *) &buf[2*i]) = 0xFFFF;
 			retVal = 1;
@@ -857,8 +857,9 @@ int main(void)
 					check_reboot(&myIRData);
 				}
 
-				/* send IR-data */
-				USB_HID_SendData(REPORT_ID_IR, (uint8_t *) &myIRData, sizeof(myIRData));
+				/* send IR-data, but only if host is running, otherwise the transfer will not complete, and we are stuck */
+				if(host_running())
+					USB_HID_SendData(REPORT_ID_IR, (uint8_t *) &myIRData, sizeof(myIRData));
 
 #ifdef TM1637
 				/* send IR-data to 4-digit-display */

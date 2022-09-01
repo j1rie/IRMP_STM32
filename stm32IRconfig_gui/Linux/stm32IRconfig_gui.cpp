@@ -130,11 +130,11 @@ private:
 	FXButton *send_button;
 	FXButton *read_cont_button;
 	FXButton *upgrade_button;
-	FXButton *reset_button;
 	FXButton *open_button;
 	FXButton *save_button;
 	FXButton *append_button;
 	FXButton *write_ir_button;
+	FXButton *reset_button;
 	FXLabel *connected_label;
 	FXLabel *connected_label2;
 	FXLabel *connected_label3;
@@ -164,8 +164,9 @@ private:
 	FXStatusBar *statusbar;
 	struct hid_device_info *devices;
 	hid_device *connected_device;
-	size_t getDataFromTextField(FXTextField *tf, char *buf, size_t len);
+	size_t getDataFromTextField(FXTextField *tf, uint8_t *buf, size_t len);
 	uint8_t buf[64];
+	uint8_t bufw[64];
 	uint8_t ReadIRcontActive;
 	uint8_t ReadIRActive;
 	uint8_t reduce_timeout;
@@ -235,9 +236,10 @@ public:
 	long onOpen(FXObject *sender, FXSelector sel, void *ptr);
 	long onSave(FXObject *sender, FXSelector sel, void *ptr);
 	long onSaveLog(FXObject *sender, FXSelector sel, void *ptr);
+	long onReeprom(FXObject *sender, FXSelector sel, void *ptr);
 	long Write(int out_len);
-	long Read(int in_len);
-	long Write_and_Check(int out_len, int in_len);
+	long Read(int show_len);
+	long Write_and_Check(int out_len, int show_len);
 	long saveFile(const FXString& file);
 	long saveLogFile(const FXString& file);
 	long onAppend(FXObject *sender, FXSelector sel, void *ptr);
@@ -245,7 +247,6 @@ public:
 	long onWrite_IR(FXObject *sender, FXSelector sel, void *ptr);
 	long onDevDClicked(FXObject *sender, FXSelector sel, void *ptr);
 	long onCmdQuit(FXObject *sender, FXSelector sel, void *ptr);
-	long onReeprom(FXObject *sender, FXSelector sel, void *ptr);
 };
 
 // FOX 1.7 changes the timeouts to all be nanoseconds.
@@ -272,6 +273,7 @@ FXDEFMAP(MainWindow) MainWindowMap [] = {
 	FXMAPFUNC(SEL_COMMAND, MainWindow::ID_GWAKEUP, MainWindow::onGwakeup ),
 	FXMAPFUNC(SEL_COMMAND, MainWindow::ID_GMACRO, MainWindow::onGmacro ),
 	FXMAPFUNC(SEL_COMMAND, MainWindow::ID_GCAP, MainWindow::onGcaps ),
+	FXMAPFUNC(SEL_COMMAND, MainWindow::ID_REEPROM, MainWindow::onReeprom ),
 	FXMAPFUNC(SEL_COMMAND, MainWindow::ID_AGET, MainWindow::onAget ),
 	FXMAPFUNC(SEL_COMMAND, MainWindow::ID_ASET, MainWindow::onAset ),
 	FXMAPFUNC(SEL_COMMAND, MainWindow::ID_RWAKEUP, MainWindow::onRwakeup ),
@@ -298,7 +300,6 @@ FXDEFMAP(MainWindow) MainWindowMap [] = {
 	FXMAPFUNC(SEL_COMMAND, MainWindow::ID_WRITE_IR, MainWindow::onWrite_IR ),
 	FXMAPFUNC(SEL_CLOSE,   0, MainWindow::onCmdQuit ),
 	FXMAPFUNC(SEL_IO_READ, MainWindow::ID_PRINT, MainWindow::onPrint),
-	FXMAPFUNC(SEL_COMMAND, MainWindow::ID_REEPROM, MainWindow::onReeprom ),
 };
 
 FXIMPLEMENT(MainWindow, FXMainWindow, MainWindowMap, ARRAYNUMBER(MainWindowMap));
@@ -697,6 +698,7 @@ MainWindow::onConnect(FXObject *sender, FXSelector sel, void *ptr)
 	connect_button->disable();
 	disconnect_button->enable();
 	reboot_button->enable();
+	reset_button->enable();
 
 	//list report counts
 	FXString w, x;
@@ -761,7 +763,6 @@ MainWindow::onConnect(FXObject *sender, FXSelector sel, void *ptr)
 	}
 	input_text->setText("");
 	output_text->setText("");
-	//input_text->appendText(x);
 	input_text->appendText(u);
 	input_text->appendText(s);
 	input_text->setBottomLine(INT_MAX);
@@ -809,6 +810,7 @@ MainWindow::onDisconnect(FXObject *sender, FXSelector sel, void *ptr)
 	connect_button->enable();
 	disconnect_button->disable();
 	reboot_button->disable();
+	reset_button->disable();
 	getApp()->removeTimeout(this, ID_TIMER);
 	getApp()->removeTimeout(this, ID_READIR_TIMER);
 	getApp()->removeTimeout(this, ID_RED_TIMER);
@@ -887,7 +889,7 @@ MainWindow::onReboot(FXObject *sender, FXSelector sel, void *ptr)
 }
 
 size_t
-MainWindow::getDataFromTextField(FXTextField *tf, char *buf, size_t len)
+MainWindow::getDataFromTextField(FXTextField *tf, uint8_t *buf, size_t len)
 {
 	const char *delim = " ,{}\t\r\n";
 	FXString data = tf->getText();
@@ -917,7 +919,7 @@ MainWindow::getDataFromTextField(FXTextField *tf, char *buf, size_t len)
 }
 
 long
-MainWindow::Read(int in_len)
+MainWindow::Read(int show_len)
 {
 	memset(buf, 0, sizeof(buf));
 	FXString s;
@@ -929,7 +931,7 @@ MainWindow::Read(int in_len)
 		return -1;
 	}
 
-	int res = hid_read(connected_device, buf, in_len); // nonblocking
+	int res = hid_read(connected_device, buf, in_size); // nonblocking, must read full length!
 	
 	if (res < 0) {
 		FXMessageBox::error(this, MBOX_OK, "Error Reading", "Could not read from device. Error reported was: %ls", hid_error(connected_device));
@@ -941,8 +943,8 @@ MainWindow::Read(int in_len)
 		if (res == 0)
 			return 0;
 
-		s.format("Received %d bytes:\n", in_len);
-		for (int i = 0; i < in_len; i++) {
+		s.format("Received %d bytes:\n", res);
+		for (int i = 0; i < show_len; i++) {
 			FXString t;
 			t.format("%02hhx ", buf[i]);
 			s += t;
@@ -1116,7 +1118,6 @@ long
 MainWindow::Write(int out_len)
 {
 	FXString s;
-	char bufw[out_size];
 	memset(bufw, 0, sizeof(bufw));
 	FXint output_text_len = getDataFromTextField(output_text, bufw, sizeof(bufw));
 	if(out_len > output_text_len)
@@ -1130,7 +1131,7 @@ MainWindow::Write(int out_len)
 		return -1;
 	}
 
-	int res = hid_write(connected_device, (const unsigned char*)bufw, out_len);
+	int res = hid_write(connected_device, (const unsigned char*)bufw, out_len); // may write arbitrary length
 	if (res < 0) {
 		FXMessageBox::error(this, MBOX_OK, "Error Writing", "Could not write to device. Error reported was: %ls", hid_error(connected_device));
 		input_text->appendText("write error\n");
@@ -1138,10 +1139,10 @@ MainWindow::Write(int out_len)
 		onRescan(NULL, 0, NULL);
 		return -1;
 	} else {
-		s.format("Sent %d bytes:\n", out_len);
+		s.format("Sent %d bytes:\n", res);
 		for (int i = 0; i < out_len; i++) {
 			FXString t;
-			t.format("%02hhx ", static_cast<unsigned char>(bufw[i]));
+			t.format("%02hhx ", bufw[i]);
 			s += t;
 		}
 		s += "\n";
@@ -1153,7 +1154,7 @@ MainWindow::Write(int out_len)
 }
 
 long
-MainWindow::Write_and_Check(int out_len, int in_len)
+MainWindow::Write_and_Check(int out_len, int show_len)
 {
 	FXString s;
 	int read, count = 0;
@@ -1167,7 +1168,7 @@ MainWindow::Write_and_Check(int out_len, int in_len)
 
 	FXThread::sleep(3000000); // 3ms
 
-	read = Read(in_len); // nonblocking
+	read = Read(show_len); // nonblocking
 	if(read  == -1) {
 		s += "W&C first Read(): -1\n";
 		input_text->appendText(s);
@@ -1176,7 +1177,7 @@ MainWindow::Write_and_Check(int out_len, int in_len)
 	}
 
 	while ((buf[0] == REPORT_ID_IR || read == 0) && count < 5000) { // 5000ms needed in case of "set by remote", this is done by a timer
-		read = Read(in_len);
+		read = Read(show_len);
 		if(read == -1) {
 			s += "W&C loop Read(): -1\n";
 			input_text->appendText(s);
@@ -1187,7 +1188,7 @@ MainWindow::Write_and_Check(int out_len, int in_len)
 		FXThread::sleep(1000000); // 1ms
 	}
 
-	if(buf[1] == STAT_SUCCESS) {
+	if((buf[0] == REPORT_ID_CONFIG_IN) && (buf[1] == STAT_SUCCESS) && (buf[2] == bufw[2]) && (buf[3] == bufw[3])) {
 		s += "************************OK***************************\n";	
 	} else {
 		s += "**********************ERROR**************************\n";
@@ -1866,7 +1867,6 @@ MainWindow::onSave(FXObject *sender, FXSelector sel, void *ptr){
 			FXMessageBox::error(this,MBOX_OK,tr("Error Saving File"),tr("Unable to save file: %s"),file.text());
 			return 1;
 		}
-		onApply(NULL, 0, NULL);
 		map_text21->setModified(0);
 		FXString u;
 		u = "save map to ";
@@ -2034,6 +2034,23 @@ MainWindow::onAppend(FXObject *sender, FXSelector sel, void *ptr){
 }
 
 long
+MainWindow::onReeprom(FXObject *sender, FXSelector sel, void *ptr){
+	if(map_text21->isModified()){
+		if(FXMessageBox::question(this,MBOX_YES_NO,tr("map was changed"),tr("Discard changes to map?"))==MBOX_CLICKED_NO) return 1;
+	}
+	if(FXMessageBox::question(this,MBOX_YES_NO,tr("reset eeprom"),tr("really reset eeprom?"))==MBOX_CLICKED_NO) return 1;
+
+	FXString s;
+	s.format("%d %d %d %d ", REPORT_ID_CONFIG_OUT, STAT_CMD, ACC_RESET, CMD_EEPROM_RESET);
+
+	output_text->setText(s);
+
+	Write_and_Check(4, 4);
+
+	return 1;
+}
+
+long
 MainWindow::onApply(FXObject *sender, FXSelector sel, void *ptr){
 	// fill map[] and mapbeg[]
 	const char *delim = " \t\r\n"; // Space, Tab, CR and LF
@@ -2188,23 +2205,6 @@ long MainWindow::onCmdmsListBox(FXObject*,FXSelector sel,void* ptr){
 long MainWindow::onDevDClicked(FXObject *sender, FXSelector sel, void *ptr){
 	onDisconnect(NULL, 0, NULL);
 	onConnect(NULL, 0, NULL);
-	return 1;
-}
-
-long
-MainWindow::onReeprom(FXObject *sender, FXSelector sel, void *ptr){
-	if(map_text21->isModified()){
-		if(FXMessageBox::question(this,MBOX_YES_NO,tr("map was changed"),tr("Discard changes to map?"))==MBOX_CLICKED_NO) return 1;
-	}
-	if(FXMessageBox::question(this,MBOX_YES_NO,tr("reset eeprom"),tr("really reset eeprom?"))==MBOX_CLICKED_NO) return 1;
-
-	FXString s;
-	s.format("%d %d %d %d ", REPORT_ID_CONFIG_OUT, STAT_CMD, ACC_RESET, CMD_EEPROM_RESET);
-
-	output_text->setText(s);
-
-	Write_and_Check(4, 4);
-
 	return 1;
 }
 

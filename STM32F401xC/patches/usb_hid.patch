@@ -362,19 +362,19 @@ diff -Nrup A/src/usbd_hid_core.c B/src/usbd_hid_core.c
 +  /* STM32->PC */
 +  0x85, REPORT_ID_IR,    /*     REPORT_ID                  */
 +  0x09, 0x02,            /*     USAGE (2)                  */
-+  0x95, HID_IN_REPORT_COUNT-1, /* REPORT_COUNT              */
++  0x95, HID_IN_REPORT_COUNT-1, /* REPORT_COUNT             */
 +  0x81, 0x02,            /*     INPUT (Data,Var,Abs,Vol)   */
 +
 +  /* STM32->PC */
 +  0x85, REPORT_ID_CONFIG_IN, /* REPORT_ID                  */
 +  0x09, 0x03,            /*     USAGE (3)                  */
-+  0x95, HID_IN_REPORT_COUNT-1, /* REPORT_COUNT              */
++  0x95, HID_IN_REPORT_COUNT-1, /* REPORT_COUNT             */
 +  0x81, 0x02,            /*     INPUT (Data,Var,Abs,Vol)   */
 +
 +  /* PC->STM32 */
 +  0x85, REPORT_ID_CONFIG_OUT, /* REPORT_ID                 */
 +  0x09, 0x04,            /*     USAGE (4)                  */
-+  0x95, HID_OUT_REPORT_COUNT-1, /* REPORT_COUNT             */
++  0x95, HID_OUT_REPORT_COUNT-1, /* REPORT_COUNT            */
 +  0x91, 0x02,            /*     OUTPUT (Data,Var,Abs,Vol)  */
 +
 +  /* 39 */

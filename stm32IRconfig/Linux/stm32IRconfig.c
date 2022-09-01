@@ -98,7 +98,7 @@ void write_and_check(int idx, int show_len) {
 	read_stm32(in_size, show_len); // blocking per default, waits until data arrive
 	while (inBuf[0] == REPORT_ID_IR)
 		read_stm32(in_size, show_len);
-	if (inBuf[1] == STAT_SUCCESS) {
+	if((inBuf[0] == REPORT_ID_CONFIG_IN) && (inBuf[1] == STAT_SUCCESS) && (inBuf[2] == outBuf[2]) && (inBufbuf[3] == outBuf[3])) {
 		puts("*****************************OK********************************\n");
 	} else {
 		puts("***************************ERROR*******************************\n");
@@ -136,13 +136,13 @@ int main(int argc, const char **argv) {
 		printf("old firmware!\n");
 	puts("");
 
-cont:	printf("program eeprom: wakeups and macros (p)\nprogram eeprom: wakeups and macros with remote control(P)\nget eeprom (wakeups, macros and capabilities) (g)\nreset (wakeups, macros, alarm and eeprom) (r)\nset alarm (s)\nget alarm (a)\nsend IR (i)\nreboot (b)\nmonitor until ^C (m)\nrun test (t)\nhid test (h)\nexit (x)\n");
+cont:	printf("set eeprom: wakeups, macros and alarm(s)\nset eeprom by remote: wakeups and macros(q)\nget eeprom: wakeups, macros, alarm and capabilities) (g)\nreset: wakeups, macros, alarm and eeprom (r)\nsend IR (i)\nreboot (b)\nmonitor until ^C (m)\nrun test (t)\nhid test (h)\nexit (x)\n");
 	scanf("%s", &c);
 
 	switch (c) {
 
-	case 'p':
-prog:		printf("set wakeup(w)\nset macro(m)\n");
+	case 's':
+set:		printf("set wakeup(w)\nset macro(m)\nset alarm(a)\n");
 		scanf("%s", &d);
 		memset(&outBuf[2], 0, out_size - 2);
 		idx = 2;
@@ -163,8 +163,15 @@ prog:		printf("set wakeup(w)\nset macro(m)\n");
 			scanf("%" SCNx8 "", &s);
 			outBuf[idx++] = s;    // (s+1)-th slot
 			break;
+		case 'a':
+			outBuf[idx++] = CMD_ALARM;
+			printf("enter alarm\n");
+			scanf("%I64x", &i);
+			memcpy(&outBuf[idx], &i, 4);
+			write_and_check(idx + 4, 4);
+			break;
 		default:
-			goto prog;
+			goto set;
 		}
 		printf("enter IRData (protocoladdresscommandflag)\n");
 		scanf("%" SCNx64 "", &i);
@@ -177,8 +184,8 @@ prog:		printf("set wakeup(w)\nset macro(m)\n");
 		write_and_check(idx, 4);
 		break;
 
-	case 'P':
-Prog:		printf("set wakeup with remote control(w)\nset macro with remote control(m)\n");
+	case 'q':
+Set:		printf("set wakeup with remote control(w)\nset macro with remote control(m)\n");
 		scanf("%s", &d);
 		memset(&outBuf[2], 0, out_size - 2);
 		idx = 2;
@@ -200,7 +207,7 @@ Prog:		printf("set wakeup with remote control(w)\nset macro with remote control(
 			outBuf[idx++] = s;    // (s+1)-th slot
 			break;
 		default:
-			goto Prog;
+			goto Set;
 		}
 		printf("enter IRData by pressing a button on the remote control\n");
 		read_stm32(in_size, 10);
@@ -217,7 +224,7 @@ Prog:		printf("set wakeup with remote control(w)\nset macro with remote control(
 		break;
 
 	case 'g':
-get:		printf("get wakeup(w)\nget macro slot(m)\nget caps(c)\n");
+get:		printf("get wakeup(w)\nget macro slot(m)\nget caps(c)\nget alarm(a)\n");
 		scanf("%s", &d);
 		memset(&outBuf[2], 0, out_size - 2);
 		idx = 2;
@@ -228,6 +235,7 @@ get:		printf("get wakeup(w)\nget macro slot(m)\nget caps(c)\n");
 			scanf("%" SCNx8 "", &s);
 			outBuf[idx++] = CMD_WAKE;
 			outBuf[idx++] = s;    // (s+1)-th slot
+			write_and_check(idx, 10);
 			break;
 		case 'm':
 			printf("enter macro number (starting with 0)\n");
@@ -237,6 +245,11 @@ get:		printf("get wakeup(w)\nget macro slot(m)\nget caps(c)\n");
 			printf("enter slot number, 0 for trigger\n");
 			scanf("%" SCNx8 "", &s);
 			outBuf[idx++] = s;    // (s+1)-th slot
+			write_and_check(idx, 10);
+			break;
+		case 'a':
+			outBuf[idx++] = CMD_ALARM;
+			write_and_check(idx, 8);
 			break;
 		case 'c':
 			jump_to_firmware = 0;
@@ -281,7 +294,6 @@ again:			;
 		default:
 			goto get;
 		}
-		write_and_check(idx, 10);
 out:
 		break;
 
@@ -307,6 +319,9 @@ reset:		printf("reset wakeup(w)\nreset macro slot(m)\nreset alarm(a)\nreset eepr
 			scanf("%" SCNx8 "", &s);
 			outBuf[idx++] = s;    // (s+1)-th slot
 			break;
+		case 'e':
+			outBuf[idx++] = CMD_EEPROM_RESET;
+			break;
 		case 'a':
 			outBuf[idx++] = CMD_ALARM;
 			break;
@@ -317,25 +332,6 @@ reset:		printf("reset wakeup(w)\nreset macro slot(m)\nreset alarm(a)\nreset eepr
 			goto reset;
 		}
 		write_and_check(idx, 4);
-		break;
-
-	case 's':
-		memset(&outBuf[2], 0, out_size - 2);
-		idx = 2;
-		outBuf[idx++] = ACC_SET;
-		outBuf[idx++] = CMD_ALARM;
-		printf("enter alarm\n");
-		scanf("%" SCNx64 "", &i);
-		memcpy(&outBuf[idx], &i, 4);
-		write_and_check(idx + 4, 4);
-		break;
-
-	case 'a':
-		memset(&outBuf[2], 0, out_size - 2);
-		idx = 2;
-		outBuf[idx++] = ACC_GET;
-		outBuf[idx++] = CMD_ALARM;
-		write_and_check(idx, 8);
 		break;
 
 	case 'i':

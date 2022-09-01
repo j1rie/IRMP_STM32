@@ -857,8 +857,9 @@ int main(void)
 					check_reboot(&myIRData);
 				}
 
-				/* send IR-data */
-				USB_HID_SendData(REPORT_ID_IR, (uint8_t *) &myIRData, sizeof(myIRData));
+				/* send IR-data, but only if host is running, otherwise the transfer will not complete, and we are stuck */
+				if(host_running())
+					USB_HID_SendData(REPORT_ID_IR, (uint8_t *) &myIRData, sizeof(myIRData));
 
 #ifdef TM1637
 				/* send IR-data to 4-digit-display */
