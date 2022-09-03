@@ -3,8 +3,9 @@
 A remote control receiver with many functions based on cheap hardware.
 
 ![Stick](https://raw.githubusercontent.com/wiki/j1rie/IRMP_STM32_KBD/images/Stick.jpg)
+  
 ![Stick am Board](https://raw.githubusercontent.com/wiki/j1rie/IRMP_STM32_KBD/images/Stick_am_Board.jpg)
- 
+
 ## Introduction
 For 2 € you can buy on ebay a ST-Link emulator or a STM32F103 development board, manufactured in China usually. Onto the STM32F103 mikrocontroller on it an open source firmware with many functions will be flashed.
 
@@ -42,12 +43,14 @@ A macro makes it possible to send a sequence of IR commands via the send diode o
 
 ## Creating a keymap
 The stm32IRconfig_gui can be used for building a keymap with the remote control.  
-There are two methods.
-
+There are two methods.  
+  
+(1)  
 ![write_IR](https://raw.githubusercontent.com/wiki/j1rie/IRMP_STM32_KBD/images/write_IR.jpg)   
 First method: Press "receive mode" and open the template keymap.
-Click the line with the button's name, press the button on the remote, press "write IR" - repeat this for all buttons. 
-
+Click the line with the button's name, press the button on the remote, press "write IR" - repeat this for all buttons.  
+  
+(2)  
 ![append](https://raw.githubusercontent.com/wiki/j1rie/IRMP_STM32_KBD/images/append.jpg)   
 Second method: Press "receive mode".
 Press the button on the remote, enter the button's name into the textfield Key and press "append" - repeat this for all buttons.
