@@ -356,7 +356,7 @@ uint8_t eeprom_restore(uint8_t *buf, uint16_t virt_addr)
 {
 	uint8_t i, retVal = 0;
 	for(i=0; i<3; i++) {
-		if (EE_ReadVariable(virt_addr + i, (uint16_t *) &buf[2*i])) {
+		if (EE_ReadVariable(virt_addr + i, (uint16_t *) &buf[2*i])) { // TODO cache eeprom (or wait for STM to do so)
 			/* the variable was not found or no valid page was found */
 			*((uint16_t *) &buf[2*i]) = 0xFFFF;
 			retVal = 1;
@@ -805,14 +805,15 @@ int main(void)
 		if (!AlarmValue && !host_running())
 			Wakeup();
 
-		if (send_ir_on_delay && last_magic_sent != send_ir_on_delay) {
+		/* always wait for previous transfer to complete before sending again, consider using a send buffer */
+		if (PrevXferComplete && host_running() && send_ir_on_delay && last_magic_sent != send_ir_on_delay) {
 			send_magic();
 			last_magic_sent = send_ir_on_delay;
 		}
 
 		wakeup_reset();
 
-		/* wait for previous transfer to complete before sending again and test if configuration command is received */
+		/* test if configuration command is received */
 		if(PrevXferComplete && USB_HID_Data_Received && buf[0] == REPORT_ID_CONFIG_OUT && buf[1] == STAT_CMD) {
 			USB_HID_Data_Received = 0;
 
@@ -844,28 +845,25 @@ int main(void)
 				reboot();
 		}
 
-		/* wait for previous transfer to complete before sending again */
-		if (PrevXferComplete) {
-			/* poll IR-data */
-			if (irmp_get_data(&myIRData)) {
-				myIRData.flags = myIRData.flags & IRMP_FLAG_REPETITION;
-				if (!(myIRData.flags)) {
-					store_wakeup(&myIRData);
-					check_macros(&myIRData);
-					check_wakeups(&myIRData);
-					check_resets(&myIRData);
-					check_reboot(&myIRData);
-				}
+		/* poll IR-data */
+		if (PrevXferComplete && irmp_get_data(&myIRData)) {
+			myIRData.flags = myIRData.flags & IRMP_FLAG_REPETITION;
+			if (!(myIRData.flags)) {
+				store_wakeup(&myIRData);
+				check_macros(&myIRData);
+				check_wakeups(&myIRData);
+				check_resets(&myIRData);
+				check_reboot(&myIRData);
+			}
 
-				/* send IR-data, but only if host is running, otherwise the transfer will not complete, and we are stuck */
-				if(host_running())
-					USB_HID_SendData(REPORT_ID_IR, (uint8_t *) &myIRData, sizeof(myIRData));
+			/* send IR-data, but only if host is running, otherwise the transfer will not complete, and we are stuck */
+			if(host_running())
+				USB_HID_SendData(REPORT_ID_IR, (uint8_t *) &myIRData, sizeof(myIRData));
 
 #ifdef TM1637
-				/* send IR-data to 4-digit-display */
-				tm1637DisplayHex(myIRData.command);
+			/* send IR-data to 4-digit-display */
+			tm1637DisplayHex(myIRData.command);
 #endif
-			}
 		}
 	}
 }
