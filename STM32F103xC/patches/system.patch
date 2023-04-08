@@ -1,0 +1,28 @@
+diff -Nrup A/system_stm32f10x.c B/system_stm32f10x.c
+--- A/system_stm32f10x.c	2017-06-16 10:14:04.000000000 +0200
++++ B/system_stm32f10x.c	2020-04-30 02:58:38.658638774 +0200
+@@ -79,6 +79,7 @@
+   */
+ 
+ #include "stm32f10x.h"
++#include "config.h" /* CooCox workaround */
+ 
+ /**
+   * @}
+@@ -141,8 +142,16 @@
+ /*!< Uncomment the following line if you need to relocate your vector Table in
+      Internal SRAM. */ 
+ /* #define VECT_TAB_SRAM */
++#if defined(Bootloader)
++#ifdef Maple_Boot
++#define VECT_TAB_OFFSET  0x5000
++#else
++#define VECT_TAB_OFFSET  0x2000
++#endif
++#else
+ #define VECT_TAB_OFFSET  0x0 /*!< Vector Table base offset field. 
+                                   This value must be a multiple of 0x200. */
++#endif
+ 
+ 
+ /**

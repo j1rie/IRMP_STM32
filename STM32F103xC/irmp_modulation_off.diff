@@ -1,0 +1,140 @@
+diff -Nrup irmp.orig/irsnd.c irmp/irsnd.c
+--- irmp.orig/irsnd.c	2020-10-25 19:20:00.000000000 +0100
++++ irmp/irsnd.c	2020-12-16 17:15:31.140442417 +0100
+@@ -561,6 +561,7 @@ irsnd_on (void)
+ {
+     if (! irsnd_is_on)
+     {
++#if IRSND_USE_MODULATION==1
+ #ifndef ANALYZE
+ #  if defined(PIC_C18)                                  // PIC C18
+         PWMon();
+@@ -615,6 +616,14 @@ irsnd_on (void)
+ #    endif // IRSND_OCx
+ #  endif // C18
+ #endif // ANALYZE
++#else
++#        if defined (ARM_STM32)
++        GPIO_ResetBits(IRSND_PORT, IRSND_BIT);          // set IRSND_BIT to low
++        //GPIO_SetBits(IRSND_PORT, IRSND_BIT);          // set IRSND_BIT to high
++#        else
++        IRSND_PORT  &= ~(1<<IRSND_BIT);          // set IRSND_BIT to low
++#        endif
++#endif // IRSND_USE_MODULATION
+ 
+ #if IRSND_USE_CALLBACK == 1
+         if (irsnd_callback_ptr)
+@@ -638,6 +647,7 @@ irsnd_off (void)
+ {
+     if (irsnd_is_on)
+     {
++#if IRSND_USE_MODULATION==1
+ #ifndef ANALYZE
+ 
+ #  if defined(PIC_C18)                                                                  // PIC C18
+@@ -696,6 +706,14 @@ irsnd_off (void)
+         IRSND_PORT  &= ~(1<<IRSND_BIT);                 // set IRSND_BIT to low
+ #  endif //C18
+ #endif // ANALYZE
++#else
++#        if defined (ARM_STM32)
++        GPIO_SetBits(IRSND_PORT, IRSND_BIT);                // set IRSND_BIT to high
++        //GPIO_ResetBits(IRSND_PORT, IRSND_BIT);                // set IRSND_BIT to low
++#        else
++        IRSND_PORT |= (1<<IRSND_BIT);                // set IRSND_BIT to high
++#        endif
++#endif // IRSND_USE_MODULATION
+ 
+ #if IRSND_USE_CALLBACK == 1
+         if (irsnd_callback_ptr)
+@@ -721,6 +739,7 @@ extern void pwm_init(uint16_t freq);
+ static void
+ irsnd_set_freq (IRSND_FREQ_TYPE freq)
+ {
++#if IRSND_USE_MODULATION==1
+ #ifndef ANALYZE
+ #  if defined(PIC_C18)                                                                      // PIC C18 or XC8
+ #    if defined(__12F1840)                                                                  // XC8
+@@ -846,6 +865,8 @@ irsnd_set_freq (IRSND_FREQ_TYPE freq)
+ #    endif
+ #  endif //PIC_C18
+ #endif // ANALYZE
++#else
++#endif // IRSND_USE_MODULATION
+ }
+ 
+ /*---------------------------------------------------------------------------------------------------------------------------------------------------
+@@ -856,6 +877,7 @@ irsnd_set_freq (IRSND_FREQ_TYPE freq)
+ void
+ irsnd_init (void)
+ {
++#if IRSND_USE_MODULATION==1
+ #ifndef ANALYZE
+ #  if defined(PIC_C18)                                                      // PIC C18 or XC8 compiler
+ #    if ! defined(__12F1840)                                                // only C18:
+@@ -996,6 +1018,49 @@ irsnd_init (void)
+         irsnd_set_freq (IRSND_FREQ_36_KHZ);                                         // default frequency
+ #  endif //PIC_C18
+ #endif // ANALYZE
++#else
++#        if defined (ARM_STM32)
++        GPIO_InitTypeDef            GPIO_InitStructure;
++
++       /* GPIOx clock enable */
++#    if defined (ARM_STM32L1XX)
++        RCC_AHBPeriphClockCmd(IRSND_PORT_RCC, ENABLE);
++#    elif defined (ARM_STM32F10X)
++        RCC_APB2PeriphClockCmd(IRSND_PORT_RCC, ENABLE);
++#    elif defined (ARM_STM32F30X)
++        RCC_AHBPeriphClockCmd(IRSND_PORT_RCC, ENABLE);
++#    elif defined (ARM_STM32F4XX)
++        RCC_AHB1PeriphClockCmd(IRSND_PORT_RCC, ENABLE);
++#    endif
++
++        /* GPIO Configuration */
++        GPIO_InitStructure.GPIO_Pin = IRSND_BIT;
++#    if defined (ARM_STM32L1XX) || defined (ARM_STM32F4XX)
++        GPIO_InitStructure.GPIO_Mode = GPIO_Mode_AF;
++        GPIO_InitStructure.GPIO_Speed = GPIO_Speed_2MHz;
++        GPIO_InitStructure.GPIO_OType = GPIO_OType_PP;
++        GPIO_InitStructure.GPIO_PuPd = GPIO_PuPd_NOPULL;
++        GPIO_Init(IRSND_PORT, &GPIO_InitStructure);
++        GPIO_PinAFConfig(IRSND_PORT, (uint8_t)IRSND_BIT_NUMBER, IRSND_GPIO_AF);
++#    elif defined (ARM_STM32F10X)
++        GPIO_InitStructure.GPIO_Speed = GPIO_Speed_2MHz;
++        GPIO_InitStructure.GPIO_Mode = GPIO_Mode_Out_PP;
++        GPIO_Init(IRSND_PORT, &GPIO_InitStructure);
++#    elif defined (ARM_STM32F30X)
++        GPIO_InitStructure.GPIO_Mode = GPIO_Mode_AF;
++        GPIO_InitStructure.GPIO_Speed = GPIO_Speed_2MHz;
++        GPIO_InitStructure.GPIO_OType = GPIO_OType_PP;
++        GPIO_InitStructure.GPIO_PuPd = GPIO_PuPd_NOPULL;
++        GPIO_Init(IRSND_PORT, &GPIO_InitStructure);
++
++#    endif
++
++        GPIO_SetBits(IRSND_PORT, IRSND_BIT);                // set IRSND_BIT to high
++        //GPIO_ResetBits(IRSND_PORT, IRSND_BIT);                // set IRSND_BIT to low
++#        else 
++       IRSND_PORT |= (1<<IRSND_BIT);                // set IRSND_BIT to high
++#        endif
++#endif // IRSND_USE_MODULATION
+ }
+ 
+ #if IRSND_USE_CALLBACK == 1
+diff -Nrup irmp.orig/irsndconfig.h irmp/irsndconfig.h
+--- irmp.orig/irsndconfig.h	2020-10-25 19:20:00.000000000 +0100
++++ irmp/irsndconfig.h	2020-12-16 13:55:54.403638200 +0100
+@@ -195,4 +191,12 @@
+ #  define IRSND_USE_CALLBACK                    0                       // flag: 0 = don't use callbacks, 1 = use callbacks, default is 0
+ #endif
+ 
++/*---------------------------------------------------------------------------------------------------------------------------------------------------
++ * Disable Modulation for RF or wired connection
++ *---------------------------------------------------------------------------------------------------------------------------------------------------
++ */
++#ifndef IRSND_USE_MODULATION
++#  define IRSND_USE_MODULATION                  0                       // flag: 0 = don't use modulation, 1 = use modulation, default is 1
++#endif
++
+ #endif // _IRSNDCONFIG_H_

@@ -1,0 +1,117 @@
+diff -Nrup A/inc/eeprom.h B/inc/eeprom.h
+--- A/inc/eeprom.h	2009-08-04 16:25:00.000000000 +0200
++++ B/inc/eeprom.h	2022-07-21 20:18:04.880102500 +0200
+@@ -35,8 +35,8 @@
+ #endif
+ 
+ /* EEPROM start address in Flash */
+-#define EEPROM_START_ADDRESS    ((uint32_t)0x08010000) /* EEPROM emulation start address:
+-                                                  after 64KByte of used Flash memory */
++#define EEPROM_START_ADDRESS    ((uint32_t)0x0801F800) /* F103C8 has actually 128k = 0x20000 Flash */
++                                                       /* 0x8020000 - 2 * 0x400 = 0x801F800 */
+ 
+ /* Pages 0 and 1 base and end addresses */
+ #define PAGE0_BASE_ADDRESS      ((uint32_t)(EEPROM_START_ADDRESS + 0x000))
+@@ -65,7 +65,7 @@
+ #define PAGE_FULL               ((uint8_t)0x80)
+ 
+ /* Variables' number */
+-#define NumbOfVar               ((uint8_t)0x03)
++#define NumbOfVar ((uint8_t) (((MACRO_DEPTH + 1) * MACRO_SLOTS + WAKE_SLOTS) * SIZEOF_IR/2))
+ 
+ /* Exported types ------------------------------------------------------------*/
+ /* Exported macro ------------------------------------------------------------*/
+@@ -73,6 +73,7 @@
+ uint16_t EE_Init(void);
+ uint16_t EE_ReadVariable(uint16_t VirtAddress, uint16_t* Data);
+ uint16_t EE_WriteVariable(uint16_t VirtAddress, uint16_t Data);
++FLASH_Status EE_Format(void);
+ 
+ #endif /* __EEPROM_H */
+ 
+diff -Nrup A/src/eeprom.c B/src/eeprom.c
+--- A/src/eeprom.c	2009-08-04 16:25:00.000000000 +0200
++++ B/src/eeprom.c	2022-07-20 17:03:29.412211455 +0200
+@@ -37,7 +37,7 @@ extern uint16_t VirtAddVarTab[NumbOfVar]
+ 
+ /* Private function prototypes -----------------------------------------------*/
+ /* Private functions ---------------------------------------------------------*/
+-static FLASH_Status EE_Format(void);
++//static FLASH_Status EE_Format(void);
+ static uint16_t EE_FindValidPage(uint8_t Operation);
+ static uint16_t EE_VerifyPageFullWriteVariable(uint16_t VirtAddress, uint16_t Data);
+ static uint16_t EE_PageTransfer(uint16_t VirtAddress, uint16_t Data);
+@@ -111,19 +111,19 @@ uint16_t EE_Init(void)
+         /* Transfer data from Page1 to Page0 */
+         for (VarIdx = 0; VarIdx < NumbOfVar; VarIdx++)
+         {
+-          if (( *(__IO uint16_t*)(PAGE0_BASE_ADDRESS + 6)) == VirtAddVarTab[VarIdx])
++          if (( *(__IO uint16_t*)(PAGE0_BASE_ADDRESS + 6)) == VarIdx)
+           {
+             x = VarIdx;
+           }
+           if (VarIdx != x)
+           {
+             /* Read the last variables' updates */
+-            ReadStatus = EE_ReadVariable(VirtAddVarTab[VarIdx], &DataVar);
++            ReadStatus = EE_ReadVariable(VarIdx, &DataVar);
+             /* In case variable corresponding to the virtual address was found */
+             if (ReadStatus != 0x1)
+             {
+               /* Transfer the variable to the Page0 */
+-              EepromStatus = EE_VerifyPageFullWriteVariable(VirtAddVarTab[VarIdx], DataVar);
++              EepromStatus = EE_VerifyPageFullWriteVariable(VarIdx, DataVar);
+               /* If program operation was failed, a Flash error code is returned */
+               if (EepromStatus != FLASH_COMPLETE)
+               {
+@@ -202,19 +202,19 @@ uint16_t EE_Init(void)
+         /* Transfer data from Page0 to Page1 */
+         for (VarIdx = 0; VarIdx < NumbOfVar; VarIdx++)
+         {
+-          if ((*(__IO uint16_t*)(PAGE1_BASE_ADDRESS + 6)) == VirtAddVarTab[VarIdx])
++          if ((*(__IO uint16_t*)(PAGE1_BASE_ADDRESS + 6)) == VarIdx)
+           {
+             x = VarIdx;
+           }
+           if (VarIdx != x)
+           {
+             /* Read the last variables' updates */
+-            ReadStatus = EE_ReadVariable(VirtAddVarTab[VarIdx], &DataVar);
++            ReadStatus = EE_ReadVariable(VarIdx, &DataVar);
+             /* In case variable corresponding to the virtual address was found */
+             if (ReadStatus != 0x1)
+             {
+               /* Transfer the variable to the Page1 */
+-              EepromStatus = EE_VerifyPageFullWriteVariable(VirtAddVarTab[VarIdx], DataVar);
++              EepromStatus = EE_VerifyPageFullWriteVariable(VarIdx, DataVar);
+               /* If program operation was failed, a Flash error code is returned */
+               if (EepromStatus != FLASH_COMPLETE)
+               {
+@@ -347,7 +347,7 @@ uint16_t EE_WriteVariable(uint16_t VirtA
+   * @retval Status of the last operation (Flash write or erase) done during
+   *         EEPROM formating
+   */
+-static FLASH_Status EE_Format(void)
++FLASH_Status EE_Format(void)
+ {
+   FLASH_Status FlashStatus = FLASH_COMPLETE;
+ 
+@@ -568,15 +568,15 @@ static uint16_t EE_PageTransfer(uint16_t
+   /* Transfer process: transfer variables from old to the new active page */
+   for (VarIdx = 0; VarIdx < NumbOfVar; VarIdx++)
+   {
+-    if (VirtAddVarTab[VarIdx] != VirtAddress)  /* Check each variable except the one passed as parameter */
++    if (VarIdx != VirtAddress)  /* Check each variable except the one passed as parameter */
+     {
+       /* Read the other last variable updates */
+-      ReadStatus = EE_ReadVariable(VirtAddVarTab[VarIdx], &DataVar);
++      ReadStatus = EE_ReadVariable(VarIdx, &DataVar);
+       /* In case variable corresponding to the virtual address was found */
+       if (ReadStatus != 0x1)
+       {
+         /* Transfer the variable to the new active page */
+-        EepromStatus = EE_VerifyPageFullWriteVariable(VirtAddVarTab[VarIdx], DataVar);
++        EepromStatus = EE_VerifyPageFullWriteVariable(VarIdx, DataVar);
+         /* If program operation was failed, a Flash error code is returned */
+         if (EepromStatus != FLASH_COMPLETE)
+         {

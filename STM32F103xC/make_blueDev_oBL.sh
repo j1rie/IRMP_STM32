@@ -1,0 +1,7 @@
+#! /bin/bash
+make clean-objects
+make -j3 SimpleCircuit=1 Platform=blueDev
+#make Bootloader=1 SimpleCircuit=1 Platform=blackDev clean-objects
+make clean-objects
+rm *.elf
+rm *.map
