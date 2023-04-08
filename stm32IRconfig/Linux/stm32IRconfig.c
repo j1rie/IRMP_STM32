@@ -36,7 +36,8 @@ enum command {
 	CMD_MACRO,
 	CMD_WAKE,
 	CMD_REBOOT,
-	CMD_EEPROM_RESET
+	CMD_EEPROM_RESET,
+	CMD_EEPROM_COMMIT
 };
 
 enum status {
@@ -59,7 +60,7 @@ unsigned int in_size, out_size;
 static bool open_stm32(const char *devicename) {
 	stm32fd = open(devicename, O_RDWR );
 	if (stm32fd == -1) {
-		printf("error opening stm32 device: %s\n",strerror(errno));
+		printf("error opening stm32 device: %s\n", strerror(errno));
 		return false;
 	}
 	printf("opened stm32 device\n");
@@ -98,7 +99,7 @@ void write_and_check(int idx, int show_len) {
 	read_stm32(in_size, show_len); // blocking per default, waits until data arrive
 	while (inBuf[0] == REPORT_ID_IR)
 		read_stm32(in_size, show_len);
-	if((inBuf[0] == REPORT_ID_CONFIG_IN) && (inBuf[1] == STAT_SUCCESS) && (inBuf[2] == outBuf[2]) && (inBufbuf[3] == outBuf[3])) {
+	if((inBuf[0] == REPORT_ID_CONFIG_IN) && (inBuf[1] == STAT_SUCCESS) && (inBuf[2] == outBuf[2]) && (inBuf[3] == outBuf[3])) {
 		puts("*****************************OK********************************\n");
 	} else {
 		puts("***************************ERROR*******************************\n");
@@ -136,13 +137,13 @@ int main(int argc, const char **argv) {
 		printf("old firmware!\n");
 	puts("");
 
-cont:	printf("set eeprom: wakeups, macros and alarm(s)\nset eeprom by remote: wakeups and macros(q)\nget eeprom: wakeups, macros, alarm and capabilities) (g)\nreset: wakeups, macros, alarm and eeprom (r)\nsend IR (i)\nreboot (b)\nmonitor until ^C (m)\nrun test (t)\nhid test (h)\nexit (x)\n");
+cont:	printf("set eeprom: wakeups, macros, alarm and commit(s)\nset eeprom by remote: wakeups and macros(q)\nget eeprom: wakeups, macros, alarm and capabilities) (g)\nreset: wakeups, macros, alarm and eeprom (r)\nsend IR (i)\nreboot (b)\nmonitor until ^C (m)\nrun test (t)\nhid test (h)\nexit (x)\n");
 	scanf("%s", &c);
 
 	switch (c) {
 
 	case 's':
-set:		printf("set wakeup(w)\nset macro(m)\nset alarm(a)\n");
+set:		printf("set wakeup(w)\nset macro(m)\nset alarm(a)\ncommit(c)\n");
 		scanf("%s", &d);
 		memset(&outBuf[2], 0, out_size - 2);
 		idx = 2;
@@ -153,6 +154,15 @@ set:		printf("set wakeup(w)\nset macro(m)\nset alarm(a)\n");
 			scanf("%" SCNx8 "", &s);
 			outBuf[idx++] = CMD_WAKE;
 			outBuf[idx++] = s;    // (s+1)-th slot
+			printf("enter IRData (protocoladdresscommandflag)\n");
+			scanf("%" SCNx64 "", &i);
+			outBuf[idx++] = (i>>40) & 0xFF;
+			outBuf[idx++] = (i>>24) & 0xFF;
+			outBuf[idx++] = (i>>32) & 0xFF;
+			outBuf[idx++] = (i>>8) & 0xFF;
+			outBuf[idx++] = (i>>16) & 0xFF;
+			outBuf[idx++] = i & 0xFF;
+			write_and_check(idx, 4);
 			break;
 		case 'm':
 			printf("enter macro number (starting with 0)\n");
@@ -162,26 +172,30 @@ set:		printf("set wakeup(w)\nset macro(m)\nset alarm(a)\n");
 			printf("enter slot number, 0 for trigger\n");
 			scanf("%" SCNx8 "", &s);
 			outBuf[idx++] = s;    // (s+1)-th slot
+			printf("enter IRData (protocoladdresscommandflag)\n");
+			scanf("%" SCNx64 "", &i);
+			outBuf[idx++] = (i>>40) & 0xFF;
+			outBuf[idx++] = (i>>24) & 0xFF;
+			outBuf[idx++] = (i>>32) & 0xFF;
+			outBuf[idx++] = (i>>8) & 0xFF;
+			outBuf[idx++] = (i>>16) & 0xFF;
+			outBuf[idx++] = i & 0xFF;
+			write_and_check(idx, 4);
 			break;
 		case 'a':
 			outBuf[idx++] = CMD_ALARM;
 			printf("enter alarm\n");
-			scanf("%I64x", &i);
+			scanf("%SCNx64", &i);
 			memcpy(&outBuf[idx], &i, 4);
 			write_and_check(idx + 4, 4);
+			break;
+		case 'c':
+			outBuf[idx++] = CMD_EEPROM_COMMIT;
+			write_and_check(idx, 4);
 			break;
 		default:
 			goto set;
 		}
-		printf("enter IRData (protocoladdresscommandflag)\n");
-		scanf("%" SCNx64 "", &i);
-		outBuf[idx++] = (i>>40) & 0xFF;
-		outBuf[idx++] = (i>>24) & 0xFF;
-		outBuf[idx++] = (i>>32) & 0xFF;
-		outBuf[idx++] = (i>>8) & 0xFF;
-		outBuf[idx++] = (i>>16) & 0xFF;
-		outBuf[idx++] = i & 0xFF;
-		write_and_check(idx, 4);
 		break;
 
 	case 'q':
@@ -324,9 +338,6 @@ reset:		printf("reset wakeup(w)\nreset macro slot(m)\nreset alarm(a)\nreset eepr
 			break;
 		case 'a':
 			outBuf[idx++] = CMD_ALARM;
-			break;
-		case 'e':
-			outBuf[idx++] = CMD_EEPROM_RESET;
 			break;
 		default:
 			goto reset;

@@ -567,6 +567,7 @@ MainWindow::MainWindow(FXApp *app)
 	max = 0;
 	count = 0;
 	out_size = 64; // at first out_size is unknown, so use HID maximum
+	in_size = 64; // at first in_size is unknown, so use HID maximum TODO check this
 }
 
 MainWindow::~MainWindow()
