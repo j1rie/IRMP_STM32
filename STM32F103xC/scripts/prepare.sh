@@ -39,7 +39,7 @@ unzip -j $ar1 \
       $path/Projects/Custom_HID/inc/stm32f10x_conf.h
 mkdir -p startup
 cd startup
-unzip -j $ar2 $path/Libraries/CMSIS/Device/ST/STM32F10x/Source/Templates/gcc/startup_stm32f10x_md.s
+unzip -j $ar2 $path/Libraries/CMSIS/Device/ST/STM32F10x/Source/Templates/gcc/startup_stm32f10x_hd.s
 cd ../..
 mkdir -p cmsis
 cd cmsis

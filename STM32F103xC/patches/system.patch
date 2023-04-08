@@ -17,7 +17,7 @@ diff -Nrup A/system_stm32f10x.c B/system_stm32f10x.c
 +#ifdef Maple_Boot
 +#define VECT_TAB_OFFSET  0x5000
 +#else
-+#define VECT_TAB_OFFSET  0x2000
++#define VECT_TAB_OFFSET  0x3000
 +#endif
 +#else
  #define VECT_TAB_OFFSET  0x0 /*!< Vector Table base offset field. 

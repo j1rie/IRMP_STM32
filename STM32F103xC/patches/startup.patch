@@ -1,7 +1,7 @@
 diff -Nrup A/startup/startup_stm32f10x_md.s B/startup/startup_stm32f10x_md.s
---- A/startup/startup_stm32f10x_md.s	2017-05-05 16:10:18.000000000 +0200
-+++ B/startup/startup_stm32f10x_md.s	2020-04-30 03:52:33.915828904 +0200
-@@ -100,7 +100,7 @@ LoopFillZerobss:
+--- A/startup/startup_stm32f10x_hd.s	2017-05-05 16:10:18.000000000 +0200
++++ B/startup/startup_stm32f10x_hd.s	2020-04-30 03:52:33.915828904 +0200
+@@ -102,7 +102,7 @@ LoopFillZerobss:
  /* Call the clock system intitialization function.*/
      bl  SystemInit
  /* Call static constructors */
@@ -10,7 +10,7 @@ diff -Nrup A/startup/startup_stm32f10x_md.s B/startup/startup_stm32f10x_md.s
  /* Call the application's entry point.*/
  	bl	main
  	bx	lr
-@@ -132,7 +132,7 @@ Infinite_Loop:
+@@ -134,7 +134,7 @@ Infinite_Loop:
  
  
  g_pfnVectors:

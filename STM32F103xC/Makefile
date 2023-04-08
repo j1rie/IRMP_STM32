@@ -1,12 +1,12 @@
 -include Make.config
 
-TARGET ?= F103x8
-PLATFORM ?= STM32F103C8
-#STM32F103C8
-#	MD PL - medium density performance line
+TARGET ?= F103CC
+PLATFORM ?= STM32F103CC
+#STM32F103CC - a fake from China
+#	HD PL - high density performance line
 #	max. 72MHz
-#	64 KB (0x10000) of Flash memory
-#	20 KB (0x05000) of SRAM
+#	256 KB (0x40000) of Flash memory
+#	48 KB (0x05000) of SRAM - a guess, actually unknown
 
 CROSS_COMPILE ?= arm-none-eabi-
 AS = $(CROSS_COMPILE)as
@@ -20,9 +20,9 @@ INCLUDES = -Icmsis -Icmsis_boot -Istm_lib/inc -Iusb_hid/inc -Iirmp -Isrc
 ifdef DEBUG
 INCLUDES += -Isemihosting -Istdio
 endif
-DEFINES = -D$(PLATFORM) -DSTM32F10X_MD -DUSE_STDPERIPH_DRIVER -DSOF_CALLBACK
+DEFINES = -D$(PLATFORM) -DSTM32F10X_HD -DUSE_STDPERIPH_DRIVER -DSOF_CALLBACK
 
-OBJS = cmsis_boot/startup/startup_stm32f10x_md.o cmsis_boot/system_stm32f10x.o\
+OBJS = cmsis_boot/startup/startup_stm32f10x_hd.o cmsis_boot/system_stm32f10x.o\
        src/irmpmain.o src/st_link_leds.o src/usb_hid.o src/main.o\
        irmp/irmp.o irmp/irsnd.o\
        stm_lib/src/misc.o stm_lib/src/stm32f10x_exti.o\
