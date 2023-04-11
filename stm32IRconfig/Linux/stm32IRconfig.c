@@ -185,7 +185,7 @@ set:		printf("set wakeup(w)\nset macro(m)\nset alarm(a)\ncommit(c)\n");
 		case 'a':
 			outBuf[idx++] = CMD_ALARM;
 			printf("enter alarm\n");
-			scanf("%SCNx64", &i);
+			scanf("%" SCNx64 "", &i);
 			memcpy(&outBuf[idx], &i, 4);
 			write_and_check(idx + 4, 4);
 			break;
@@ -272,13 +272,15 @@ get:		printf("get wakeup(w)\nget macro slot(m)\nget caps(c)\nget alarm(a)\n");
 				outBuf[idx] = l;
 				write_stm32(idx+1);
 				usleep(3000);
-				read_stm32(in_size, l == 0 ? 7 : in_size);
+				read_stm32(in_size, l == 0 ? 9 : in_size);
 				while (inBuf[0] == 0x01)
-					read_stm32(in_size, l == 0 ? 7 : in_size);
+					read_stm32(in_size, l == 0 ? 9 : in_size);
 				if (!l) { // first query for slots and depth
 					printf("macro_slots: %u\n", inBuf[4]);
 					printf("macro_depth: %u\n", inBuf[5]);
 					printf("wakeup_slots: %u\n", inBuf[6]);
+					printf("hid in report count: %u\n", inBuf[7]);
+					printf("hid out report count: %u\n", inBuf[8]);
 				} else {
 					if(!jump_to_firmware) { // queries for supported_protocols
 						printf("protocols: ");

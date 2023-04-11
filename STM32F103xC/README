@@ -1,1 +1,11 @@
 See make.config.template.
+
+"STM32F103CC" is a name I gave to the microcontroller showing up as
+Device: STM32 F10xx High-density
+Device ID: 0x414
+Revision ID: Rev. Z
+Flash Size: 256kbytes
+in ST-Link Utility
+and with idcode: 0x2ba01477 in openocd
+In the matrix of STM32F103 devices a device with 48 pins and 256 kB flash would be a STM32F103CC.
+But it does not exist in that matrix.

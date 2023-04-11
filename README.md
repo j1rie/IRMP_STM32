@@ -83,15 +83,19 @@ Compile with arm-none-eabi-gcc.
 See /STM32Fxxxxx/src/config.h.
 
 ## Flashing the bootloader with a ST-Link
-Get the STM32 ST-Link Utility.  
 Connect  
 Programmer SWDIO -> IO  
 Programmer SWCLK -> CLK  
 Programmer GND -> G  
 Programmer 3V3 -> V3  
-File - Open File - boot.blackDev.bin (https://github.com/j1rie/STM32F103-bootloader/tree/master/binaries
-)  
+Windows:  
+Get the STM32 ST-Link Utility.  
+File - Open File - boot.blackDev.bin (https://github.com/j1rie/STM32F103-bootloader/tree/master/binaries)  
 Target - Program & Verify (confirm a message about read out protection, if it appears)  
+Linux:  
+openocd -f ocd-program.cfg  
+In case the flash is locked, do openocd -f ocd-unlock.cfg first, disconnect and reconnect the device, and run openocd -f ocd-program.cfg again.  
+The files are in the STM32Fxxx(yy)-bootloader repos.  
 https://github.com/j1rie/IRMP_STM32_KBD/wiki/Herstellungsprozess-Schwarze#bootloader-flashen  
 
 ## Flashing the firmware
