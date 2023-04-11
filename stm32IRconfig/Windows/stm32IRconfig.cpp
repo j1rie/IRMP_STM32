@@ -150,9 +150,9 @@ int main(int argc, char* argv[])
 	#else
 	usleep(3000);
 	#endif
-	hid_read(handle, inBuf, 9);
+	hid_read(handle, inBuf, 64);
 	while (inBuf[0] == 0x01)
-		hid_read(handle, inBuf, 9);
+		hid_read(handle, inBuf, 64);
 	in_size = inBuf[7] ? inBuf[7] : 17;
 	out_size = inBuf[8] ? inBuf[8] : 17;
 	printf("hid in report count: %u\n", in_size);

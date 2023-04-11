@@ -126,9 +126,9 @@ int main(int argc, const char **argv) {
 	outBuf[4] = 0;
 	write(stm32fd, outBuf, 5);
 	usleep(3000);
-	read(stm32fd, inBuf, 9);
+	read(stm32fd, inBuf, 64);
 	while (inBuf[0] == 0x01)
-		read(stm32fd, inBuf, 9);
+		read(stm32fd, inBuf, 64);
 	in_size = inBuf[7] ? inBuf[7] : 17;
 	out_size = inBuf[8] ? inBuf[8] : 17;
 	printf("hid in report count: %u\n", in_size);

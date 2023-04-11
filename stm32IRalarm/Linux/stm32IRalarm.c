@@ -122,7 +122,7 @@ int main(int argc, char *argv[]) {
 	}
 
 	open_stm32(dvalue != NULL ? dvalue : "/dev/irmp_stm32");
-        outBuf[0] = 0x03; // Report ID
+        outBuf[0] = REPORT_ID_CONFIG_OUT;
 	outBuf[1] = STAT_CMD;
 
 	if (svalue != NULL) {

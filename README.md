@@ -94,7 +94,8 @@ File - Open File - boot.blackDev.bin (https://github.com/j1rie/STM32F103-bootloa
 Target - Program & Verify (confirm a message about read out protection, if it appears)  
 Linux:  
 openocd -f ocd-program.cfg  
-In case the flash is locked, do openocd -f ocd-unlock.cfg first, disconnect and reconnect the device, and run openocd -f ocd-program.cfg again.  
+In case the flash is locked, do openocd -f ocd-unlock.cfg first, disconnect and reconnect the device, and  
+run openocd -f ocd-program.cfg again.  
 The files are in the STM32Fxxx(yy)-bootloader repos.  
 https://github.com/j1rie/IRMP_STM32_KBD/wiki/Herstellungsprozess-Schwarze#bootloader-flashen  
 
