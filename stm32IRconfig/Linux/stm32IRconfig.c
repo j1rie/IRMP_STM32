@@ -21,6 +21,8 @@
 #include <inttypes.h>
 #include <termios.h>
 #include <fcntl.h>
+#include <sys/ioctl.h>
+#include <linux/hidraw.h>
 
 enum access {
 	ACC_GET,
@@ -111,12 +113,46 @@ int main(int argc, const char **argv) {
 	uint64_t i;
 	char c, d;
 	uint8_t s, m, k, l, idx;
-	int retValm, jump_to_firmware;
+	int retValm, jump_to_firmware, res, desc_size = 0;
+	unsigned int n;
 	FILE *fp;
 	char testfilename[10];
 	uint16_t j = 0;
+        struct hidraw_report_descriptor rpt_desc;
+
+        memset(&rpt_desc, 0x0, sizeof(rpt_desc));
 
 	open_stm32(argc>1 ? argv[1] : "/dev/irmp_stm32");
+
+        /* Get Report Descriptor Size */
+        res = ioctl(stm32fd, HIDIOCGRDESCSIZE, &desc_size);
+        if (res < 0)
+                perror("HIDIOCGRDESCSIZE");
+        else
+                printf("Report Descriptor Size: %d\n", desc_size);
+
+        /* Get Report Descriptor */
+        rpt_desc.size = desc_size;
+        res = ioctl(stm32fd, HIDIOCGRDESC, &rpt_desc);
+        if (res < 0) {
+                perror("HIDIOCGRDESC");
+        } else {
+                printf("Report Descriptor: ");
+                for(n = 0; n < rpt_desc.size; n++)
+                        printf("%hhx ", rpt_desc.value[n]);
+                puts("");
+        }
+
+	/* Get Report count */
+	for(n = 0; n < rpt_desc.size; n++) {
+		if(rpt_desc.value[n] == REPORT_ID_CONFIG_IN && rpt_desc.value[n+3] == 0x95){ // REPORT_COUNT
+			in_size = rpt_desc.value[n+4] + 1;
+		}
+		if(rpt_desc.value[n] == REPORT_ID_CONFIG_OUT && rpt_desc.value[n+3] == 0x95){ // REPORT_COUNT
+			out_size = rpt_desc.value[n+4] + 1;
+			break;
+		}
+	}
 
 	outBuf[0] = REPORT_ID_CONFIG_OUT;
 	outBuf[1] = STAT_CMD;
@@ -126,13 +162,17 @@ int main(int argc, const char **argv) {
 	outBuf[4] = 0;
 	write(stm32fd, outBuf, 5);
 	usleep(3000);
-	read(stm32fd, inBuf, 64);
+	read(stm32fd, inBuf, in_size);
 	while (inBuf[0] == 0x01)
-		read(stm32fd, inBuf, 64);
-	in_size = inBuf[7] ? inBuf[7] : 17;
-	out_size = inBuf[8] ? inBuf[8] : 17;
-	printf("hid in report count: %u\n", in_size);
-	printf("hid out report count: %u\n", out_size);
+		read(stm32fd, inBuf, in_size);
+	if(in_size != (inBuf[7] ? inBuf[7] : 17))
+		printf("warning: hid in report count mismatch: %u %u\n", in_size, inBuf[7] ? inBuf[7] : 17);
+	else
+		printf("hid in report count: %u\n", in_size);
+	if(out_size != (inBuf[8] ? inBuf[8] : 17))
+		printf("warning: hid out report count mismatch: %u %u\n", out_size,  inBuf[8] ? inBuf[8] : 17);
+	else
+		printf("hid out report count: %u\n", out_size);
 	if(!inBuf[7] || !inBuf[8])
 		printf("old firmware!\n");
 	puts("");
