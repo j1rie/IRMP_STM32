@@ -81,7 +81,7 @@ static void read_stm32(int in_size, int show_len) {
 	if (retVal < 0) {
 		printf("read error\n");
 	} else {
-		printf("read %d bytes:\n\t", retVal);
+		printf("read %d bytes:\n", retVal);
 		for (int i = 0; i < show_len; i++)
 			printf("%02x ", (unsigned int)inBuf[i]);
 		puts("\n");
@@ -94,7 +94,7 @@ static void write_stm32(int idx) {
 	if (retVal < 0) {
 		printf("write error: %ls\n", hid_error(handle));
 	} else {
-		printf("written %d bytes:\n\t", retVal);
+		printf("written %d bytes:\n", retVal);
 		for (int i = 0; i < idx; i++)
 			printf("%02x ", (unsigned int)outBuf[i]);
 		puts("\n");
