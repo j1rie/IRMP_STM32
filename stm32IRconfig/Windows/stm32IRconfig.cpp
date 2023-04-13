@@ -1,7 +1,7 @@
 /**********************************************************************************************************
 	stm32IRconfig: configure and monitor IRMP_STM32
 
-	Copyright (C) 2014-2022 Joerg Riechardt
+	Copyright (C) 2014-2023 Joerg Riechardt
 
 	based on work by Alan Ott
 	Copyright 2010  Alan Ott
@@ -43,7 +43,8 @@ enum command {
 	CMD_MACRO,
 	CMD_WAKE,
 	CMD_REBOOT,
-	CMD_EEPROM_RESET
+	CMD_EEPROM_RESET,
+	CMD_EEPROM_COMMIT
 };
 
 enum status {
@@ -87,14 +88,14 @@ static void read_stm32(int in_size, int show_len) {
 	}
 } 
 
-static void write_stm32(int out_size) {
+static void write_stm32(int idx) {
 	int retVal;
-	retVal = hid_write(handle, outBuf, out_size);
+	retVal = hid_write(handle, outBuf, idx);
 	if (retVal < 0) {
 		printf("write error: %ls\n", hid_error(handle));
 	} else {
 		printf("written %d bytes:\n\t", retVal);
-		for (int i = 0; i < out_size; i++)
+		for (int i = 0; i < idx; i++)
 			printf("%02x ", (unsigned int)outBuf[i]);
 		puts("\n");
 	}
@@ -138,9 +139,35 @@ int main(int argc, char* argv[])
 
 	open_stm32();
 
+	unsigned char descriptor[HID_API_MAX_REPORT_DESCRIPTOR_SIZE];
+	int res = 0;
+
+	res = hid_get_report_descriptor(handle, descriptor, sizeof(descriptor));
+	if (res < 0) {
+		printf("Error: Unable to get Report Descriptor\n");
+		return -1;
+	} else {
+		printf("Report Descriptor Size: %d\n", res);
+		printf("Report Descriptor:");
+		for (int i = 0; i < res; i++) {
+			printf(" %02x", descriptor[i]);
+		}
+		printf("\n");
+	}
+
+	/* Get Report count */
+	for(int n = 0; n < res; n++) {
+		if(descriptor[n] == 0x95 && descriptor[n+2] == 0x81){ // REPORT_COUNT, INPUT
+			in_size = descriptor[n+1] + 1;
+		}
+		if(descriptor[n] == 0x95 && descriptor[n+2] == 0x91){ // REPORT_COUNT, OUTPUT
+			out_size = descriptor[n+1] + 1;
+			break;
+		}
+	}
+
 	outBuf[0] = REPORT_ID_CONFIG_OUT;
 	outBuf[1] = STAT_CMD;
-
 	outBuf[2] = ACC_GET;
 	outBuf[3] = CMD_CAPS;
 	outBuf[4] = 0;
@@ -150,26 +177,30 @@ int main(int argc, char* argv[])
 	#else
 	usleep(3000);
 	#endif
-	hid_read(handle, inBuf, 64);
+	hid_read(handle, inBuf, in_size);
 	while (inBuf[0] == 0x01)
-		hid_read(handle, inBuf, 64);
-	in_size = inBuf[7] ? inBuf[7] : 17;
-	out_size = inBuf[8] ? inBuf[8] : 17;
+		hid_read(handle, inBuf, in_size);
+	if(in_size != (inBuf[7] ? inBuf[7] : 17))
+		printf("warning: hid in report count mismatch: %u %u\n", in_size, inBuf[7] ? inBuf[7] : 17);
+	else
 	printf("hid in report count: %u\n", in_size);
-	printf("hid out report count: %u\n", out_size);
+	if(out_size != (inBuf[8] ? inBuf[8] : 17))
+		printf("warning: hid out report count mismatch: %u %u\n", out_size,  inBuf[8] ? inBuf[8] : 17);
+	else
+		printf("hid out report count: %u\n", out_size);
 	if(!inBuf[7] || !inBuf[8])
 		printf("old firmware!\n");
 	puts("");
 
-cont:	printf("set eeprom: wakeups, macros and alarm(s)\nset eeprom by remote: wakeups and macros(q)\nget eeprom: wakeups, macros, alarm and capabilities) (g)\nreset: wakeups, macros, alarm and eeprom (r)\nsend IR (i)\nreboot (b)\nmonitor until ^C (m)\nrun test (t)\nhid test (h)\nexit (x)\n");
+cont:	printf("set eeprom: wakeups, macros, alarm and commit(s)\nset eeprom by remote: wakeups and macros(q)\nget eeprom: wakeups, macros, alarm and capabilities) (g)\nreset: wakeups, macros, alarm and eeprom (r)\nsend IR (i)\nreboot (b)\nmonitor until ^C (m)\nrun test (t)\nhid test (h)\nexit (x)\n");
 	scanf("%s", &c);
 
 	switch (c) {
 
 	case 's':
-set:		printf("set wakeup(w)\nset macro(m)\nset alarm(a)\n");
+set:		printf("set wakeup(w)\nset macro(m)\nset alarm(a)\ncommit(c)\n");
 		scanf("%s", &d);
-		memset(&outBuf[2], 0, out_size - 2);
+		memset(&outBuf[2], 0, sizeof(outBuf) - 2);
 		idx = 2;
 		outBuf[idx++] = ACC_SET;
 		switch (d) {
@@ -178,6 +209,15 @@ set:		printf("set wakeup(w)\nset macro(m)\nset alarm(a)\n");
 			scanf("%u", &s);
 			outBuf[idx++] = CMD_WAKE;
 			outBuf[idx++] = s;    // (s+1)-th slot
+			printf("enter IRData (protocoladdresscommandflag)\n");
+			scanf("%llx", &i);
+			outBuf[idx++] = (i>>40) & 0xFF;
+			outBuf[idx++] = (i>>24) & 0xFF;
+			outBuf[idx++] = (i>>32) & 0xFF;
+			outBuf[idx++] = (i>>8) & 0xFF;
+			outBuf[idx++] = (i>>16) & 0xFF;
+			outBuf[idx++] = i & 0xFF;
+			write_and_check(idx, 4);
 			break;
 		case 'm':
 			printf("enter macro number (starting with 0)\n");
@@ -187,32 +227,37 @@ set:		printf("set wakeup(w)\nset macro(m)\nset alarm(a)\n");
 			printf("enter slot number, 0 for trigger\n");
 			scanf("%u", &s);
 			outBuf[idx++] = s;    // (s+1)-th slot
+			printf("enter IRData (protocoladdresscommandflag)\n");
+			scanf("%llx", &i);
+			outBuf[idx++] = (i>>40) & 0xFF;
+			outBuf[idx++] = (i>>24) & 0xFF;
+			outBuf[idx++] = (i>>32) & 0xFF;
+			outBuf[idx++] = (i>>8) & 0xFF;
+			outBuf[idx++] = (i>>16) & 0xFF;
+			outBuf[idx++] = i & 0xFF;
+			write_and_check(idx, 4);
+
 			break;
 		case 'a':
 			outBuf[idx++] = CMD_ALARM;
 			printf("enter alarm\n");
-			scanf("%I64x", &i);
+			scanf("%llx", &i);
 			memcpy(&outBuf[idx], &i, 4);
 			write_and_check(idx + 4, 4);
+			break;
+		case 'c':
+			outBuf[idx++] = CMD_EEPROM_COMMIT;
+			write_and_check(idx, 4);
 			break;
 		default:
 			goto set;
 		}
-		printf("enter IRData (protocoladdresscommandflag)\n");
-		scanf("%I64x", &i);
-		outBuf[idx++] = (i>>40) & 0xFF;
-		outBuf[idx++] = (i>>24) & 0xFF;
-		outBuf[idx++] = (i>>32) & 0xFF;
-		outBuf[idx++] = (i>>8) & 0xFF;
-		outBuf[idx++] = (i>>16) & 0xFF;
-		outBuf[idx++] = i & 0xFF;
-		write_and_check(idx, 4);
 		break;
 
 	case 'q':
 Set:		printf("set wakeup with remote control(w)\nset macro with remote control(m)\n");
 		scanf("%s", &d);
-		memset(&outBuf[2], 0, out_size - 2);
+		memset(&outBuf[2], 0, sizeof(outBuf) - 2);
 		idx = 2;
 		outBuf[idx++] = ACC_SET;
 		switch (d) {
@@ -255,7 +300,7 @@ Set:		printf("set wakeup with remote control(w)\nset macro with remote control(m
 	case 'g':
 get:		printf("get wakeup(w)\nget macro slot(m)\nget caps(c)\nget alarm(a)\n");
 		scanf("%s", &d);
-		memset(&outBuf[2], 0, out_size - 2);
+		memset(&outBuf[2], 0, sizeof(outBuf) - 2);
 		idx = 2;
 		outBuf[idx++] = ACC_GET;
 		switch (d) {
@@ -291,13 +336,15 @@ get:		printf("get wakeup(w)\nget macro slot(m)\nget caps(c)\nget alarm(a)\n");
 				#else
 				usleep(3000);
 				#endif
-				read_stm32(in_size, l == 0 ? 7 : in_size);
+				read_stm32(in_size, l == 0 ? 9 : in_size);
 				while (inBuf[0] == 0x01)
-					read_stm32(in_size, l == 0 ? 7 : in_size);
+					read_stm32(in_size, l == 0 ? 9 : in_size);
 				if (!l) { // first query for slots and depth
 					printf("macro_slots: %u\n", inBuf[4]);
 					printf("macro_depth: %u\n", inBuf[5]);
 					printf("wakeup_slots: %u\n", inBuf[6]);
+					printf("hid in report count: %u\n", inBuf[7]);
+					printf("hid out report count: %u\n", inBuf[8]);
 				} else {
 					if(!jump_to_firmware) { // queries for supported_protocols
 						printf("protocols: ");
@@ -333,7 +380,7 @@ out:
 	case 'r':
 reset:		printf("reset wakeup(w)\nreset macro slot(m)\nreset alarm(a)\nreset eeprom(e)\n");
 		scanf("%s", &d);
-		memset(&outBuf[2], 0, out_size - 2);
+		memset(&outBuf[2], 0, sizeof(outBuf) - 2);
 		idx = 2;
 		outBuf[idx++] = ACC_RESET;
 		switch (d) {
@@ -366,8 +413,8 @@ reset:		printf("reset wakeup(w)\nreset macro slot(m)\nreset alarm(a)\nreset eepr
 
 	case 'i':
 		printf("enter IRData (protocoladdresscommandflag)\n");
-		scanf("%I64x", &i);
-		memset(&outBuf[2], 0, out_size - 2);
+		scanf("%llx", &i);
+		memset(&outBuf[2], 0, sizeof(outBuf) - 2);
 		idx = 2;
 		outBuf[idx++] = ACC_SET;
 		outBuf[idx++] = CMD_EMIT;
@@ -381,7 +428,7 @@ reset:		printf("reset wakeup(w)\nreset macro slot(m)\nreset alarm(a)\nreset eepr
 		break;
 
 	case 'b':
-		memset(&outBuf[2], 0, out_size - 2);
+		memset(&outBuf[2], 0, sizeof(outBuf) - 2);
 		idx = 2;
 		outBuf[idx++] = ACC_SET;
 		outBuf[idx++] = CMD_REBOOT;
@@ -416,7 +463,7 @@ reset:		printf("reset wakeup(w)\nreset macro slot(m)\nreset alarm(a)\nreset eepr
 		break;
 
 	case 'h':
-		memset(&outBuf[2], 0, out_size - 2);
+		memset(&outBuf[2], 0, sizeof(outBuf) - 2);
 		for(l = 2; l < out_size; l++){
 			outBuf[l] = l - 1; // ACC_SET CMD_HID_TEST ...
 		}

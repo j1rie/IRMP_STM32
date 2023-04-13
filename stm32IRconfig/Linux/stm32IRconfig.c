@@ -1,7 +1,7 @@
 /**********************************************************************************************************
 	stm32IRconfig: configure and monitor IRMP_STM32
 
-	Copyright (C) 2014-2022 Joerg Riechardt
+	Copyright (C) 2014-2023 Joerg Riechardt
 
 	This program is free software; you can redistribute it and/or modify
 	it under the terms of the GNU General Public License as published by
@@ -82,14 +82,14 @@ static void read_stm32(int in_size, int show_len) {
 	}
 } 
 
-static void write_stm32(int out_size) {
+static void write_stm32(int idx) {
 	int retVal;
-	retVal = write(stm32fd, outBuf, out_size);
+	retVal = write(stm32fd, outBuf, idx);
 	if (retVal < 0) {
 		printf("write error\n");
 	} else {
 		printf("written %d bytes:\n\t", retVal);
-		for (int i = 0; i < out_size; i++)
+		for (int i = 0; i < idx; i++)
 			printf("%02hhx ", outBuf[i]);
 		puts("\n");
 	}
@@ -139,24 +139,23 @@ int main(int argc, const char **argv) {
         } else {
                 printf("Report Descriptor: ");
                 for(n = 0; n < rpt_desc.size; n++)
-                        printf("%hhx ", rpt_desc.value[n]);
+                        printf("%02hhx ", rpt_desc.value[n]);
                 puts("");
         }
 
 	/* Get Report count */
 	for(n = 0; n < rpt_desc.size; n++) {
-		if(rpt_desc.value[n] == REPORT_ID_CONFIG_IN && rpt_desc.value[n+3] == 0x95){ // REPORT_COUNT
-			in_size = rpt_desc.value[n+4] + 1;
+		if(rpt_desc.value[n] == 0x95 && rpt_desc.value[n+2] == 0x81){ // REPORT_COUNT, INPUT
+			in_size = rpt_desc.value[n+1] + 1;
 		}
-		if(rpt_desc.value[n] == REPORT_ID_CONFIG_OUT && rpt_desc.value[n+3] == 0x95){ // REPORT_COUNT
-			out_size = rpt_desc.value[n+4] + 1;
+		if(rpt_desc.value[n] == 0x95 && rpt_desc.value[n+2] == 0x91){ // REPORT_COUNT, OUTPUT
+			out_size = rpt_desc.value[n+1] + 1;
 			break;
 		}
 	}
 
 	outBuf[0] = REPORT_ID_CONFIG_OUT;
 	outBuf[1] = STAT_CMD;
-
 	outBuf[2] = ACC_GET;
 	outBuf[3] = CMD_CAPS;
 	outBuf[4] = 0;
@@ -185,7 +184,7 @@ cont:	printf("set eeprom: wakeups, macros, alarm and commit(s)\nset eeprom by re
 	case 's':
 set:		printf("set wakeup(w)\nset macro(m)\nset alarm(a)\ncommit(c)\n");
 		scanf("%s", &d);
-		memset(&outBuf[2], 0, out_size - 2);
+		memset(&outBuf[2], 0, sizeof(outBuf) - 2);
 		idx = 2;
 		outBuf[idx++] = ACC_SET;
 		switch (d) {
@@ -241,7 +240,7 @@ set:		printf("set wakeup(w)\nset macro(m)\nset alarm(a)\ncommit(c)\n");
 	case 'q':
 Set:		printf("set wakeup with remote control(w)\nset macro with remote control(m)\n");
 		scanf("%s", &d);
-		memset(&outBuf[2], 0, out_size - 2);
+		memset(&outBuf[2], 0, sizeof(outBuf) - 2);
 		idx = 2;
 		outBuf[idx++] = ACC_SET;
 		switch (d) {
@@ -280,7 +279,7 @@ Set:		printf("set wakeup with remote control(w)\nset macro with remote control(m
 	case 'g':
 get:		printf("get wakeup(w)\nget macro slot(m)\nget caps(c)\nget alarm(a)\n");
 		scanf("%s", &d);
-		memset(&outBuf[2], 0, out_size - 2);
+		memset(&outBuf[2], 0, sizeof(outBuf) - 2);
 		idx = 2;
 		outBuf[idx++] = ACC_GET;
 		switch (d) {
@@ -356,7 +355,7 @@ out:
 	case 'r':
 reset:		printf("reset wakeup(w)\nreset macro slot(m)\nreset alarm(a)\nreset eeprom(e)\n");
 		scanf("%s", &d);
-		memset(&outBuf[2], 0, out_size - 2);
+		memset(&outBuf[2], 0, sizeof(outBuf) - 2);
 		idx = 2;
 		outBuf[idx++] = ACC_RESET;
 		switch (d) {
@@ -390,7 +389,7 @@ reset:		printf("reset wakeup(w)\nreset macro slot(m)\nreset alarm(a)\nreset eepr
 	case 'i':
 		printf("enter IRData (protocoladdresscommandflag)\n");
 		scanf("%" SCNx64 "", &i);
-		memset(&outBuf[2], 0, out_size - 2);
+		memset(&outBuf[2], 0, sizeof(outBuf) - 2);
 		idx = 2;
 		outBuf[idx++] = ACC_SET;
 		outBuf[idx++] = CMD_EMIT;
@@ -404,7 +403,7 @@ reset:		printf("reset wakeup(w)\nreset macro slot(m)\nreset alarm(a)\nreset eepr
 		break;
 
 	case 'b':
-		memset(&outBuf[2], 0, out_size - 2);
+		memset(&outBuf[2], 0, sizeof(outBuf) - 2);
 		idx = 2;
 		outBuf[idx++] = ACC_SET;
 		outBuf[idx++] = CMD_REBOOT;
@@ -431,7 +430,7 @@ reset:		printf("reset wakeup(w)\nreset macro slot(m)\nreset alarm(a)\nreset eepr
 		break;
 
 	case 'h':
-		memset(&outBuf[2], 0, out_size - 2);
+		memset(&outBuf[2], 0, sizeof(outBuf) - 2);
 		for(l = 2; l < out_size; l++){
 			outBuf[l] = l - 1; // ACC_SET CMD_HID_TEST ...
 		}

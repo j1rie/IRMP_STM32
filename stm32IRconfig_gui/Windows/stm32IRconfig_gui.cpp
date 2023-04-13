@@ -566,8 +566,6 @@ MainWindow::MainWindow(FXApp *app)
 	firmware1 = "";
 	max = 0;
 	count = 0;
-	out_size = 64; // at first out_size is unknown, so use HID maximum
-	in_size = 64; // at first in_size is unknown, so use HID maximum TODO check this
 }
 
 MainWindow::~MainWindow()
@@ -628,9 +626,49 @@ MainWindow::onConnect(FXObject *sender, FXSelector sel, void *ptr)
 		return -1;
 	}
 
+	unsigned char descriptor[HID_API_MAX_REPORT_DESCRIPTOR_SIZE];
+	int res = 0;
+
+	res = hid_get_report_descriptor(connected_device, descriptor, sizeof(descriptor));
+	if (res < 0) {
+		FXMessageBox::error(this, MBOX_OK, "Report Descriptor Error", "Unable to get Report Descriptor");
+		return -1;
+	} else {
+		/*printf("Report Descriptor Size: %d\n", res);
+		printf("Report Descriptor:");
+		for (int i = 0; i < res; i++) {
+			printf(" %02x", descriptor[i]);
+		}
+		printf("\n");*/
+	}
+
+	/* Get Report count */
+	for(int n = 0; n < res; n++) {
+		if(descriptor[n] == 0x95 && descriptor[n+2] == 0x81){ // REPORT_COUNT, INPUT
+			in_size = descriptor[n+1] + 1;
+		}
+		if(descriptor[n] == 0x95 && descriptor[n+2] == 0x91){ // REPORT_COUNT, OUTPUT
+			out_size = descriptor[n+1] + 1;
+			break;
+		}
+	}
+
+	FXString s;
+	s.format("%d %d %d %d 0 ", REPORT_ID_CONFIG_OUT, STAT_CMD, ACC_GET, CMD_CAPS);
+	output_text->setText(s);
+	Write_and_Check(5, 9);
+
+	FXString u, v, w, x;
+	if(in_size != (buf[7] ? buf[7] : 17))
+		u.format("warning: hid in report count mismatch: %u %u\n", in_size, buf[7] ? buf[7] : 17);
+	if(out_size != (buf[8] ? buf[8] : 17))
+		v.format("warning: hid out report count mismatch: %u %u\n", out_size,  buf[8] ? buf[8] : 17);
+	if(!buf[7] || !buf[8])
+		w.format("old firmware!\n");
+	x += u+v+w;
+
 	if(onGcaps(NULL, 0, NULL) == -1)
 		return -1;
-	FXString s;
 	s.format("Connected to: %04hx:%04hx -", device_info->vendor_id, device_info->product_id);
 	//s += FXString(" ") + device_info->manufacturer_string;
 	s += FXString(" ") + device_info->product_string;
@@ -701,14 +739,7 @@ MainWindow::onConnect(FXObject *sender, FXSelector sel, void *ptr)
 	reboot_button->enable();
 	reset_button->enable();
 
-	//list report counts
-	FXString w, x;
-	w.format("hid in report count: %u\n", in_size);
-	x = w;
-	w.format("hid out report count: %u\n", out_size);
-	x += w;
 	//list wakeups and alarm and warn if no STM32
-	FXString u;
 	for(int i = 0; i < wakeupslots; i++) {
 		FXString t, v;
 #if (FOX_MINOR >= 7)
@@ -721,17 +752,17 @@ MainWindow::onConnect(FXObject *sender, FXSelector sel, void *ptr)
 		output_text->setText(s);
 		Write_and_Check(5, 10);
 		s = (i < wakeupslots-1) ? "wakeup: " : "reboot: ";
-		t.format("%02x", (unsigned int)buf[4]);
+		t.format("%02x", buf[4]);
 		v = t;
-		t.format("%02x", (unsigned int)buf[6]);
+		t.format("%02x", buf[6]);
 		v += t;
-		t.format("%02x", (unsigned int)buf[5]);
+		t.format("%02x", buf[5]);
 		v += t;
-		t.format("%02x", (unsigned int)buf[8]);
+		t.format("%02x", buf[8]);
 		v += t;
-		t.format("%02x", (unsigned int)buf[7]);
+		t.format("%02x", buf[7]);
 		v += t;
-		t.format("%02x", (unsigned int)buf[9]);
+		t.format("%02x", buf[9]);
 		v += t;
 		s += v;
 		s += "\n";
@@ -764,6 +795,7 @@ MainWindow::onConnect(FXObject *sender, FXSelector sel, void *ptr)
 	}
 	input_text->setText("");
 	output_text->setText("");
+	input_text->appendText(x);
 	input_text->appendText(u);
 	input_text->appendText(s);
 	input_text->setBottomLine(INT_MAX);
@@ -947,7 +979,7 @@ MainWindow::Read(int show_len)
 		s.format("Received %d bytes:\n", res);
 		for (int i = 0; i < show_len; i++) {
 			FXString t;
-			t.format("%02x ", (unsigned int)buf[i]);
+			t.format("%02x ", buf[i]);
 			s += t;
 		}
 		s += "\n";
@@ -996,26 +1028,26 @@ MainWindow::onReadIR(FXObject *sender, FXSelector sel, void *ptr)
 
 		// show received IR
 		s = "";
-		t.format("%02hhx", buf[1]);
+		t.format("%02x", buf[1]);
 		s += t;
 		protocol1_text->setText(s);
 		
 		s = ""; t = "";
-		t.format("%02hhx", buf[3]);
+		t.format("%02x", buf[3]);
 		s += t; t = "";
-		t.format("%02hhx", buf[2]);
+		t.format("%02x", buf[2]);
 		s += t;
 		address1_text->setText(s);
 
 		s = ""; t = "";
-		t.format("%02hhx", buf[5]);
+		t.format("%02x", buf[5]);
 		s += t; t = "";
-		t.format("%02hhx", buf[4]);
+		t.format("%02x", buf[4]);
 		s += t;
 		command1_text->setText(s);
 
 		s = ""; t = "";
-		t.format("%02hhx", buf[6]);
+		t.format("%02x", buf[6]);
 		s += t;
 		flag1_text->setText(s);
 
@@ -1143,7 +1175,7 @@ MainWindow::Write(int out_len)
 		s.format("Sent %d bytes:\n", res);
 		for (int i = 0; i < out_len; i++) {
 			FXString t;
-			t.format("%02hhx ", bufw[i]);
+			t.format("%02x ", bufw[i]);
 			s += t;
 		}
 		s += "\n";
@@ -1370,26 +1402,26 @@ MainWindow::onGwakeup(FXObject *sender, FXSelector sel, void *ptr)
 	Write_and_Check(5, 10);
 
 	s = "";
-	t.format("%02x", (unsigned int)buf[4]);
+	t.format("%02x", buf[4]);
 	s += t;
 	protocol1_text->setText(s);
 		
 	s = "";
-	t.format("%02x", (unsigned int)buf[6]);
+	t.format("%02x", buf[6]);
 	s += t;
-	t.format("%02x", (unsigned int)buf[5]);
+	t.format("%02x", buf[5]);
 	s += t;
 	address1_text->setText(s);
 
 	s = "";
-	t.format("%02x", (unsigned int)buf[8]);
+	t.format("%02x", buf[8]);
 	s += t;
-	t.format("%02x", (unsigned int)buf[7]);
+	t.format("%02x", buf[7]);
 	s += t;
 	command1_text->setText(s);
 
 	s = "";
-	t.format("%02x", (unsigned int)buf[9]);
+	t.format("%02x", buf[9]);
 	s += t;
 	flag1_text->setText(s);
 
@@ -1411,26 +1443,26 @@ MainWindow::onGmacro(FXObject *sender, FXSelector sel, void *ptr)
 	Write_and_Check(6, 10);
 	
 	s = "";
-	t.format("%02x", (unsigned int)buf[4]);
+	t.format("%02x", buf[4]);
 	s += t;
 	protocol1_text->setText(s);
 		
 	s = "";
-	t.format("%02x", (unsigned int)buf[6]);
+	t.format("%02x", buf[6]);
 	s += t;
-	t.format("%02x", (unsigned int)buf[5]);
+	t.format("%02x", buf[5]);
 	s += t;
 	address1_text->setText(s);
 
 	s = "";
-	t.format("%02x", (unsigned int)buf[8]);
+	t.format("%02x", buf[8]);
 	s += t;
-	t.format("%02x", (unsigned int)buf[7]);
+	t.format("%02x", buf[7]);
 	s += t;
 	command1_text->setText(s);
 
 	s = "";
-	t.format("%02x", (unsigned int)buf[9]);
+	t.format("%02x", buf[9]);
 	s += t;
 	flag1_text->setText(s);
 	
@@ -1468,14 +1500,10 @@ MainWindow::onGcaps(FXObject *sender, FXSelector sel, void *ptr)
 			wakeupslots = buf[6];
 			t.format("wakeup_slots: %u\n", buf[6]);
 			s += t;
-			in_size = buf[7] ? buf[7] : 17;
 			t.format("hid in report count: %u\n", in_size);
 			s += t;
-			out_size = buf[8] ? buf[8] : 17;
 			t.format("hid out report count: %u\n", out_size);
 			s += t;
-			if(!buf[7] || ! buf[8])
-				s += "old firmware!\n";
 		} else {
 			if (!jump_to_firmware) { // queries for supported_protocols
 				s = "protocols: ";

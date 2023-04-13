@@ -566,8 +566,6 @@ MainWindow::MainWindow(FXApp *app)
 	firmware1 = "";
 	max = 0;
 	count = 0;
-	out_size = 64; // at first out_size is unknown, so use HID maximum
-	in_size = 64; // at first in_size is unknown, so use HID maximum TODO check this
 }
 
 MainWindow::~MainWindow()
@@ -628,9 +626,49 @@ MainWindow::onConnect(FXObject *sender, FXSelector sel, void *ptr)
 		return -1;
 	}
 
+	unsigned char descriptor[HID_API_MAX_REPORT_DESCRIPTOR_SIZE];
+	int res = 0;
+
+	res = hid_get_report_descriptor(connected_device, descriptor, sizeof(descriptor));
+	if (res < 0) {
+		FXMessageBox::error(this, MBOX_OK, "Report Descriptor Error", "Unable to get Report Descriptor");
+		return -1;
+	} else {
+		/*printf("Report Descriptor Size: %d\n", res);
+		printf("Report Descriptor:");
+		for (int i = 0; i < res; i++) {
+			printf(" %02x", descriptor[i]);
+		}
+		printf("\n");*/
+	}
+
+	/* Get Report count */
+	for(int n = 0; n < res; n++) {
+		if(descriptor[n] == 0x95 && descriptor[n+2] == 0x81){ // REPORT_COUNT, INPUT
+			in_size = descriptor[n+1] + 1;
+		}
+		if(descriptor[n] == 0x95 && descriptor[n+2] == 0x91){ // REPORT_COUNT, OUTPUT
+			out_size = descriptor[n+1] + 1;
+			break;
+		}
+	}
+
+	FXString s;
+	s.format("%d %d %d %d 0 ", REPORT_ID_CONFIG_OUT, STAT_CMD, ACC_GET, CMD_CAPS);
+	output_text->setText(s);
+	Write_and_Check(5, 9);
+
+	FXString u, v, w, x;
+	if(in_size != (buf[7] ? buf[7] : 17))
+		u.format("warning: hid in report count mismatch: %u %u\n", in_size, buf[7] ? buf[7] : 17);
+	if(out_size != (buf[8] ? buf[8] : 17))
+		v.format("warning: hid out report count mismatch: %u %u\n", out_size,  buf[8] ? buf[8] : 17);
+	if(!buf[7] || !buf[8])
+		w.format("old firmware!\n");
+	x += u+v+w;
+
 	if(onGcaps(NULL, 0, NULL) == -1)
 		return -1;
-	FXString s;
 	s.format("Connected to: %04hx:%04hx -", device_info->vendor_id, device_info->product_id);
 	//s += FXString(" ") + device_info->manufacturer_string;
 	s += FXString(" ") + device_info->product_string;
@@ -701,14 +739,7 @@ MainWindow::onConnect(FXObject *sender, FXSelector sel, void *ptr)
 	reboot_button->enable();
 	reset_button->enable();
 
-	//list report counts
-	FXString w, x;
-	w.format("hid in report count: %u\n", in_size);
-	x = w;
-	w.format("hid out report count: %u\n", out_size);
-	x += w;
 	//list wakeups and alarm and warn if no STM32
-	FXString u;
 	for(int i = 0; i < wakeupslots; i++) {
 		FXString t, v;
 #if (FOX_MINOR >= 7)
@@ -764,6 +795,7 @@ MainWindow::onConnect(FXObject *sender, FXSelector sel, void *ptr)
 	}
 	input_text->setText("");
 	output_text->setText("");
+	input_text->appendText(x);
 	input_text->appendText(u);
 	input_text->appendText(s);
 	input_text->setBottomLine(INT_MAX);
@@ -832,7 +864,7 @@ MainWindow::onRescan(FXObject *sender, FXSelector sel, void *ptr)
 	// List the Devices
 	hid_free_enumeration(devices);
 	devices = hid_enumerate(0x1209, 0x4444);
-	cur_dev = devices;	
+	cur_dev = devices;
 	while (cur_dev) {
 		// Add it to the List Box.
 		FXString s;
@@ -1468,14 +1500,10 @@ MainWindow::onGcaps(FXObject *sender, FXSelector sel, void *ptr)
 			wakeupslots = buf[6];
 			t.format("wakeup_slots: %u\n", buf[6]);
 			s += t;
-			in_size = buf[7] ? buf[7] : 17;
 			t.format("hid in report count: %u\n", in_size);
 			s += t;
-			out_size = buf[8] ? buf[8] : 17;
 			t.format("hid out report count: %u\n", out_size);
 			s += t;
-			if(!buf[7] || ! buf[8])
-				s += "old firmware!\n";
 		} else {
 			if (!jump_to_firmware) { // queries for supported_protocols
 				s = "protocols: ";
