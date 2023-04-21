@@ -1,7 +1,7 @@
 ## IRMP on RP2040
 
-For boards with the RP2040, e.g. the Raspberry Pi Pico and many others.
-This is additional information,basic information in https://github.com/j1rie/IRMP_STM32#readme.
+For boards with the RP2040, e.g. the Raspberry Pi Pico and many others.  
+This is additional information, basic information in https://github.com/j1rie/IRMP_STM32#readme.
 
 ## Flashing the firmware
 Disconnect from USB.
