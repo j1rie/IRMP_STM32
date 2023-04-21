@@ -11,8 +11,16 @@ Drag and drop the firmware.uf2 file onto it. The device will reboot and start as
 Sending the "reboot" command brings device into mass storage state as well.
 
 ## First test
-When you press the BOOTSEL button in suspend mode, the PC should wake up.
+When you press the BOOTSEL button in suspend mode, the PC should wake up.  
+For wiring see https://www.mikrocontroller.net/articles/IRMP_auf_STM32_-_Bauanleitung#Minimalistic_assembly_for_experienced_users
 
 ## Emulated Eeprom
 Any configuration done by one of the configuration programs goes first into cache only. In order to save
 those changes into flash permanently, you have to do an eeprom commit.
+
+## Building from source
+See [Getting Started with the Raspberry Pi Pico](https://rptl.io/pico-get-started)  
+-> Get the SDK and examples  
+-> Install the Toolchain  
+->  Building "Blink"  
+->  Load and run "Blink"  
