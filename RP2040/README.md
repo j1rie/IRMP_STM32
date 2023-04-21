@@ -1,4 +1,4 @@
-# IRMP on RP204 - a USB IR receiver/sender/powerswitch with wakeup-timer
+## IRMP on RP2040 - a USB IR receiver/sender/powerswitch with wakeup-timer
 
 For boards with the RP2040, e.g. the Raspberry Pi Pico and many others.
 
