@@ -12,7 +12,9 @@ Sending the "reboot" command brings device into mass storage state as well.
 
 ## First test
 When you press the BOOTSEL button in suspend mode, the PC should wake up.  
-For wiring see https://www.mikrocontroller.net/articles/IRMP_auf_STM32_-_Bauanleitung#Minimalistic_assembly_for_experienced_users
+For wiring see https://www.mikrocontroller.net/articles/IRMP_auf_STM32_-_Bauanleitung#Minimalistic_assembly_for_experienced_users  
+https://www.mikrocontroller.net/articles/IRMP_auf_STM32_%E2%80%93_stark_vereinfachte_Bauanleitung#Solder_Cables  
+https://www.mikrocontroller.net/articles/IRMP_auf_STM32_%E2%80%93_stark_vereinfachte_Bauanleitung#Connect_Cables
 
 ## Emulated Eeprom
 Any configuration done by one of the configuration programs goes first into cache only. In order to save
