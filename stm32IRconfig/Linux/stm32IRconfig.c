@@ -39,7 +39,8 @@ enum command {
 	CMD_WAKE,
 	CMD_REBOOT,
 	CMD_EEPROM_RESET,
-	CMD_EEPROM_COMMIT
+	CMD_EEPROM_COMMIT,
+	CMD_EEPROM_GET_RAW,
 };
 
 enum status {
@@ -144,7 +145,7 @@ int main(int argc, const char **argv) {
         }
 
 	/* Get Report count */
-	for(n = 0; n < rpt_desc.size; n++) {
+	for(n = 0; n < rpt_desc.size - 2; n++) {
 		if(rpt_desc.value[n] == 0x95 && rpt_desc.value[n+2] == 0x81){ // REPORT_COUNT, INPUT
 			in_size = rpt_desc.value[n+1] + 1;
 		}
@@ -176,7 +177,7 @@ int main(int argc, const char **argv) {
 		printf("old firmware!\n");
 	puts("");
 
-cont:	printf("set eeprom: wakeups, macros, alarm and commit(s)\nset eeprom by remote: wakeups and macros(q)\nget eeprom: wakeups, macros, alarm and capabilities) (g)\nreset: wakeups, macros, alarm and eeprom (r)\nsend IR (i)\nreboot (b)\nmonitor until ^C (m)\nrun test (t)\nhid test (h)\nexit (x)\n");
+cont:	printf("set: wakeups, macros, alarm and commit(s)\nset by remote: wakeups and macros(q)\nget: wakeups, macros, alarm, capabilities and eeprom) (g)\nreset: wakeups, macros, alarm and eeprom (r)\nsend IR (i)\nreboot (b)\nmonitor until ^C (m)\nrun test (t)\nhid test (h)\nexit (x)\n");
 	scanf("%s", &c);
 
 	switch (c) {
@@ -277,7 +278,7 @@ Set:		printf("set wakeup with remote control(w)\nset macro with remote control(m
 		break;
 
 	case 'g':
-get:		printf("get wakeup(w)\nget macro slot(m)\nget caps(c)\nget alarm(a)\n");
+get:		printf("get wakeup(w)\nget macro slot(m)\nget caps(c)\nget alarm(a)\nget eeprom\n");
 		scanf("%s", &d);
 		memset(&outBuf[2], 0, sizeof(outBuf) - 2);
 		idx = 2;
@@ -344,6 +345,26 @@ get:		printf("get wakeup(w)\nget macro slot(m)\nget caps(c)\nget alarm(a)\n");
 				}
 				printf("\n\n");
 again:			;
+			}
+			break;
+		case 'e':
+			outBuf[idx++] = CMD_EEPROM_GET_RAW;
+			for(k = 0; k < 16; k++) { // FLASH_SECTOR_SIZE * nr_sectors / size
+				outBuf[idx] = 15 - k;
+				for(l = 0; l < 16; l++) { // size / 32
+					outBuf[idx+1] = l;
+					write(stm32fd, outBuf, idx+2);
+					usleep(3000);
+					retValm = read(stm32fd, inBuf, in_size);
+					if (retValm < 0) {
+						printf("read error\n");
+					} else {
+						for (int i = 4; i < 36; i++)
+							printf("%02hhx ", inBuf[i]);
+						//puts("\n");
+					}
+				}
+				printf("\n");
 			}
 			break;
 		default:
