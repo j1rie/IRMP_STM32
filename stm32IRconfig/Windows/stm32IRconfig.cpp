@@ -44,7 +44,8 @@ enum command {
 	CMD_WAKE,
 	CMD_REBOOT,
 	CMD_EEPROM_RESET,
-	CMD_EEPROM_COMMIT
+	CMD_EEPROM_COMMIT,
+	CMD_EEPROM_GET_RAW
 };
 
 enum status {
@@ -192,7 +193,7 @@ int main(int argc, char* argv[])
 		printf("old firmware!\n");
 	puts("");
 
-cont:	printf("set eeprom: wakeups, macros, alarm and commit(s)\nset eeprom by remote: wakeups and macros(q)\nget eeprom: wakeups, macros, alarm and capabilities) (g)\nreset: wakeups, macros, alarm and eeprom (r)\nsend IR (i)\nreboot (b)\nmonitor until ^C (m)\nrun test (t)\nhid test (h)\nexit (x)\n");
+cont:	printf("set: wakeups, macros, alarm and commit(s)\nset by remote: wakeups and macros(q)\nget: wakeups, macros, alarm, capabilities and eeprom) (g)\nreset: wakeups, macros, alarm and eeprom (r)\nsend IR (i)\nreboot (b)\nmonitor until ^C (m)\nrun test (t)\nhid test (h)\nexit (x)\n");
 	scanf("%s", &c);
 
 	switch (c) {
@@ -298,7 +299,7 @@ Set:		printf("set wakeup with remote control(w)\nset macro with remote control(m
 		break;
 
 	case 'g':
-get:		printf("get wakeup(w)\nget macro slot(m)\nget caps(c)\nget alarm(a)\n");
+get:		printf("get wakeup(w)\nget macro slot(m)\nget caps(c)\nget alarm(a)\nget eeprom\n");
 		scanf("%s", &d);
 		memset(&outBuf[2], 0, sizeof(outBuf) - 2);
 		idx = 2;
@@ -369,6 +370,29 @@ get:		printf("get wakeup(w)\nget macro slot(m)\nget caps(c)\nget alarm(a)\n");
 				}
 				printf("\n\n");
 again:			;
+			}
+			break;
+		case 'e':
+			outBuf[idx++] = CMD_EEPROM_GET_RAW;
+			for(k = 15; k >= 0; k--) { // FLASH_SECTOR_SIZE * nr_sectors / size
+				outBuf[idx] = k;
+				for(l = 0; l < 16; l++) { // size / 32
+					outBuf[idx+1] = l;
+					hid_write(handle, outBuf, idx+2);
+					#ifdef WIN32
+					Sleep(3);
+					#else
+					usleep(3000);
+					#endif
+					retValm = hid_read(handle, inBuf, in_size);
+					if (retValm < 0) {
+						printf("read error\n");
+					} else {
+						for (int i = 4; i < 36; i++)
+							printf("%02x ", inBuf[i]);
+					}
+				}
+				printf("\n");
 			}
 			break;
 		default:

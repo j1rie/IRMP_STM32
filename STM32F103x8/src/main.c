@@ -609,7 +609,7 @@ int8_t reset_handler(uint8_t *buf)
 			ret = -1;
 		break;
 	case CMD_EEPROM_RESET:
-		if(EE_Format() != FLASH_COMPLETE)
+		if (EE_Format() != FLASH_COMPLETE)
 			ret = -1;
 		break;
 	default:
@@ -621,7 +621,7 @@ int8_t reset_handler(uint8_t *buf)
 /* is received ir-code in one of the lower wakeup-slots? wakeup if true */
 void check_wakeups(IRMP_DATA *ir)
 {
-	if(host_running())
+	if (host_running())
 		return;
 	uint8_t i;
 	uint16_t idx;
@@ -805,16 +805,17 @@ int main(void)
 		if (!AlarmValue && !host_running())
 			Wakeup();
 
-		/* always wait for previous transfer to complete before sending again, consider using a send buffer */
-		if (PrevXferComplete && host_running() && send_ir_on_delay && last_magic_sent != send_ir_on_delay) {
+		/* after Wakeup(): send again even if previous transfer did not complete, otherwise we get stuck on USB FS lib */
+		if (host_running() && send_ir_on_delay && last_magic_sent != send_ir_on_delay) {
 			send_magic();
 			last_magic_sent = send_ir_on_delay;
 		}
 
 		wakeup_reset();
 
+		/* always wait for previous transfer to complete before sending again, consider using a send buffer */
 		/* test if configuration command is received */
-		if(PrevXferComplete && USB_HID_Data_Received && buf[0] == REPORT_ID_CONFIG_OUT && buf[1] == STAT_CMD) {
+		if (PrevXferComplete && USB_HID_Data_Received && buf[0] == REPORT_ID_CONFIG_OUT && buf[1] == STAT_CMD) {
 			USB_HID_Data_Received = 0;
 
 			switch (buf[2]) {
@@ -841,7 +842,7 @@ int main(void)
 			/* send configuration data */
 			USB_HID_SendData(REPORT_ID_CONFIG_IN, buf, ret);
 			blink_LED();
-			if(Reboot)
+			if (Reboot)
 				reboot();
 		}
 
@@ -857,7 +858,7 @@ int main(void)
 			}
 
 			/* send IR-data, but only if host is running, otherwise the transfer will not complete, and we are stuck */
-			if(host_running())
+			if (host_running())
 				USB_HID_SendData(REPORT_ID_IR, (uint8_t *) &myIRData, sizeof(myIRData));
 
 #ifdef TM1637

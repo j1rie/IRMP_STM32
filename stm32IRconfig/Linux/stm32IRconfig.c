@@ -40,7 +40,7 @@ enum command {
 	CMD_REBOOT,
 	CMD_EEPROM_RESET,
 	CMD_EEPROM_COMMIT,
-	CMD_EEPROM_GET_RAW,
+	CMD_EEPROM_GET_RAW
 };
 
 enum status {
@@ -349,8 +349,8 @@ again:			;
 			break;
 		case 'e':
 			outBuf[idx++] = CMD_EEPROM_GET_RAW;
-			for(k = 0; k < 16; k++) { // FLASH_SECTOR_SIZE * nr_sectors / size
-				outBuf[idx] = 15 - k;
+			for(k = 15; k >= 0; k--) { // FLASH_SECTOR_SIZE * nr_sectors / size
+				outBuf[idx] = k;
 				for(l = 0; l < 16; l++) { // size / 32
 					outBuf[idx+1] = l;
 					write(stm32fd, outBuf, idx+2);

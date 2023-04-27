@@ -73,7 +73,9 @@ public:
 		ID_APPEND,
 		ID_WRITE_IR,
 		ID_DEVLIST,
-		ID_REEPROM
+		ID_REEPROM,
+		ID_CEEPROM,
+		ID_GEEPROM
 	};
 
 enum access {
@@ -90,7 +92,9 @@ enum command {
 	CMD_MACRO,
 	CMD_WAKE,
 	CMD_REBOOT,
-	CMD_EEPROM_RESET
+	CMD_EEPROM_RESET,
+	CMD_EEPROM_COMMIT,
+	CMD_EEPROM_GET_RAW
 };
 
 enum status {
@@ -135,6 +139,8 @@ private:
 	FXButton *append_button;
 	FXButton *write_ir_button;
 	FXButton *reset_button;
+	FXButton *commit_button;
+	FXButton *get_raw_button;
 	FXLabel *connected_label;
 	FXLabel *connected_label2;
 	FXLabel *connected_label3;
@@ -237,6 +243,8 @@ public:
 	long onSave(FXObject *sender, FXSelector sel, void *ptr);
 	long onSaveLog(FXObject *sender, FXSelector sel, void *ptr);
 	long onReeprom(FXObject *sender, FXSelector sel, void *ptr);
+	long onCeeprom(FXObject *sender, FXSelector sel, void *ptr);
+	long onGeeprom(FXObject *sender, FXSelector sel, void *ptr);
 	long Write(int out_len);
 	long Read(int show_len);
 	long Write_and_Check(int out_len, int show_len);
@@ -274,6 +282,8 @@ FXDEFMAP(MainWindow) MainWindowMap [] = {
 	FXMAPFUNC(SEL_COMMAND, MainWindow::ID_GMACRO, MainWindow::onGmacro ),
 	FXMAPFUNC(SEL_COMMAND, MainWindow::ID_GCAP, MainWindow::onGcaps ),
 	FXMAPFUNC(SEL_COMMAND, MainWindow::ID_REEPROM, MainWindow::onReeprom ),
+	FXMAPFUNC(SEL_COMMAND, MainWindow::ID_CEEPROM, MainWindow::onCeeprom ),
+	FXMAPFUNC(SEL_COMMAND, MainWindow::ID_GEEPROM, MainWindow::onGeeprom ),
 	FXMAPFUNC(SEL_COMMAND, MainWindow::ID_AGET, MainWindow::onAget ),
 	FXMAPFUNC(SEL_COMMAND, MainWindow::ID_ASET, MainWindow::onAset ),
 	FXMAPFUNC(SEL_COMMAND, MainWindow::ID_RWAKEUP, MainWindow::onRwakeup ),
@@ -359,8 +369,9 @@ MainWindow::MainWindow(FXApp *app)
 
 	// horizontal frame for IR Group Box and firmware upgrade and eeprom reset
 	FXHorizontalFrame *hf13 = new FXHorizontalFrame(vf1, LAYOUT_FILL_X,0,0,0,0, 0,0,0,0, 0,0);
-	FXSpring *s131 = new FXSpring(hf13, LAYOUT_FILL_X, 300, 0, 0,0,0,0, 4,2,2,2, 2,2);
-	FXSpring *s132 = new FXSpring(hf13, LAYOUT_FILL_X, 100, 0, 0,0,0,0, 2,4,2,2, 2,2);
+	FXSpring *s131 = new FXSpring(hf13, LAYOUT_FILL_X, 200, 0, 0,0,0,0, 4,2,2,2, 2,2);
+	FXSpring *s132 = new FXSpring(hf13, LAYOUT_FILL_X, 100, 0, 0,0,0,0, 2,2,2,2, 2,2);
+	FXSpring *s133 = new FXSpring(hf13, LAYOUT_FILL_X, 100, 0, 0,0,0,0, 2,4,2,2, 2,2);
 
 	//IR Group Box
 	FXGroupBox *gb131 = new FXGroupBox(s131, "IR (hex)", FRAME_GROOVE|LAYOUT_FILL_X, 0,0,0,0, 0,0,0,4);
@@ -392,23 +403,26 @@ MainWindow::MainWindow(FXApp *app)
 	command1_text->setVisibleRows(1);
 	flag1_text->setVisibleRows(1);
 
-	//firmware Group Box
-	FXGroupBox *gb132 = new FXGroupBox(s132, "firmware", FRAME_GROOVE|LAYOUT_FILL_X);
-	upgrade_button = new FXButton(gb132, "upgrade", NULL, this, ID_UPGRADE, BUTTON_NORMAL|LAYOUT_FILL_X);
-
 	//eeprom Group Box
-	FXGroupBox *gb133 = new FXGroupBox(s132, "eeprom", FRAME_GROOVE|LAYOUT_FILL_X);
-	reset_button = new FXButton(gb133, "reset", NULL, this, ID_REEPROM, BUTTON_NORMAL|LAYOUT_FILL_X);
+	FXGroupBox *gb132 = new FXGroupBox(s132, "eeprom", FRAME_GROOVE|LAYOUT_FILL_X);
+	reset_button = new FXButton(gb132, "reset", NULL, this, ID_REEPROM, BUTTON_NORMAL|LAYOUT_FILL_X);
+	commit_button = new FXButton(gb132, "commit", NULL, this, ID_CEEPROM, BUTTON_NORMAL|LAYOUT_FILL_X);
+	get_raw_button = new FXButton(gb132, "get raw", NULL, this, ID_GEEPROM, BUTTON_NORMAL|LAYOUT_FILL_X);
+	commit_button->disable();
+	get_raw_button->disable();
+
+	//firmware Group Box
+	FXGroupBox *gb133 = new FXGroupBox(s133, "firmware", FRAME_GROOVE|LAYOUT_FILL_X);
+	upgrade_button = new FXButton(gb133, "upgrade", NULL, this, ID_UPGRADE, BUTTON_NORMAL|LAYOUT_FILL_X);
 
 	// horizontal frame for alarm Group Box, select listboxes, Output Group Box and map group box
 	FXHorizontalFrame *hf14 = new FXHorizontalFrame(vf1, LAYOUT_FILL_X,0,0,0,0, 0,0,0,0, 0,0);
-	// two vertical frames, left for map, right for everything else 
-	FXVerticalFrame *vf141 = new FXVerticalFrame(hf14, LAYOUT_FILL_Y|LAYOUT_FILL_X,0,0,0,0, 0,0,0,0, 0,0);
-	FXVerticalFrame *vf142 = new FXVerticalFrame(hf14, LAYOUT_FILL_Y|LAYOUT_FILL_X,0,0,0,0, 0/*,0,0,0*/);
-	// horizontal frame for alarm Group Box and select listboxes
-	FXHorizontalFrame *hf143 = new FXHorizontalFrame(vf141, LAYOUT_FILL_X/*,0,0,0,0, 0,0,0,0*/);
+	FXSpring *s141 = new FXSpring(hf14, LAYOUT_FILL_X, 200, 0, 0,0,0,0, 4,2,2,2, 2,2);
+	FXSpring *s142 = new FXSpring(hf14, LAYOUT_FILL_X, 100, 0, 0,0,0,0, 2,2,2,2, 2,2);
+	FXSpring *s143 = new FXSpring(hf14, LAYOUT_FILL_X, 100, 0, 0,0,0,0, 2,4,2,2, 2,2);
+
 	//alarm Group Box
-	FXGroupBox *gb14 = new FXGroupBox(hf143, "alarm (dec)", FRAME_GROOVE|LAYOUT_FILL_X, 0,0,0,0, 0,0,0,6);
+	FXGroupBox *gb14 = new FXGroupBox(s141, "alarm (dec)", FRAME_GROOVE|LAYOUT_FILL_X, 0,0,0,0, 0,0,0,4);
 	FXMatrix *m14 = new FXMatrix(gb14, 5, MATRIX_BY_COLUMNS|LAYOUT_FILL_X);
 	new FXLabel(m14, "days");
 	new FXLabel(m14, "hours");
@@ -433,13 +447,15 @@ MainWindow::MainWindow(FXApp *app)
 	hours1_text->setVisibleRows(1);
 	minutes1_text->setVisibleRows(1);
 	seconds1_text->setVisibleRows(1);
+
 	// select listboxes
-	FXGroupBox *gb143 = new FXGroupBox(hf143, "select", FRAME_GROOVE|LAYOUT_FILL_X|LAYOUT_FILL_Y);
+	FXGroupBox *gb143 = new FXGroupBox(s142, "select", FRAME_GROOVE|LAYOUT_FILL_X|LAYOUT_FILL_Y);
 	wslistbox=new FXListBox(gb143,this,ID_WSLISTBOX,FRAME_SUNKEN|FRAME_THICK|LAYOUT_TOP);
 	mnlistbox=new FXListBox(gb143,this,ID_MNLISTBOX,FRAME_SUNKEN|FRAME_THICK|LAYOUT_TOP);
 	mslistbox=new FXListBox(gb143,this,ID_MSLISTBOX,FRAME_SUNKEN|FRAME_THICK|LAYOUT_TOP);
+
 	// map group box
-	FXGroupBox *gb142 = new FXGroupBox(vf142, "map", FRAME_GROOVE|LAYOUT_FILL_X|LAYOUT_FILL_Y);
+	FXGroupBox *gb142 = new FXGroupBox(s143, "map", FRAME_GROOVE|LAYOUT_FILL_X|LAYOUT_FILL_Y);
 	open_button = new FXButton(gb142, "open", NULL, this, ID_OPEN, BUTTON_NORMAL|LAYOUT_FILL_X);
 	save_button = new FXButton(gb142, "save", NULL, this, ID_SAVE, BUTTON_NORMAL|LAYOUT_FILL_X);
 	append_button = new FXButton(gb142, "append", NULL, this, ID_APPEND, BUTTON_NORMAL|LAYOUT_FILL_X);
@@ -450,10 +466,8 @@ MainWindow::MainWindow(FXApp *app)
 	map_text = new FXText(new FXHorizontalFrame(innerVF9,LAYOUT_FILL_X|FRAME_SUNKEN|FRAME_THICK, 0,0,0,0, 0,0,0,0), NULL, 0, LAYOUT_FILL_X);
 	map_text->setVisibleRows(1);
 
-	// horizontal frame for Output Group Box
-	FXHorizontalFrame *hf15 = new FXHorizontalFrame(vf141, LAYOUT_FILL_X);
 	// Output Group Box
-	FXGroupBox *gb15 = new FXGroupBox(hf15, "PC->STM32", FRAME_GROOVE|LAYOUT_FILL_X, 0,0,0,0, 0,0,0,0);
+	FXGroupBox *gb15 = new FXGroupBox(s141, "PC->STM32", FRAME_GROOVE|LAYOUT_FILL_X, 0,0,0,0, 0,0,0,0);
 	FXMatrix *m3 = new FXMatrix(gb15, 2, MATRIX_BY_COLUMNS|LAYOUT_FILL_X);
 	new FXLabel(m3, "Data");
 	new FXLabel(m3, "");
@@ -504,6 +518,8 @@ MainWindow::MainWindow(FXApp *app)
 	read_cont_button->setHelpText("receive IR until pressed again");
 	upgrade_button->setHelpText("upgrade firmware");
 	reset_button->setHelpText("reset eeprom");
+	commit_button->setHelpText("RP2040: commit eeprom");
+	get_raw_button->setHelpText("RP2040: get eeprom raw");
 	days_text->setHelpText("enter days to be set");
 	hours_text->setHelpText("enter hours to be set");
 	minutes_text->setHelpText("enter minutes to be set");
@@ -692,7 +708,7 @@ MainWindow::onConnect(FXObject *sender, FXSelector sel, void *ptr)
 #else
 		s += (i < wakeupslots-1) ? FXStringVal(i,10) : "";
 #endif
-		wslistbox->appendItem(s);	
+		wslistbox->appendItem(s);
 	}
 	wslistbox->setNumVisible(wakeupslots);
 	for(int i = 0; i < macrodepth; i++) {
@@ -704,7 +720,7 @@ MainWindow::onConnect(FXObject *sender, FXSelector sel, void *ptr)
 #else
 		s += FXStringVal(i,10);
 #endif
-		mnlistbox->appendItem(s);	
+		mnlistbox->appendItem(s);
 	}
 	mnlistbox->setNumVisible(macrodepth);
 	for(int i = 0; i < macroslots; i++) {
@@ -716,7 +732,7 @@ MainWindow::onConnect(FXObject *sender, FXSelector sel, void *ptr)
 #else
 		s += FXStringVal(i,10);
 #endif
-		mslistbox->appendItem(s);	
+		mslistbox->appendItem(s);
 	}
 	mslistbox->setNumVisible(macroslots);
 	output_button->enable();
@@ -738,6 +754,10 @@ MainWindow::onConnect(FXObject *sender, FXSelector sel, void *ptr)
 	disconnect_button->enable();
 	reboot_button->enable();
 	reset_button->enable();
+	if(uC == "RP2040"){
+		commit_button->enable();
+		get_raw_button->enable();
+	}
 
 	//list wakeups and alarm and warn if no STM32
 	for(int i = 0; i < wakeupslots; i++) {
@@ -844,6 +864,8 @@ MainWindow::onDisconnect(FXObject *sender, FXSelector sel, void *ptr)
 	disconnect_button->disable();
 	reboot_button->disable();
 	reset_button->disable();
+	commit_button->disable();
+	get_raw_button->disable();
 	getApp()->removeTimeout(this, ID_TIMER);
 	getApp()->removeTimeout(this, ID_READIR_TIMER);
 	getApp()->removeTimeout(this, ID_RED_TIMER);
@@ -864,7 +886,7 @@ MainWindow::onRescan(FXObject *sender, FXSelector sel, void *ptr)
 	// List the Devices
 	hid_free_enumeration(devices);
 	devices = hid_enumerate(0x1209, 0x4444);
-	cur_dev = devices;	
+	cur_dev = devices;
 	while (cur_dev) {
 		// Add it to the List Box.
 		FXString s;
@@ -2075,6 +2097,55 @@ MainWindow::onReeprom(FXObject *sender, FXSelector sel, void *ptr){
 	output_text->setText(s);
 
 	Write_and_Check(4, 4);
+
+	return 1;
+}
+
+long
+MainWindow::onCeeprom(FXObject *sender, FXSelector sel, void *ptr){
+	FXString s;
+	s.format("%d %d %d %d ", REPORT_ID_CONFIG_OUT, STAT_CMD, ACC_SET, CMD_EEPROM_COMMIT);
+
+	output_text->setText(s);
+
+	Write_and_Check(4, 4);
+
+	return 1;
+}
+
+long
+MainWindow::onGeeprom(FXObject *sender, FXSelector sel, void *ptr){
+	FXString s, t, u;
+	for(int k = 15; k >= 0; k--) { // FLASH_SECTOR_SIZE * nr_sectors / size
+		for(int l = 0; l < 16; l++) { // size / 32
+			s.format("%d %d %d %d ", REPORT_ID_CONFIG_OUT, STAT_CMD, ACC_GET, CMD_EEPROM_GET_RAW);
+#if (FOX_MINOR >= 7)
+			t.fromInt(k,16);
+			s += t;
+#else
+			s += FXStringVal(k,16);
+#endif
+			s += " ";
+#if (FOX_MINOR >= 7)
+			t.fromInt(l,16);
+			s += t;
+#else
+			s += FXStringVal(l,16);
+#endif
+			s += " ";
+			output_text->setText(s);
+
+			Write_and_Check(6, in_size);
+
+			for (int i = 4; i < 36; i++) {
+				t.format("%02x", buf[i]);
+				u += t;
+			}
+		}
+		u += "\n";
+	}
+	input_text->appendText(u);
+	input_text->setBottomLine(INT_MAX);
 
 	return 1;
 }
