@@ -332,6 +332,7 @@ void Wakeup(void)
 	/* USB wakeup */
 	tud_remote_wakeup();
 	/* motherboard power switch: WAKEUP_PIN short low (SimpleCircuit) */
+	gpio_set_drive_strenght(WAKEUP_GPIO, GPIO_DRIVE_STRENGTH_12MA); // TODO: once enough?!
 	gpio_set_dir(WAKEUP_GPIO, GPIO_OUT);
 	gpio_put(WAKEUP_GPIO, 0);
 	sleep_ms(500);
