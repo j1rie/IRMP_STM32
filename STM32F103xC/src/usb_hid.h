@@ -29,6 +29,7 @@
 extern uint8_t buf[BUFFER_SIZE];
 extern volatile uint8_t USB_HID_Data_Received;
 extern __IO uint8_t PrevXferComplete;
+extern volatile uint8_t suspended;
 
 void USB_HID_Init(void);
 extern void USB_HID_SendData(uint8_t Report_ID, uint8_t *ptr, uint8_t len);

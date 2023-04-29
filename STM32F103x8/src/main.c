@@ -25,8 +25,6 @@
 #endif
 
 #define BYTES_PER_QUERY	(HID_IN_REPORT_COUNT - 4)
-/* after plugging in, it takes some time, until SOF's are being sent to the device */
-#define SOF_TIMEOUT 500
 
 enum access {
 	ACC_GET,
@@ -229,7 +227,6 @@ IRMP_RC6A28_PROTOCOL,
 
 uint32_t AlarmValue = 0xFFFFFFFF;
 volatile unsigned int systicks = 0;
-volatile unsigned int sof_timeout = 0;
 volatile unsigned int i = 0;
 uint8_t Reboot = 0;
 volatile uint32_t boot_flag __attribute__((__section__(".noinit")));
@@ -382,8 +379,6 @@ void Systick_Init(void)
 void SysTick_Handler(void)
 {
 	systicks++;
-	if (sof_timeout != SOF_TIMEOUT)
-		sof_timeout++;
 	if (i == 999) {
 		if (AlarmValue)
 			AlarmValue--;
@@ -401,16 +396,20 @@ void SysTick_Handler(void)
 	}
 }
 
-/* Reset the counter with every "StartOfFrame" event,
- * sent by active host at fullspeed every 1ms */
 void SOF_Callback(void)
 {
-	sof_timeout = 0;
+	if (suspended)
+		suspended = 0;
 }
 
-uint8_t host_running(void)
+void WKUP_Callback(void)
 {
-	return (sof_timeout != SOF_TIMEOUT);
+	suspended = 0;
+}
+
+void SUSP_Callback(void)
+{
+	suspended = 1;
 }
 
 void Wakeup(void)
@@ -621,7 +620,7 @@ int8_t reset_handler(uint8_t *buf)
 /* is received ir-code in one of the lower wakeup-slots? wakeup if true */
 void check_wakeups(IRMP_DATA *ir)
 {
-	if (host_running())
+	if (!suspended)
 		return;
 	uint8_t i;
 	uint16_t idx;
@@ -802,11 +801,11 @@ int main(void)
 #endif
 
 	while (1) {
-		if (!AlarmValue && !host_running())
+		if (!AlarmValue && suspended)
 			Wakeup();
 
 		/* after Wakeup(): send again even if previous transfer did not complete, otherwise we get stuck on USB FS lib */
-		if (host_running() && send_ir_on_delay && last_magic_sent != send_ir_on_delay) {
+		if (send_ir_on_delay && last_magic_sent != send_ir_on_delay) {
 			send_magic();
 			last_magic_sent = send_ir_on_delay;
 		}
@@ -858,8 +857,7 @@ int main(void)
 			}
 
 			/* send IR-data, but only if host is running, otherwise the transfer will not complete, and we are stuck */
-			if (host_running())
-				USB_HID_SendData(REPORT_ID_IR, (uint8_t *) &myIRData, sizeof(myIRData));
+			USB_HID_SendData(REPORT_ID_IR, (uint8_t *) &myIRData, sizeof(myIRData));
 
 #ifdef TM1637
 			/* send IR-data to 4-digit-display */
