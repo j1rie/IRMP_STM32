@@ -20,7 +20,7 @@ INCLUDES = -Icmsis -Icmsis_boot -Istm_lib/inc -Iusb_hid/inc -Iirmp -Isrc
 ifdef DEBUG
 INCLUDES += -Isemihosting -Istdio
 endif
-DEFINES = -D$(PLATFORM) -DSTM32F10X_HD -DUSE_STDPERIPH_DRIVER -DSOF_CALLBACK -DSUSP_CALLBACK -DWKUP_CALLBACK
+DEFINES = -D$(PLATFORM) -DSTM32F10X_HD -DUSE_STDPERIPH_DRIVER -DSOF_CALLBACK -DSUSP_CALLBACK
 
 OBJS = cmsis_boot/startup/startup_stm32f10x_hd.o cmsis_boot/system_stm32f10x.o\
        src/irmpmain.o src/st_link_leds.o src/usb_hid.o src/main.o\

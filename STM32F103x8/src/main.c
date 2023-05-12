@@ -402,14 +402,10 @@ void SOF_Callback(void)
 		suspended = 0;
 }
 
-void WKUP_Callback(void)
-{
-	suspended = 0;
-}
-
 void SUSP_Callback(void)
 {
 	suspended = 1;
+	PrevXferComplete = 1;
 }
 
 void Wakeup(void)
@@ -856,7 +852,6 @@ int main(void)
 				check_reboot(&myIRData);
 			}
 
-			/* send IR-data, but only if host is running, otherwise the transfer will not complete, and we are stuck */
 			USB_HID_SendData(REPORT_ID_IR, (uint8_t *) &myIRData, sizeof(myIRData));
 
 #ifdef TM1637
