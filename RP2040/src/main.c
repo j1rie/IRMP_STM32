@@ -226,7 +226,6 @@ IRMP_RC6A28_PROTOCOL,
 
 uint32_t AlarmValue = 0xFFFFFFFF;
 volatile unsigned int systicks = 0;
-volatile unsigned int sof_timeout = 0;
 volatile unsigned int i = 0;
 uint8_t Reboot = 0;
 //volatile uint32_t boot_flag __attribute__((__section__(".noinit")));
@@ -238,10 +237,10 @@ void LED_Switch_init(void)
 	/* start with wakeup switch off */
 	gpio_init(WAKEUP_GPIO);
 	gpio_init(EXTLED_GPIO);
+	gpio_set_drive_strength(EXTLED_GPIO, GPIO_DRIVE_STRENGTH_12MA);
+	//gpio_set_drive_strength(WAKEUP_GPIO, GPIO_DRIVE_STRENGTH_12MA); // TODO: once enough?!
 	gpio_set_dir(WAKEUP_GPIO, GPIO_IN); // no open drain on RP2040
 	gpio_set_dir(EXTLED_GPIO, GPIO_OUT);
-	gpio_init(14);
-	gpio_set_dir(14, GPIO_OUT);
 }
 
 void toggle_led(void)
@@ -332,7 +331,7 @@ void Wakeup(void)
 	/* USB wakeup */
 	tud_remote_wakeup();
 	/* motherboard power switch: WAKEUP_PIN short low (SimpleCircuit) */
-	gpio_set_drive_strenght(WAKEUP_GPIO, GPIO_DRIVE_STRENGTH_12MA); // TODO: once enough?!
+	gpio_set_drive_strength(WAKEUP_GPIO, GPIO_DRIVE_STRENGTH_12MA); // TODO: once enough?!
 	gpio_set_dir(WAKEUP_GPIO, GPIO_OUT);
 	gpio_put(WAKEUP_GPIO, 0);
 	sleep_ms(500);

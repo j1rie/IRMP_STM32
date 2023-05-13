@@ -16,8 +16,8 @@ volatile uint8_t USB_HID_Data_Received = 0;
 
 void USB_HID_SendData(uint8_t Report_ID, uint8_t *ptr, uint8_t len)
 {
-	/* send data only if host is running */
-	if(tud_suspended()) return;
+	if(tud_suspended())
+		return;
 	if (Report_ID == REPORT_ID_IR)
 	{
 		/* Windows needs HID_IN_REPORT_COUNT, for linux SIZEOF_IR + 1 is sufficient */

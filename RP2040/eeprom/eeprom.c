@@ -120,6 +120,7 @@ bool eeprom_commit() {
 
     _data[_size - 1] = 0x00; // mark last byte
     flash_range_program((intptr_t)_sector - (intptr_t)XIP_BASE + first_empty_page * _size, _data, _size);
+    bool res = !(memcmp(_sector + first_empty_page * _size, _data, _size)); // verify
     first_empty_page++;
     if(!(first_empty_page < _nr_sectors * FLASH_SECTOR_SIZE / _size))
         first_empty_page = -1;
@@ -127,7 +128,7 @@ bool eeprom_commit() {
     //rp2040.resumeOtherCore();
     restore_interrupts(status);
 
-    return true;
+    return res;
 }
 
 void eeprom_reset() {

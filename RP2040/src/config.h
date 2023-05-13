@@ -10,7 +10,7 @@
 #ifndef __CONFIG_H
 #define __CONFIG_H
 
-/* MACRO_SLOTS x (MACRO_DEPTH + 1) + WAKE_SLOTS <= 42
+/* MACRO_SLOTS x (MACRO_DEPTH + 1) + WAKE_SLOTS <= 85
  * Eeprom page size = (512 - 1) 8bit variables,
  * IRdata needs 6 variables, 511 / 6 = 85
  */
