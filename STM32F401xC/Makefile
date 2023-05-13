@@ -105,7 +105,7 @@ clean-objects:
 	rm -f $(OBJS) $(TARGET).{bin,elf,map}
 
 clean: clean-objects
-	rm -rf cmsis cmsis_boot irmp stm_lib usb_hid ext_src/prepared
+	rm -rf cmsis cmsis_boot irmp stm_lib usb_hid ext_src/prepared tm1637
 
 distclean: clean
 	rm -rf ext_src

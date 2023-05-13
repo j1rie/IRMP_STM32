@@ -20,7 +20,7 @@ INCLUDES = -Icmsis -Icmsis_boot -Istm_lib/inc -Iusb_hid/inc -Iirmp -Isrc
 ifdef DEBUG
 INCLUDES += -Isemihosting -Istdio
 endif
-DEFINES = -D$(PLATFORM) -DSTM32F30X -DUSE_STDPERIPH_DRIVER -DSOF_CALLBACK
+DEFINES = -D$(PLATFORM) -DSTM32F30X -DUSE_STDPERIPH_DRIVER -DSOF_CALLBACK -DSUSP_CALLBACK
 
 OBJS = cmsis_boot/startup/startup_stm32f30x.o cmsis_boot/system_stm32f30x.o\
        src/irmpmain.o src/st_link_leds.o src/usb_hid.o src/main.o\
@@ -59,7 +59,7 @@ LDFLAGS = -nostartfiles -Wl,-Map=$(TARGET).map,--gc-sections,--entry=main,-Tscri
 else
 LDFLAGS = -nostartfiles -Wl,-Map=$(TARGET).map,--gc-sections,--entry=main,-Tscripts/arm-gcc-link.ld $(ARCH) $(COMMON)
 endif
-LDFLAGS += --specs=nano.specs
+LDFLAGS += --specs=nano.specs --specs=nosys.specs
 
 ifdef SimpleCircuit
 DEFINES += -DSimpleCircuit
@@ -104,7 +104,7 @@ clean-objects:
 	rm -f $(OBJS) $(TARGET).{bin,elf,map}
 
 clean: clean-objects
-	rm -rf cmsis cmsis_boot irmp stm_lib usb_hid ext_src/prepared
+	rm -rf cmsis cmsis_boot irmp stm_lib usb_hid ext_src/prepared tm1637
 
 distclean: clean
 	rm -rf ext_src

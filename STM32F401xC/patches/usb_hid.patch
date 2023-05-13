@@ -1,5 +1,5 @@
 /*
- *  Copyright (C) 2014-2022 Joerg Riechardt
+ *  Copyright (C) 2014-2023 Joerg Riechardt
  *
  *  based on work by Uwe Becker - http://mikrocontroller.bplaced.net
  *
@@ -7,8 +7,7 @@
  *  it under the terms of the GNU General Public License as published by
  *  the Free Software Foundation; either version 2 of the License, or
  *  (at your option) any later version.
- */
-diff -Nrup A/inc/usb_bsp.h B/inc/usb_bsp.h
+ */diff -Nrup A/inc/usb_bsp.h B/inc/usb_bsp.h
 --- A/inc/usb_bsp.h	2018-09-05 14:57:38.000000000 +0200
 +++ B/inc/usb_bsp.h	2022-03-15 20:31:51.692280120 +0100
 @@ -25,6 +25,7 @@
@@ -107,10 +106,12 @@ diff -Nrup A/inc/usbd_hid_core.h B/inc/usbd_hid_core.h
  #define HID_REPORT_DESC               0x22
 diff -Nrup A/inc/usbd_usr.h B/inc/usbd_usr.h
 --- A/inc/usbd_usr.h	2018-09-05 14:57:38.000000000 +0200
-+++ B/inc/usbd_usr.h	2022-03-15 19:28:49.319930926 +0100
-@@ -26,7 +26,7 @@
++++ B/inc/usbd_usr.h	2023-05-13 14:47:56.224178296 +0200
+@@ -25,8 +25,9 @@
+ 
  /* Includes ------------------------------------------------------------------*/
  #include "usbd_ioreq.h"
++#include "usb_hid.h"
  #if ! defined (USE_STM32446_EVAL) && ! defined (USE_STM32469I_EVAL)
 -#include "lcd_log.h"
 +//#include "lcd_log.h"
@@ -271,7 +272,7 @@ diff -Nrup A/src/usbd_desc.c B/src/usbd_desc.c
                     USBD_StrDesc, length);
 diff -Nrup A/src/usbd_hid_core.c B/src/usbd_hid_core.c
 --- A/src/usbd_hid_core.c	2018-09-05 14:58:08.000000000 +0200
-+++ B/src/usbd_hid_core.c	2022-07-15 21:30:34.978505522 +0200
++++ B/src/usbd_hid_core.c	2023-05-13 15:04:42.322245398 +0200
 @@ -44,6 +44,7 @@
  #include "usbd_hid_core.h"
  #include "usbd_desc.h"
@@ -420,7 +421,7 @@ diff -Nrup A/src/usbd_hid_core.c B/src/usbd_hid_core.c
    return USBD_OK;
  }
  
-@@ -490,12 +548,32 @@ uint32_t USBD_HID_GetPollingInterval (US
+@@ -490,12 +548,29 @@ uint32_t USBD_HID_GetPollingInterval (US
    {
      /* Sets the data transfer polling interval for low and full 
      speed transfers */
@@ -441,13 +442,10 @@ diff -Nrup A/src/usbd_hid_core.c B/src/usbd_hid_core.c
 +  return USBD_OK;
 +}
 +
-+extern volatile unsigned int sof_timeout;
-+
-+/* Reset the counter with every "StartOfFrame" event,
-+ * sent by active host at fullspeed every 1ms */
 +static uint8_t  SOF_Callback (void  *pdev)
 +{
-+	sof_timeout = 0;
++	if (suspended)
++		suspended = 0;
 +	return USBD_OK;
 +}
 +
@@ -456,7 +454,7 @@ diff -Nrup A/src/usbd_hid_core.c B/src/usbd_hid_core.c
    */ 
 diff -Nrup A/src/usbd_usr.c B/src/usbd_usr.c
 --- A/src/usbd_usr.c	2018-09-05 14:48:20.000000000 +0200
-+++ B/src/usbd_usr.c	2022-03-15 19:34:19.355374606 +0100
++++ B/src/usbd_usr.c	2023-05-13 14:49:07.936811837 +0200
 @@ -112,6 +112,7 @@ USBD_Usr_cb_TypeDef USR_cb = {
  */
  void USBD_USR_Init(void)
@@ -518,16 +516,19 @@ diff -Nrup A/src/usbd_usr.c B/src/usbd_usr.c
  }
  
  /**
-@@ -245,7 +247,7 @@ void USBD_USR_DeviceDisconnected(void)
+@@ -245,8 +247,10 @@ void USBD_USR_DeviceDisconnected(void)
  */
  void USBD_USR_DeviceSuspended(void)
  {
 -  LCD_UsrLog("> USB Device in Suspend Mode.\n");
 +  //LCD_UsrLog("> USB Device in Suspend Mode.\n");
    /* Users can do their application actions here for the USB-Reset */
++	suspended = 1;
++	PrevXferComplete = 1;
  }
  
-@@ -258,7 +260,7 @@ void USBD_USR_DeviceSuspended(void)
+ 
+@@ -258,7 +262,7 @@ void USBD_USR_DeviceSuspended(void)
  */
  void USBD_USR_DeviceResumed(void)
  {
