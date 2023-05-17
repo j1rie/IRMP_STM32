@@ -299,7 +299,8 @@ void store_wakeup(IRMP_DATA *ir)
 	if (!memcmp(tmp, zeros, SIZEOF_IR)) {
 		/* store received wakeup IRData in first wakeup slot */
 		eeprom_store(idx, (uint8_t *) ir);
-		fast_toggle();
+		if (eeprom_commit())
+			fast_toggle();
 	}
 }
 
