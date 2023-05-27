@@ -425,7 +425,6 @@ int8_t set_handler(uint8_t *buf)
 	/* number of valid bytes in buf, -1 signifies error */
 	int8_t ret = 4;
 	uint16_t idx;
-	uint8_t tmp[SIZEOF_IR];
 	switch (buf[3]) {
 	case CMD_EMIT:
 		yellow_short_on();
@@ -437,18 +436,14 @@ int8_t set_handler(uint8_t *buf)
 	case CMD_MACRO:
 		idx = (MACRO_DEPTH + 1) * SIZEOF_IR * buf[4] + SIZEOF_IR * buf[5];
 		eeprom_store(idx, &buf[6]);
-		/* validate stored value in eeprom */
-		eeprom_restore(tmp, idx);
-		if (memcmp(&buf[6], tmp, sizeof(tmp)))
-			ret = -1;
 		break;
 	case CMD_WAKE:
 		idx = (MACRO_DEPTH + 1) * SIZEOF_IR * MACRO_SLOTS + SIZEOF_IR * buf[4];
 		eeprom_store(idx, &buf[5]);
-		/* validate stored value in eeprom */
-		eeprom_restore(tmp, idx);
-		if (memcmp(&buf[5], tmp, sizeof(tmp)))
-			ret = -1;
+		if (!buf[4]){
+			if(!eeprom_commit())
+				ret = -1;
+		}
 		break;
 	case CMD_REBOOT:
 		Reboot = 1;
@@ -471,7 +466,6 @@ int8_t reset_handler(uint8_t *buf)
 	/* number of valid bytes in buf, -1 signifies error */
 	int8_t ret = 4;
 	uint16_t idx;
-	uint8_t tmp[SIZEOF_IR];
 	uint8_t zeros[SIZEOF_IR] = {0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF};
 	switch (buf[3]) {
 	case CMD_ALARM:
@@ -480,18 +474,10 @@ int8_t reset_handler(uint8_t *buf)
 	case CMD_MACRO:
 		idx = (MACRO_DEPTH + 1) * SIZEOF_IR * buf[4] + SIZEOF_IR * buf[5];
 		eeprom_store(idx, zeros);
-		/* validate stored value in eeprom */
-		eeprom_restore(tmp, idx);
-		if (memcmp(zeros, tmp, sizeof(tmp)))
-			ret = -1;
 		break;
 	case CMD_WAKE:
 		idx = (MACRO_DEPTH + 1) * SIZEOF_IR * MACRO_SLOTS + SIZEOF_IR * buf[4];
 		eeprom_store(idx, zeros);
-		/* validate stored value in eeprom */
-		eeprom_restore(tmp, idx);
-		if (memcmp(zeros, tmp, sizeof(tmp)))
-			ret = -1;
 		break;
 	case CMD_EEPROM_RESET:
 		eeprom_reset();
