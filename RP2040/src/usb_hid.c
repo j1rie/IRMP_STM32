@@ -16,7 +16,7 @@ volatile uint8_t USB_HID_Data_Received = 0;
 
 void USB_HID_SendData(uint8_t Report_ID, uint8_t *ptr, uint8_t len)
 {
-	if(tud_suspended())
+	if(tud_suspended() || !tud_connected())
 		return;
 	if (Report_ID == REPORT_ID_IR)
 	{

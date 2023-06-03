@@ -113,7 +113,8 @@ int main(int argc, const char **argv) {
 
 	uint64_t i;
 	char c, d;
-	uint8_t s, m, k, l, idx;
+	uint8_t s, m, l, idx;
+	int8_t k;
 	int retValm, jump_to_firmware, res, desc_size = 0;
 	unsigned int n;
 	FILE *fp;

@@ -123,7 +123,8 @@ int main(int argc, char* argv[])
 {
 	uint64_t i;
 	char c, d;
-	uint8_t k, l, idx;
+	uint8_t l, idx;
+	int8_t k;
 	unsigned int s, m;
 	int retValm, jump_to_firmware;
 	FILE *fp;

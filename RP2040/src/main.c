@@ -591,7 +591,7 @@ int main(void)
 	IRMP_Init();
 	irsnd_init();
 	eeprom_begin(2*FLASH_PAGE_SIZE, 2); // 16 pages of 512 byte
-	//irmp_set_callback_ptr(led_callback);
+	irmp_set_callback_ptr(led_callback);
 
 	while (1)
 	{
@@ -644,7 +644,6 @@ int main(void)
 		if (irmp_get_data(&myIRData)) {
 			myIRData.flags = myIRData.flags & IRMP_FLAG_REPETITION;
 			if (!(myIRData.flags)) {
-				blink_LED(); ///
 				store_wakeup(&myIRData);
 				check_macros(&myIRData);
 				check_wakeups(&myIRData);
