@@ -22,7 +22,7 @@ void USB_HID_Init(void)
 
 void USB_HID_SendData(uint8_t Report_ID, uint8_t *ptr, uint8_t len)
 {
-	if (suspended)
+	if (suspended || (USB_OTG_dev.dev.device_status != USB_OTG_CONFIGURED))
 		return;
 	if (Report_ID == REPORT_ID_IR)
 	{
