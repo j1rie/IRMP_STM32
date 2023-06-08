@@ -22,7 +22,7 @@
 
 /* TODO GPIO x Logging (irmp.c) */
 
-#define WAKEUP_GPIO		27 /* GPIO 2  (Pin 32)  */
+#define WAKEUP_GPIO		27 /* GPIO 27 (Pin 32) */
 #define RESET_GPIO		3  /* GPIO 3  (Pin 5)  */
 #define EXTLED_GPIO		4  /* GPIO 4  (Pin 6)  */
 #define IR_IN_GPIO		28 /* GPIO 28 (Pin 34) */
