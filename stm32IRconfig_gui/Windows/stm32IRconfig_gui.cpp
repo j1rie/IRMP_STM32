@@ -408,8 +408,6 @@ MainWindow::MainWindow(FXApp *app)
 	reset_button = new FXButton(gb132, "reset", NULL, this, ID_REEPROM, BUTTON_NORMAL|LAYOUT_FILL_X);
 	commit_button = new FXButton(gb132, "commit", NULL, this, ID_CEEPROM, BUTTON_NORMAL|LAYOUT_FILL_X);
 	get_raw_button = new FXButton(gb132, "get raw", NULL, this, ID_GEEPROM, BUTTON_NORMAL|LAYOUT_FILL_X);
-	commit_button->disable();
-	get_raw_button->disable();
 
 	//firmware Group Box
 	FXGroupBox *gb133 = new FXGroupBox(s133, "firmware", FRAME_GROOVE|LAYOUT_FILL_X);
@@ -562,6 +560,9 @@ MainWindow::MainWindow(FXApp *app)
 	send_button->disable();
 	read_cont_button->disable();
 	reboot_button->disable();
+	commit_button->disable();
+	get_raw_button->disable();
+
 
 	// save Colors
 	storedShadowColor = read_cont_button->getShadowColor();
@@ -752,11 +753,12 @@ MainWindow::onConnect(FXObject *sender, FXSelector sel, void *ptr)
 	read_cont_button->enable();
 	connect_button->disable();
 	disconnect_button->enable();
-	reboot_button->enable();
 	reset_button->enable();
 	if(uC == "RP2040"){
 		commit_button->enable();
 		get_raw_button->enable();
+	} else {
+		reboot_button->enable();
 	}
 
 	//list wakeups and alarm and warn if no STM32
@@ -808,10 +810,10 @@ MainWindow::onConnect(FXObject *sender, FXSelector sel, void *ptr)
 	t.format("%d", alarm % 60);
 	s += t;
 	s += " seconds\n";
-	if(uC != "STM32"){
+	if(uC != "STM32" && uC != "RP2040"){
 		s += "WARNING: This device's microcontroller is a ";
 		s += uC;
-		s += ", NOT a STM32!\n";
+		s += ", NOT a STM32 or RP2040!\n";
 	}
 	input_text->setText("");
 	output_text->setText("");
@@ -1754,40 +1756,51 @@ MainWindow::onSendIR(FXObject *sender, FXSelector sel, void *ptr)
 long
 MainWindow::onUpgrade(FXObject *sender, FXSelector sel, void *ptr)
 {
-	const FXchar patterns[]="All Files (*)\nFirmware Files (*.bin)";
-	FXString s, v, Filename, FilenameText;
-	FXFileDialog open(this,"Open a firmware file");
-	open.setPatternList(patterns);
-	open.setCurrentPattern(1);
-	if(open.execute()){
-		Filename = open.getFilename();
-		FXint pos = Filename.rfind(PATHSEP);
-		FXint endpos = Filename.length();
-		FXint suffix_length = open.getCurrentPattern() ? 4 : 0;
-		FXString Firmwarename = Filename.mid(pos + 1, endpos - pos - 1 - suffix_length);
-		if(MBOX_CLICKED_NO==FXMessageBox::question(this,MBOX_YES_NO,"Really upgrade?","Old Firmware: %s\nNew Firmware: %s", firmware1.text(),  Firmwarename.text())) return 1;
-		sprintf(printcollect, "%s", "");
+	if(uC != "RP2040"){
+		const FXchar patterns[]="All Files (*)\nFirmware Files (*.bin)";
+		FXString s, v, Filename, FilenameText;
+		FXFileDialog open(this,"Open a firmware file");
+		open.setPatternList(patterns);
+		open.setCurrentPattern(1);
+		if(open.execute()){
+			Filename = open.getFilename();
+			FXint pos = Filename.rfind(PATHSEP);
+			FXint endpos = Filename.length();
+			FXint suffix_length = open.getCurrentPattern() ? 4 : 0;
+			FXString Firmwarename = Filename.mid(pos + 1, endpos - pos - 1 - suffix_length);
+			if(MBOX_CLICKED_NO==FXMessageBox::question(this,MBOX_YES_NO,"Really upgrade?","Old Firmware: %s\nNew Firmware: %s", firmware1.text(),  Firmwarename.text())) return 1;
+			sprintf(printcollect, "%s", "");
 #ifndef WIN32
-		sprintf(firmwarefile, "%s", Filename.text());
+			sprintf(firmwarefile, "%s", Filename.text());
 #else
-		FXCP1252Codec codec;
-		FXString mbstring=codec.utf2mb(Filename); // on Windows file encoding is cp1252, needed for umlaut
-		sprintf(firmwarefile, "%s", mbstring.text());
+			FXCP1252Codec codec;
+			FXString mbstring=codec.utf2mb(Filename); // on Windows file encoding is cp1252, needed for umlaut
+			sprintf(firmwarefile, "%s", mbstring.text());
 #endif
 
-		doUpgrade.set_firmwarefile(firmwarefile);
-		doUpgrade.set_print(print);
-		doUpgrade.set_printcollect(printcollect);
-		doUpgrade.set_signal(guisignal);
-		doUpgrade.start();
+			doUpgrade.set_firmwarefile(firmwarefile);
+			doUpgrade.set_print(print);
+			doUpgrade.set_printcollect(printcollect);
+			doUpgrade.set_signal(guisignal);
+			doUpgrade.start();
 
-		cur_item = device_list->getCurrentItem();
-		num_devices_before_upgrade = device_list->getNumItems();
-		s.format("%d %d %d %d", REPORT_ID_CONFIG_OUT, STAT_CMD, ACC_SET, CMD_REBOOT);
-		output_text->setText(s);
-		if(connected_device)
+			cur_item = device_list->getCurrentItem();
+			num_devices_before_upgrade = device_list->getNumItems();
+			s.format("%d %d %d %d", REPORT_ID_CONFIG_OUT, STAT_CMD, ACC_SET, CMD_REBOOT);
+			output_text->setText(s);
+			if(connected_device)
+				Write_and_Check(4, 4);
+			onDisconnect(NULL, 0, NULL);
+		}
+	} else {
+		if(MBOX_CLICKED_OK==FXMessageBox::information(this, MBOX_OK_CANCEL, "Firmware upgrade", "Switch the Pico into mass storage device mode.\nIn your file manager than drag and drop the firmware file *.uf2 onto the newly appeared mass storage device.\nThan press buttons 'Re-Scan devices' and 'Connect'.")){
+			FXString s;
+			s.format("%d %d %d %d", REPORT_ID_CONFIG_OUT, STAT_CMD, ACC_SET, CMD_REBOOT);
+			output_text->setText(s);
 			Write_and_Check(4, 4);
-		onDisconnect(NULL, 0, NULL);
+			FXThread::sleep(1000000000); // 1 s
+			onRescan(NULL, 0, NULL);
+		}
 	}
 
 	return 1;
