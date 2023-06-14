@@ -2,7 +2,7 @@
  *  IR receiver, sender, USB wakeup, motherboard switch wakeup, wakeup timer,
  *  USB HID device, eeprom emulation
  *
- *  Copyright (C) 2014-2022 Joerg Riechardt
+ *  Copyright (C) 2014-2023 Joerg Riechardt
  *
  *  This program is free software; you can redistribute it and/or modify
  *  it under the terms of the GNU General Public License as published by
@@ -616,7 +616,7 @@ int8_t reset_handler(uint8_t *buf)
 /* is received ir-code in one of the lower wakeup-slots? wakeup if true */
 void check_wakeups(IRMP_DATA *ir)
 {
-	if (!suspended)
+	if (!suspended && (bDeviceSate == CONFIGURED))
 		return;
 	uint8_t i;
 	uint16_t idx;

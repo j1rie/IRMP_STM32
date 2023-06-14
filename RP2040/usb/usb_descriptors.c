@@ -45,7 +45,7 @@ tusb_desc_device_t const desc_device =
     .bcdUSB             = 0x0200,
     .bDeviceClass       = 0x00,
     .bDeviceSubClass    = 0x00,
-    .bDeviceProtocol    = 0x00,
+    .bDeviceProtocol    = HID_ITF_PROTOCOL_NONE,
     .bMaxPacketSize0    = CFG_TUD_ENDPOINT0_SIZE,
 
     .idVendor           = 0x1209,
@@ -86,22 +86,26 @@ uint8_t const * tud_descriptor_device_cb(void)
     HID_USAGE        ( 0x01                       ),\
     HID_COLLECTION   ( HID_COLLECTION_APPLICATION ),\
       /* Report ID if any */\
-      __VA_ARGS__ \
+      /*__VA_ARGS__*/ \
+\
       /* common global */\
       HID_LOGICAL_MIN ( 0x00                                   ),\
       HID_LOGICAL_MAX_N ( 0xff, 2                              ),\
       HID_REPORT_SIZE ( 8                                      ),\
-      /* Input */ \
+\
+      /* RP2040->PC */ \
       0x85, REPORT_ID_IR,    /*     REPORT_ID                  */\
       HID_USAGE       ( 0x02                                   ),\
       HID_REPORT_COUNT( HID_IN_REPORT_COUNT-1                  ),\
       HID_INPUT       ( HID_DATA | HID_VARIABLE | HID_ABSOLUTE ),\
-      /* Input */ \
+\
+      /* RP2040->PC */ \
       0x85, REPORT_ID_CONFIG_IN, /* REPORT_ID                  */\
       HID_USAGE       ( 0x03                                   ),\
       HID_REPORT_COUNT( HID_IN_REPORT_COUNT-1                  ),\
       HID_INPUT       ( HID_DATA | HID_VARIABLE | HID_ABSOLUTE ),\
-      /* Output */ \
+\
+      /* PC->RP2040 */ \
       0x85, REPORT_ID_CONFIG_OUT, /* REPORT_ID                  */\
       HID_USAGE       ( 0x04                                    ),\
       HID_REPORT_COUNT( HID_OUT_REPORT_COUNT-1                  ),\

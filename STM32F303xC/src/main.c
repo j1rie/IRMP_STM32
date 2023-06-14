@@ -623,7 +623,7 @@ int8_t reset_handler(uint8_t *buf)
 /* is received ir-code in one of the lower wakeup-slots? wakeup if true */
 void check_wakeups(IRMP_DATA *ir)
 {
-	if (!suspended)
+	if (!suspended && (bDeviceSate == CONFIGURED))
 		return;
 	uint8_t i;
 	uint16_t idx;
@@ -807,15 +807,14 @@ int main(void)
 		if (!AlarmValue && suspended)
 			Wakeup();
 
-		/* after Wakeup(): send again even if previous transfer did not complete, otherwise we get stuck on USB FS lib */
-		if (send_ir_on_delay && last_magic_sent != send_ir_on_delay) {
+		/* always wait for previous transfer to complete before sending again, consider using a send buffer */
+		if (PrevXferComplete && send_ir_on_delay && last_magic_sent != send_ir_on_delay) {
 			send_magic();
 			last_magic_sent = send_ir_on_delay;
 		}
 
 		wakeup_reset();
 
-		/* always wait for previous transfer to complete before sending again, consider using a send buffer */
 		/* test if configuration command is received */
 		if (PrevXferComplete && USB_HID_Data_Received && buf[0] == REPORT_ID_CONFIG_OUT && buf[1] == STAT_CMD) {
 			USB_HID_Data_Received = 0;

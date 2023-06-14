@@ -492,7 +492,7 @@ int8_t reset_handler(uint8_t *buf)
 /* is received ir-code in one of the lower wakeup-slots? wakeup if true */
 void check_wakeups(IRMP_DATA *ir)
 {
-	if(!tud_suspended())
+	if(tud_ready())
 		return;
 	uint8_t i;
 	uint16_t idx;
