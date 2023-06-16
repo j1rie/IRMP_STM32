@@ -12,7 +12,7 @@
 uint8_t buf[BUFFER_SIZE];
 volatile uint8_t USB_HID_Data_Received = 0;
 __IO uint8_t PrevXferComplete = 1;
-volatile uint8_t suspended;
+volatile uint8_t suspended = 0;
 
 void USB_HID_Init(void)
 {
@@ -24,7 +24,7 @@ void USB_HID_Init(void)
 
 void USB_HID_SendData(uint8_t Report_ID, uint8_t *ptr, uint8_t len)
 {
-	if (suspended || (bDeviceState != CONFIGURED))
+	if (!USB_Ready())
 		return;
 	if (Report_ID == REPORT_ID_IR)
 	{
@@ -33,7 +33,6 @@ void USB_HID_SendData(uint8_t Report_ID, uint8_t *ptr, uint8_t len)
 		buf[0] = Report_ID;
 		memcpy(&buf[1], ptr, SIZEOF_IR);
 		USB_SIL_Write(EP1_IN, buf, HID_IN_REPORT_COUNT);
-
 	}
 	else if (Report_ID == REPORT_ID_CONFIG_IN)
 	{
@@ -44,4 +43,9 @@ void USB_HID_SendData(uint8_t Report_ID, uint8_t *ptr, uint8_t len)
 	}
 	SetEPTxValid(ENDP1);
 	PrevXferComplete = 0;
+}
+
+uint8_t USB_Ready(void)
+{
+	return ((bDeviceState == CONFIGURED) && !suspended);
 }

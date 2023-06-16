@@ -13,7 +13,7 @@ USB_OTG_CORE_HANDLE  USB_OTG_dev;
 uint8_t buf[BUFFER_SIZE];
 volatile uint8_t USB_HID_Data_Received = 0;
 __IO uint8_t PrevXferComplete = 1;
-volatile uint8_t suspended;
+volatile uint8_t suspended = 0;
 
 void USB_HID_Init(void)
 {
@@ -22,7 +22,7 @@ void USB_HID_Init(void)
 
 void USB_HID_SendData(uint8_t Report_ID, uint8_t *ptr, uint8_t len)
 {
-	if (suspended || (USB_OTG_dev.dev.device_status != USB_OTG_CONFIGURED))
+	if (!USB_Ready())
 		return;
 	if (Report_ID == REPORT_ID_IR)
 	{
@@ -40,4 +40,9 @@ void USB_HID_SendData(uint8_t Report_ID, uint8_t *ptr, uint8_t len)
 		DCD_EP_Tx (&USB_OTG_dev, HID_IN_EP, ptr, HID_IN_REPORT_COUNT);
 	}
 	PrevXferComplete = 0;
+}
+
+uint8_t USB_Ready(void)
+{
+	return ((USB_OTG_dev.dev.device_status == USB_OTG_CONFIGURED) && !suspended);
 }

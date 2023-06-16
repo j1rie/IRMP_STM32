@@ -623,7 +623,7 @@ int8_t reset_handler(uint8_t *buf)
 /* is received ir-code in one of the lower wakeup-slots? wakeup if true */
 void check_wakeups(IRMP_DATA *ir)
 {
-	if (!suspended && (bDeviceSate == CONFIGURED))
+	if (USB_Ready())
 		return;
 	uint8_t i;
 	uint16_t idx;
@@ -804,7 +804,7 @@ int main(void)
 #endif
 
 	while (1) {
-		if (!AlarmValue && suspended)
+		if (!AlarmValue && !USB_Ready())
 			Wakeup();
 
 		/* always wait for previous transfer to complete before sending again, consider using a send buffer */

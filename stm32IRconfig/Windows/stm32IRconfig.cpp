@@ -185,7 +185,7 @@ int main(int argc, char* argv[])
 	if(in_size != (inBuf[7] ? inBuf[7] : 17))
 		printf("warning: hid in report count mismatch: %u %u\n", in_size, inBuf[7] ? inBuf[7] : 17);
 	else
-	printf("hid in report count: %u\n", in_size);
+		printf("hid in report count: %u\n", in_size);
 	if(out_size != (inBuf[8] ? inBuf[8] : 17))
 		printf("warning: hid out report count mismatch: %u %u\n", out_size,  inBuf[8] ? inBuf[8] : 17);
 	else
@@ -194,7 +194,7 @@ int main(int argc, char* argv[])
 		printf("old firmware!\n");
 	puts("");
 
-cont:	printf("set: wakeups, macros, alarm and commit(s)\nset by remote: wakeups and macros(q)\nget: wakeups, macros, alarm, capabilities and eeprom) (g)\nreset: wakeups, macros, alarm and eeprom (r)\nsend IR (i)\nreboot (b)\nmonitor until ^C (m)\nrun test (t)\nhid test (h)\nexit (x)\n");
+cont:	printf("set: wakeups, macros, alarm and commit(s)\nset by remote: wakeups and macros(q)\nget: wakeups, macros, alarm, capabilities and raw eeprom from RP2040) (g)\nreset: wakeups, macros, alarm and eeprom (r)\nsend IR (i)\nreboot (b)\nmonitor until ^C (m)\nrun test (t)\nhid test (h)\nexit (x)\n");
 	scanf("%s", &c);
 
 	switch (c) {
@@ -300,7 +300,7 @@ Set:		printf("set wakeup with remote control(w)\nset macro with remote control(m
 		break;
 
 	case 'g':
-get:		printf("get wakeup(w)\nget macro slot(m)\nget caps(c)\nget alarm(a)\nget eeprom\n");
+get:		printf("get wakeup(w)\nget macro slot(m)\nget caps(c)\nget alarm(a)\nget raw eeprom from RP2040(p)\n");
 		scanf("%s", &d);
 		memset(&outBuf[2], 0, sizeof(outBuf) - 2);
 		idx = 2;
@@ -350,22 +350,22 @@ get:		printf("get wakeup(w)\nget macro slot(m)\nget caps(c)\nget alarm(a)\nget e
 				} else {
 					if(!jump_to_firmware) { // queries for supported_protocols
 						printf("protocols: ");
-						for (k = 4; k < in_size; k++) {
-							if (!inBuf[k]) { // NULL termination
+						for (s = 4; s < in_size; s++) {
+							if (!inBuf[s]) { // NULL termination
 								printf("\n\n");
 								jump_to_firmware = 1;
 								goto again;
 							}
-							printf("%u ", inBuf[k]);
+							printf("%u ", inBuf[s]);
 						}
 					} else { // queries for firmware
 						printf("firmware: ");
-						for (k = 4; k < in_size; k++) {
-							if (!inBuf[k]) { // NULL termination
+						for (s = 4; s < in_size; s++) {
+							if (!inBuf[s]) { // NULL termination
 								printf("\n\n");
 								goto out;
 							}
-							printf("%c", inBuf[k]);
+							printf("%c", inBuf[s]);
 						}
 					}
 				}
@@ -373,7 +373,7 @@ get:		printf("get wakeup(w)\nget macro slot(m)\nget caps(c)\nget alarm(a)\nget e
 again:			;
 			}
 			break;
-		case 'e':
+		case 'p':
 			outBuf[idx++] = CMD_EEPROM_GET_RAW;
 			for(k = 15; k >= 0; k--) { // FLASH_SECTOR_SIZE * nr_sectors / size
 				outBuf[idx] = k;

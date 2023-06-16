@@ -563,7 +563,6 @@ MainWindow::MainWindow(FXApp *app)
 	commit_button->disable();
 	get_raw_button->disable();
 
-
 	// save Colors
 	storedShadowColor = read_cont_button->getShadowColor();
 	storedBaseColor = read_cont_button->getBaseColor();

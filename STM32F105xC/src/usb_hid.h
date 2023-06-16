@@ -36,5 +36,6 @@ extern volatile uint8_t suspended;
 
 void USB_HID_Init(void);
 extern void USB_HID_SendData(uint8_t Report_ID, uint8_t *ptr, uint8_t len);
+uint8_t USB_Ready(void);
 
 #endif /* __USB_HID_H */
