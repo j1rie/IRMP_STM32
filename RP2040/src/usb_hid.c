@@ -24,7 +24,6 @@ void USB_HID_SendData(uint8_t Report_ID, uint8_t *ptr, uint8_t len)
 		uint8_t buf[HID_IN_REPORT_COUNT - 1] = {0};
 		memcpy(buf, ptr, SIZEOF_IR);
 		tud_hid_report(Report_ID, buf, HID_IN_REPORT_COUNT - 1);
-
 	}
 	else if (Report_ID == REPORT_ID_CONFIG_IN)
 	{
