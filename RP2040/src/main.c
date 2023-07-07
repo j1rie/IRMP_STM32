@@ -481,7 +481,6 @@ int8_t reset_handler(uint8_t *buf)
 		break;
 	case CMD_EEPROM_RESET:
 		eeprom_reset();
-		eeprom_begin(2*FLASH_PAGE_SIZE, 2);
 		break;
 	default:
 		ret = -1;
@@ -597,19 +596,20 @@ int main(void)
 	{
 		tud_task(); // tinyusb device task
 
-		if (board_button_read() && tud_suspended())
+		if (board_button_read() && !tud_ready())
 			Wakeup();
 
-		if (!AlarmValue && tud_suspended())
+		if (!AlarmValue && !tud_ready())
 			Wakeup();
 
-		if (send_ir_on_delay && last_magic_sent != send_ir_on_delay) {
+		/* always wait for previous transfer to complete before sending again, consider using a send buffer */
+		if (PrevXferComplete && send_ir_on_delay && last_magic_sent != send_ir_on_delay) {
 			send_magic();
 			last_magic_sent = send_ir_on_delay;
 		}
 
 		/* test if configuration command is received */
-		if(USB_HID_Data_Received && *bufptr == REPORT_ID_CONFIG_OUT && *(bufptr+1) == STAT_CMD) {
+		if(PrevXferComplete && USB_HID_Data_Received && *bufptr == REPORT_ID_CONFIG_OUT && *(bufptr+1) == STAT_CMD) {
 			USB_HID_Data_Received = 0;
 
 			switch (*(bufptr+2)) {
@@ -641,7 +641,7 @@ int main(void)
 		}
 
 		/* poll IR-data */
-		if (irmp_get_data(&myIRData)) {
+		if (PrevXferComplete && irmp_get_data(&myIRData)) {
 			myIRData.flags = myIRData.flags & IRMP_FLAG_REPETITION;
 			if (!(myIRData.flags)) {
 				store_wakeup(&myIRData);
