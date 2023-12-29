@@ -700,6 +700,7 @@ irsnd_off (void)
 
 #  elif defined (ARM_RP2040)                                                            // ARM_RP2040
         pwm_set_enabled(slice_num, false);                                              // disable counter
+        gpio_put(IRSND_BIT, 0);                                                         // set IRSND_BIT to low
 
 #  elif defined (TEENSY_ARM_CORTEX_M4)                                                  // TEENSY
         analogWrite(IRSND_PIN, 0);                                                      // pwm off, LOW level
