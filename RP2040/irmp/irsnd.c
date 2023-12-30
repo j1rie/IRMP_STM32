@@ -1083,6 +1083,7 @@ irsnd_init (void)
         gpio_set_function(IRSND_BIT, GPIO_FUNC_PWM);
         slice_num = pwm_gpio_to_slice_num(IRSND_BIT);
         pwm_set_output_polarity(slice_num, true, true);
+        gpio_set_outover(IRSND_BIT, GPIO_OVERRIDE_LOW);
 
         irsnd_set_freq (IRSND_FREQ_36_KHZ);                                         // set default frequency
 
