@@ -11,16 +11,11 @@
 ************************************************************************************************************/
 
 #include <stdio.h>
-#include <time.h>
 #include <stdlib.h>
 #include <inttypes.h>
 #include <unistd.h>
-#include <sys/socket.h>
 #include <sys/un.h>
-#include <sysexits.h>
-#include <sys/stat.h>
 #include <errno.h>
-#include <termios.h>
 #include <fcntl.h>
 
 enum access {
@@ -128,7 +123,7 @@ int main(int argc, char *argv[]) {
 	    memcpy(&outBuf[4], &led_state, sizeof(led_state));
 	    write_stm32();
 	    usleep(3000);
-	    read_stm32(); /* necessary to avoid, that echo is read by first alarm read */
+	    read_stm32();
 	    while (inBuf[0] == REPORT_ID_IR)
 		read_stm32();
 	}
