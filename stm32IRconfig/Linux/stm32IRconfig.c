@@ -40,7 +40,8 @@ enum command {
 	CMD_REBOOT,
 	CMD_EEPROM_RESET,
 	CMD_EEPROM_COMMIT,
-	CMD_EEPROM_GET_RAW
+	CMD_EEPROM_GET_RAW,
+	CMD_STATUSLED
 };
 
 enum status {
@@ -178,13 +179,13 @@ int main(int argc, const char **argv) {
 		printf("old firmware!\n");
 	puts("");
 
-cont:	printf("set: wakeups, macros, alarm and commit(s)\nset by remote: wakeups and macros(q)\nget: wakeups, macros, alarm, capabilities and raw eeprom from RP2040 (g)\nreset: wakeups, macros, alarm and eeprom (r)\nsend IR (i)\nreboot (b)\nmonitor until ^C (m)\nrun test (t)\nhid test (h)\nexit (x)\n");
+cont:	printf("set: wakeups, macros, alarm, commit and statusled(s)\nset by remote: wakeups and macros(q)\nget: wakeups, macros, alarm, capabilities and raw eeprom from RP2040 (g)\nreset: wakeups, macros, alarm and eeprom (r)\nsend IR (i)\nreboot (b)\nmonitor until ^C (m)\nrun test (t)\nhid test (h)\nexit (x)\n");
 	scanf("%s", &c);
 
 	switch (c) {
 
 	case 's':
-set:		printf("set wakeup(w)\nset macro(m)\nset alarm(a)\ncommit(c)\n");
+set:		printf("set wakeup(w)\nset macro(m)\nset alarm(a)\ncommit(c)\nstatusled(s)\n");
 		scanf("%s", &d);
 		memset(&outBuf[2], 0, sizeof(outBuf) - 2);
 		idx = 2;
@@ -232,6 +233,13 @@ set:		printf("set wakeup(w)\nset macro(m)\nset alarm(a)\ncommit(c)\n");
 			break;
 		case 'c':
 			outBuf[idx++] = CMD_EEPROM_COMMIT;
+			write_and_check(idx, 4);
+			break;
+		case 's':
+			outBuf[idx++] = CMD_STATUSLED;
+			printf("enter 1 for on, 0 for off\n");
+			scanf("%" SCNx8 "", &s);
+			outBuf[idx++] = s;
 			write_and_check(idx, 4);
 			break;
 		default:

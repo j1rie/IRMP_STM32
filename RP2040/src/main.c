@@ -41,7 +41,8 @@ enum command {
 	CMD_REBOOT,
 	CMD_EEPROM_RESET,
 	CMD_EEPROM_COMMIT,
-	CMD_EEPROM_GET_RAW
+	CMD_EEPROM_GET_RAW,
+	CMD_STATUSLED
 };
 
 enum status {
@@ -237,10 +238,13 @@ void LED_Switch_init(void)
 	/* start with wakeup switch off */
 	gpio_init(WAKEUP_GPIO);
 	gpio_init(EXTLED_GPIO);
+	gpio_init(STATUSLED_GPIO);
 	gpio_set_drive_strength(EXTLED_GPIO, GPIO_DRIVE_STRENGTH_12MA);
+	gpio_set_drive_strength(STATUSLED_GPIO, GPIO_DRIVE_STRENGTH_12MA);
 	//gpio_set_drive_strength(WAKEUP_GPIO, GPIO_DRIVE_STRENGTH_12MA); // TODO: once enough?!
 	gpio_set_dir(WAKEUP_GPIO, GPIO_IN); // no open drain on RP2040
 	gpio_set_dir(EXTLED_GPIO, GPIO_OUT);
+	gpio_set_dir(STATUSLED_GPIO, GPIO_OUT);
 }
 
 void toggle_led(void)
@@ -271,6 +275,10 @@ void yellow_short_on(void)
 	toggle_led();
 	sleep_ms(130);
 	toggle_led();
+}
+
+void statusled_write(uint8_t led_state) {
+	gpio_put(STATUSLED_GPIO, led_state);
 }
 
 void eeprom_store(int addr, uint8_t *buf)
@@ -454,6 +462,9 @@ int8_t set_handler(uint8_t *buf)
 	case CMD_EEPROM_COMMIT:
 		if(!eeprom_commit())
 			ret = -1;
+		break;
+	case CMD_STATUSLED:
+		statusled_write(buf[4]);
 		break;
 	default:
 		ret = -1;

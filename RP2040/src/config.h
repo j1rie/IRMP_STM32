@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2014-2023 Joerg Riechardt
+ * Copyright (C) 2014-2024 Joerg Riechardt
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -29,5 +29,6 @@
 #define IR_OUT_GPIO		6  /* GPIO 6  (Pin 9)  */
 #define WAKEUP_RESET_GPIO	7  /* GPIO 7  (Pin 10) */
 #define LED_GPIO		8  /* GPIO 8  (Pin 11) */
+#define STATUSLED_GPIO		22 /* GPIO 22 (Pin 29) */
 
 #endif /* __CONFIG_H */
