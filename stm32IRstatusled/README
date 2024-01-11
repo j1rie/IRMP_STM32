@@ -1,0 +1,11 @@
+Set statusled on STM32.
+For use in vdr-plugin-statusleds.
+
+Usage:
+stm32IRstatusled [-d device] -s led_state
+
+Examples:
+switch the statusled on stm32IRstatusled -d /dev/hidraw1 -s 1
+switch the statusled offm32IRstatusled -d /dev/hidraw1 -s 0
+
+put the udev rule from irmplircd into your udev rules directory, then you don't need to give a device
