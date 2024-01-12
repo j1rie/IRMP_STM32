@@ -51,8 +51,8 @@ enum report_id {
 };
 
 static int stm32fd = -1;
-uint8_t inBuf[8];
-uint8_t outBuf[8];
+uint8_t inBuf[64];
+uint8_t outBuf[64];
 
 static bool open_stm32(const char *devicename) {
 	stm32fd = open(devicename, O_RDWR);
@@ -120,7 +120,7 @@ int main(int argc, char *argv[]) {
 	    outBuf[2] = ACC_SET;
 	    outBuf[3] = CMD_STATUSLED;
 	    led_state = strtoul(svalue, NULL, 0);
-	    memcpy(&outBuf[4], &led_state, sizeof(led_state));
+	    outBuf[4] = led_state;
 	    write_stm32();
 	    usleep(3000);
 	    read_stm32();
