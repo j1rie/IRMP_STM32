@@ -99,7 +99,7 @@ int main(int argc, char *argv[]) {
 	char *dvalue = NULL;
 	char *svalue = NULL;
 	
-	while ((opt = getopt(argc, argv, ":ds:")) != -1) {
+	while ((opt = getopt(argc, argv, "d:s:")) != -1) {
 	    switch (opt) {
 	    case 'd':
 		dvalue = optarg;

@@ -185,6 +185,8 @@
 	#define LED_PIN			GPIO_Pin_13
 	#define WAKEUP_RESET_PORT	GPIOB
 	#define WAKEUP_RESET_PIN	GPIO_Pin_12
+	#define STATUSLED_PORT	GPIOB
+	#define STATUSLED_PIN	GPIO_Pin_9
 #elif defined(BlueDeveloperBoard) /* blue developer board */
 	#define WAKEUP_PORT		GPIOA
 	#define WAKEUP_PIN		GPIO_Pin_14 /* CLK */
@@ -198,6 +200,8 @@
 	#define LED_PIN			GPIO_Pin_13
 	#define WAKEUP_RESET_PORT	GPIOB
 	#define WAKEUP_RESET_PIN	GPIO_Pin_13
+	#define STATUSLED_PORT	GPIOB
+	#define STATUSLED_PIN	GPIO_Pin_11
 #elif defined(BlackDeveloperBoard) /* black developer board */
 	#define WAKEUP_PORT		GPIOA
 	#define WAKEUP_PIN		GPIO_Pin_14 /* CLK */
@@ -211,6 +215,8 @@
 	#define LED_PIN			GPIO_Pin_12
 	#define WAKEUP_RESET_PORT	GPIOB
 	#define WAKEUP_RESET_PIN	GPIO_Pin_13
+	#define STATUSLED_PORT	GPIOB
+	#define STATUSLED_PIN	GPIO_Pin_11
 #elif defined(BlackDeveloperBoardTest) /* black developer board test */
 	#define WAKEUP_PORT		GPIOB
 	#define WAKEUP_PIN		GPIO_Pin_8
@@ -224,6 +230,8 @@
 	#define LED_PIN			GPIO_Pin_12
 	#define WAKEUP_RESET_PORT	GPIOB
 	#define WAKEUP_RESET_PIN	GPIO_Pin_13
+	#define STATUSLED_PORT	GPIOB
+	#define STATUSLED_PIN	GPIO_Pin_11
 #elif defined(MapleMini) || defined(MapleMini_2k) /* Maple Mini */
 	#define WAKEUP_PORT		GPIOB
 	#define WAKEUP_PIN		GPIO_Pin_10
@@ -240,6 +248,8 @@
 	#define USB_DISC_PORT		GPIOB
 	#define USB_DISC_RCC_APB2Periph	RCC_APB2Periph_GPIOB
 	#define USB_DISC_PIN		GPIO_Pin_9
+	#define STATUSLED_PORT	GPIOB
+	#define STATUSLED_PIN	GPIO_Pin_11
 #elif defined(MapleMini_ExtBd) || defined(MapleMini_2k_ExtBd) /* Maple Mini with Extension Board */
 	#define WAKEUP_PORT		GPIOB
 	#define WAKEUP_PIN		GPIO_Pin_7 /* 15 */
@@ -260,6 +270,8 @@
 	#define USB_DISC_PORT		GPIOB
 	#define USB_DISC_RCC_APB2Periph	RCC_APB2Periph_GPIOB
 	#define USB_DISC_PIN		GPIO_Pin_9
+	#define STATUSLED_PORT	GPIOB
+	#define STATUSLED_PIN	GPIO_Pin_11
 #else
 	#error "Missing define for board"
 #endif /* BlueLink */

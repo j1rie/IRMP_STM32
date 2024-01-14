@@ -2,7 +2,7 @@
  *  IR receiver, sender, USB wakeup, motherboard switch wakeup, wakeup timer,
  *  USB HID device, eeprom emulation
  *
- *  Copyright (C) 2014-2023 Joerg Riechardt
+ *  Copyright (C) 2014-2024 Joerg Riechardt
  *
  *  This program is free software; you can redistribute it and/or modify
  *  it under the terms of the GNU General Public License as published by
@@ -33,7 +33,10 @@ enum command {
 	CMD_MACRO,
 	CMD_WAKE,
 	CMD_REBOOT,
-	CMD_EEPROM_RESET
+	CMD_EEPROM_RESET,
+	CMD_EEPROM_COMMIT,
+	CMD_EEPROM_GET_RAW,
+	CMD_STATUSLED
 };
 
 enum status {
@@ -235,7 +238,7 @@ void LED_Switch_init(void)
 {
 	GPIO_InitTypeDef GPIO_InitStructure;
 	RCC_APB2PeriphClockCmd(RCC_APB2Periph_GPIOB, ENABLE);
-	/* start with wakeup and reset switch off */
+	/* start with wakeup and reset and statusled off */
 #ifdef SimpleCircuit
 	GPIO_WriteBit(WAKEUP_PORT, WAKEUP_PIN, Bit_SET);
 #ifdef RESET_PORT
@@ -247,6 +250,7 @@ void LED_Switch_init(void)
 	GPIO_WriteBit(RESET_PORT, RESET_PIN, Bit_RESET);
 #endif
 #endif /* SimpleCircuit */
+	GPIO_WriteBit(STATUSLED_PORT, STATUSLED_PIN, Bit_RESET);
 	GPIO_InitStructure.GPIO_Mode = GPIO_Mode_Out_PP;
 	GPIO_InitStructure.GPIO_Speed = GPIO_Speed_2MHz;
 	GPIO_InitStructure.GPIO_Pin = LED_PIN;
@@ -255,6 +259,8 @@ void LED_Switch_init(void)
 	GPIO_InitStructure.GPIO_Pin = EXTLED_PIN;
 	GPIO_Init(EXTLED_PORT, &GPIO_InitStructure);
 #endif
+	GPIO_InitStructure.GPIO_Pin = STATUSLED_PIN;
+	GPIO_Init(STATUSLED_PORT, &GPIO_InitStructure);
 	GPIO_InitStructure.GPIO_Pin = WAKEUP_PIN;
 #ifdef SimpleCircuit
 	GPIO_InitStructure.GPIO_Mode = GPIO_Mode_Out_OD;
@@ -506,6 +512,9 @@ int8_t set_handler(uint8_t *buf)
 		break;
 	case CMD_HID_TEST:
 		ret = HID_IN_REPORT_COUNT;
+		break;
+	case CMD_STATUSLED:
+		statusled_write(buf[4]);
 		break;
 	default:
 		ret = -1;

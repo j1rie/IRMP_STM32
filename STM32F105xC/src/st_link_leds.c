@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2014-2017 Joerg Riechardt
+ * Copyright (C) 2014-2024 Joerg Riechardt
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -116,5 +116,8 @@ void yellow_short_on(void)
 #ifdef EXTLED_PORT
 	EXTLED_PORT->ODR ^= EXTLED_PIN;
 #endif
+}
+void statusled_write (uint8_t led_state) {
+		GPIO_WriteBit(STATUSLED_PORT, STATUSLED_PIN, led_state? Bit_SET : Bit_RESET);
 }
 #endif /* ST_Link */

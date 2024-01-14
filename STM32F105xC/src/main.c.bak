@@ -16,13 +16,6 @@
 #include "eeprom.h"
 #include "st_link_leds.h"
 #include "config.h" /* CooCox workaround */
-#ifdef DEBUG
-#include <stdio.h>
-#endif
-#include "romtable.h"
-#ifdef TM1637
-#include "tm1637.h"
-#endif
 
 #define BYTES_PER_QUERY	(HID_IN_REPORT_COUNT - 4)
 
@@ -52,7 +45,7 @@ enum status {
 	STAT_FAILURE
 };
 
-char firmware[sizeof(FW_STR) + sizeof(rt)];
+const char firmware[] = FW_STR;
 
 const char supported_protocols[] = {
 #if IRMP_SUPPORT_SIRCS_PROTOCOL==1
@@ -234,9 +227,6 @@ volatile unsigned int i = 0;
 uint8_t Reboot = 0;
 volatile uint32_t boot_flag __attribute__((__section__(".noinit")));
 volatile unsigned int send_ir_on_delay = 0;
-#ifdef TM1637
-volatile unsigned int dim_delay;
-#endif
 
 void delay_ms(unsigned int msec)
 {
@@ -248,17 +238,6 @@ void LED_Switch_init(void)
 {
 	GPIO_InitTypeDef GPIO_InitStructure;
 	RCC_APB2PeriphClockCmd(RCC_APB2Periph_GPIOB, ENABLE);
-#ifdef BlueDeveloperBoard
-	RCC_APB2PeriphClockCmd(RCC_APB2Periph_GPIOC, ENABLE);
-#endif
-#if (defined(ST_Link) || defined(BlackDeveloperBoard) || defined(BlueDeveloperBoard))
-	RCC_APB2PeriphClockCmd(RCC_APB2Periph_GPIOA | RCC_APB2Periph_AFIO, ENABLE);
-	/* disable SWD, so pins are available */
-	GPIO_PinRemapConfig(GPIO_Remap_SWJ_Disable, ENABLE);
-#endif /* ST_Link */
-#if defined(StickLink) || defined(GreenLink)
-	RCC_APB2PeriphClockCmd(RCC_APB2Periph_GPIOA, ENABLE);
-#endif /* StickLink */
 	/* start with wakeup and reset and statusled off */
 #ifdef SimpleCircuit
 	GPIO_WriteBit(WAKEUP_PORT, WAKEUP_PIN, Bit_SET);
@@ -270,24 +249,18 @@ void LED_Switch_init(void)
 #ifdef RESET_PORT
 	GPIO_WriteBit(RESET_PORT, RESET_PIN, Bit_RESET);
 #endif
-#endif /* SimpleCircuit */
-#ifdef STATUSLED_PORT
 	GPIO_WriteBit(STATUSLED_PORT, STATUSLED_PIN, Bit_RESET);
-#endif
+#endif /* SimpleCircuit */
 	GPIO_InitStructure.GPIO_Mode = GPIO_Mode_Out_PP;
 	GPIO_InitStructure.GPIO_Speed = GPIO_Speed_2MHz;
-#ifndef ST_Link
 	GPIO_InitStructure.GPIO_Pin = LED_PIN;
 	GPIO_Init(LED_PORT, &GPIO_InitStructure);
-#endif /* ST_Link */
 #ifdef EXTLED_PORT
 	GPIO_InitStructure.GPIO_Pin = EXTLED_PIN;
 	GPIO_Init(EXTLED_PORT, &GPIO_InitStructure);
 #endif
-#ifdef STATUSLED_PORT
 	GPIO_InitStructure.GPIO_Pin = STATUSLED_PIN;
 	GPIO_Init(STATUSLED_PORT, &GPIO_InitStructure);
-#endif
 	GPIO_InitStructure.GPIO_Pin = WAKEUP_PIN;
 #ifdef SimpleCircuit
 	GPIO_InitStructure.GPIO_Mode = GPIO_Mode_Out_OD;
@@ -297,38 +270,18 @@ void LED_Switch_init(void)
 	GPIO_InitStructure.GPIO_Pin = RESET_PIN;
 	GPIO_Init(RESET_PORT, &GPIO_InitStructure);
 #endif
-	GPIO_InitStructure.GPIO_Pin = WAKEUP_RESET_PIN;
-	GPIO_InitStructure.GPIO_Mode = GPIO_Mode_IPU;
-	GPIO_Init(WAKEUP_RESET_PORT, &GPIO_InitStructure);
+	//GPIO_InitStructure.GPIO_Pin = WAKEUP_RESET_PIN;
+	//GPIO_InitStructure.GPIO_Mode = GPIO_Mode_IPU;
+	//GPIO_Init(WAKEUP_RESET_PORT, &GPIO_InitStructure);
 	/* start with LED off */
-#ifdef ST_Link
-	LED_deinit();
-#else
-	/* on the blue and black developer board and on the green ST-Link stick the LED lights, when pulled low */
-#if !(defined(BlueDeveloperBoard) || defined(BlackDeveloperBoard) || defined(BlackDeveloperBoardTest) || defined(GreenLink))
 	GPIO_WriteBit(LED_PORT, LED_PIN, Bit_RESET);
-#else
-	GPIO_WriteBit(LED_PORT, LED_PIN, Bit_SET);
-#endif
 #ifdef EXTLED_PORT
 	GPIO_WriteBit(EXTLED_PORT, EXTLED_PIN, Bit_RESET);
 #endif
-#endif /* ST_Link */
 }
 
 void blink_LED(void)
 {
-#ifdef ST_Link
-		red_on();
-#ifdef EXTLED_PORT
-		EXTLED_PORT->ODR ^= EXTLED_PIN;
-#endif
-		delay_ms(25);
-		LED_deinit();
-#ifdef EXTLED_PORT
-		EXTLED_PORT->ODR ^= EXTLED_PIN;
-#endif
-#else
 	LED_PORT->ODR ^= LED_PIN;
 #ifdef EXTLED_PORT
 	EXTLED_PORT->ODR ^= EXTLED_PIN;
@@ -338,7 +291,6 @@ void blink_LED(void)
 #ifdef EXTLED_PORT
 	EXTLED_PORT->ODR ^= EXTLED_PIN;
 #endif
-#endif /* ST_Link */
 }
 
 /* buf[0 ... 5] -> eeprom[virt_addr ... virt_addr + 2] */
@@ -394,35 +346,17 @@ void SysTick_Handler(void)
 			AlarmValue--;
 		if (send_ir_on_delay)
 			send_ir_on_delay--;
-#ifdef TM1637
-		if (dim_delay){
-			dim_delay--;
-			tm1637SetBrightness(dim_delay);
-		}
-#endif
 		i = 0;
 	} else {
 		i++;
 	}
 }
 
-void SOF_Callback(void)
-{
-	if (suspended)
-		suspended = 0;
-}
-
-void SUSP_Callback(void)
-{
-	suspended = 1;
-	PrevXferComplete = 1;
-}
-
 void Wakeup(void)
 {
 	AlarmValue = 0xFFFFFFFF;
 	/* USB wakeup */
-	Resume(RESUME_START);
+	USB_OTG_ActiveRemoteWakeup(&USB_OTG_dev);
 	/* motherboard power switch: WAKEUP_PIN short high (resp. low in case of SimpleCircuit) */
 #ifdef SimpleCircuit
 	GPIO_WriteBit(WAKEUP_PORT, WAKEUP_PIN, Bit_RESET);
@@ -482,13 +416,12 @@ void store_new_wakeup(void)
 
 void wakeup_reset(void)
 {
-/* avoid AFIO in order to avoid having to flash with reset! */
-#if !defined(StickLink) && !defined(GreenLink)
+#if (0)
 	/* wakeup reset pin pulled low? */
 	if (!GPIO_ReadInputDataBit(WAKEUP_RESET_PORT, WAKEUP_RESET_PIN)) {
 		store_new_wakeup();
 	}
-#endif /* ST_Link */
+#endif
 }
 
 int8_t get_handler(uint8_t *buf)
@@ -582,7 +515,6 @@ int8_t set_handler(uint8_t *buf)
 		break;
 	case CMD_STATUSLED:
 		statusled_write(buf[4]);
-		break;
 	default:
 		ret = -1;
 	}
@@ -748,8 +680,9 @@ void USB_DISC_release(void)
 void USB_Reset(void)
 {
 #if defined(Bootloader) && !defined(PullDown) && !defined(Maple)
-	/* disable USB */
-	PowerOff();
+	/* reset USB */
+	RCC_AHBPeriphResetCmd(RCC_AHBPeriph_OTG_FS, ENABLE);
+	RCC_AHBPeriphResetCmd(RCC_AHBPeriph_OTG_FS, DISABLE);
 	/* USB reset by pulling USBDP shortly low. A pullup resistor is needed, most
 	 * boards have it. */
 	GPIO_InitTypeDef GPIO_InitStructure;
@@ -765,15 +698,7 @@ void USB_Reset(void)
 
 void led_callback (uint_fast8_t on)
 {
-#ifdef ST_Link
-	if (on) {
-			red_on();
-	} else {
-			LED_deinit();
-	}
-#else
 	LED_PORT->ODR ^= LED_PIN;
-#endif /* ST_Link */
 #ifdef EXTLED_PORT
 	EXTLED_PORT->ODR ^= EXTLED_PIN;
 #endif
@@ -801,13 +726,6 @@ int main(void)
 	FLASH_Unlock();
 	EE_Init();
 	irmp_set_callback_ptr (led_callback);
-	parse_romtable();
-	memcpy(&firmware, FW_STR, sizeof(FW_STR));
-	firmware[sizeof(FW_STR) - 1] = 42; // * separator
-	memcpy(&firmware[sizeof(FW_STR)], &rt, sizeof(rt));
-#ifdef TM1637
-	tm1637Init();
-#endif
 
 	while (1) {
 		if (!AlarmValue && !USB_Ready())
@@ -865,11 +783,6 @@ int main(void)
 			}
 
 			USB_HID_SendData(REPORT_ID_IR, (uint8_t *) &myIRData, sizeof(myIRData));
-
-#ifdef TM1637
-			/* send IR-data to 4-digit-display */
-			tm1637DisplayHex(myIRData.command);
-#endif
 		}
 	}
 }
