@@ -2,7 +2,7 @@
  *  IR receiver, sender, USB wakeup, motherboard switch wakeup, wakeup timer,
  *  USB HID device, eeprom emulation
  *
- *  Copyright (C) 2014-2023 Joerg Riechardt
+ *  Copyright (C) 2014-2024 Joerg Riechardt
  *
  *  This program is free software; you can redistribute it and/or modify
  *  it under the terms of the GNU General Public License as published by
@@ -39,7 +39,10 @@ enum command {
 	CMD_MACRO,
 	CMD_WAKE,
 	CMD_REBOOT,
-	CMD_EEPROM_RESET
+	CMD_EEPROM_RESET,
+	CMD_EEPROM_COMMIT,
+	CMD_EEPROM_GET_RAW,
+	CMD_STATUSLED
 };
 
 enum status {
@@ -268,6 +271,9 @@ void LED_Switch_init(void)
 	GPIO_WriteBit(RESET_PORT, RESET_PIN, Bit_RESET);
 #endif
 #endif /* SimpleCircuit */
+#ifdef STATUSLED_PORT
+	GPIO_WriteBit(STATUSLED_PORT, STATUSLED_PIN, Bit_RESET);
+#endif
 	GPIO_InitStructure.GPIO_Mode = GPIO_Mode_OUT;
 	GPIO_InitStructure.GPIO_Speed = GPIO_Speed_2MHz;
 	GPIO_InitStructure.GPIO_OType = GPIO_OType_PP;
@@ -279,6 +285,10 @@ void LED_Switch_init(void)
 #ifdef EXTLED_PORT
 	GPIO_InitStructure.GPIO_Pin = EXTLED_PIN;
 	GPIO_Init(EXTLED_PORT, &GPIO_InitStructure);
+#endif
+#ifdef STATUSLED_PORT
+	GPIO_InitStructure.GPIO_Pin = STATUSLED_PIN;
+	GPIO_Init(STATUSLED_PORT, &GPIO_InitStructure);
 #endif
 	GPIO_InitStructure.GPIO_Pin = WAKEUP_PIN;
 #ifdef SimpleCircuit
@@ -563,6 +573,9 @@ int8_t set_handler(uint8_t *buf)
 		break;
 	case CMD_HID_TEST:
 		ret = HID_IN_REPORT_COUNT;
+		break;
+	case CMD_STATUSLED:
+		statusled_write(buf[4]);
 		break;
 	default:
 		ret = -1;
