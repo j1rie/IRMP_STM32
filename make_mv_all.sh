@@ -3,6 +3,10 @@ cd STM32F103x8
 ./make_all.sh
 ./mv_all.sh
 cd ..
+cd STM32F103xC
+./make_all.sh
+./mv_all.sh
+cd ..
 cd STM32F105xC
 ./make_all.sh
 ./mv_all.sh
