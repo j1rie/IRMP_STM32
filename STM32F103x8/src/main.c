@@ -581,9 +581,7 @@ int8_t set_handler(uint8_t *buf)
 		ret = HID_IN_REPORT_COUNT;
 		break;
 	case CMD_STATUSLED:
-#ifdef STATUSLED_PORT
 		statusled_write(buf[4]);
-#endif
 		break;
 	default:
 		ret = -1;

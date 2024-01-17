@@ -117,9 +117,9 @@ void yellow_short_on(void)
 	EXTLED_PORT->ODR ^= EXTLED_PIN;
 #endif
 }
+#endif /* ST_Link */
 void statusled_write (uint8_t led_state) {
 #ifdef STATUSLED_PORT
 		GPIO_WriteBit(STATUSLED_PORT, STATUSLED_PIN, led_state? Bit_SET : Bit_RESET);
 #endif
 }
-#endif /* ST_Link */
