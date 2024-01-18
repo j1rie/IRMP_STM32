@@ -9,3 +9,8 @@ switch the statusled on:  stm32IRstatusled -d /dev/hidraw1 -s 1
 switch the statusled off: stm32IRstatusled -d /dev/hidraw1 -s 0
 
 put the udev rule from irmplircd into your udev rules directory, then you don't need to give a device
+
+vdr + vdr-plugin-statusleds + stm32IRstatusled:
+vdr -P'statusleds --stm32IRstatusled_path=/path/to/stm32IRstatusled'
+this turns the led on, if vdr is started; it turns the led off, if vdr is stopped; it lets the led blink during recording
+for systemd put into the vdr service a line ExecStop=/path/to/stm32IRstatusled -s 0

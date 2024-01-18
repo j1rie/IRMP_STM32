@@ -172,6 +172,8 @@
 	#define LED_PIN			GPIO_Pin_9
 	#define WAKEUP_RESET_PORT	GPIOA
 	#define WAKEUP_RESET_PIN	GPIO_Pin_14
+	#define STATUSLED_PORT	GPIOB
+	#define STATUSLED_PIN	GPIO_Pin_0 /* JRST */
 #elif defined(DeveloperBoard) /* classic developer board */
 	#define WAKEUP_PORT		GPIOB
 	#define WAKEUP_PIN		GPIO_Pin_14
