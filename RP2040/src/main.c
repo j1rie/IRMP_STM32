@@ -266,6 +266,7 @@ void fast_toggle(void)
 	int i;
 	for(i=0; i<10; i++) {
 		toggle_led();
+		gpio_put(STATUSLED_GPIO, 1 - gpio_get(STATUSLED_GPIO));
 		sleep_ms(50); 
 	}
 }
