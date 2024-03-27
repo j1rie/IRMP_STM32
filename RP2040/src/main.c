@@ -524,7 +524,11 @@ void check_wakeups(IRMP_DATA *ir)
 void reboot(void)
 {
 	fast_toggle();
+#ifdef PICO_DEFAULT_LED_PIN
 	reset_usb_boot(PICO_DEFAULT_LED_PIN, 0);
+#else
+	reset_usb_boot(0, 0);
+#endif
 }
 
 /* is received ir-code in the last wakeup-slot? reboot µC if true */

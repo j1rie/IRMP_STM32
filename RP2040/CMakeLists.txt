@@ -4,7 +4,7 @@ include(../pico-sdk/pico_sdk_init.cmake)
 
 string(TIMESTAMP BUILD_TIME "%Y-%m-%d_%H-%M")
 # sets PROJECT_NAME and PROJECT_SOURCE_DIR
-project(${BUILD_TIME}_RP2040_hid_irmp)
+project(${BUILD_TIME}_${PICO_BOARD}_hid_irmp)
 
 pico_sdk_init()
 
@@ -42,9 +42,9 @@ execute_process (COMMAND bash -c "grep -e 'Version IRMP' ${CMAKE_CURRENT_SOURCE_
 
 string(STRIP ${IRMP_VERSION} IRMP_VERSION)
 
-target_compile_definitions(timestamp PRIVATE FW_STR="${BUILD_TIME}_RP2040   IRMP-Version: ${IRMP_VERSION}*RP2040")
+target_compile_definitions(timestamp PRIVATE FW_STR="${BUILD_TIME}_${PICO_BOARD}   IRMP-Version: ${IRMP_VERSION}*RP2040")
 
-set(FW_STR "${BUILD_TIME}_RP2040   IRMP-Version: ${IRMP_VERSION}*RP2040")
+set(FW_STR "${BUILD_TIME}_${PICO_BOARD}   IRMP-Version: ${IRMP_VERSION}*RP2040")
 
 target_include_directories(timestamp PUBLIC $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}>)
 
