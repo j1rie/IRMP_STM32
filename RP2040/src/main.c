@@ -22,6 +22,8 @@
 #include <hardware/structs/systick.h>
 #include "timestamp.h"
 #include "pico/bootrom.h"
+#include "ws2812.h"
+extern void put_pixel(uint32_t pixel_grb);
 
 #define BYTES_PER_QUERY	(HID_IN_REPORT_COUNT - 4)
 
@@ -49,6 +51,14 @@ enum status {
 	STAT_CMD,
 	STAT_SUCCESS,
 	STAT_FAILURE
+};
+
+enum color {
+	red,
+	green,
+	blue,
+	yellow,
+	white
 };
 
 const char supported_protocols[] = {
@@ -232,6 +242,9 @@ uint8_t Reboot = 0;
 //volatile uint32_t boot_flag __attribute__((__section__(".noinit")));
 volatile unsigned int send_ir_on_delay = 0;
 static bool led_state = false;
+static enum color statusled_state = white;
+static enum color statusled_color = white;
+alarm_id_t alarm_id;
 
 void LED_Switch_init(void)
 {
@@ -254,11 +267,36 @@ void toggle_led(void)
 	gpio_put(EXTLED_GPIO, led_state);
 }
 
+void set_rgb_led(enum color statusled_color)
+{
+	switch (statusled_color) {
+	case red:
+		put_pixel(urgb_u32(255,0,0));
+		break;
+	case green:
+		put_pixel(urgb_u32(0,255,0));
+		break;
+	case blue:
+		put_pixel(urgb_u32(0,0,255));
+		break;
+	case yellow:
+		put_pixel(urgb_u32(127,127,0));
+		break;
+	case white:
+		put_pixel(urgb_u32(85,85,85));
+		break;
+	}
+}
+
 void blink_LED(void)
 {
 	toggle_led();
+	statusled_color = green;
+	set_rgb_led(green);
 	sleep_ms(25);
 	toggle_led();
+	statusled_color = statusled_state;
+	set_rgb_led(statusled_state);
 }
 
 void fast_toggle(void)
@@ -266,20 +304,35 @@ void fast_toggle(void)
 	int i;
 	for(i=0; i<10; i++) {
 		toggle_led();
+		if (statusled_state == white)
+			statusled_color = i%2 ? white : red;
+		else
+			statusled_color = i%2 ? red : white;
+		set_rgb_led(statusled_color);
 		gpio_put(STATUSLED_GPIO, 1 - gpio_get(STATUSLED_GPIO));
-		sleep_ms(50); 
+		sleep_ms(50);
 	}
 }
 
 void yellow_short_on(void)
 {
 	toggle_led();
+	statusled_color = yellow;
+	set_rgb_led(yellow);
 	sleep_ms(130);
 	toggle_led();
+	statusled_color = statusled_state;
+	set_rgb_led(statusled_state);
 }
 
 void statusled_write(uint8_t led_state) {
 	gpio_put(STATUSLED_GPIO, led_state);
+	if (led_state)
+		statusled_state = red;
+	else
+		statusled_state = white;
+	statusled_color = statusled_state;
+	set_rgb_led(statusled_state);
 }
 
 void eeprom_store(int addr, uint8_t *buf)
@@ -582,9 +635,22 @@ void check_macros(IRMP_DATA *ir)
 	}
 }
 
+int64_t alarm_callback(alarm_id_t id, void *user_data)
+{
+	set_rgb_led(statusled_color);
+	return 0;
+}
+
 void led_callback(uint_fast8_t on)
 {
 	toggle_led();
+	if (led_state) {
+		set_rgb_led(blue);
+		alarm_id = add_alarm_in_ms(12, alarm_callback, NULL, false); // just in case
+	} else {
+		set_rgb_led(statusled_color);
+		cancel_alarm(alarm_id);
+	}
 }
 
 void send_magic(void)
@@ -605,6 +671,8 @@ int main(void)
 	tusb_init();
 	IRMP_Init();
 	irsnd_init();
+	ws2812_init();
+	set_rgb_led(white);
 	eeprom_begin(2*FLASH_PAGE_SIZE, 2); // 16 pages of 512 byte
 	irmp_set_callback_ptr(led_callback);
 

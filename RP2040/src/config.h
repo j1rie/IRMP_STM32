@@ -30,5 +30,12 @@
 #define WAKEUP_RESET_GPIO	7  /* GPIO 7  (Pin 10) */
 #define LED_GPIO		8  /* GPIO 8  (Pin 11) */
 #define STATUSLED_GPIO		2  /* GPIO 2  (Pin 4)  */
+#define IS_RGBW			false
+#ifdef PICO_DEFAULT_WS2812_PIN
+#define WS2812_PIN		PICO_DEFAULT_WS2812_PIN
+#else
+// default to pin 16 if the board doesn't have a default WS2812 pin defined
+#define WS2812_PIN		16 /* GPIO 16 (Pin 21) */
+#endif
 
 #endif /* __CONFIG_H */

@@ -16,7 +16,13 @@ add_executable(${PROJECT_NAME}
     src/irmpmain.c
     eeprom/eeprom.c
     src/usb_hid.c
+    src/ws2812.c
 )
+
+file(MAKE_DIRECTORY ${CMAKE_CURRENT_LIST_DIR}/generated)
+
+# generate the header file into the source tree as it is included in the RP2040 datasheet
+pico_generate_pio_header(${PROJECT_NAME} ${CMAKE_CURRENT_LIST_DIR}/src/ws2812.pio OUTPUT_DIR ${CMAKE_CURRENT_LIST_DIR}/generated)
 
 target_include_directories(${PROJECT_NAME} PUBLIC
         ${CMAKE_CURRENT_SOURCE_DIR}/src
@@ -28,7 +34,7 @@ target_include_directories(${PROJECT_NAME} PUBLIC
 
 # In addition to pico_stdlib required for common PicoSDK functionality, add dependency on tinyusb_device
 # for TinyUSB device support and tinyusb_board for the additional board support library used by the example
-target_link_libraries(${PROJECT_NAME} pico_stdlib tinyusb_device tinyusb_board hardware_pwm hardware_flash hardware_exception timestamp)
+target_link_libraries(${PROJECT_NAME} pico_stdlib tinyusb_device tinyusb_board hardware_pwm hardware_flash hardware_exception timestamp hardware_pio)
 
 # Uncomment this line to enable fix for Errata RP2040-E5 (the fix requires use of GPIO 15)
 # for compability with early revisions
