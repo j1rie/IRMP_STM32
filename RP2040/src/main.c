@@ -23,7 +23,7 @@
 #include "timestamp.h"
 #include "pico/bootrom.h"
 #include "ws2812.h"
-extern void put_pixel(uint32_t pixel_grb);
+extern void put_pixel(uint8_t red, uint8_t green, uint8_t blue);
 
 #define BYTES_PER_QUERY	(HID_IN_REPORT_COUNT - 4)
 
@@ -44,7 +44,8 @@ enum command {
 	CMD_EEPROM_RESET,
 	CMD_EEPROM_COMMIT,
 	CMD_EEPROM_GET_RAW,
-	CMD_STATUSLED
+	CMD_STATUSLED,
+	CMD_NEOPIXEL,
 };
 
 enum status {
@@ -58,7 +59,10 @@ enum color {
 	green,
 	blue,
 	yellow,
-	white
+	white,
+	off,
+	custom,
+	strong_red
 };
 
 const char supported_protocols[] = {
@@ -242,9 +246,11 @@ uint8_t Reboot = 0;
 //volatile uint32_t boot_flag __attribute__((__section__(".noinit")));
 volatile unsigned int send_ir_on_delay = 0;
 static bool led_state = false;
-static enum color statusled_state = white;
-static enum color statusled_color = white;
+static enum color statusled_state = custom; // custom or red
+static enum color statusled_color = custom; // restore after blue/led_callback
 alarm_id_t alarm_id;
+uint8_t pixel[NUM_PIXELS * 3] = {0};
+uint8_t custom_pixel[3] = {3,3,2}; // white
 
 void LED_Switch_init(void)
 {
@@ -267,23 +273,36 @@ void toggle_led(void)
 	gpio_put(EXTLED_GPIO, led_state);
 }
 
+/* this is called by led_callback(), which is called by irmp_ISR(),
+ * so it needs to be fast, we can't set many leds here!
+ * setting only one led may disturb next led unfortunately
+ */
 void set_rgb_led(enum color statusled_color)
 {
 	switch (statusled_color) {
 	case red:
-		put_pixel(urgb_u32(255,0,0));
+		put_pixel(3,0,0);
+		break;
+	case strong_red:
+		put_pixel(255,0,0);
 		break;
 	case green:
-		put_pixel(urgb_u32(0,255,0));
+		put_pixel(0,255,0);
 		break;
 	case blue:
-		put_pixel(urgb_u32(0,0,255));
+		put_pixel(0,0,255);
 		break;
 	case yellow:
-		put_pixel(urgb_u32(127,127,0));
+		put_pixel(40,20,0);
 		break;
 	case white:
-		put_pixel(urgb_u32(85,85,85));
+		put_pixel(3,3,2);
+		break;
+	case off:
+		put_pixel(0,0,0);
+		break;
+	case custom:
+		put_pixel(custom_pixel[0],custom_pixel[1],custom_pixel[2]);
 		break;
 	}
 }
@@ -304,10 +323,10 @@ void fast_toggle(void)
 	int i;
 	for(i=0; i<10; i++) {
 		toggle_led();
-		if (statusled_state == white)
-			statusled_color = i%2 ? white : red;
+		if (statusled_state == custom)
+			statusled_color = i%2 ? custom : strong_red;
 		else
-			statusled_color = i%2 ? red : white;
+			statusled_color = i%2 ? strong_red : custom;
 		set_rgb_led(statusled_color);
 		gpio_put(STATUSLED_GPIO, 1 - gpio_get(STATUSLED_GPIO));
 		sleep_ms(50);
@@ -330,7 +349,7 @@ void statusled_write(uint8_t led_state) {
 	if (led_state)
 		statusled_state = red;
 	else
-		statusled_state = white;
+		statusled_state = custom;
 	statusled_color = statusled_state;
 	set_rgb_led(statusled_state);
 }
@@ -520,6 +539,32 @@ int8_t set_handler(uint8_t *buf)
 	case CMD_STATUSLED:
 		statusled_write(buf[4]);
 		break;
+	case CMD_NEOPIXEL:
+		/* buf[4] = total length
+		 * buf[5] = chunk number, a chunk is max 57 long
+		 * buf[6] = data start byte of single + 1
+		 * buf[7 ... 63] rgb data
+		 */
+		{
+			bool single = buf[6]; // set only one led?
+			int start = single * (buf[6] - 1); // 0 for whole chunk, 'start byte of single' if only one led
+			int end = (!single) * 57 + single * (buf[6] + 2); // 57 for whole chunk, 3 bytes for only one led
+			bool cpy_flag = !buf[5] && !start; // first led
+			for (int n=start; n<end; n++) {
+				idx = buf[5] * 57 + n;
+				if (idx < buf[4])
+					pixel[idx] = buf[7 + n];
+				else
+					break;
+			}
+			if (idx >= buf[4] - 1) { // reached last led
+				for (int n = 0; n < NUM_PIXELS * 3; n += 3)
+					put_pixel(pixel[n], pixel[n + 1], pixel[n + 2]);
+				if (cpy_flag)
+					memcpy(custom_pixel, pixel, 3); // save color and restore it after blink_LED(), etc
+			}
+		}
+		break;
 	default:
 		ret = -1;
 	}
@@ -635,21 +680,13 @@ void check_macros(IRMP_DATA *ir)
 	}
 }
 
-int64_t alarm_callback(alarm_id_t id, void *user_data)
-{
-	set_rgb_led(statusled_color);
-	return 0;
-}
-
 void led_callback(uint_fast8_t on)
 {
 	toggle_led();
 	if (led_state) {
 		set_rgb_led(blue);
-		alarm_id = add_alarm_in_ms(12, alarm_callback, NULL, false); // just in case
 	} else {
 		set_rgb_led(statusled_color);
-		cancel_alarm(alarm_id);
 	}
 }
 
@@ -672,7 +709,7 @@ int main(void)
 	IRMP_Init();
 	irsnd_init();
 	ws2812_init();
-	set_rgb_led(white);
+	set_rgb_led(custom);
 	eeprom_begin(2*FLASH_PAGE_SIZE, 2); // 16 pages of 512 byte
 	irmp_set_callback_ptr(led_callback);
 

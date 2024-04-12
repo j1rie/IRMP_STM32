@@ -65,28 +65,26 @@ static bool open_stm32(const char *devicename) {
 }
 
 static void read_stm32() {
-	//int i;
 	int retVal;
 	retVal = read(stm32fd, inBuf, sizeof(inBuf));
 	if (retVal < 0) {
 	    printf("read error\n");
-        }/* else {
+        } /*else {
                 printf("read %d bytes:\n\t", retVal);
-                for (i = 0; i < retVal; i++)
+                for (int i = 0; i < retVal; i++)
                         printf("%02hhx ", inBuf[i]);
                 puts("\n");
         }*/
 } 
 
 static void write_stm32() {
-	//int i;
 	int retVal;
 	retVal = write(stm32fd, outBuf, sizeof(outBuf));
 	if (retVal < 0) {
 	    printf("write error\n");
-        }/* else {
+        } /*else {
                 printf("written %d bytes:\n\t", retVal);
-                for (i = 0; i < retVal; i++)
+                for (int i = 0; i < retVal; i++)
                         printf("%02hhx ", outBuf[i]);
                 puts("\n");
         }*/
@@ -129,4 +127,5 @@ int main(int argc, char *argv[]) {
 	}
 	
 	if (stm32fd >= 0) close(stm32fd);
+	return 0;
 }

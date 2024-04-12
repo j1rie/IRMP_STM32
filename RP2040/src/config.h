@@ -23,13 +23,13 @@
 /* TODO GPIO x Logging (irmp.c) */
 
 #define WAKEUP_GPIO		27 /* GPIO 27 (Pico Pin 32, One+Zero Pin 27) */
-#define RESET_GPIO		3  /* GPIO 3  (Pico Pin 5, One+Zero Pin 3)   */
-#define EXTLED_GPIO		4  /* GPIO 4  (Pico Pin 6, One+Zero Pin 4)   */
+#define RESET_GPIO		3  /* GPIO 3  (Pico Pin 5,  One+Zero Pin 3)  */
+#define EXTLED_GPIO		4  /* GPIO 4  (Pico Pin 6,  One+Zero Pin 4)  */
 #define IR_IN_GPIO		28 /* GPIO 28 (Pico Pin 34, One+Zero Pin 28) */
-#define IR_OUT_GPIO		6  /* GPIO 6  (Pico Pin 9, One+Zero Pin 6)   */
+#define IR_OUT_GPIO		6  /* GPIO 6  (Pico Pin 9,  One+Zero Pin 6)  */
 #define WAKEUP_RESET_GPIO	7  /* GPIO 7  (Pico Pin 10, One+Zero Pin 7)  */
 #define LED_GPIO		8  /* GPIO 8  (Pico Pin 11, One+Zero Pin 8)  */
-#define STATUSLED_GPIO		2  /* GPIO 2  (Pico Pin 4, One+Zero Pin 2)   */
+#define STATUSLED_GPIO		2  /* GPIO 2  (Pico Pin 4,  One+Zero Pin 2)  */
 #define IS_RGBW			false
 #ifdef PICO_DEFAULT_WS2812_PIN
 #define WS2812_PIN		PICO_DEFAULT_WS2812_PIN /* GPIO16 (One+Zero Onboard) */
@@ -37,5 +37,6 @@
 // default to pin 16 if the board doesn't have a default WS2812 pin defined
 #define WS2812_PIN		16 /* GPIO 16 (Pico Pin 21) */
 #endif
+#define NUM_PIXELS		64
 
 #endif /* __CONFIG_H */

@@ -1258,7 +1258,7 @@ MainWindow::Write_and_Check(int out_len, int show_len)
 long
 MainWindow::onSendOutputReport(FXObject *sender, FXSelector sel, void *ptr)
 {
-	Write_and_Check(12, 10); // maximum outgoing protocol is 12, maximum incoming protocol is 10
+	Write_and_Check(64, 64);
 
 	return 1;
 }

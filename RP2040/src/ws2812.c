@@ -8,10 +8,6 @@
 #include "config.h"
 
 void ws2812_init() {
-    // todo get free sm
-    PIO pio = pio0;
-    int sm = 0;
-    uint offset = pio_add_program(pio, &ws2812_program);
-
-    ws2812_program_init(pio, sm, offset, WS2812_PIN, 800000, IS_RGBW);
+    uint offset = pio_add_program(pio0, &ws2812_program);
+    ws2812_program_init(pio0, 0, offset, WS2812_PIN, 800000, IS_RGBW);
 }
