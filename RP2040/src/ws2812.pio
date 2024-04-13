@@ -5,7 +5,7 @@
 ;
 
 .program ws2812
-.side_set 1
+.side_set 2
 
 .define public T1 3
 .define public T2 3
@@ -13,12 +13,12 @@
 
 .wrap_target
 bitloop:
-    out x, 1       side 0 [T3 - 1] ; Side-set still takes place when instruction stalls
-    jmp !x do_zero side 1 [T1 - 1] ; Branch on the bit we shifted out. Positive pulse
+    out x, 1       side 0b00 [T3 - 1] ; Side-set still takes place when instruction stalls
+    jmp !x do_zero side 0b11 [T1 - 1] ; Branch on the bit we shifted out. Positive pulse
 do_one:
-    jmp  bitloop   side 1 [T2 - 1] ; Continue driving high, for a long pulse
+    jmp  bitloop   side 0b11 [T2 - 1] ; Continue driving high, for a long pulse
 do_zero:
-    nop            side 0 [T2 - 1] ; Or drive low, for a short pulse
+    nop            side 0b00 [T2 - 1] ; Or drive low, for a short pulse
 .wrap
 
 % c-sdk {
@@ -26,11 +26,15 @@ do_zero:
 
 static inline void ws2812_program_init(PIO pio, uint sm, uint offset, uint pin, float freq, bool rgbw) {
 
+    pio_gpio_init(pio, pin-1);
     pio_gpio_init(pio, pin);
-    pio_sm_set_consecutive_pindirs(pio, sm, pin, 1, true);
+    //pio_gpio_init(pio, pin+1);
+    pio_sm_set_consecutive_pindirs(pio, sm, pin-1, 2, true);
+    //pio_sm_set_consecutive_pindirs(pio, sm, pin, 2, true);
 
     pio_sm_config c = ws2812_program_get_default_config(offset);
-    sm_config_set_sideset_pins(&c, pin);
+    sm_config_set_sideset_pins(&c, pin-1);
+    //sm_config_set_sideset_pins(&c, pin);
     sm_config_set_out_shift(&c, false, true, rgbw ? 32 : 24);
     sm_config_set_fifo_join(&c, PIO_FIFO_JOIN_TX);
 
