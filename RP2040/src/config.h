@@ -28,7 +28,6 @@
 #define IR_IN_GPIO		28 /* GPIO 28 (Pico Pin 34, One+Zero Pin 28) */
 #define IR_OUT_GPIO		6  /* GPIO 6  (Pico Pin 9,  One+Zero Pin 6)  */
 #define WAKEUP_RESET_GPIO	7  /* GPIO 7  (Pico Pin 10, One+Zero Pin 7)  */
-#define LED_GPIO		8  /* GPIO 8  (Pico Pin 11, One+Zero Pin 8)  */
 #define STATUSLED_GPIO		2  /* GPIO 2  (Pico Pin 4,  One+Zero Pin 2)  */
 #define IS_RGBW			false
 #ifdef PICO_DEFAULT_WS2812_PIN
