@@ -248,9 +248,8 @@ volatile unsigned int send_ir_on_delay = 0;
 static bool led_state = false;
 static enum color statusled_state = custom; // custom or red
 static enum color statusled_color = custom; // restore after blue/led_callback
-alarm_id_t alarm_id;
 uint8_t pixel[NUM_PIXELS * 3] = {0};
-uint8_t custom_pixel[3] = {3,3,2}; // white
+uint8_t custom_pixel[3] = {3,3,2}; // default white
 
 void LED_Switch_init(void)
 {
@@ -277,9 +276,9 @@ void toggle_led(void)
  * so it needs to be fast, we can't set many leds here!
  * setting only one led may disturb next led unfortunately
  */
-void set_rgb_led(enum color statusled_color)
+void set_rgb_led(enum color led_color, bool store)
 {
-	switch (statusled_color) {
+	switch (led_color) {
 	case red:
 		put_pixel(3,0,0);
 		break;
@@ -305,17 +304,17 @@ void set_rgb_led(enum color statusled_color)
 		put_pixel(custom_pixel[0],custom_pixel[1],custom_pixel[2]);
 		break;
 	}
+	if (store)
+		statusled_color = led_color;
 }
 
 void blink_LED(void)
 {
 	toggle_led();
-	statusled_color = green;
-	set_rgb_led(green);
+	set_rgb_led(green, 1);
 	sleep_ms(25);
 	toggle_led();
-	statusled_color = statusled_state;
-	set_rgb_led(statusled_state);
+	set_rgb_led(statusled_state, 1);
 }
 
 void fast_toggle(void)
@@ -324,10 +323,9 @@ void fast_toggle(void)
 	for(i=0; i<10; i++) {
 		toggle_led();
 		if (statusled_state == custom)
-			statusled_color = i%2 ? custom : strong_red;
+			set_rgb_led(i%2 ? custom : strong_red, 1);
 		else
-			statusled_color = i%2 ? strong_red : custom;
-		set_rgb_led(statusled_color);
+			set_rgb_led(i%2 ? strong_red : custom, 1);
 		gpio_put(STATUSLED_GPIO, 1 - gpio_get(STATUSLED_GPIO));
 		sleep_ms(50);
 	}
@@ -336,12 +334,10 @@ void fast_toggle(void)
 void yellow_short_on(void)
 {
 	toggle_led();
-	statusled_color = yellow;
-	set_rgb_led(yellow);
+	set_rgb_led(yellow, 1);
 	sleep_ms(130);
 	toggle_led();
-	statusled_color = statusled_state;
-	set_rgb_led(statusled_state);
+	set_rgb_led(statusled_state, 1);
 }
 
 void statusled_write(uint8_t led_state) {
@@ -350,8 +346,7 @@ void statusled_write(uint8_t led_state) {
 		statusled_state = red;
 	else
 		statusled_state = custom;
-	statusled_color = statusled_state;
-	set_rgb_led(statusled_state);
+	set_rgb_led(statusled_state, 1);
 }
 
 void eeprom_store(int addr, uint8_t *buf)
@@ -684,9 +679,9 @@ void led_callback(uint_fast8_t on)
 {
 	toggle_led();
 	if (led_state) {
-		set_rgb_led(blue);
+		set_rgb_led(blue, 0);
 	} else {
-		set_rgb_led(statusled_color);
+		set_rgb_led(statusled_color, 0);
 	}
 }
 
@@ -709,7 +704,7 @@ int main(void)
 	IRMP_Init();
 	irsnd_init();
 	ws2812_init();
-	set_rgb_led(custom);
+	set_rgb_led(white, 0);
 	eeprom_begin(2*FLASH_PAGE_SIZE, 2); // 16 pages of 512 byte
 	irmp_set_callback_ptr(led_callback);
 
