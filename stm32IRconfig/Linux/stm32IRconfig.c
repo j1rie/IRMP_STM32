@@ -190,20 +190,20 @@ int main(int argc, const char **argv) {
 		printf("old firmware!\n");
 	puts("");
 
-cont:	printf("set: wakeups, macros, alarm, commit, statusled and neopixel(s)\nset by remote: wakeups and macros(q)\nget: wakeups, macros, alarm, capabilities and raw eeprom from RP2040 (g)\nreset: wakeups, macros, alarm and eeprom (r)\nsend IR (i)\nreboot (b)\nmonitor until ^C (m)\nrun test (t)\nhid test (h)\nneopixel test (n)\nexit (x)\n");
+cont:	printf("set: wakeups, macros, alarm, commit on RP2040, statusled and neopixel(s)\nset by remote: wakeups and macros(q)\nget: wakeups, macros, alarm, capabilities and raw eeprom from RP2040 (g)\nreset: wakeups, macros, alarm and eeprom (r)\nsend IR (i)\nreboot (b)\nmonitor until ^C (m)\nrun test (t)\nhid test (h)\nneopixel test (n)\nexit (x)\n");
 	scanf("%s", &c);
 
 	switch (c) {
 
 	case 's':
-set:		printf("set wakeup(w)\nset macro(m)\nset alarm(a)\ncommit(c)\nstatusled(s)\nneopixel(n)\n");
+set:		printf("set wakeup(w)\nset macro(m)\nset alarm(a)\ncommit on RP2040(c)\nstatusled(s)\nneopixel(n)\n");
 		scanf("%s", &d);
 		memset(&outBuf[2], 0, sizeof(outBuf) - 2);
 		idx = 2;
 		outBuf[idx++] = ACC_SET;
 		switch (d) {
 		case 'w':
-			printf("enter slot number (starting with 0)\n");
+			printf("enter wakeup number (starting with 0)\n");
 			scanf("%" SCNx8 "", &s);
 			outBuf[idx++] = CMD_WAKE;
 			outBuf[idx++] = s;    // (s+1)-th slot
@@ -329,7 +329,7 @@ Set:		printf("set wakeup with remote control(w)\nset macro with remote control(m
 		outBuf[idx++] = ACC_SET;
 		switch (d) {
 		case 'w':
-			printf("enter slot number (starting with 0)\n");
+			printf("enter wakeup number (starting with 0)\n");
 			scanf("%" SCNx8 "", &s);
 			outBuf[idx++] = CMD_WAKE;
 			outBuf[idx++] = s;    // (s+1)-th slot
@@ -368,7 +368,7 @@ get:		printf("get wakeup(w)\nget macro slot(m)\nget caps(c)\nget alarm(a)\nget r
 		outBuf[idx++] = ACC_GET;
 		switch (d) {
 		case 'w':
-			printf("enter slot number (starting with 0)\n");
+			printf("enter wakeup number (starting with 0)\n");
 			scanf("%" SCNx8 "", &s);
 			outBuf[idx++] = CMD_WAKE;
 			outBuf[idx++] = s;    // (s+1)-th slot
@@ -399,9 +399,9 @@ get:		printf("get wakeup(w)\nget macro slot(m)\nget caps(c)\nget alarm(a)\nget r
 				while (inBuf[0] == 0x01)
 					read_stm32(in_size, l == 0 ? 9 : in_size);
 				if (!l) { // first query for slots and depth
-					printf("macro_slots: %u\n", inBuf[4]);
+					printf("number of macros: %u\n", inBuf[4]);
 					printf("macro_depth: %u\n", inBuf[5]);
-					printf("wakeup_slots: %u\n", inBuf[6]);
+					printf("number of wakeups: %u\n", inBuf[6]);
 					printf("hid in report count: %u\n", inBuf[7]);
 					printf("hid out report count: %u\n", inBuf[8]);
 				} else {
@@ -442,7 +442,7 @@ again:			;
 					if (retValm < 0) {
 						printf("read error\n");
 					} else {
-						for (int i = 4; i < 36; i++)
+						for (int i = 4; i < 36; i++) // 32
 							printf("%02hhx ", inBuf[i]);
 					}
 				}

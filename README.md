@@ -31,7 +31,7 @@ A macro makes it possible to send a sequence of IR commands via the send diode o
 * stm32FWupgrade for firmware update on the command line
 * irmplircd is a daemon, running in background as an independent lirc server and passing the IR codes/events on to the application https://github.com/realglotzi/irmplircd
 * irctl for configuration: https://github.com/olebowle/irctl
-* Software ready for LibreELEC, Ubuntu, yaVDR, easyVDR, MLD, OpenELEC.
+* Software ready for Ubuntu, yaVDR, easyVDR, MLD.
 
 ## Software Windows
 * GUI config-tool stm32IRconfig_gui (same as linux)
@@ -140,4 +140,4 @@ https://www.mikrocontroller.net/articles/IRMP_auf_STM32_-_Bauanleitung
 
 Much fun with IRMP on STM32!
 
-Copyright (C) 2014-2022 Jörg Riechardt
+Copyright (C) 2014-2024 Jörg Riechardt

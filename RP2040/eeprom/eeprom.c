@@ -28,6 +28,7 @@
 #include <hardware/flash.h>
 #include <hardware/sync.h>
 
+/* 1 sector contains 16 flash pages */
 uint8_t* _sector;
 uint8_t* _data = NULL;
 size_t _size = 0;
