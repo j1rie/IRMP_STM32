@@ -94,7 +94,9 @@ enum command {
 	CMD_REBOOT,
 	CMD_EEPROM_RESET,
 	CMD_EEPROM_COMMIT,
-	CMD_EEPROM_GET_RAW
+	CMD_EEPROM_GET_RAW,
+	CMD_STATUSLED,
+	CMD_NEOPIXEL,
 };
 
 enum status {
@@ -669,12 +671,11 @@ MainWindow::onConnect(FXObject *sender, FXSelector sel, void *ptr)
 		}
 	}
 
-	FXString s;
-	s.format("%x %x %x %x 0 ", REPORT_ID_CONFIG_OUT, STAT_CMD, ACC_GET, CMD_CAPS);
+	FXString s, t, u, v, w, x;
+	s.format("%x %x %x %x 0 ", REPORT_ID_CONFIG_OUT, STAT_CMD, ACC_GET, CMD_CAPS); // hex!
 	output_text->setText(s);
 	Write_and_Check(5, 9);
 
-	FXString u, v, w, x;
 	if(in_size != (buf[7] ? buf[7] : 17))
 		u.format("warning: hid in report count mismatch: %u %u\n", in_size, buf[7] ? buf[7] : 17);
 	if(out_size != (buf[8] ? buf[8] : 17))
@@ -702,7 +703,6 @@ MainWindow::onConnect(FXObject *sender, FXSelector sel, void *ptr)
 	for(int i = 0; i < wakeupslots; i++) {
 		s = (i < wakeupslots-1) ? "wakeup" : "reboot";
 #if (FOX_MINOR >= 7)
-		FXString t;
 		t.fromInt(i,10);
 		s += (i < wakeupslots-1) ? t : "";
 #else
@@ -714,7 +714,6 @@ MainWindow::onConnect(FXObject *sender, FXSelector sel, void *ptr)
 	for(int i = 0; i < macrodepth; i++) {
 		s = "macro";
 #if (FOX_MINOR >= 7)
-		FXString t;
 		t.fromInt(i,10);
 		s += t;
 #else
@@ -726,7 +725,6 @@ MainWindow::onConnect(FXObject *sender, FXSelector sel, void *ptr)
 	for(int i = 0; i < macroslots; i++) {
 		s = "macroslot";
 #if (FOX_MINOR >= 7)
-		FXString t;
 		t.fromInt(i,10);
 		s += t;
 #else
@@ -760,13 +758,12 @@ MainWindow::onConnect(FXObject *sender, FXSelector sel, void *ptr)
 		reboot_button->enable();
 	}
 
-	//list wakeups and alarm and warn if no STM32
+	//list wakeups, macros and alarm and warn if no STM32
 	for(int i = 0; i < wakeupslots; i++) {
-		FXString t, v;
 #if (FOX_MINOR >= 7)
-		t.fromInt(i,10);
+		t.fromInt(i,16);
 #else
-		t = FXStringVal(i,10);
+		t = FXStringVal(i,16);
 #endif
 		s.format("%x %x %x %x ", REPORT_ID_CONFIG_OUT, STAT_CMD, ACC_GET, CMD_WAKE);
 		s += t;
@@ -791,11 +788,61 @@ MainWindow::onConnect(FXObject *sender, FXSelector sel, void *ptr)
 			u += s;
 		}
 	}
+int show_macro = 0;
+	for(int i = 0; i < macroslots; i++) {
+		for(int k = 0; k < macrodepth; k++) {
+#if (FOX_MINOR >= 7)
+			t.fromUInt(i,16);
+			v.fromUInt(k,16);
+#else
+			t = FXStringVal(i,16);
+			v = FXStringVal(k,16);
+#endif
+			s.format("%x %x %x %x ", REPORT_ID_CONFIG_OUT, STAT_CMD, ACC_GET, CMD_MACRO);
+			s += t;
+			s += " ";
+			s += v;
+			output_text->setText(s);
+			Write_and_Check(6, 10);
+			t.format("%02x", buf[4]);
+			v = t;
+			t.format("%02x", buf[6]);
+			v += t;
+			t.format("%02x", buf[5]);
+			v += t;
+			t.format("%02x", buf[8]);
+			v += t;
+			t.format("%02x", buf[7]);
+			v += t;
+			t.format("%02x", buf[9]);
+			v += t;
+			if(v != "ffffffffffff") {
+				if(!k) {
+					w += "macro: ";
+					w += v;
+					w += " ->";
+				} else {
+					w += " ";
+					w += v;
+					if(k == macrodepth - 1)
+						w += "\n";
+					show_macro = 1;
+				}
+			} else {
+				if(!k) {
+					i = macroslots; // exit both loops
+					break;
+				} else {
+					w += "\n";
+					break;
+				}
+			}
+		}
+	}
 	s.format("%x %x %x %x", REPORT_ID_CONFIG_OUT, STAT_CMD, ACC_GET, CMD_ALARM);
 	output_text->setText(s);
 	Write_and_Check(4, 8);
 	unsigned int alarm = *((uint32_t *)&buf[4]);
-	FXString t;	
 	s = "alarm: ";
 	t.format("%u", alarm/60/60/24);
 	s += t;
@@ -818,6 +865,8 @@ MainWindow::onConnect(FXObject *sender, FXSelector sel, void *ptr)
 	output_text->setText("");
 	input_text->appendText(x);
 	input_text->appendText(u);
+	if(show_macro)
+		input_text->appendText(w);
 	input_text->appendText(s);
 	input_text->setBottomLine(INT_MAX);
 
@@ -1181,7 +1230,7 @@ MainWindow::Write(int out_len)
 
 	if (!connected_device) {
 		FXMessageBox::error(this, MBOX_OK, "Device Error W", "Unable to Connect to Device");
-		s = "Unable to Connect to Device W\n";//
+		s = "Unable to Connect to Device W\n";
 		input_text->appendText(s);
 		input_text->setBottomLine(INT_MAX);
 		return -1;
@@ -1362,8 +1411,7 @@ MainWindow::onPmacro(FXObject *sender, FXSelector sel, void *ptr)
 long
 MainWindow::onPRwakeup(FXObject *sender, FXSelector sel, void *ptr)
 {
-	FXString s;
-	FXString t;
+	FXString s, t;
 	protocol1_text->setText("");
 	address1_text->setText("");
 	command1_text->setText("");
@@ -1387,8 +1435,7 @@ MainWindow::onPRwakeup(FXObject *sender, FXSelector sel, void *ptr)
 long
 MainWindow::onPRmacro(FXObject *sender, FXSelector sel, void *ptr)
 {
-	FXString s;
-	FXString t;
+	FXString s, t;
 	protocol1_text->setText("");
 	address1_text->setText("");
 	command1_text->setText("");
@@ -1417,7 +1464,7 @@ MainWindow::onGwakeup(FXObject *sender, FXSelector sel, void *ptr)
 {
 	FXString s;
 	FXString t;
-	t.format("%d", wslistbox->getCurrentItem());
+	t.format("%x", wslistbox->getCurrentItem());
 	s.format("%x %x %x %x ", REPORT_ID_CONFIG_OUT, STAT_CMD, ACC_GET, CMD_WAKE);
 	s += t;
 	output_text->setText(s);
@@ -1521,7 +1568,7 @@ MainWindow::onGcaps(FXObject *sender, FXSelector sel, void *ptr)
 			t.format("macro_depth: %u\n", buf[5]);
 			s += t;
 			wakeupslots = buf[6];
-			t.format("wakeup_slots: %u\n", buf[6]);
+			t.format("number of wakeups: %u\n", buf[6]);
 			s += t;
 			t.format("hid in report count: %u\n", in_size);
 			s += t;
@@ -1634,7 +1681,7 @@ MainWindow::onAset(FXObject *sender, FXSelector sel, void *ptr)
 	const char *z = " ";
 	s.format("%x %x %x %x ", REPORT_ID_CONFIG_OUT, STAT_CMD, ACC_SET, CMD_ALARM);
 #if (FOX_MINOR >= 7)
-	t.fromInt(setalarm,16);
+	t.fromUInt(setalarm,16);
 #else
 	t = FXStringVal(setalarm, 16);
 #endif
@@ -2147,9 +2194,9 @@ MainWindow::onGeeprom(FXObject *sender, FXSelector sel, void *ptr){
 			s += " ";
 			output_text->setText(s);
 
-			Write_and_Check(6, in_size);
+			Write_and_Check(6, 36);
 
-			for (int i = 4; i < 36; i++) {
+			for (int i = 4; i < 36; i++) { // 32
 				t.format("%02x", buf[i]);
 				u += t;
 			}
