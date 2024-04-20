@@ -1,0 +1,2 @@
+Chose a macro and a macroslot in "select". Put the trigger in macroslot0, e.g. with the remote control. Put the IR codes to be sent into macroslot1 et seq, again e.g. with the remote control.
+If a trigger is zero (ffffffffffff) transmission will stop, and if a IR code to be sent is zero we continue at the next macro.
