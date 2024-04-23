@@ -1,0 +1,7 @@
+In a new eeprom and an eeprom after reset all bytes are '0xff'. That's for technical reasons, how erasing flash works.
+So '0xff' means yet unwritten.
+
+After IR reception the received IR code will be compared with all macro triggers one after the other. If a trigger is 'ffffffffffff', parsing will stop.
+If the received IR code and the trigger match, the accompanying IR codes will be sent, but again at 'ffffffffffff' transmission will stop.
+So 'ffffffffffff' is the stop mark for both triggers and to be sent IR codes.
+This is practical, because the 'ffffffffffff's are there already at the beginning, due to the eeprom properties.
