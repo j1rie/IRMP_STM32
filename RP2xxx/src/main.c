@@ -397,7 +397,13 @@ void SysTick_Handler(void)
 void Systick_Init(void)
 {
 	exception_set_exclusive_handler(SYSTICK_EXCEPTION, SysTick_Handler);
+#if PICO_RP2040
 	systick_hw->csr = M0PLUS_SYST_CSR_ENABLE_BITS | M0PLUS_SYST_CSR_TICKINT_BITS | M0PLUS_SYST_CSR_CLKSOURCE_BITS;
+#elif PICO_RP2350
+	systick_hw->csr = M33_SYST_CSR_ENABLE_BITS | M33_SYST_CSR_TICKINT_BITS | M33_SYST_CSR_CLKSOURCE_BITS;
+#else
+	#error unknown PICO_BOARD
+#endif
 	/* 1ms */
 	systick_hw->rvr = 124999UL;
 }

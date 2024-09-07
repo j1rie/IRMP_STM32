@@ -4,7 +4,7 @@ Usage:
 stm32IRconfig [/dev/hidraw1]
 
 program and read the eeprom (wakeups, macros and capabilities)
-reset wakeups, macros and alarm and eeprom
+reset wakeups, macros, alarm and eeprom
 set and get the alarm
 reboot the device
 send IR

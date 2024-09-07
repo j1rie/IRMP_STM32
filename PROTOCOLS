@@ -43,7 +43,7 @@ Query the fourth (slot 4) IR data of the third (slot 2) macro:
 PC->µC: STAT_CMD ACC_GET CMD_MACRO 0x02 0x04
 µC->PC: STAT_SUCCESS ACC_GET CMD_MACRO 0x77 0x88 0x99 0xAA 0xBB 0xCC
 
-Neopixel (RP2040 only): byte 4 = total length of payload = (length of strip) * 3, the total length is divided into chunks of 57, byte 5 = chunk number, byte 6 set only one led: number of data start byte + 1, byte 7 ... 63 rgb data
+Neopixel (RP2xxx only): byte 4 = total length of payload = (length of strip) * 3, the total length is divided into chunks of 57, byte 5 = chunk number, byte 6 set only one led: number of data start byte + 1, byte 7 ... 63 rgb data
 Set eight neopixels to red, green, blue, red, green, blue, red, green (length = 8 * 3, chunk = 0, unused, rgb, rgb, rgb, ...):
 PC->µC: STAT_CMD ACC_SET CMD_NEOPIXEL 0x18 0x00 0x00 0xff 0x00 0x00 0x00 0xff 0x00 0x00 0x00 0xff 0xff 0x00 0x00 0x00 0xff 0x00 0x00 0x00 0xff 0xff 0x00 0x00 0x00 0xff 0x00
 µC->PC: STAT_SUCCESS ACC_SET CMD_NEOPIXEL

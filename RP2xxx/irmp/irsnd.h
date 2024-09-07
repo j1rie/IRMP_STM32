@@ -76,7 +76,7 @@
 #    error IRSND_TIMER_NUMBER not valid.
 #  endif
 
-#elif defined (ARM_RP2040)                        // ARM_RP2040
+#elif defined (ARM_RP2xxx)                        // ARM_RP2xxx
 #  define IRSND_BIT                             IRSND_BIT_NUMBER
 
 #elif defined(PIC_C18)

@@ -13,3 +13,8 @@ cd build_zero
 cmake  -D"PICO_BOARD=waveshare_rp2040_zero" ..
 make -j5
 cd ..
+mkdir build_pico_2
+cd build_pico_2
+cmake -D"PICO_BOARD=pico2" ..
+make -j5
+cd ..

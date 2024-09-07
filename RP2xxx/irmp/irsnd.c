@@ -185,7 +185,7 @@
     //Nothing here to do here -> See irsndconfig.h
 #elif defined (ARM_STM32_HAL)                                           // STM32 with Hal Library
     //Nothing here to do here -> See irsndconfig.h
-#elif defined (ARM_RP2040)                                              // ARM_RP2040
+#elif defined (ARM_RP2xxx)                                              // ARM_RP2xxx
     uint slice_num;
 #elif defined (__xtensa__)                                              // ESP8266
     //Nothing here to do here -> See irsndconfig.h
@@ -526,7 +526,7 @@
 #  define IRSND_FREQ_40_KHZ                     (IRSND_FREQ_TYPE) (40000)
 #  define IRSND_FREQ_56_KHZ                     (IRSND_FREQ_TYPE) (56000)
 #  define IRSND_FREQ_455_KHZ                    (IRSND_FREQ_TYPE) (455000)
-#elif defined (ARM_RP2040)                      // ARM_RP2040
+#elif defined (ARM_RP2xxx)                      // ARM_RP2xxx
 #  define IRSND_FREQ_TYPE                       uint32_t
 #  define IRSND_FREQ_30_KHZ                     (IRSND_FREQ_TYPE) (30000)
 #  define IRSND_FREQ_32_KHZ                     (IRSND_FREQ_TYPE) (32000)
@@ -613,7 +613,7 @@ irsnd_on (void)
         IRSND_TIMER->EGR = TIM_EGR_UG;                  // Generate an update event to reload the Prescaler and the Repetition counter values immediately
         HAL_TIM_PWM_Start(&IRSND_TIMER_HANDLER, IRSND_TIMER_CHANNEL_NUMBER);
 
-#  elif defined (ARM_RP2040)                            // ARM_RP2040
+#  elif defined (ARM_RP2xxx)                            // ARM_RP2xxx
         pwm_set_counter(slice_num, 0);                  // reset counter
         pwm_set_enabled(slice_num, true);               // enable counter
         gpio_set_outover(IRSND_BIT, GPIO_OVERRIDE_NORMAL);
@@ -699,7 +699,7 @@ irsnd_off (void)
 #  elif defined (ARM_STM32_HAL)                                                         // STM32
         HAL_TIM_PWM_Stop(&IRSND_TIMER_HANDLER, IRSND_TIMER_CHANNEL_NUMBER);
 
-#  elif defined (ARM_RP2040)                                                            // ARM_RP2040
+#  elif defined (ARM_RP2xxx)                                                            // ARM_RP2xxx
         pwm_set_enabled(slice_num, false);                                              // disable counter
         gpio_set_outover(IRSND_BIT, GPIO_OVERRIDE_LOW);                                 // set IRSND_BIT to low
 
@@ -897,7 +897,7 @@ irsnd_set_freq (IRSND_FREQ_TYPE freq)
             _Error_Handler(__FILE__, __LINE__);
         }
 
-#  elif defined (ARM_RP2040)                                                               // ARM_RP2040
+#  elif defined (ARM_RP2xxx)                                                               // ARM_RP2xxx
         static uint32_t      TimeBaseFreq = 0;
 
         if (TimeBaseFreq == 0)
@@ -1078,7 +1078,7 @@ irsnd_init (void)
 #  elif defined (ARM_STM32_HAL)
         irsnd_set_freq (IRSND_FREQ_36_KHZ);                                         // default frequency
 
-#  elif defined (ARM_RP2040)                                                        // ARM_RP2040
+#  elif defined (ARM_RP2xxx)                                                        // ARM_RP2xxx
         /* GPIO Configuration */
         gpio_set_function(IRSND_BIT, GPIO_FUNC_PWM);
         slice_num = pwm_gpio_to_slice_num(IRSND_BIT);

@@ -67,12 +67,12 @@
 #  define F_CPU SystemCoreClock
 #elif defined(__SDCC_stm8)                                                          // STM8
 #  define SDCC_STM8
-#elif defined(PICO_BOARD)                                                           // ARM RP2040
+#elif defined(PICO_BOARD)                                                           // ARM RP2xxx
 #  include "hardware/clocks.h"
 #  include "hardware/pwm.h"
 #  include "pico/stdlib.h"
 #  include "../src/config.h"
-#  define ARM_RP2040
+#  define ARM_RP2xxx
 #  define F_CPU (clock_get_hz(clk_sys))
 #elif defined(TARGET_IS_BLIZZARD_RA2)                                               // TI Stellaris (tested on Stellaris Launchpad with Code Composer Studio)
 #  define STELLARIS_ARM_CORTEX_M4

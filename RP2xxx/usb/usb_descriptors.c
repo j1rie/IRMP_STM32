@@ -70,8 +70,8 @@ uint8_t const * tud_descriptor_device_cb(void)
 // HID Report Descriptor
 //--------------------------------------------------------------------+
 
-#define HID_IN_REPORT_COUNT     64 /* RP2040->PC */
-#define HID_OUT_REPORT_COUNT    64 /* PC->RP2040 */
+#define HID_IN_REPORT_COUNT     64 /* RP2xxx->PC */
+#define HID_OUT_REPORT_COUNT    64 /* PC->RP2xxx */
 
 #define REPORT_ID_IR            0x01
 #define REPORT_ID_CONFIG_IN     0x02
@@ -93,19 +93,19 @@ uint8_t const * tud_descriptor_device_cb(void)
       HID_LOGICAL_MAX_N ( 0xff, 2                              ),\
       HID_REPORT_SIZE ( 8                                      ),\
 \
-      /* RP2040->PC */ \
+      /* RP2xxx->PC */ \
       0x85, REPORT_ID_IR,    /*     REPORT_ID                  */\
       HID_USAGE       ( 0x02                                   ),\
       HID_REPORT_COUNT( HID_IN_REPORT_COUNT-1                  ),\
       HID_INPUT       ( HID_DATA | HID_VARIABLE | HID_ABSOLUTE ),\
 \
-      /* RP2040->PC */ \
+      /* RP2xxx->PC */ \
       0x85, REPORT_ID_CONFIG_IN, /* REPORT_ID                  */\
       HID_USAGE       ( 0x03                                   ),\
       HID_REPORT_COUNT( HID_IN_REPORT_COUNT-1                  ),\
       HID_INPUT       ( HID_DATA | HID_VARIABLE | HID_ABSOLUTE ),\
 \
-      /* PC->RP2040 */ \
+      /* PC->RP2xxx */ \
       0x85, REPORT_ID_CONFIG_OUT, /* REPORT_ID                  */\
       HID_USAGE       ( 0x04                                    ),\
       HID_REPORT_COUNT( HID_OUT_REPORT_COUNT-1                  ),\

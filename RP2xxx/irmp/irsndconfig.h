@@ -164,10 +164,10 @@
 #  define IRSND_TIMER_SPEED_APBX                64000000                //Speed of the corresponding APBx. (see STM32CubeMX: Clock Configuration)
 
 /*---------------------------------------------------------------------------------------------------------------------------------------------------
- * ARM RP2040 section
+ * ARM RP2xxx section
  *---------------------------------------------------------------------------------------------------------------------------------------------------
  */
-#elif defined (ARM_RP2040)                                              // use IR_OUT_GPIO as IR output on RP2040
+#elif defined (ARM_RP2xxx)                                              // use IR_OUT_GPIO as IR output on RP2xxx
 #  define IRSND_BIT_NUMBER                      IR_OUT_GPIO
 
 /*---------------------------------------------------------------------------------------------------------------------------------------------------

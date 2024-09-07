@@ -1,4 +1,4 @@
-cmake_minimum_required(VERSION 3.12)
+cmake_minimum_required(VERSION 3.13)
 
 include(../pico-sdk/pico_sdk_init.cmake)
 
@@ -21,7 +21,6 @@ add_executable(${PROJECT_NAME}
 
 file(MAKE_DIRECTORY ${CMAKE_CURRENT_LIST_DIR}/generated)
 
-# generate the header file into the source tree as it is included in the RP2040 datasheet
 pico_generate_pio_header(${PROJECT_NAME} ${CMAKE_CURRENT_LIST_DIR}/src/ws2812.pio OUTPUT_DIR ${CMAKE_CURRENT_LIST_DIR}/generated)
 
 target_include_directories(${PROJECT_NAME} PUBLIC
@@ -32,8 +31,6 @@ target_include_directories(${PROJECT_NAME} PUBLIC
         ${CMAKE_CURRENT_SOURCE_DIR}/timestamp
 )
 
-# In addition to pico_stdlib required for common PicoSDK functionality, add dependency on tinyusb_device
-# for TinyUSB device support and tinyusb_board for the additional board support library used by the example
 target_link_libraries(${PROJECT_NAME} pico_stdlib tinyusb_device tinyusb_board hardware_pwm hardware_flash hardware_exception timestamp hardware_pio)
 
 # Uncomment this line to enable fix for Errata RP2040-E5 (the fix requires use of GPIO 15)
@@ -48,9 +45,9 @@ execute_process (COMMAND bash -c "grep -e 'Version IRMP' ${CMAKE_CURRENT_SOURCE_
 
 string(STRIP ${IRMP_VERSION} IRMP_VERSION)
 
-target_compile_definitions(timestamp PRIVATE FW_STR="${BUILD_TIME}_${PICO_BOARD}   IRMP-Version: ${IRMP_VERSION}*RP2040")
+target_compile_definitions(timestamp PRIVATE FW_STR="${BUILD_TIME}_${PICO_BOARD}   IRMP-Version: ${IRMP_VERSION}*RP2xxx")
 
-set(FW_STR "${BUILD_TIME}_${PICO_BOARD}   IRMP-Version: ${IRMP_VERSION}*RP2040")
+set(FW_STR "${BUILD_TIME}_${PICO_BOARD}   IRMP-Version: ${IRMP_VERSION}*RP2xxx")
 
 target_include_directories(timestamp PUBLIC $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}>)
 
@@ -58,6 +55,6 @@ add_custom_target(clear_cache COMMAND ${CMAKE_COMMAND} -U BUILD_TIME ${CMAKE_BIN
 
 add_dependencies(timestamp clear_cache)
 
-message(STATUS "BUILD_TIME=${BUILD_TIME}")
-message(STATUS "IRMP_VERSION=${IRMP_VERSION}")
+#message(STATUS "BUILD_TIME=${BUILD_TIME}")
+#message(STATUS "IRMP_VERSION=${IRMP_VERSION}")
 message(STATUS "FW_STR=${FW_STR}")
