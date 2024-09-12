@@ -1,5 +1,5 @@
 /*
-    RPI2040 EEPROM emulation
+    RP2xxx EEPROM emulation
 
     Based on ESP8266 EEPROM library, which is
     Copyright (c) 2014 Ivan Grokhotkov. All rights reserved.

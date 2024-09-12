@@ -260,7 +260,7 @@ void LED_Switch_init(void)
 	gpio_set_drive_strength(EXTLED_GPIO, GPIO_DRIVE_STRENGTH_12MA);
 	gpio_set_drive_strength(STATUSLED_GPIO, GPIO_DRIVE_STRENGTH_12MA);
 	//gpio_set_drive_strength(WAKEUP_GPIO, GPIO_DRIVE_STRENGTH_12MA); // TODO: once enough?!
-	gpio_set_dir(WAKEUP_GPIO, GPIO_IN); // no open drain on RP2040
+	gpio_set_dir(WAKEUP_GPIO, GPIO_IN); // no open drain on RP2xxx
 	gpio_set_dir(EXTLED_GPIO, GPIO_OUT);
 	gpio_set_dir(STATUSLED_GPIO, GPIO_OUT);
 }
