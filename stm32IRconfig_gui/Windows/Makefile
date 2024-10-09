@@ -13,7 +13,7 @@ LIBS= -mwindows -Wl,-Bstatic -lFOX-1.6 -lpng -ljpeg -ltiff -lz -llzma -lws2_32 -
 else ifeq ($(MSYSTEM),MINGW64)
 CFLAGS=-I/mingw64/include/fox-1.6 -I/mingw64/include/libusb-1.0 -g -c -s -Wall -mno-ms-bitfields -O2
 # -static
-LIBS= -mwindows -Wl,-Bstatic -lFOX-1.6 -lpng -ljpeg -ltiff -lz -lzstd -llzma -lws2_32 -lgdi32 -static-libgcc -static-libstdc++ -lkernel32 -lsetupapi -lusb-1.0 -ldeflate -lWebP -llerc -ljbig
+LIBS= -mwindows -Wl,-Bstatic -lFOX-1.6 -lpng -ljpeg -ltiff -lz -lzstd -llzma -lws2_32 -lgdi32 -static-libgcc -static-libstdc++ -lkernel32 -lsetupapi -lusb-1.0 -ldeflate -lWebP -llerc -ljbig -lturbojpeg -lsharpyuv
 endif
 CXXFLAGS=-g -s -Wall  -mno-ms-bitfields -O2
 # -static // causes timing problems, libwinpthread-1.dll is needed
