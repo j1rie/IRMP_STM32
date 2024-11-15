@@ -12,5 +12,5 @@ put the udev rule from irmplircd into your udev rules directory, then you don't 
 
 vdr + vdr-plugin-statusleds + stm32IRstatusled:
 vdr -P'statusleds --stm32IRstatusled_path=/path/to/stm32IRstatusled'
-this will turn the led on, when vdr is starts; it will turn the led off, when vdr stops; it will make the led blink during recording
+this will turn the led on, when vdr starts; it will turn the led off, when vdr stops; it will make the led blink during recording
 for systemd add a line to the vdr service ExecStop=/path/to/stm32IRstatusled -s 0
