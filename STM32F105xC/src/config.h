@@ -38,27 +38,31 @@
  * due to the level shifting complementary MOSFETs and the level shifting transistors in the A{0,1,2} paths.
  * Unfortunately 3 resistors need to be changed for A{0,1,2} to work with 5V, so better use B{6,7,8} */
 #ifdef SimpleCircuit_F105
-#define WAKEUP_PORT	GPIOB
-#define WAKEUP_PIN	GPIO_Pin_7 /* Yaw-middle */
-#ifdef NOEXTLED
-#define RESET_PORT	GPIOB
-#define RESET_PIN	GPIO_Pin_8 /* Yaw-left */
+# define WAKEUP_PORT	GPIOB
+# define WAKEUP_PIN	GPIO_Pin_7 /* Yaw-middle */
+# ifdef NOEXTLED
+#  define RESET_PORT	GPIOB
+#  define RESET_PIN	GPIO_Pin_8 /* Yaw-left */
+# else
+#  define EXTLED_PORT	GPIOB
+#  define EXTLED_PIN	GPIO_Pin_8 /* connect EXTLED to Yaw-left and 3,3V */
+# endif
+# define STATUSLED_PORT	GPIOB
+# define STATUSLED_PIN	GPIO_Pin_11 /* SDA */
+/*
+# define xxx_PORT	GPIOB
+# define xxx_PIN	GPIO_Pin_10 /* SCL */
+*/
 #else
-#define EXTLED_PORT	GPIOB
-#define EXTLED_PIN	GPIO_Pin_8 /* connect EXTLED to Yaw-left and 3,3V */
-#endif
-#define STATUSLED_PORT	GPIOB
-#define STATUSLED_PIN	GPIO_Pin_11
-#else
-#define WAKEUP_PORT	GPIOA
-#define WAKEUP_PIN	GPIO_Pin_1 /* Yaw-middle */
-#ifdef NOEXTLED
-#define RESET_PORT	GPIOA
-#define RESET_PIN	GPIO_Pin_2 /* Yaw-left */
-#else
-#define EXTLED_PORT	GPIOA
-#define EXTLED_PIN	GPIO_Pin_2 /* connect EXTLED to Yaw-left and GND */
-#endif
+# define WAKEUP_PORT	GPIOA
+# define WAKEUP_PIN	GPIO_Pin_1 /* Yaw-middle */
+# ifdef NOEXTLED
+#  define RESET_PORT	GPIOA
+#  define RESET_PIN	GPIO_Pin_2 /* Yaw-left */
+# else
+#  define EXTLED_PORT	GPIOA
+#  define EXTLED_PIN	GPIO_Pin_2 /* connect EXTLED to Yaw-left and GND */
+# endif
 #endif
 #define LED_PORT	GPIOB
 #define LED_PIN		GPIO_Pin_12
