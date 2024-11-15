@@ -1,4 +1,4 @@
-libudev-dev libfox-1.x-dev are needed.
+libudev-dev libfox-1.x-dev are required.
 
-In case you created nicer icons, use generate_icons.sh to integrate them on fox-1.6.x.
+If you have created nicer icons, use generate_icons.sh to integrate them on fox-1.6.x.
 On fox-1.7.x this is done in the Makefile.

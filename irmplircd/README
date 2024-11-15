@@ -1,20 +1,20 @@
 get irmplircd from https://github.com/realglotzi/irmplircd
-for automatic start and stop of irmplircd during boot and on device dis/reconnect
-put the udev rule '70-irmp.rules' into your udev rules directory (/etc/udev/rules.d/) and
+to automatically start and stop irmplircd at boot time and on device dis/reconnect
+put the udev rule '70-irmp.rules' in your udev rules directory (/etc/udev/rules.d/) and
 put the systemd service 'irmplircd.service' into your services directory (/etc/systemd/system/)
 put the systemd-tmpfiles config file 'irmplircd.conf' into your tmpfiles directory (/etc/tmpfiles.d/)
 and run "systemctl enable irmplircd.service" once
 
-you want to know, if the computer was started by the receiver?
-put the systemd service 'irmpexec.service' into your services directory (/etc/systemd/system/)
+want to know, if the computer was started by the receiver?
+put the systemd service 'irmpexec.service' in your services directory (/etc/systemd/system/)
 and run "systemctl enable irmpexec.service" once
-irmp_stm32.map needs to contain a line "ff0000000000 KEY_REFRESH"
+irmp_stm32.map must contain a line "ff0000000000 KEY_REFRESH"
 if /var/log/started_by_irmp_stm32 is newer than /var/log/boot.msg, the computer was started by the receiver
-You may use this in VDR's shutdownscript in order to not shut down on the first power key press, if the
+You can use this in VDR's shutdown script to avoid shutting down on the first power key press, if the
 computer is already running. See the example script.
-This is handy if you have a remote control with macros as the logitech and use one button to power
-on not only VDR but other devices as well.
+This is handy if you have a remote control with macros like the Logitech and you want to use one button to switch
+on not only VDR but also other devices.
 
 irmpexec executes commands on an IR signal decoded by irmplircd.
 For example an irmplircd.map line "070000000100 KEY_1" and an
-irmpexec.map line "KEY_1 ls -l" executes "ls -l" on 070000000100.
+irmpexec.map line "KEY_1 ls -l" will execute "ls -l" on 070000000100.

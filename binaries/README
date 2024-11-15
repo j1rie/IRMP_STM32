@@ -1,7 +1,7 @@
 The compiler is from
 https://developer.arm.com/open-source/gnu-toolchain/gnu-rm/downloads
 
-For complete eeprom and firmware reset flash the file "ZEROS".
+For a full eeprom and firmware reset flash the file "ZEROS".
 Afterwards a new firmware needs to be flashed.
 
 The Windows USB drivers for the device in bootloader mode have been created by Zadig [1] (WinUSB).

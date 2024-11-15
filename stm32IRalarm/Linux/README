@@ -1,15 +1,15 @@
-Set alarmtime to and get alarmtime from STM32.
+Set alarm time on and get alarm time from STM32.
 For use in VDRs shutdown script and commands.conf.
 
 Usage:
 stm32IRalarm [-d device] -s alarmtime -a
 
 Examples:
-set alarmtime 1 hour ahead, 3600 sec: stm32IRalarm -d /dev/hidraw1 -s 3600
-get alarmtime: stm32IRalarm -d /dev/hidraw2 -a
+set alarm time 1 hour ahead, 3600 sec: stm32IRalarm -d /dev/hidraw1 -s 3600
+get alarm time: stm32IRalarm -d /dev/hidraw2 -a
 set & get (136 years ahead ;-)): stm32IRalarm -d /dev/hidraw0 -s 0xFFFFFFFF -a
 
-shutdown script (pointed to by vdr.conf's --shutdown line):
+shutdown script (pointed to by the --shutdown line in vdr.conf):
 stm32IRalarm [-d /dev/hidraw0] -s $2
 stm32IRalarm [-d /dev/hidraw0] -s $(($2 -300))
 

@@ -1,13 +1,13 @@
-The bootloaders are in [1], [2] and [3].
+The bootloaders are locted in [1], [2] and [3].
 
 The firmware, which gets loaded by the bootloader, has to make an USB reset for 
-reenumeration. For this compile the firmware with "make Bootloader=1".
+re-enumeration. For this compile the firmware with "make Bootloader=1".
 
 Once the bootloader is flashed, you flash the new firmware like this:
 First run /path/FlashDFUxxx.sh /path/newFirmware.bin,
 then (re)connect or reset or reboot the board.
 
-I made a patch for dfu-util, which lets's dfu-util loop, so this needs no longer be done in a script.
+I made a patch for dfu-util, which lets's dfu-util loop, so this no longer needs to be done in a script.
 dfu-util git contains that patch [4].
 
 [1] https://github.com/j1rie/maple-bootloader/tree/unify_platforms

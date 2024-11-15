@@ -1,14 +1,14 @@
-For the sticks there are several hardware designs.
-Make sure the extension board fits your stick.
+There are different hardware designs for the sticks.
+Make sure that the extension board fits your stick.
 
 Stick1_jr1 is based on:
 https://github.com/ranseyer/STM32-IRMP-Hardware/tree/master/1_Small_ST-Link/STl-Link-V303-small.brd
 https://github.com/ranseyer/STM32-IRMP-Hardware/tree/master/1_Small_ST-Link/STl-Link-V303-small.sch
 
-I strongly recommend the optocoupler version. It is not very likely that you actually need it, but
-in case you do have a motherboard, which needs it, it will save you much debugging effort.
+I highly recommend the optocoupler version. It is not very likely that you will actually need it, but
+if you do have a motherboard, that needs it, it will save you a lot of debugging effort.
 
-If you like a tiny design, take a look at https://github.com/Sl-Alex/IRMP_STM32_MINI and at
+If you like a tiny design, have a look at https://github.com/Sl-Alex/IRMP_STM32_MINI and at
 https://www.vdr-portal.de/index.php?attachment/48154-20230825-130009-jpg/
 
 In case you want to attach a 4 digit display tm1637, connect:
