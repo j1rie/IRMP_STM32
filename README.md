@@ -4,31 +4,31 @@ A remote control receiver with many functions based on cheap hardware.
 
 ![Stick](https://raw.githubusercontent.com/wiki/j1rie/IRMP_STM32_KBD/images/Stick.jpg)
   
-![Stick am Board](https://raw.githubusercontent.com/wiki/j1rie/IRMP_STM32_KBD/images/Stick_am_Board.jpg)
+![Stick on Board](https://raw.githubusercontent.com/wiki/j1rie/IRMP_STM32_KBD/images/Stick_am_Board.jpg)
 
 ## Introduction
-For 2 € you can buy a ST-Link emulator or a STM32F103 development board, usually made in China, on ebay. Onto the STM32F103 microcontroller on it an open source firmware with many functions is flashed.
+For 2 € you can buy an ST-Link emulator or a STM32F103 development board, usually made in China, on ebay. The STM32F103 microcontroller on it is flashed with an open source firmware with many functions.
 
 ## Features
 * connection via USB 
 * registers as HID device, appears as /dev/hidraw or "Custom HID device", no drivers needed
-* transfers the data via USB2 in hardware with fullspeed 
+* transfers the data over USB2 in hardware with fullspeed 
 * IR receiver (about 40 protocols decoded in hardware) 
 * power on PC via remote control from S3 (STR) and S4 (STD) via USB or from S3, S4 and S5 (SoftOff) via motherboard switch (+5V required, on USB or from PSU or motherboard) 
-* power on PC via build-in timer from S3 (STR) and S4 (STD) via USB or from S3, S4 and S5 (SoftOff) via motherboard switch (+5V required, on USB or from PSU or motherboard) 
+* power on PC via built-in timer from S3 (STR) and S4 (STD) via USB or from S3, S4 and S5 (SoftOff) via motherboard switch (+5V required, on USB or from PSU or motherboard) 
 * IR transmitter (about 40 protocols) 
 * the configuration is stored in the emulated eeprom
 * bootloader for easy firmware update
 * macro support
 
-A macro allows a sequence of IR commands to be sent via the send diode when a trigger is received.
+A macro allows a sequence of IR commands to be sent via the transmitter diode when a trigger is received.
  macroslot0 is the trigger, macroslot1 … macroslot7 are the commands to be sent.
 
 ## Software Linux
 * GUI configuration tool stm32IRconfig_gui for configuration: set, get and reset wakeup codes, macros, alarm time, send IR and show the received IR code. It is possible to program wakeups and macros via remote control. Create, test and edit the translation table using remote control and mouse. Comprehensive debug messages. Firmware update.
 * interactive command line program stm32IRconfig for configuration: set, get and reset wakeups, macros, alarm time, send IR and display the received IR code. It is possible to program wakeups and macros by remote control.
 * stm32IRalarm for setting and reading alarm time via script 
-* stm32FWupgrade for command line firmware update
+* stm32FWupgrade for command line firmware upgrade
 * irmplircd is a daemon that runs in the background as an independent lirc server and passes the IR codes/events on to the application https://github.com/realglotzi/irmplircd
 * irctl for configuration: https://github.com/olebowle/irctl
 * Software available for Ubuntu, yaVDR, easyVDR, MLD.
@@ -36,13 +36,13 @@ A macro allows a sequence of IR commands to be sent via the send diode when a tr
 ## Software Windows
 * GUI configuration tool stm32IRconfig_gui (same as linux)
 * interactive command line programm stm32IRconfig (same as linux)
-* stm32IRalarm for setting and reading alarm time via script
-* stm32FWupgrade for command line firmware update
+* stm32IRalarm to set and read alarm time via script
+* stm32FWupgrade for command line firmware upgrade
 * MediaPortal plugin: https://github.com/pikim/HIDIRT-host/tree/master/hidirt.MePo
 * EventGhost with generic HID
 
 ## Creating a keymap
-The stm32IRconfig_gui can be used to create a keymap with the remote control.  
+The stm32IRconfig_gui can be used to create a keymap using the remote control.  
 There are two methods.  
   
 (1)  
@@ -61,8 +61,8 @@ When you are finished, press "save" to save the keymap.
 ## Learning wakeup
 If the first wakeup is empty, the first IR data received will be stored in the wakeup.  
 Change wakeup with stm32kbdIRconfig_gui: press set by remote - wakeup, press button on remote control.  
-Important for testing: wakeup only happens, if the PC is powered off.  
-If the PC is powered on, only the key is sent to the PC (so you can use the same button for switching on and off).  
+Important for testing: wakeup only happens, if the PC is switched off.  
+If the PC is powered on, only the key is sent to the PC (so you can use the same button to switch on and off).  
 
 ## EventGhost
 ![EG1](https://raw.githubusercontent.com/wiki/j1rie/IRMP_STM32_KBD/images/EG1.jpg)   
@@ -74,7 +74,7 @@ If the PC is powered on, only the key is sent to the PC (so you can use the same
 A keycode in the left event window is dragged into the right configuration window and assigned to the desired action of a plugin. 
 
 ## Building from source
-The sources are complete only after running the prepare script, the script downloads the IRMP sources, extracts and patches the sources. You have to download the ST sources manually, because unfortunately you have to register.  
+The sources are not complete until you run the prepare script, the script downloads the IRMP sources, extracts and patches the sources. You have to download the ST sources manually, because unfortunately you have to register.  
 This makes it possible to put the patches under the GPL, without interfering with the original licences.  
 It is also easier to see, what has been changed, too.  
 Compile with arm-none-eabi-gcc.  
@@ -109,7 +109,7 @@ https://github.com/j1rie/IRMP_STM32_KBD/wiki/Herstellungsprozess-Schwarze#firmwa
 
 ## Other ways how to flash
 Flashing with an USB-serial-TTL is possible on the developer boards.  
-Flashing over USB is possible on those boards, that support it.  
+Flashing over USB is possible on the boards, that support it.  
 See https://www.mikrocontroller.net/articles/IRMP_auf_STM32_-_ein_USB_IR_Empf%C3%A4nger/Sender/Einschalter_mit_Wakeup-Timer#Firmware_Flashing  
 
 ## irmplircd, eventlircd, udev and systemd
@@ -130,7 +130,7 @@ Manuel Reimer for gcc-4.9 fix, SimpleCircuit and check if host is running. [5]
 [4] https://github.com/olebowle  
 [5] https://github.com/M-Reimer  
 
-## Discussion and more information
+## Discussion and further information
 Comments, questions, suggestions can be sent to https://www.vdr-portal.de/forum/index.php?thread/123572-irmp-auf-stm32-ein-usb-ir-empf%C3%A4nger-sender-einschalter-mit-wakeup-timer/
 
 ## Construction manuals
