@@ -10,7 +10,7 @@ A remote control receiver with many functions based on cheap hardware.
 For 2 € you can buy an ST-Link emulator or a STM32F103 development board, usually made in China, on ebay. The STM32F103 microcontroller on it is flashed with an open source firmware with many functions.
 
 ## Features
-* connection via USB 
+* connection over USB 
 * registers as HID device, appears as /dev/hidraw or "Custom HID device", no drivers needed
 * transfers the data over USB2 in hardware with fullspeed 
 * IR receiver (about 40 protocols decoded in hardware) 
@@ -25,8 +25,8 @@ A macro allows a sequence of IR commands to be sent via the transmitter diode wh
  macroslot0 is the trigger, macroslot1 … macroslot7 are the commands to be sent.
 
 ## Software Linux
-* GUI configuration tool stm32IRconfig_gui for configuration: set, get and reset wakeup codes, macros, alarm time, send IR and show the received IR code. It is possible to program wakeups and macros via remote control. Create, test and edit the translation table using remote control and mouse. Comprehensive debug messages. Firmware update.
-* interactive command line program stm32IRconfig for configuration: set, get and reset wakeups, macros, alarm time, send IR and display the received IR code. It is possible to program wakeups and macros by remote control.
+* GUI configuration tool stm32IRconfig_gui for configuration: set, get and reset wakeup codes, macros, alarm time, send IR and show the received IR code. It is possible to program wakeups and macros by the remote control. Create, test and edit the translation table using remote control and mouse. Comprehensive debug messages. Firmware update.
+* interactive command line program stm32IRconfig for configuration: set, get and reset wakeups, macros, alarm time, send IR and display the received IR code. It is possible to program wakeups and macros by the remote control.
 * stm32IRalarm for setting and reading alarm time via script 
 * stm32FWupgrade for command line firmware upgrade
 * irmplircd is a daemon that runs in the background as an independent lirc server and passes the IR codes/events on to the application https://github.com/realglotzi/irmplircd
