@@ -9,7 +9,7 @@ This is additional information, basic information in https://github.com/j1rie/IR
 
 ## Flashing the firmware
 Disconnect from USB.
-Attach to USB while holding BOOTSEL button down, then release. The device will appear as a mass storage.
+Attach to USB while holding down the BOOTSEL button, then release. The device will appear as a mass storage.
 Drag and drop the firmware.uf2 file onto it. The device will reboot and start as an IRMP HID Device.
 
 Sending the "reboot" command will also put the device into mass storage mode.
@@ -21,8 +21,8 @@ https://www.mikrocontroller.net/articles/IRMP_auf_STM32_%E2%80%93_stark_vereinfa
 https://www.mikrocontroller.net/articles/IRMP_auf_STM32_%E2%80%93_stark_vereinfachte_Bauanleitung#Connect_Cables
 
 ## Emulated Eeprom
-Any configuration made by one of the configuration programs goes first into cache only. To save
-these changes permanently into flash, you have to do an eeprom commit.
+Any configuration made by one of the configuration programs goes first into cache only. To permanently save
+these changes  to flash, you have to do an eeprom commit.
 Exception: the first wakeup is committed by the firmware for backward compatibility.
 
 ## Building from source
@@ -32,7 +32,7 @@ See [Getting Started with the Raspberry Pi Pico](https://rptl.io/pico-get-starte
 -> Build "Blink"  
 -> Load and run "Blink"  
 
-## Pin-out
+## Pin-Out
 See ./src/config.h.
 
 ##

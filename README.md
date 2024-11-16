@@ -12,7 +12,7 @@ For 2 € you can buy an ST-Link emulator or a STM32F103 development board, usua
 ## Features
 * connection over USB 
 * registers as HID device, appears as /dev/hidraw or "Custom HID device", no drivers needed
-* transfers the data over USB2 in hardware with fullspeed 
+* transfers the data over USB2 in hardware at fullspeed 
 * IR receiver (about 40 protocols decoded in hardware) 
 * power on PC via remote control from S3 (STR) and S4 (STD) via USB or from S3, S4 and S5 (SoftOff) via motherboard switch (+5V required, on USB or from PSU or motherboard) 
 * power on PC via built-in timer from S3 (STR) and S4 (STD) via USB or from S3, S4 and S5 (SoftOff) via motherboard switch (+5V required, on USB or from PSU or motherboard) 
@@ -56,7 +56,7 @@ Second method: Press "receive mode".
 Press the button on the remote, type the name of the button into the Key text box and press "append" - repeat for all the buttons.
 
 You can now test the keymap: After pressing the button on the remote, the red cursor should be in the corresponding line.
-When you are finished, press "save" to save the keymap.
+When you are done, press "save" to save the keymap.
 
 ## Learning wakeup
 If the first wakeup is empty, the first IR data received will be stored in the wakeup.  
@@ -94,7 +94,7 @@ File - Open File - boot.blackDev.bin (https://github.com/j1rie/STM32F103-bootloa
 Target - Program & Verify (confirm a message about read out protection, if it appears)  
 Linux:  
 openocd -f ocd-program.cfg  
-If the flash is locked, first do openocd -f ocd-unlock.cfg first, disconnect and reconnect the device, and  
+If the flash is locked, first run openocd -f ocd-unlock.cfg first, disconnect and reconnect the device, and then 
 run openocd -f ocd-program.cfg again.  
 The files are in the STM32Fxxx(yy)-bootloader repos.  
 https://github.com/j1rie/IRMP_STM32_KBD/wiki/Herstellungsprozess-Schwarze#bootloader-flashen  
@@ -118,9 +118,9 @@ See /irmplircd/README.
 ## Thanks to
 Frank Meyer for IRMP. [1]  
 Uwe Becker for adapting IRMP to the STM32F4xx and his USB-HID for the STM32F4xx. [2]  
-His work helped me in getting started with the STM32F105.  
+His work helped me to get started with the STM32F105.  
 Andrew Kambaroff for his USB-HID for the STM32F103. [3]  
-His work helped me in getting started with the STM32F103.  
+His work helped me to get started with the STM32F103.  
 Ole Ernst for code review, linux Makefile and linux download-extract-patch-script and new protocol. [4]  
 Manuel Reimer for gcc-4.9 fix, SimpleCircuit and check if host is running. [5]  
 
@@ -131,7 +131,7 @@ Manuel Reimer for gcc-4.9 fix, SimpleCircuit and check if host is running. [5]
 [5] https://github.com/M-Reimer  
 
 ## Discussion and further information
-Comments, questions, suggestions can be sent to https://www.vdr-portal.de/forum/index.php?thread/123572-irmp-auf-stm32-ein-usb-ir-empf%C3%A4nger-sender-einschalter-mit-wakeup-timer/
+Comments, questions and suggestions can be sent to https://www.vdr-portal.de/forum/index.php?thread/123572-irmp-auf-stm32-ein-usb-ir-empf%C3%A4nger-sender-einschalter-mit-wakeup-timer/
 
 ## Construction manuals
 https://github.com/j1rie/IRMP_STM32_KBD/wiki/Herstellungsprozess-Schwarze  
