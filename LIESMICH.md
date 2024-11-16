@@ -42,14 +42,14 @@ macroslot0 ist der Auslöser, macroslot1 ... macroslot7 sind die zu sendenden Be
 * EventGhost mit generischer HID
 
 ## Erstellen einer Keymap
-Das stm32IRconfig_gui kann verwendet werden, um eine Keymap mit der Fernsteuerung zu erstellen. 
-Es gibt zwei Methoden. 
-
-(1) 
+Das stm32IRconfig_gui kann verwendet werden, um eine Keymap mit der Fernsteuerung zu erstellen.  
+Es gibt zwei Methoden.  
+  
+(1)  
 ![write_IR](https://raw.githubusercontent.com/wiki/j1rie/IRMP_STM32_KBD/images/write_IR.jpg)  
 Erste Methode: Drücken Sie „receive mode“ und öffnen Sie die Vorlagen Keymap.
 Klicken Sie auf die Zeile mit dem Namen der Taste, drücken Sie die Taste auf der Fernbedienung, drücken Sie „write IR“ - wiederholen Sie dies für alle Tasten.  
-
+  
 (2)  
 ![append](https://raw.githubusercontent.com/wiki/j1rie/IRMP_STM32_KBD/images/append.jpg)  
 Zweite Methode: Drücken Sie „receive mode“.
