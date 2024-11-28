@@ -29,9 +29,13 @@
 #define IR_OUT_GPIO		6  /* GPIO 6  (Pico Pin 9,  One+Zero Pin 6)  */
 #define WAKEUP_RESET_GPIO	7  /* GPIO 7  (Pico Pin 10, One+Zero Pin 7)  */
 #define STATUSLED_GPIO		2  /* GPIO 2  (Pico Pin 4,  One+Zero Pin 2)  */
+#ifndef SEEED_XIAO_RP2350
 #define IS_RGBW			false
+#else
+#define IS_RGBW			true
+#endif
 #ifdef PICO_DEFAULT_WS2812_PIN
-#define WS2812_PIN		PICO_DEFAULT_WS2812_PIN /* GPIO16 (One+Zero Onboard) */
+#define WS2812_PIN		PICO_DEFAULT_WS2812_PIN /* GPIO16 (One+Zero Onboard), GPIO22 (Seeed XIAO RP2350) */
 #else
 // default to pin 16 if the board doesn't have a default WS2812 pin defined
 #define WS2812_PIN		16 /* GPIO 16 (Pico Pin 21) */

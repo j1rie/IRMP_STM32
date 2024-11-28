@@ -18,3 +18,8 @@ cd build_pico_2
 cmake -D"PICO_BOARD=pico2" ..
 make -j5
 cd ..
+mkdir build_seeed_xiao_rp2350
+cd build_seeed_xiao_rp2350
+cmake -D"PICO_BOARD=seeed_xiao_rp2350" ..
+make -j5
+cd ..

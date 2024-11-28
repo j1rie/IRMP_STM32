@@ -263,6 +263,11 @@ void LED_Switch_init(void)
 	gpio_set_dir(WAKEUP_GPIO, GPIO_IN); // no open drain on RP2xxx
 	gpio_set_dir(EXTLED_GPIO, GPIO_OUT);
 	gpio_set_dir(STATUSLED_GPIO, GPIO_OUT);
+#ifdef SEEED_XIAO_RP2350
+	gpio_init(PICO_DEFAULT_WS2812_POWER_PIN);
+	gpio_set_dir(PICO_DEFAULT_WS2812_POWER_PIN, GPIO_OUT);
+	gpio_put(PICO_DEFAULT_WS2812_POWER_PIN, 1);
+#endif
 }
 
 void toggle_led(void)
