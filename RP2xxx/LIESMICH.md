@@ -22,8 +22,9 @@ https://www.mikrocontroller.net/articles/IRMP_auf_STM32_%E2%80%93_stark_vereinfa
 
 ## Emuliertes Eeprom
 Jede Konfiguration, die mit einem der Konfigurationsprogramme vorgenommen wird, wird zunächst nur im Cache gespeichert. Um
-diese Änderungen dauerhaft im Flash zu speichern, müssen Sie einen Eeprom-Commit durchführen.
+diese Änderungen dauerhaft im Flash zu speichern, muss ein Eeprom-Commit durchgeführt werden.
 Ausnahme: Der erste wakeup wird aus Gründen der Abwärtskompatibilität von der Firmware übertragen.
+Dies betrifft Makros und mehrere Wakeups.
 
 ## Aus den Quellen bauen
 Siehe [Getting Started with the Raspberry Pi Pico](https://rptl.io/pico-get-started)  

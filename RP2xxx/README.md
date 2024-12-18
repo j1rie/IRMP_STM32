@@ -24,6 +24,7 @@ https://www.mikrocontroller.net/articles/IRMP_auf_STM32_%E2%80%93_stark_vereinfa
 Any configuration made by one of the configuration programs goes first into cache only. To permanently save
 these changes  to flash, you have to do an eeprom commit.
 Exception: the first wakeup is committed by the firmware for backward compatibility.
+This applies to macros and multiple wakeups.
 
 ## Building from source
 See [Getting Started with the Raspberry Pi Pico](https://rptl.io/pico-get-started)  
