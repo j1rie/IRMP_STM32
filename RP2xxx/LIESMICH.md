@@ -38,10 +38,10 @@ Siehe ./src/config.h.
 
 ## 5 V vom Netzteil statt über USB
 Wenn das Gerät vom Netzteil versorgt werden muss, darf es nicht zusätzlich über USB versorgt werden, um Querströme zu vermeiden.
-Eine Möglichkeit ist es, die Leiterbahn auf dem PCB zu durchtrennen:
+Eine Möglichkeit ist es, die Leiterbahn auf dem PCB zu durchtrennen:  
 ![VBUS trennen](https://raw.githubusercontent.com/wiki/j1rie/IRMP_STM32_KBD/images/RP2040-One_VBUS_trennen.jpg)
 
-##Signale von den LEDs
+## Signale von den LEDs
 
 Der Pico(2) hat eine normale LED, der One und der Zero haben eine RGB LED, und der XIAO-RP2350 hat eine RGBW LED.
 Zusätzlich kann eine externe LED oder RGB LED angeschlossen werden.
