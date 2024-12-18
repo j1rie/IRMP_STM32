@@ -39,6 +39,7 @@ Siehe ./src/config.h.
 ## 5 V vom Netzteil statt über USB
 Wenn das Gerät vom Netzteil versorgt werden muss, darf es nicht zusätzlich über USB versorgt werden, um Querströme zu vermeiden.
 Eine Möglichkeit ist es, die Leiterbahn auf dem PCB zu durchtrennen:  
+
 ![VBUS trennen](https://raw.githubusercontent.com/wiki/j1rie/IRMP_STM32_KBD/images/RP2040-One_VBUS_trennen.jpg)
 
 ## Signale von den LEDs
