@@ -36,6 +36,19 @@ See [Getting Started with the Raspberry Pi Pico](https://rptl.io/pico-get-starte
 ## Pin-Out
 See ./src/config.h.
 
+## 5 V from power supply instead via USB
+If you need to power the device from the power supply, it must not be powered via USB in order to avoid cross-current.
+One way is to cut the copper on the pcb:
+![cut VBUS](https://raw.githubusercontent.com/wiki/j1rie/IRMP_STM32_KBD/images/RP2040-One_VBUS_trennen.jpg)
+
+## Signals from LEDs
+The pico(2) has a regular led, the one and the zero have an RGB led, and the XIAO-RP2350 has an RGBW led.
+An external led or RGB led can be connected.
+They show what is happening inside the firmware.
+
+Then there is the Status led (controlled over hidraw) and the Num led (controlled via USB).
+They give status messages from the vdr-plugin-statusleds and blink on power-on, storage of first wakeup and reboot.
+
 ##
   \
 [1] Waveshare RP2040-One with TSOP by clausmuus, see https://www.vdr-portal.de/forum/index.php?thread/123572-irmp-auf-stm32-ein-usb-ir-empf%C3%A4nger-sender-einschalter-mit-wakeup-timer/&postID=1361220#post1361220  

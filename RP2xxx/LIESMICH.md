@@ -36,6 +36,20 @@ Siehe [Getting Started with the Raspberry Pi Pico](https://rptl.io/pico-get-star
 ## Pin-Out
 Siehe ./src/config.h.
 
+## 5 V vom Netzteil statt über USB
+Wenn das Gerät vom Netzteil versorgt werden muss, darf es nicht zusätzlich über USB versorgt werden, um Querströme zu vermeiden.
+Eine Möglichkeit ist es, die Leiterbahn auf dem PCB zu durchtrennen:
+![VBUS trennen](https://raw.githubusercontent.com/wiki/j1rie/IRMP_STM32_KBD/images/RP2040-One_VBUS_trennen.jpg)
+
+##Signale von den LEDs
+
+Der Pico(2) hat eine normale LED, der One und der Zero haben eine RGB LED, und der XIAO-RP2350 hat eine RGBW LED.
+Zusätzlich kann eine externe LED oder RGB LED angeschlossen werden.
+Diese zeigen an, was in der Firmware passiert.
+
+Dann gibt es noch die Status LED (über hidraw angesteuert) und die Num LED (über USB angesteuert).
+Diese zeigen den Status des vdr-plugin-statusleds an und blinken beim Einschalten, beim Speichern des ersten Wakeups und bei Reboot.
+
 ##
  \
 [1] Waveshare RP2040-One mit TSOP von clausmuus, siehe https://www.vdr-portal.de/forum/index.php?thread/123572-irmp-auf-stm32-ein-usb-ir-empf%C3%A4nger-sender-einschalter-mit-wakeup-timer/&postID=1361220#post1361220  
