@@ -48,8 +48,7 @@ Der Pico(2) hat eine normale LED, der One und der Zero haben eine RGB LED, und d
 Zusätzlich kann eine externe LED oder RGB LED angeschlossen werden.
 Diese zeigen an, was in der Firmware passiert.
 
-Dann gibt es noch die Status LED (über hidraw angesteuert) und die Num LED (über USB angesteuert).
-Diese zeigen den Status des vdr-plugin-statusleds an und blinken beim Einschalten, beim Speichern des ersten Wakeups und bei Reboot.
+Dann gibt es noch die Status LED (über hidraw angesteuert), die den Status des vdr-plugin-statusleds anzeigt und beim Einschalten, beim Speichern des ersten Wakeups und bei Reboot blinkt.
 
 ##
  \
