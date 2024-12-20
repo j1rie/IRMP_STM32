@@ -137,6 +137,7 @@ Kommentare, Fragen und Anregungen können an https://www.vdr-portal.de/forum/ind
 https://github.com/j1rie/IRMP_STM32_KBD/wiki/Herstellungsprozess-Schwarze  
 https://www.mikrocontroller.net/articles/IRMP_auf_STM32_%E2%80%93_stark_vereinfachte_Bauanleitung  
 https://www.mikrocontroller.net/articles/IRMP_auf_STM32_-_Bauanleitung  
+Die letzten beiden sind auch in /doc/old/Deutsch.  
 
 Viel Spaß mit IRMP auf STM32!
 
