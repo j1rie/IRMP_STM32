@@ -249,7 +249,7 @@ static bool led_state = false;
 static enum color statusled_state = custom; // custom or red
 static enum color statusled_color = custom; // restore after blue/led_callback
 uint8_t pixel[NUM_PIXELS * 3] = {0};
-uint8_t custom_pixel[3] = {3,3,2}; // default white
+uint8_t custom_pixel[3] = {3,3,2}; // color when inactive, default white
 
 void LED_Switch_init(void)
 {
@@ -261,6 +261,7 @@ void LED_Switch_init(void)
 	gpio_set_drive_strength(STATUSLED_GPIO, GPIO_DRIVE_STRENGTH_12MA);
 	//gpio_set_drive_strength(WAKEUP_GPIO, GPIO_DRIVE_STRENGTH_12MA); // TODO: once enough?!
 	gpio_set_dir(WAKEUP_GPIO, GPIO_IN); // no open drain on RP2xxx
+	gpio_pull_up(WAKEUP_GPIO); // RP2350-E9
 	gpio_set_dir(EXTLED_GPIO, GPIO_OUT);
 	gpio_set_dir(STATUSLED_GPIO, GPIO_OUT);
 #ifdef SEEED_XIAO_RP2350
@@ -283,6 +284,8 @@ void toggle_led(void)
  */
 void set_rgb_led(enum color led_color, bool store)
 {
+	if (custom_pixel[0] == 0 && custom_pixel[1] == 0 && custom_pixel[2] == 0) // if off, stay off
+		return;
 	switch (led_color) {
 	case red:
 		put_pixel(3,0,0);
@@ -304,6 +307,9 @@ void set_rgb_led(enum color led_color, bool store)
 		break;
 	case off:
 		put_pixel(0,0,0);
+#ifdef SEEED_XIAO_RP2350
+	 gpio_put(PICO_DEFAULT_WS2812_POWER_PIN, 0);
+#endif
 		break;
 	case custom:
 		put_pixel(custom_pixel[0],custom_pixel[1],custom_pixel[2]);
@@ -424,6 +430,7 @@ void Wakeup(void)
 	gpio_put(WAKEUP_GPIO, 0);
 	sleep_ms(500);
 	gpio_set_dir(WAKEUP_GPIO, GPIO_IN);
+	gpio_pull_up(WAKEUP_GPIO); // RP2350-E9
 	fast_toggle();
 	/* let software know, PC was powered on by firmware */
 	send_ir_on_delay = 90;

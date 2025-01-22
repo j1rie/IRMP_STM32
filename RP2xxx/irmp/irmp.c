@@ -2552,7 +2552,7 @@ irmp_init (void)
 #elif defined (ARM_RP2xxx)                                              // ARM_RP2xxx
     /* GPIO Configuration */
     gpio_init(IRMP_BIT);
-    gpio_disable_pulls(IRMP_BIT);
+    gpio_pull_up(IRMP_BIT);
 
 #elif defined (TEENSY_ARM_CORTEX_M4)                                    // TEENSY
     pinMode(IRMP_PIN, INPUT);

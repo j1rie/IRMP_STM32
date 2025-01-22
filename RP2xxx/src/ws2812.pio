@@ -6,10 +6,13 @@
 
 .program ws2812
 .side_set 2
+; The following constants are selected for broad compatibility with WS2812,
+; WS2812B, and SK6812 LEDs. Other constants may support higher bandwidths for
+; specific LEDs, such as (7,10,8) for WS2812B LEDs.
 
 .define public T1 3
 .define public T2 3
-.define public T3 3
+.define public T3 4
 
 .wrap_target
 bitloop:
