@@ -1,8 +1,8 @@
 ## IRMP on RP2xxx
 
 <img src="https://www.vdr-portal.de/index.php?attachment/48154-20230825-130009-jpg" width="33%"> [1]  
-[Receiver inside thin client](https://www.vdr-portal.de/index.php?attachment/49235-ir-sensor-1-jpg) [2]  
-[Receiver inside thin client](https://www.vdr-portal.de/index.php?attachment/49236-ir-sensor-2-jpg) [2]
+<img src="https://www.vdr-portal.de/index.php?attachment/49235-ir-sensor-1-jpg" width="100%">
+<img src="https://www.vdr-portal.de/index.php?attachment/49236-ir-sensor-2-jpg" width="60%"> [2]  
 
 For boards with the RP2xxx, e.g. the Raspberry Pi Pico, Pico2 and many others.  
 This is additional information, basic information in https://github.com/j1rie/IRMP_STM32#readme.
@@ -22,9 +22,8 @@ https://www.mikrocontroller.net/articles/IRMP_auf_STM32_%E2%80%93_stark_vereinfa
 
 ## Emulated Eeprom
 Any configuration made by one of the configuration programs goes first into cache only. To permanently save
-these changes  to flash, you have to do an eeprom commit.
+these changes  to flash, you have to do an eeprom commit. This applies to macros and multiple wakeups.
 Exception: the first wakeup is committed by the firmware for backward compatibility.
-This applies to macros and multiple wakeups.
 
 ## Building from source
 See [Getting Started with the Raspberry Pi Pico](https://rptl.io/pico-get-started)  
@@ -46,6 +45,20 @@ One way is to cut the copper on the pcb:
 The pico(2) has a regular LED, the one and the zero have an RGB LED, and the XIAO-RP2350 has an RGBW LED.
 An external LED or RGB LED can be connected.
 They show what is happening inside the firmware.
+
+| Receiver              | RGB-LED                                       |
+|-----------------------|-----------------------------------------------|
+| disconnected          | off                                           |
+| USB resumed           | white (or custom)                             |
+| USB suspended         | orange                                        |
+| IR reception          | flickers blue                                 |
+| save wakeup           | flashes red quickly                           |
+| Wakeup                | flashes red quickly                           |
+| Reboot                | flashes red quickly                           |
+| Send IR               | short yellow                                  |
+| VDR running           | red                                           |
+| VDR recording         | flashes red according to number of recordings |
+| configuration command | short green                                   |
 
 Then there is the Status LED (controlled over hidraw), which shows status messages from the vdr-plugin-statusleds and blinks on power-on, storage of first wakeup and reboot.
 

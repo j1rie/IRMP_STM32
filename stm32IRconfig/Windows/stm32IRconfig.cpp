@@ -1,7 +1,7 @@
 /**********************************************************************************************************
 	stm32IRconfig: configure and monitor IRMP_STM32
 
-	Copyright (C) 2014-2023 Joerg Riechardt
+	Copyright (C) 2014-2024 Joerg Riechardt
 
 	based on work by Alan Ott
 	Copyright 2010  Alan Ott
@@ -45,7 +45,9 @@ enum command {
 	CMD_REBOOT,
 	CMD_EEPROM_RESET,
 	CMD_EEPROM_COMMIT,
-	CMD_EEPROM_GET_RAW
+	CMD_EEPROM_GET_RAW,
+	CMD_STATUSLED,
+	CMD_NEOPIXEL,
 };
 
 enum status {
@@ -59,6 +61,22 @@ enum report_id {
 	REPORT_ID_CONFIG_IN = 2,
 	REPORT_ID_CONFIG_OUT = 3
 };
+
+enum color {
+	red,
+	green,
+	blue,
+	yellow,
+	white,
+	off,
+	custom,
+	strong_red,
+	orange,
+	purple,
+	strong_white
+};
+
+#define NUM_PIXELS 64
 
 hid_device *handle;
 uint8_t inBuf[64];
@@ -122,7 +140,7 @@ void write_and_check(int idx, int show_len) {
 int main(int argc, char* argv[])
 {
 	uint64_t i;
-	char c, d;
+	char c, d, e;
 	uint8_t l, idx;
 	int8_t k;
 	unsigned int s, m;
@@ -194,20 +212,20 @@ int main(int argc, char* argv[])
 		printf("old firmware!\n");
 	puts("");
 
-cont:	printf("set: wakeups, macros, alarm and commit(s)\nset by remote: wakeups and macros(q)\nget: wakeups, macros, alarm, capabilities and raw eeprom from RP2xxx (g)\nreset: wakeups, macros, alarm and eeprom (r)\nsend IR (i)\nreboot (b)\nmonitor until ^C (m)\nrun test (t)\nhid test (h)\nexit (x)\n");
+cont:	printf("set: wakeups, macros, alarm, commit on RP2xxx, statusled and neopixel(s)\nset by remote: wakeups and macros(q)\nget: wakeups, macros, alarm, capabilities and raw eeprom from RP2xxx (g)\nreset: wakeups, macros, alarm and eeprom (r)\nsend IR (i)\nreboot (b)\nmonitor until ^C (m)\nrun test (t)\nhid test (h)\nneopixel test (n)\nexit (x)\n");
 	scanf("%s", &c);
 
 	switch (c) {
 
 	case 's':
-set:		printf("set wakeup(w)\nset macro(m)\nset alarm(a)\ncommit(c)\n");
+set:		printf("set wakeup(w)\nset macro(m)\nset alarm(a)\ncommit on RP2xxx(c)\nstatusled(s)\nneopixel(n)\n");
 		scanf("%s", &d);
 		memset(&outBuf[2], 0, sizeof(outBuf) - 2);
 		idx = 2;
 		outBuf[idx++] = ACC_SET;
 		switch (d) {
 		case 'w':
-			printf("enter slot number (starting with 0)\n");
+			printf("enter wakeup number (starting with 0)\n");
 			scanf("%u", &s);
 			outBuf[idx++] = CMD_WAKE;
 			outBuf[idx++] = s;    // (s+1)-th slot
@@ -251,6 +269,100 @@ set:		printf("set wakeup(w)\nset macro(m)\nset alarm(a)\ncommit(c)\n");
 			outBuf[idx++] = CMD_EEPROM_COMMIT;
 			write_and_check(idx, 4);
 			break;
+		case 's':
+			outBuf[idx++] = CMD_STATUSLED;
+			printf("enter 1 for on, 0 for off\n");
+			scanf("%u", &s);
+			outBuf[idx++] = s;
+			write_and_check(idx, 4);
+			break;
+		case 'n':
+			outBuf[idx++] = CMD_NEOPIXEL;
+			printf("enter led number (starting with 1)\n");
+			scanf("%u", &s);
+			outBuf[idx++] = 3 * s;
+			outBuf[idx++] = (s - 1) / 19;
+			outBuf[idx++] = 3 * ((s - 1) % 19) + 1;
+			idx += 3 * ((s - 1) % 19);
+color: printf("red(r)\ngreen(g)\nblue(b)\nyellow(y)\nwhite(w)\noff(o)\ncustom(c)\nstrong_red(s)\norange(a)\npurple(p)\nstrong_white(x)\n");
+			scanf("%s", &e);
+			switch (e) {
+			case 'r':
+				outBuf[idx++] = 3;
+				outBuf[idx++] = 0;
+				outBuf[idx++] = 0;
+				write_and_check(idx, 4);
+				break;
+			case 'g':
+				outBuf[idx++] = 0;
+				outBuf[idx++] = 4;
+				outBuf[idx++] = 0;
+				write_and_check(idx, 4);
+				break;
+			case 'b':
+				outBuf[idx++] = 0;
+				outBuf[idx++] = 0;
+				outBuf[idx++] = 12;
+				write_and_check(idx, 4);
+				break;
+			case 'y':
+				outBuf[idx++] = 4;
+				outBuf[idx++] = 2;
+				outBuf[idx++] = 0;
+				write_and_check(idx, 4);
+				break;
+			case 'w':
+				outBuf[idx++] = 3;
+				outBuf[idx++] = 3;
+				outBuf[idx++] = 2;
+				write_and_check(idx, 4);
+				break;
+			case 'o':
+				outBuf[idx++] = 0;
+				outBuf[idx++] = 0;
+				outBuf[idx++] = 0;
+				write_and_check(idx, 4);
+				break;
+			case 'c':
+				printf("enter red in hex\n");
+				scanf("%u", &s);
+				outBuf[idx++] = s;
+				printf("enter green in hex\n");
+				scanf("%u", &s);
+				outBuf[idx++] = s;
+				printf("enter blue in hex\n");
+				scanf("%u", &s);
+				outBuf[idx++] = s;
+				write_and_check(idx, 4);
+				break;
+			case 's':
+				outBuf[idx++] = 255;
+				outBuf[idx++] = 0;
+				outBuf[idx++] = 0;
+				write_and_check(idx, 4);
+				break;
+			case 'a':
+				outBuf[idx++] = 8;
+				outBuf[idx++] = 2;
+				outBuf[idx++] = 0;
+				write_and_check(idx, 4);
+				break;
+			case 'p':
+				outBuf[idx++] = 8;
+				outBuf[idx++] = 0;
+				outBuf[idx++] = 8;
+				write_and_check(idx, 4);
+				break;
+			case 'x':
+				outBuf[idx++] = 255;
+				outBuf[idx++] = 255;
+				outBuf[idx++] = 255;
+				write_and_check(idx, 4);
+				break;
+			default:
+				goto color;
+			}
+			break;
 		default:
 			goto set;
 		}
@@ -264,7 +376,7 @@ Set:		printf("set wakeup with remote control(w)\nset macro with remote control(m
 		outBuf[idx++] = ACC_SET;
 		switch (d) {
 		case 'w':
-			printf("enter slot number (starting with 0)\n");
+			printf("enter wakeup number (starting with 0)\n");
 			scanf("%u", &s);
 			outBuf[idx++] = CMD_WAKE;
 			outBuf[idx++] = s;    // (s+1)-th slot
@@ -286,7 +398,7 @@ Set:		printf("set wakeup with remote control(w)\nset macro with remote control(m
 		/* it is necessary, to have *all* IR codes received, *before* calling
 		* write_and_check(), in order to avoid, that these disturb later! */
 		#ifdef WIN32
-		Sleep(500); 
+		Sleep(500);
 		#else
 		usleep(500000);
 		#endif
@@ -300,14 +412,14 @@ Set:		printf("set wakeup with remote control(w)\nset macro with remote control(m
 		break;
 
 	case 'g':
-get:		printf("get wakeup(w)\nget macro slot(m)\nget caps(c)\nget alarm(a)\nget raw eeprom from RP2xxx(p)\n");
+get:		printf("get wakeup(w)\nget macro(m)\nget caps(c)\nget alarm(a)\nget raw eeprom from RP2xxx(p)\n");
 		scanf("%s", &d);
 		memset(&outBuf[2], 0, sizeof(outBuf) - 2);
 		idx = 2;
 		outBuf[idx++] = ACC_GET;
 		switch (d) {
 		case 'w':
-			printf("enter slot number (starting with 0)\n");
+			printf("enter wakeup number (starting with 0)\n");
 			scanf("%u", &s);
 			outBuf[idx++] = CMD_WAKE;
 			outBuf[idx++] = s;    // (s+1)-th slot
@@ -342,9 +454,9 @@ get:		printf("get wakeup(w)\nget macro slot(m)\nget caps(c)\nget alarm(a)\nget r
 				while (inBuf[0] == 0x01)
 					read_stm32(in_size, l == 0 ? 9 : in_size);
 				if (!l) { // first query for slots and depth
-					printf("macro_slots: %u\n", inBuf[4]);
+					printf("number of macros: %u\n", inBuf[4]);
 					printf("macro_depth: %u\n", inBuf[5]);
-					printf("wakeup_slots: %u\n", inBuf[6]);
+					printf("number of wakeups: %u\n", inBuf[6]);
 					printf("hid in report count: %u\n", inBuf[7]);
 					printf("hid out report count: %u\n", inBuf[8]);
 				} else {
@@ -389,7 +501,7 @@ again:			;
 					if (retValm < 0) {
 						printf("read error\n");
 					} else {
-						for (int i = 4; i < 36; i++)
+						for (int i = 4; i < 36; i++) // 32
 							printf("%02x ", inBuf[i]);
 					}
 				}
@@ -477,6 +589,66 @@ reset:		printf("reset wakeup(w)\nreset macro slot(m)\nreset alarm(a)\nreset eepr
 
 	case 'm':
 		goto monit;
+		break;
+
+	case 'n':
+		memset(&outBuf[2], 0, sizeof(outBuf) - 2);
+		idx = 2;
+		outBuf[idx++] = ACC_SET;
+		outBuf[idx++] = CMD_NEOPIXEL;
+		outBuf[idx++] = NUM_PIXELS * 3;
+		for (m = 0; m < 3; m++) {
+			for (s = 0; s < (NUM_PIXELS + 18) / 19; s++) {
+				idx = 5;
+				outBuf[idx++] = s; // chunk s
+				outBuf[idx++] = 0;
+				for (i = 0; i < 19; i++) {
+					if (s * 19 + i < NUM_PIXELS) {
+						outBuf[idx++] = s * 19 + i;
+						outBuf[idx++] = 64 - s * 19 - i;
+						outBuf[idx++] = 0;
+					}
+				}
+				write_and_check(idx, 4);
+			}
+		#ifdef WIN32
+		Sleep(500);
+		#else
+
+			usleep(1000000);
+#endif
+			for (s = 0; s < (NUM_PIXELS + 18) / 19; s++) {
+				idx = 5;
+				outBuf[idx++] = s; // chunk s
+				outBuf[idx++] = 0;
+				for (i = 0; i < 19; i++) {
+					if (s * 19 + i < NUM_PIXELS) {
+						outBuf[idx++] = 64 - s * 19 - i;
+						outBuf[idx++] = s * 19 + i;
+						outBuf[idx++] = 0;
+					}
+				}
+				write_and_check(idx, 4);
+			}
+		#ifdef WIN32
+		Sleep(500);
+		#else
+			usleep(1000000);
+#endif
+		}
+		for (s = 0; s < (NUM_PIXELS + 18) / 19; s++) {
+			idx = 5;
+			outBuf[idx++] = s; // chunk s
+			outBuf[idx++] = 0;
+			for (i = 0; i < 19; i++) {
+				if (s * 19 + i < NUM_PIXELS) {
+					outBuf[idx++] = 0;
+					outBuf[idx++] = 0;
+					outBuf[idx++] = 0;
+				}
+			}
+			write_and_check(idx, 4);
+		}
 		break;
 
 	case 't':

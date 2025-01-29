@@ -41,7 +41,7 @@
 #define WS2812_PIN		16 /* GPIO 16 (Pico(2) Pin 21) */
 #endif
 /* it seems, pio pins need to be consecutive
- * does this work with USB Erratum RP2040-E5? otherwise choose 17 (but that's only a solder point on Zero and One
+ * does this work with USB Erratum RP2040-E5? otherwise choose 17 (but that's only a solder point on Zero and One)
  */
 #define WS2812_PIN_2		WS2812_PIN - 1  /* GPIO 15  (Pico(2) Pin 20, One+Zero Pin 15) */
 #define NUM_PIXELS		64

@@ -26,10 +26,25 @@
 #define REPORT_ID_CONFIG_IN	0x02
 #define REPORT_ID_CONFIG_OUT	0x03
 
+enum color {
+	red,
+	green,
+	blue,
+	yellow,
+	white,
+	off,
+	custom,
+	strong_red,
+	orange,
+	purple,
+	strong_white
+};
+
 //extern uint8_t buf[BUFFER_SIZE];
 extern uint8_t *bufptr;
 extern volatile uint8_t USB_HID_Data_Received;
 extern volatile uint8_t PrevXferComplete;
+extern volatile uint8_t usb_state_color;
 
 extern void USB_HID_SendData(uint8_t Report_ID, uint8_t *ptr, uint8_t len);
 extern void tud_hid_set_report_cb(uint8_t itf, uint8_t report_id, hid_report_type_t report_type, uint8_t const* buffer, uint16_t bufsize);

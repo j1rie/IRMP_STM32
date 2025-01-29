@@ -62,7 +62,13 @@ enum color {
 	green,
 	blue,
 	yellow,
-	white
+	white,
+	off,
+	custom,
+	strong_red,
+	orange,
+	purple,
+	strong_white
 };
 
 #define NUM_PIXELS 64
@@ -261,7 +267,7 @@ set:		printf("set wakeup(w)\nset macro(m)\nset alarm(a)\ncommit on RP2xxx(c)\nst
 			outBuf[idx++] = (s - 1) / 19;
 			outBuf[idx++] = 3 * ((s - 1) % 19) + 1;
 			idx += 3 * ((s - 1) % 19);
-color: printf("red(r)\ngreen(g)\nblue(b)\nyellow(y)\nwhite(w)\noff(o)\ncustom(c)\n");
+color: printf("red(r)\ngreen(g)\nblue(b)\nyellow(y)\nwhite(w)\noff(o)\ncustom(c)\nstrong_red(s)\norange(a)\npurple(p)\nstrong_white(x)\n");
 			scanf("%s", &e);
 			switch (e) {
 			case 'r':
@@ -310,6 +316,30 @@ color: printf("red(r)\ngreen(g)\nblue(b)\nyellow(y)\nwhite(w)\noff(o)\ncustom(c)
 				printf("enter blue in hex\n");
 				scanf("%" SCNx8 "", &s);
 				outBuf[idx++] = s;
+				write_and_check(idx, 4);
+				break;
+			case 's':
+				outBuf[idx++] = 255;
+				outBuf[idx++] = 0;
+				outBuf[idx++] = 0;
+				write_and_check(idx, 4);
+				break;
+			case 'a':
+				outBuf[idx++] = 8;
+				outBuf[idx++] = 2;
+				outBuf[idx++] = 0;
+				write_and_check(idx, 4);
+				break;
+			case 'p':
+				outBuf[idx++] = 8;
+				outBuf[idx++] = 0;
+				outBuf[idx++] = 8;
+				write_and_check(idx, 4);
+				break;
+			case 'x':
+				outBuf[idx++] = 255;
+				outBuf[idx++] = 255;
+				outBuf[idx++] = 255;
 				write_and_check(idx, 4);
 				break;
 			default:

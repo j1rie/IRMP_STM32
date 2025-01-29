@@ -14,6 +14,7 @@ uint8_t *bufptr; // maybe copying the data into buf would be better? but using t
 
 volatile uint8_t USB_HID_Data_Received = 0;
 volatile uint8_t PrevXferComplete = 1;
+volatile uint8_t usb_state_color = off;
 
 void USB_HID_SendData(uint8_t Report_ID, uint8_t *ptr, uint8_t len)
 {
@@ -35,10 +36,21 @@ void USB_HID_SendData(uint8_t Report_ID, uint8_t *ptr, uint8_t len)
 	PrevXferComplete = 0;
 }
 
+void tud_mount_cb(void)
+{
+  usb_state_color = custom; // nötig?
+}
+
 void tud_suspend_cb(bool remote_wakeup_en)
 {
   (void) remote_wakeup_en;
   PrevXferComplete = 1;
+  usb_state_color = orange;
+}
+
+void tud_resume_cb(void)
+{
+  usb_state_color = custom;
 }
 
 void tud_hid_report_complete_cb(uint8_t instance, uint8_t const* report, uint16_t len)
