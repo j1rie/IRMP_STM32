@@ -212,7 +212,7 @@ set:		printf("set wakeup(w)\nset macro(m)\nset alarm(a)\ncommit on RP2xxx(c)\nst
 			printf("enter wakeup number (starting with 0)\n");
 			scanf("%" SCNx8 "", &s);
 			outBuf[idx++] = CMD_WAKE;
-			outBuf[idx++] = s;    // (s+1)-th slot
+			outBuf[idx++] = s;
 			printf("enter IRData (protocoladdresscommandflag)\n");
 			scanf("%" SCNx64 "", &i);
 			outBuf[idx++] = (i>>40) & 0xFF;
@@ -361,13 +361,13 @@ Set:		printf("set wakeup with remote control(w)\nset macro with remote control(m
 		case 'w':
 			printf("enter wakeup number (starting with 0)\n");
 			scanf("%" SCNx8 "", &s);
-			outBuf[idx++] = CMD_WAKE;
+			outBuf[idx++] = CMD_WAKE_REMOTE;
 			outBuf[idx++] = s;    // (s+1)-th slot
 			break;
 		case 'm':
 			printf("enter macro number (starting with 0)\n");
 			scanf("%" SCNx8 "", &m);
-			outBuf[idx++] = CMD_MACRO;
+			outBuf[idx++] = CMD_MACRO_REMOTE;
 			outBuf[idx++] = m;    // (m+1)-th macro
 			printf("enter slot number, 0 for trigger\n");
 			scanf("%" SCNx8 "", &s);

@@ -228,7 +228,7 @@ set:		printf("set wakeup(w)\nset macro(m)\nset alarm(a)\ncommit on RP2xxx(c)\nst
 			printf("enter wakeup number (starting with 0)\n");
 			scanf("%u", &s);
 			outBuf[idx++] = CMD_WAKE;
-			outBuf[idx++] = s;    // (s+1)-th slot
+			outBuf[idx++] = s;
 			printf("enter IRData (protocoladdresscommandflag)\n");
 			scanf("%llx", &i);
 			outBuf[idx++] = (i>>40) & 0xFF;
@@ -378,13 +378,13 @@ Set:		printf("set wakeup with remote control(w)\nset macro with remote control(m
 		case 'w':
 			printf("enter wakeup number (starting with 0)\n");
 			scanf("%u", &s);
-			outBuf[idx++] = CMD_WAKE;
-			outBuf[idx++] = s;    // (s+1)-th slot
+			outBuf[idx++] = CMD_WAKE_REMOTE;
+			outBuf[idx++] = s;
 			break;
 		case 'm':
 			printf("enter macro number (starting with 0)\n");
 			scanf("%u", &m);
-			outBuf[idx++] = CMD_MACRO;
+			outBuf[idx++] = CMD_MACRO_REMOTE;
 			outBuf[idx++] = m;    // (m+1)-th macro
 			printf("enter slot number, 0 for trigger\n");
 			scanf("%u", &s);
@@ -422,7 +422,7 @@ get:		printf("get wakeup(w)\nget macro(m)\nget caps(c)\nget alarm(a)\nget raw ee
 			printf("enter wakeup number (starting with 0)\n");
 			scanf("%u", &s);
 			outBuf[idx++] = CMD_WAKE;
-			outBuf[idx++] = s;    // (s+1)-th slot
+			outBuf[idx++] = s;
 			write_and_check(idx, 10);
 			break;
 		case 'm':
@@ -525,7 +525,7 @@ reset:		printf("reset wakeup(w)\nreset macro slot(m)\nreset alarm(a)\nreset eepr
 			printf("enter slot number (starting with 0)\n");
 			scanf("%u", &s);
 			outBuf[idx++] = CMD_WAKE;
-			outBuf[idx++] = s;    // (s+1)-th slot
+			outBuf[idx++] = s;
 			break;
 		case 'm':
 			printf("enter macro number (starting with 0)\n");
@@ -611,12 +611,11 @@ reset:		printf("reset wakeup(w)\nreset macro slot(m)\nreset alarm(a)\nreset eepr
 				}
 				write_and_check(idx, 4);
 			}
-		#ifdef WIN32
-		Sleep(500);
-		#else
-
+			#ifdef WIN32
+			Sleep(1000);
+			#else
 			usleep(1000000);
-#endif
+			#endif
 			for (s = 0; s < (NUM_PIXELS + 18) / 19; s++) {
 				idx = 5;
 				outBuf[idx++] = s; // chunk s
@@ -630,11 +629,11 @@ reset:		printf("reset wakeup(w)\nreset macro slot(m)\nreset alarm(a)\nreset eepr
 				}
 				write_and_check(idx, 4);
 			}
-		#ifdef WIN32
-		Sleep(500);
-		#else
+			#ifdef WIN32
+			Sleep(1000);
+			#else
 			usleep(1000000);
-#endif
+			#endif
 		}
 		for (s = 0; s < (NUM_PIXELS + 18) / 19; s++) {
 			idx = 5;
