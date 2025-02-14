@@ -64,6 +64,9 @@ Diese zeigen an, was in der Firmware passiert.
 
 Dann gibt es noch die Status LED (über hidraw angesteuert), die den Status des vdr-plugin-statusleds anzeigt und beim Einschalten, beim Speichern des ersten Wakeups und bei Reboot blinkt.
 
+## Externe RGB-LEDs
+Es wird empfohlen, zwei Widerstände im Datenkabel zu verwenden, siehe http://stefanfrings.de/ws2812/.
+
 ##
  \
 [1] Waveshare RP2040-One mit TSOP von clausmuus, siehe https://www.vdr-portal.de/forum/index.php?thread/123572-irmp-auf-stm32-ein-usb-ir-empf%C3%A4nger-sender-einschalter-mit-wakeup-timer/&postID=1361220#post1361220  
