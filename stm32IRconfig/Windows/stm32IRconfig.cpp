@@ -378,13 +378,13 @@ Set:		printf("set wakeup with remote control(w)\nset macro with remote control(m
 		case 'w':
 			printf("enter wakeup number (starting with 0)\n");
 			scanf("%u", &s);
-			outBuf[idx++] = CMD_WAKE_REMOTE;
+			outBuf[idx++] = CMD_WAKE;
 			outBuf[idx++] = s;
 			break;
 		case 'm':
 			printf("enter macro number (starting with 0)\n");
 			scanf("%u", &m);
-			outBuf[idx++] = CMD_MACRO_REMOTE;
+			outBuf[idx++] = CMD_MACRO;
 			outBuf[idx++] = m;    // (m+1)-th macro
 			printf("enter slot number, 0 for trigger\n");
 			scanf("%u", &s);
