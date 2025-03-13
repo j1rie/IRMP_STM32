@@ -1802,7 +1802,7 @@ MainWindow::onSendIR(FXObject *sender, FXSelector sel, void *ptr)
 long
 MainWindow::onUpgrade(FXObject *sender, FXSelector sel, void *ptr)
 {
-	if(uC != "RP2xxx"){
+	//if(uC != "RP2xxx"){
 		const FXchar patterns[]="All Files (*)\nFirmware Files (*.bin)";
 		FXString s, v, Filename, FilenameText;
 		FXFileDialog open(this,"Open a firmware file");
@@ -1824,11 +1824,14 @@ MainWindow::onUpgrade(FXObject *sender, FXSelector sel, void *ptr)
 			sprintf(firmwarefile, "%s", mbstring.text());
 #endif
 
+			if(uC == "STM32"){
 			doUpgrade.set_firmwarefile(firmwarefile);
 			doUpgrade.set_print(print);
 			doUpgrade.set_printcollect(printcollect);
 			doUpgrade.set_signal(guisignal);
+			doUpgrade.set_RP2xxx_device(false);
 			doUpgrade.start();
+			}
 
 			cur_item = device_list->getCurrentItem();
 			num_devices_before_upgrade = device_list->getNumItems();
@@ -1837,8 +1840,17 @@ MainWindow::onUpgrade(FXObject *sender, FXSelector sel, void *ptr)
 			if(connected_device)
 				Write_and_Check(4, 4);
 			onDisconnect(NULL, 0, NULL);
+
+			if(uC == "RP2xxx"){
+			doUpgrade.set_firmwarefile(firmwarefile);
+			doUpgrade.set_print(print);
+			doUpgrade.set_printcollect(printcollect);
+			doUpgrade.set_signal(guisignal);
+			doUpgrade.set_RP2xxx_device(true);
+			doUpgrade.start();
+			}
 		}
-	} else {
+	/*} else {
 		if(MBOX_CLICKED_OK==FXMessageBox::information(this, MBOX_OK_CANCEL, "Firmware upgrade", "Switch the Pico into mass storage device mode.\nIn your file manager than drag and drop the firmware file *.uf2 onto the newly appeared mass storage device.\nThan press buttons 'Re-Scan devices' and 'Connect'.")){
 			FXString s;
 			s.format("%x %x %x %x", REPORT_ID_CONFIG_OUT, STAT_CMD, ACC_SET, CMD_REBOOT);
@@ -1847,7 +1859,7 @@ MainWindow::onUpgrade(FXObject *sender, FXSelector sel, void *ptr)
 			FXThread::sleep(1000000000); // 1 s
 			onRescan(NULL, 0, NULL);
 		}
-	}
+	}*/
 
 	return 1;
 }

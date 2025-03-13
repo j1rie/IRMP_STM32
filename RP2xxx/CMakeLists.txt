@@ -58,3 +58,5 @@ add_dependencies(timestamp clear_cache)
 #message(STATUS "BUILD_TIME=${BUILD_TIME}")
 #message(STATUS "IRMP_VERSION=${IRMP_VERSION}")
 message(STATUS "FW_STR=${FW_STR}")
+
+target_compile_definitions(${PROJECT_NAME} PUBLIC PICO_USE_FASTEST_SUPPORTED_CLOCK=1)

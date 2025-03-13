@@ -30,7 +30,7 @@
 
 #define LOAD_ADDRESS 0x8002000
 
-int upgrade(const char* firmwarefile, char* print, char* printcollect, FXGUISignal* guisignal);
+int upgrade(const char* firmwarefile, char* print, char* printcollect, FXGUISignal* guisignal, bool RP2xxx_device);
 
 void Upgrade::set_firmwarefile(const char* pfirmwarefile) {
 	firmwarefile = pfirmwarefile;
@@ -48,8 +48,12 @@ void Upgrade::set_signal(FXGUISignal* pguisignal) {
 	guisignal = pguisignal;
 }
 
+void Upgrade::set_RP2xxx_device(bool pRP2xxx_device) {
+	RP2xxx_device = pRP2xxx_device;
+}
+
 FXint Upgrade::run() {
-	upgrade(firmwarefile, print, printcollect, guisignal);
+	upgrade(firmwarefile, print, printcollect, guisignal, RP2xxx_device);
   return 0;
 }
 
@@ -180,8 +184,10 @@ uint8_t * get_firmware(const char *firmwarefile, int *firmwareSize, char* print)
 	return fw_buf;
 }
 
-int upgrade(const char* firmwarefile, char* print, char* printcollect, FXGUISignal* guisignal)
+int upgrade(const char* firmwarefile, char* print, char* printcollect, FXGUISignal* guisignal, bool RP2xxx_device)
 {
+	if (RP2xxx_device) goto RP2xxx;
+	printf("STM32\n");
 	struct libusb_device *dev;
 	libusb_device_handle *handle;
 	int state;
@@ -276,6 +282,33 @@ retry:
 
 	printf("=== Firmware Upgrade successful! ===\n");
 	fflush(stdout);
+	sprintf(print, "=== Firmware Upgrade successful! ===\n");
+	strcat(printcollect, print);
+	guisignal->signal();
+
+	return 1;
+
+RP2xxx:
+	printf("RP2xxx\n");
+#ifdef WIN32
+	Sleep(2000);
+#else
+	usleep(2000000);
+#endif
+
+	sprintf(print, "/usr/local/bin/picotool load -v -x %s", firmwarefile);
+	strcat(printcollect, print);
+	guisignal->signal();
+
+	int status = system(print);
+	printf("status: %d\n", status);
+	if (status != 0) return 0;
+
+	sprintf(print, "\n");
+	strcat(printcollect, print);
+	guisignal->signal();
+
+
 	sprintf(print, "=== Firmware Upgrade successful! ===\n");
 	strcat(printcollect, print);
 	guisignal->signal();

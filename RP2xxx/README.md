@@ -14,6 +14,9 @@ Drag and drop the firmware.uf2 file onto it. The device will reboot and start as
 
 Sending the "reboot" command will also put the device into mass storage mode.
 
+If there is already an older firmware on the device, stm32IRconfig - b will put the device into mass storage mode, and
+picotool load -v -x firmware.uf2 will flash the firmware, verify and start it.
+
 ## First test
 Press the BOOTSEL button in suspend mode, and the PC should wake up.  
 For wiring see https://www.mikrocontroller.net/articles/IRMP_auf_STM32_-_Bauanleitung#Minimalistic_assembly_for_experienced_users  

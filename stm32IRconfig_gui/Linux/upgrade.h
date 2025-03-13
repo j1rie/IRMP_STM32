@@ -12,11 +12,13 @@ private:
 	char* print{NULL};
 	char* printcollect{NULL};
 	FXGUISignal* guisignal{NULL};
+	bool RP2xxx_device;
 public:
 	void set_firmwarefile(const char* pfirmwarefile);
 	void set_print(char* pprint);
 	void set_printcollect(char* pprintcollect);
 	void set_signal(FXGUISignal* pguisignal);
+	void set_RP2xxx_device(bool pRP2xxx_device);
 	FXint run();
 };
 

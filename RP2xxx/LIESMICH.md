@@ -15,6 +15,9 @@ Ziehen Sie die Datei firmware.uf2 per Drag & Drop auf den Massenspeicher. Das Ge
 
 Durch das Senden des Befehls „reboot“ wird das Gerät ebenfalls in den Massenspeichermodus versetzt.
 
+Wenn sich bereits eine ältere Firmware auf dem Gerät befindet, versetzt stm32IRconfig - b das Gerät in den Massenspeichermodus, und
+picotool load -v -x firmware.uf2 flasht die Firmware, verifiziert und startet sie.
+
 ## Erster Test
 Drücken Sie im Suspend-Modus die BOOTSEL-Taste, und der PC sollte aufwachen.  
 Für die Verkabelung siehe https://www.mikrocontroller.net/articles/IRMP_auf_STM32_-_Bauanleitung#Minimalistic_assembly_for_experienced_users  
