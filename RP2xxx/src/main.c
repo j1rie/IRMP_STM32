@@ -274,6 +274,10 @@ void set_rgb_led(enum color led_color, bool store)
 {
 	if (custom_pixel[0] == 0 && custom_pixel[1] == 0 && custom_pixel[2] == 0) // if off, stay off
 		return;
+#ifdef SEEED_XIAO_RP2350
+	if (led_color != off && gpio_get(PICO_DEFAULT_WS2812_POWER_PIN) == 0)
+		gpio_put(PICO_DEFAULT_WS2812_POWER_PIN, 1);
+#endif
 	switch (led_color) {
 	case red:
 		put_pixel(3,0,0);
@@ -295,9 +299,6 @@ void set_rgb_led(enum color led_color, bool store)
 		break;
 	case off:
 		put_pixel(0,0,0);
-#ifdef SEEED_XIAO_RP2350
-	 gpio_put(PICO_DEFAULT_WS2812_POWER_PIN, 0);
-#endif
 		break;
 	case custom:
 		put_pixel(custom_pixel[0],custom_pixel[1],custom_pixel[2]);
@@ -570,8 +571,13 @@ int8_t set_handler(uint8_t *buf)
 			if (idx >= buf[4] - 1) { // reached last led
 				for (int n = 0; n < NUM_PIXELS * 3; n += 3)
 					put_pixel(pixel[n], pixel[n + 1], pixel[n + 2]);
-				if (cpy_flag)
+				if (cpy_flag) {
 					memcpy(custom_pixel, pixel, 3); // save color and restore it after blink_LED(), etc
+#ifdef SEEED_XIAO_RP2350
+					if (custom_pixel[0] == 0 && custom_pixel[1] == 0 && custom_pixel[2] == 0)
+						gpio_put(PICO_DEFAULT_WS2812_POWER_PIN, 0);
+#endif
+				}
 			}
 		}
 		break;
