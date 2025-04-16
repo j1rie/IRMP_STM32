@@ -49,19 +49,21 @@ The pico(2) has a regular LED, the one and the zero have an RGB LED, and the XIA
 An external LED or RGB LED can be connected.
 They show what is happening inside the firmware.
 
-| Receiver              | RGB-LED                                       |
-|-----------------------|-----------------------------------------------|
-| disconnected          | off                                           |
-| USB resumed           | white (or custom)                             |
-| USB suspended         | orange                                        |
-| IR reception          | flickers blue                                 |
-| save wakeup           | flashes red quickly                           |
-| Wakeup                | flashes red quickly                           |
-| Reboot                | flashes red quickly                           |
-| Send IR               | short yellow                                  |
-| VDR running           | red                                           |
-| VDR recording         | flashes red according to number of recordings |
-| configuration command | short green                                   |
+| Receiver              | RGB-LED                                          |
+|-----------------------|--------------------------------------------------|
+| disconnected          | off                                              |
+| USB resumed           | white (or custom)                                |
+| USB suspended         | orange                                           |
+| IR reception          | flickers blue                                    |
+| save wakeup           | flashes red quickly                              |
+| Wakeup                | flashes red quickly                              |
+| Reboot                | flashes red quickly                              |
+| Send IR               | short yellow                                     |
+| VDR running           | red(*)                                           |
+| VDR recording         | flashes red according to number of recordings(*) |
+| configuration command | short green                                      |
+
+(*) needs vdr-plugin-statusled [3]
 
 Then there is the Status LED (controlled over hidraw), which shows status messages from the vdr-plugin-statusleds and blinks on power-on, storage of first wakeup and reboot.
 
@@ -72,3 +74,4 @@ It is recommended to use two resistors in the data cable, see http://stefanfring
   \
 [1] Waveshare RP2040-One with TSOP by clausmuus, see https://www.vdr-portal.de/forum/index.php?thread/123572-irmp-auf-stm32-ein-usb-ir-empf%C3%A4nger-sender-einschalter-mit-wakeup-timer/&postID=1361220#post1361220  
 [2] Waveshare RP2040-One with TSOP by FireFly, see https://www.vdr-portal.de/forum/index.php?thread/132289-irmp-auf-stm32-ein-usb-hid-keyboard-ir-empf%C3%A4nger-sender-einschalter-mit-wakeup-t/&postID=1371419#post1371419
+[3] https://github.com/j1rie/vdr-plugin-statusleds

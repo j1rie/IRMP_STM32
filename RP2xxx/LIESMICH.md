@@ -51,19 +51,21 @@ Der Pico(2) hat eine normale LED, der One und der Zero haben eine RGB LED, und d
 Zusätzlich kann eine externe LED oder RGB LED angeschlossen werden.
 Diese zeigen an, was in der Firmware passiert.
 
-| Empfänger             |  RGB-LED                                  |
-|-----------------------|-------------------------------------------|
-| stromlos              |  aus                                      |
-| USB eingehängt        |  weiß (oder custom)                       |
-| USB suspend           |  orange                                   |
-| IR Empfang            |  flackert blau                            |
-| Wakeup speichern      |  blinkt schnell rot                       |
-| Wakeup                |  blinkt schnell rot                       |
-| Reboot                |  blinkt schnell rot                       |
-| IR senden             |  kurz gelb                                |
-| VDR läuft             |  rot                                      |
-| VDR nimmt auf         |  blinkt rot entsprechend Anzahl Aufnahmen |
-| Konfigurationsbefehl  |  kurz grün                                |
+| Empfänger             |  RGB-LED                                     |
+|-----------------------|----------------------------------------------|
+| stromlos              |  aus                                         |
+| USB eingehängt        |  weiß (oder custom)                          |
+| USB suspend           |  orange                                      |
+| IR Empfang            |  flackert blau                               |
+| Wakeup speichern      |  blinkt schnell rot                          |
+| Wakeup                |  blinkt schnell rot                          |
+| Reboot                |  blinkt schnell rot                          |
+| IR senden             |  kurz gelb                                   |
+| VDR läuft             |  rot(*)                                      |
+| VDR nimmt auf         |  blinkt rot entsprechend Anzahl Aufnahmen(*) |
+| Konfigurationsbefehl  |  kurz grün                                   |
+
+(*) mit vdr-plugin-statusleds [3]
 
 Dann gibt es noch die Status LED (über hidraw angesteuert), die den Status des vdr-plugin-statusleds anzeigt und beim Einschalten, beim Speichern des ersten Wakeups und bei Reboot blinkt.
 
@@ -74,3 +76,4 @@ Es wird empfohlen, zwei Widerstände im Datenkabel zu verwenden, siehe http://st
  \
 [1] Waveshare RP2040-One mit TSOP von clausmuus, siehe https://www.vdr-portal.de/forum/index.php?thread/123572-irmp-auf-stm32-ein-usb-ir-empf%C3%A4nger-sender-einschalter-mit-wakeup-timer/&postID=1361220#post1361220  
 [2] Waveshare RP2040-One mit TSOP von FireFly, siehe https://www.vdr-portal.de/forum/index.php?thread/132289-irmp-auf-stm32-ein-usb-hid-keyboard-ir-empf%C3%A4nger-sender-einschalter-mit-wakeup-t/&postID=1371419#post1371419
+[3] https://github.com/j1rie/vdr-plugin-statusleds
