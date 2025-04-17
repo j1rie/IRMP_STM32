@@ -49,19 +49,19 @@ The pico(2) has a regular LED, the one and the zero have an RGB LED, and the XIA
 An external LED or RGB LED can be connected.
 They show what is happening inside the firmware.
 
-| Receiver              | RGB-LED                                          |
-|-----------------------|--------------------------------------------------|
-| disconnected          | off                                              |
-| USB resumed           | white (or custom)                                |
-| USB suspended         | orange                                           |
-| IR reception          | flickers blue                                    |
-| save wakeup           | flashes red quickly                              |
-| Wakeup                | flashes red quickly                              |
-| Reboot                | flashes red quickly                              |
-| Send IR               | short yellow                                     |
-| VDR running           | red(*)                                           |
-| VDR recording         | flashes red according to number of recordings(*) |
-| configuration command | short green                                      |
+| Receiver              | RGB-LED                                          | Board/External-LED | Status-LED                                       |
+|-----------------------|--------------------------------------------------|--------------------|--------------------------------------------------|
+| disconnected          | off                                              |                    |                                                  |
+| USB resumed           | white (or custom)                                |                    |                                                  |
+| USB suspended         | orange                                           |                    |                                                  |
+| IR reception          | flickers blue                                    | flickers           |                                                  |
+| save wakeup           | flashes red quickly                              | flashes quickly    | flashes quickly                                  |
+| Wakeup                | flashes red quickly                              | flashes quickly    | flashes quickly                                  |
+| Reboot                | flashes red quickly                              | flashes quickly    | flashes quickly                                  |
+| Send IR               | short yellow                                     | short on           |                                                  |
+| VDR running           | red(*)                                           |                    | on(*)                                            |
+| VDR recording         | flashes red according to number of recordings(*) |                    | flashes according to number of recordings(*)     |
+| configuration command | short green                                      | short blink        |                                                  |
 
 (*) needs vdr-plugin-statusled [3]
 

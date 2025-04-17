@@ -51,19 +51,19 @@ Der Pico(2) hat eine normale LED, der One und der Zero haben eine RGB LED, und d
 Zusätzlich kann eine externe LED oder RGB LED angeschlossen werden.
 Diese zeigen an, was in der Firmware passiert.
 
-| Empfänger             |  RGB-LED                                     |
-|-----------------------|----------------------------------------------|
-| stromlos              |  aus                                         |
-| USB eingehängt        |  weiß (oder custom)                          |
-| USB suspend           |  orange                                      |
-| IR Empfang            |  flackert blau                               |
-| Wakeup speichern      |  blinkt schnell rot                          |
-| Wakeup                |  blinkt schnell rot                          |
-| Reboot                |  blinkt schnell rot                          |
-| IR senden             |  kurz gelb                                   |
-| VDR läuft             |  rot(*)                                      |
-| VDR nimmt auf         |  blinkt rot entsprechend Anzahl Aufnahmen(*) |
-| Konfigurationsbefehl  |  kurz grün                                   |
+| Empfänger             |  RGB-LED                                     | Board/Externe-LED | Status-LED                               |
+|-----------------------|----------------------------------------------|--------------------|-----------------------------------------|
+| stromlos              |  aus                                         |                    |                                         |
+| USB eingehängt        |  weiß (oder custom)                          |                    |                                         |
+| USB suspend           |  orange                                      |                    |                                         |
+| IR Empfang            |  flackert blau                               | flackert           |                                         |
+| Wakeup speichern      |  blinkt schnell rot                          | blinkt schnell     | blinkt schnell                          |
+| Wakeup                |  blinkt schnell rot                          | blinkt schnell     | blinkt schnell                          |
+| Reboot                |  blinkt schnell rot                          | blinkt schnell     | blinkt schnell                          |
+| IR senden             |  kurz gelb                                   | kurz an            |                                         |
+| VDR läuft             |  rot(*)                                      |                    | an(*)                                   |
+| VDR nimmt auf         |  blinkt rot entsprechend Anzahl Aufnahmen(*) |                    | blinkt entsprechend Anzahl Aufnahmen(*) |
+| Konfigurationsbefehl  |  kurz grün                                   | kurz an            |                                         |
 
 (*) mit vdr-plugin-statusleds [3]
 
