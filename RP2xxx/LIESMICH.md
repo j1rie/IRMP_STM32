@@ -4,7 +4,6 @@
 <img src="https://www.vdr-portal.de/index.php?attachment/49235-ir-sensor-1-jpg" width="100%">
 <img src="https://www.vdr-portal.de/index.php?attachment/49236-ir-sensor-2-jpg" width="60%"> [2]  
 
-
 Für Boards mit dem RP2xxx, z.B. den Raspberry Pi Pico, Pico2 und viele andere.  
 Dies sind zusätzliche Informationen, grundlegende Informationen unter https://github.com/j1rie/IRMP_STM32#readme.
 
@@ -47,11 +46,12 @@ Eine Möglichkeit ist es, die Leiterbahn auf dem PCB zu durchtrennen:
 
 ## Signale von den LEDs
 
-Der Pico(2) hat eine normale LED, der One und der Zero haben eine RGB LED, und der XIAO-RP2350 hat eine RGBW LED.
-Zusätzlich kann eine externe LED oder RGB LED angeschlossen werden.
-Diese zeigen an, was in der Firmware passiert.
+Der Pico(2) hat eine normale LED, der One und der Zero haben eine RGB LED, und der XIAO-RP2350 hat eine Duale und eine RGBW LED.  
+Zusätzlich kann eine externe LED oder RGB LED angeschlossen werden.  
+Diese zeigen an, was in der Firmware passiert.  
+Dann gibt es noch die Status LED (über hidraw angesteuert), die den Status des vdr-plugin-statusleds anzeigt und beim Einschalten, beim Speichern des ersten Wakeups und bei Reboot blinkt.
 
-| Empfänger             |  RGB-LED                                     | Board/Externe-LED | Status-LED                               |
+| Empfänger             |  Board/Externe RGB-LED                       | Board/Externe LED  | Externe Status-LED                      |
 |-----------------------|----------------------------------------------|--------------------|-----------------------------------------|
 | stromlos              |  aus                                         |                    |                                         |
 | USB eingehängt        |  weiß (oder custom)                          |                    |                                         |
@@ -66,8 +66,6 @@ Diese zeigen an, was in der Firmware passiert.
 | Konfigurationsbefehl  |  kurz grün                                   | kurz an            |                                         |
 
 (*) mit vdr-plugin-statusleds [3]
-
-Dann gibt es noch die Status LED (über hidraw angesteuert), die den Status des vdr-plugin-statusleds anzeigt und beim Einschalten, beim Speichern des ersten Wakeups und bei Reboot blinkt.
 
 ## Externe RGB-LEDs
 Es wird empfohlen, zwei Widerstände im Datenkabel zu verwenden, siehe http://stefanfrings.de/ws2812/.
