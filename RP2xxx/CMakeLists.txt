@@ -45,9 +45,7 @@ execute_process (COMMAND bash -c "grep -e 'Version IRMP' ${CMAKE_CURRENT_SOURCE_
 
 string(STRIP ${IRMP_VERSION} IRMP_VERSION)
 
-target_compile_definitions(timestamp PRIVATE FW_STR="${BUILD_TIME}_${PICO_BOARD}_hid_irmp   IRMP-Version: ${IRMP_VERSION}*RP2xxx")
-
-set(FW_STR "${BUILD_TIME}_${PICO_BOARD}_hid_irmp   IRMP-Version: ${IRMP_VERSION}*RP2xxx")
+target_compile_definitions(timestamp PRIVATE FW_STR="${PROJECT_NAME}   IRMP-Version: ${IRMP_VERSION}*RP2xxx")
 
 target_include_directories(timestamp PUBLIC $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}>)
 
@@ -55,8 +53,6 @@ add_custom_target(clear_cache COMMAND ${CMAKE_COMMAND} -U BUILD_TIME ${CMAKE_BIN
 
 add_dependencies(timestamp clear_cache)
 
-#message(STATUS "BUILD_TIME=${BUILD_TIME}")
-#message(STATUS "IRMP_VERSION=${IRMP_VERSION}")
 message(STATUS "FW_STR=${FW_STR}")
 
 target_compile_definitions(${PROJECT_NAME} PUBLIC PICO_USE_FASTEST_SUPPORTED_CLOCK=1)

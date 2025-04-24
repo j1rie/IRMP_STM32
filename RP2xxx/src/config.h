@@ -10,9 +10,12 @@
 #ifndef __CONFIG_H
 #define __CONFIG_H
 
-/* MACRO_SLOTS x (MACRO_DEPTH + 1) + WAKE_SLOTS <= 85
+/* MACRO_SLOTS x (MACRO_DEPTH + 1) + WAKE_SLOTS + 1 <= 85
  * Eeprom page size = (512 - 1) 8bit variables,
  * IRdata needs 6 variables, 511 / 6 = 85
+ * Eeprom partition 1: MACRO_SLOTS macros of length MACRO_DEPTH + 1
+ * Eeprom partition 2: WAKE_SLOTS wakeups
+ * Eeprom partition 3: send_after_wakeup
  */
 #define MACRO_SLOTS	8
 #define MACRO_DEPTH	8
@@ -41,7 +44,7 @@
 /* it seems, pio pins need to be consecutive
  * does this work with USB Erratum RP2040-E5? otherwise choose 17 (but that's only a solder point on Zero and One)
  */
-#define WS2812_PIN_2		WS2812_PIN - 1  /* GPIO 15  (Pico(2) Pin 20, One+Zero Pin 15) */
+#define WS2812_PIN_2		WS2812_PIN - 1  /* GPIO 15 (Pico(2) Pin 20, One+Zero Pin 15), GPIO 21 (Seeed XIAO RP2350 D11) */
 #define NUM_PIXELS		64
 
 #endif /* __CONFIG_H */
