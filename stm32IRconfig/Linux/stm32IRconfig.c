@@ -315,14 +315,14 @@ color: printf("red(r)\ngreen(g)\nblue(b)\nyellow(y)\nwhite(w)\noff(o)\ncustom(c)
 				write_and_check(idx, 4);
 				break;
 			case 'c':
-				printf("enter red in hex\n");
-				scanf("%" SCNx8 "", &s);
+				printf("enter red in dec\n");
+				scanf("%" SCNu8 "", &s);
 				outBuf[idx++] = s;
-				printf("enter green in hex\n");
-				scanf("%" SCNx8 "", &s);
+				printf("enter green in dec\n");
+				scanf("%" SCNu8 "", &s);
 				outBuf[idx++] = s;
-				printf("enter blue in hex\n");
-				scanf("%" SCNx8 "", &s);
+				printf("enter blue in dec\n");
+				scanf("%" SCNu8 "", &s);
 				outBuf[idx++] = s;
 				write_and_check(idx, 4);
 				break;
