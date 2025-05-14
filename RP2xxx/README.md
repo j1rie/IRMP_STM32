@@ -46,7 +46,7 @@ One way is to cut the copper on the pcb:
 
 ## Signals from LEDs
 The pico(2) has a regular led, the one and the zero have an RGB led, and the XIAO-RP2350 has a dual and an RGBW led.  
-An external LED or RGB LED can be connected.  
+An external led or external RGB led (WS2812 or APA106) can be connected.  
 They show what is happening inside the firmware.  
 Then there is the Status LED (controlled over hidraw), which shows status messages from the vdr-plugin-statusleds (and blinks on power-on, storage of first wakeup and reboot).
 

@@ -1,2 +1,0 @@
-Chose a macro and a macroslot in "select". Put the trigger in macroslot0, e.g. with the remote control. Put the IR codes to be sent into macroslot1 and the following, again e.g. with the remote control.
-If a trigger is ffffffffffff parsing stops, and if an IR code to be sent is ffffffffffff transmission stops and parsing continues at the next macro.

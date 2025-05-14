@@ -1,4 +1,4 @@
-= Protocol for IR Data =
+## Protocol for IR Data
 
 byte 0:	   0x01 (µC->PC) 
 byte 1:    protocol
@@ -7,7 +7,7 @@ bytes 4+5: command
 byte 6:    flags
 
 
-= Protocol for Configuration =
+## Protocol for Configuration
 
 byte 0: 0x03 (PC->µC) or 0x02 (µC->PC) 
 
@@ -26,7 +26,7 @@ following bytes: for ACC_SET: value to be set
 
 The device answers with the 3 obligatory bytes, the first byte (status) is set to STAT_SUCCESS or STAT_FAILURE. More bytes may follow, e.g. for ACC_GET.
 
-Examples:
+## Examples:
 Query the alarmtimer (in 60 seconds WakeUp):
 PC->µC: STAT_CMD ACC_GET CMD_ALARM
 µC->PC: STAT_SUCCESS ACC_GET CMD_ALARM 0x00 0x00 0x00 0x3C
