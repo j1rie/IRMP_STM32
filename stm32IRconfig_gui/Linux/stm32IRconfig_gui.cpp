@@ -1543,8 +1543,7 @@ MainWindow::onGmacro(FXObject *sender, FXSelector sel, void *ptr)
 long
 MainWindow::onGcaps(FXObject *sender, FXSelector sel, void *ptr)
 {
-	FXString s;
-	FXString t, u;
+	FXString s, t, u;
 	int jump_to_firmware, romtable;
 	jump_to_firmware = 0;
 	romtable = 0;
