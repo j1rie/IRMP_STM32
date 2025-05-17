@@ -1,7 +1,7 @@
 /*
  *  GUI Config Tool for IRMP STM32 devices
  *
- *  Copyright (C) 2015-2022 Joerg Riechardt
+ *  Copyright (C) 2015-2025 Joerg Riechardt
  *
  *  based on work by Alan Ott
  *  Copyright 2010  Alan Ott
@@ -21,6 +21,7 @@
 #include <FXArray.h>
 #include "icons.h"
 #include "upgrade.h"
+#include "protocols.h"
 
 // Headers needed for sleeping.
 #ifdef _WIN32
@@ -1543,7 +1544,7 @@ long
 MainWindow::onGcaps(FXObject *sender, FXSelector sel, void *ptr)
 {
 	FXString s;
-	FXString t;
+	FXString t, u;
 	int jump_to_firmware, romtable;
 	jump_to_firmware = 0;
 	romtable = 0;
@@ -1576,7 +1577,7 @@ MainWindow::onGcaps(FXObject *sender, FXSelector sel, void *ptr)
 			s += t;
 		} else {
 			if (!jump_to_firmware) { // queries for supported_protocols
-				s = "protocols: ";
+				s = "protocols: \n";
 				for (int k = 4; k < in_size; k++) {
 					if (!buf[k]) { // NULL termination
 						s += "\n";
@@ -1587,7 +1588,10 @@ MainWindow::onGcaps(FXObject *sender, FXSelector sel, void *ptr)
 					}
 					t.format("%u ", buf[k]);
 					protocols += t;
+					u = protocol[buf[k]];
 					s += t;
+					s += u;
+					s += "\n";
 				}
 			} else { // queries for firmware
 				s = "firmware: ";

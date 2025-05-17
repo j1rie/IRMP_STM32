@@ -1,7 +1,7 @@
 /*
  *  GUI Config Tool for IRMP STM32 devices
  *
- *  Copyright (C) 2015-2022 Joerg Riechardt
+ *  Copyright (C) 2015-2024 Joerg Riechardt
  *
  *  based on work by Alan Ott
  *  Copyright 2010  Alan Ott
