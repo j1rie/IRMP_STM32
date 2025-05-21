@@ -1563,7 +1563,7 @@ MainWindow::onGcaps(FXObject *sender, FXSelector sel, void *ptr)
 
 		if (!i) { // first query for slots and depth
 			macroslots = buf[4];
-			s.format("macro_slots: %u\n", buf[4]);
+			s.format("number of macros: %u\n", buf[4]);
 			macrodepth = buf[5];
 			t.format("macro_depth: %u\n", buf[5]);
 			s += t;

@@ -433,7 +433,7 @@ void Systick_Init(void)
 	#error unknown PICO_BOARD
 #endif
 	/* 1ms */
-	systick_hw->rvr = 124999UL;
+	systick_hw->rvr = (clock_get_hz(clk_sys) / 1000) - 1;
 }
 
 void Wakeup(void)
