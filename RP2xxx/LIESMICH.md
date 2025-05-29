@@ -17,11 +17,19 @@ Durch das Senden des Befehls „reboot“ wird das Gerät ebenfalls in den Masse
 Wenn sich bereits eine ältere Firmware auf dem Gerät befindet, versetzt stm32IRconfig - b das Gerät in den Massenspeichermodus, und
 picotool load -v -x firmware.uf2 flasht die Firmware, verifiziert und startet sie.
 
+## Motherboard Test
+Wenn einer der Einschaltpins an Masse liegt und der andere ca. +3,3 V oder +5 V führt, ist das Motherboard für die folgende einfache Verkabelung geeignet.  
+Wenn nicht (sehr selten) braucht man einen Optokoppler.
+
+## Kabel löten und anschließen
+Ein 10 cm Dupont-Kabel wird aufgetrennt, die beiden Enden miteinander und dem 220 Ohm Widerstand verbunden, das andere Ende des Widerstands wird mit einem 20 cm Dupont-Kabel, dessen eine Buchse abgeschnitten ist, verbunden. Lötstellen einschrumpfen und das zweite 10 cm Kabel mittels Schrumpfschlauch anheften.  
+Der TSOP wird direkt mit den Pins 3,3 V, GND und IR_IN verbunden, das Kabelpaar wird zwischen die Mainboard-Einschaltpins und den Stecker des Einschalters eingeschleift.  
+
+![Kabel](https://raw.githubusercontent.com/wiki/j1rie/IRMP_STM32_KBD/images/cables.jpg)
+![verbunden](https://raw.githubusercontent.com/wiki/j1rie/IRMP_STM32_KBD/images/connected.jpg)
+
 ## Erster Test
-Drücken Sie im Suspend-Modus die BOOTSEL-Taste, und der PC sollte aufwachen.  
-Für die Verkabelung siehe https://www.mikrocontroller.net/articles/IRMP_auf_STM32_-_Bauanleitung#Minimalistic_assembly_for_experienced_users  
-https://www.mikrocontroller.net/articles/IRMP_auf_STM32_%E2%80%93_stark_vereinfachte_Bauanleitung#Solder_Cables  
-https://www.mikrocontroller.net/articles/IRMP_auf_STM32_%E2%80%93_stark_vereinfachte_Bauanleitung#Connect_Cables
+Wenn man im Suspend-Modus die BOOTSEL-Taste drückt, sollte der PC aufwachen.
 
 ## Emuliertes Eeprom
 Jede Konfiguration, die mit einem der Konfigurationsprogramme vorgenommen wird, wird zunächst nur im Cache gespeichert. Um

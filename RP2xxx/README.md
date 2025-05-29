@@ -17,11 +17,19 @@ Sending the "reboot" command will also put the device into mass storage mode.
 If there is already an older firmware on the device, stm32IRconfig - b will put the device into mass storage mode, and
 picotool load -v -x firmware.uf2 will flash the firmware, verify and start it.
 
+## Motherboard test
+If one of the powerswitch pins is on ground and the other on ca. +3,3V or +5V, then the motherboard is suitable for the following simple wiring.  
+If not (very rare), you need an optocoupler.
+
+## Solder and connect cables
+Split a 10 cm dupont cable, connect both ends and the 220 ohm resistor, connect the other end of the resistor with the 20 cm dupont cable, from which one socket is cut off. Shrink the solder connections and attach the other 10 cm cable with shrink tube.  
+The TSOP is connected directly to the 3,3V, GND and IR_IN pins, the pair of cables is inserted between the power-on pins of the mainboard and the connector from the power button.  
+
+![cables](https://raw.githubusercontent.com/wiki/j1rie/IRMP_STM32_KBD/images/cables.jpg)
+![connected](https://raw.githubusercontent.com/wiki/j1rie/IRMP_STM32_KBD/images/connected.jpg)
+
 ## First test
 Press the BOOTSEL button in suspend mode, and the PC should wake up.  
-For wiring see https://www.mikrocontroller.net/articles/IRMP_auf_STM32_-_Bauanleitung#Minimalistic_assembly_for_experienced_users  
-https://www.mikrocontroller.net/articles/IRMP_auf_STM32_%E2%80%93_stark_vereinfachte_Bauanleitung#Solder_Cables  
-https://www.mikrocontroller.net/articles/IRMP_auf_STM32_%E2%80%93_stark_vereinfachte_Bauanleitung#Connect_Cables
 
 ## Emulated Eeprom
 Any configuration made by one of the configuration programs goes first into cache only. To permanently save
