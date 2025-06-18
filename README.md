@@ -134,8 +134,7 @@ All Users for questions, feature requests, feedback and ideas
 [3] https://habr.com/post/208026/  
 [4] https://github.com/olebowle  
 [5] https://github.com/M-Reimer  
-[6] https://www.vdr-portal.de/user/4786-ranseyer/  
-&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;https://github.com/ranseyer/STM32-IRMP-Hardware  
+[6] https://www.vdr-portal.de/user/4786-ranseyer/, https://github.com/ranseyer/STM32-IRMP-Hardware  
 [7] https://www.vdr-portal.de/user/24681-seahawk1986/  
 [8] https://www.vdr-portal.de/user/13499-emma53/  
 [9] https://www.vdr-portal.de/user/942-clausmuus/  
