@@ -123,12 +123,22 @@ Andrew Kambaroff für sein USB-HID für den STM32F103. [3]
 Seine Arbeit half mir bei den ersten Schritten mit dem STM32F103.  
 Ole Ernst für die Code-Überprüfung, das Linux-Makefile und das Linux-Download-Extract-Patch-Skript und das neue Protokoll. [4]  
 Manuel Reimer für den gcc-4.9 Fix, SimpleCircuit und die Überprüfung, ob der Host läuft. [5]  
+Martin Neubauer für die Integration in EasyVDR, Entwicklung einer Zusatzplatine und den Verkauf von fertigen Empfängern mit Kabeln. [6]  
+Alexander Grothe für die Integration in yaVDR und für wertvolle Hilfe bei schwierigen Fragestellungen. [7]  
+Helmut Emmerich für den Verkauf von fertigen Empfängern mit Kabeln und die Unterstützung der Anwender. [8]  
+Claus Muus für die Integration in MLD. [9]  
+Alle Benutzer für Fragen, Feature-Anfragen, Feedback und Ideen  
 
 [1] https://www.mikrocontroller.net/articles/IRMP  
 [2] http://mikrocontroller.bplaced.net/wordpress/?page_id=744  
 [3] https://habr.com/post/208026/  
 [4] https://github.com/olebowle  
 [5] https://github.com/M-Reimer  
+[6] https://www.vdr-portal.de/user/4786-ranseyer/  
+    https://github.com/ranseyer/STM32-IRMP-Hardware  
+[7] https://www.vdr-portal.de/user/24681-seahawk1986/  
+[8] https://www.vdr-portal.de/user/13499-emma53/  
+[9] https://www.vdr-portal.de/user/942-clausmuus/  
 
 ## Diskussion und weitere Informationen
 Kommentare, Fragen und Anregungen können an https://www.vdr-portal.de/forum/index.php?thread/123572-irmp-auf-stm32-ein-usb-ir-empf%C3%A4nger-sender-einschalter-mit-wakeup-timer/ gesendet werden.
@@ -141,4 +151,4 @@ Die letzten beiden sind auch in /doc/old/Deutsch.
 
 Viel Spaß mit IRMP auf STM32!
 
-Copyright (C) 2014-2024 Jörg Riechardt
+Copyright (C) 2014-2025 Jörg Riechardt
