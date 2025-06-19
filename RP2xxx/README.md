@@ -9,7 +9,7 @@ This is additional information, basic information in https://github.com/j1rie/IR
 
 ## Flashing the firmware
 Disconnect from USB.
-Attach to USB while holding down the BOOTSEL button, then release. The device will appear as a mass storage (USB ID 2e8a:0003).
+Attach to USB while holding down the BOOTSEL button, then release. The device will appear as a mass storage (USB ID 2e8a:0003).  
 Drag and drop the firmware.uf2 file onto it. The device will reboot and start as an IRMP HID Device.
 
 Sending the "reboot" command will also put the device into mass storage mode.
