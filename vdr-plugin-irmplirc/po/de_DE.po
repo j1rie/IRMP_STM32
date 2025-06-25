@@ -1,0 +1,25 @@
+# German translations for vdr-irmplirc package
+# German translation for vdr-irmplirc.
+# Copyright (C) 2025 THE vdr-irmplirc'S COPYRIGHT HOLDER
+# This file is distributed under the same license as the vdr-irmplirc package.
+# root <root@vdr>, 2025.
+#
+msgid ""
+msgstr ""
+"Project-Id-Version: vdr-irmplirc 0.0.1\n"
+"Report-Msgid-Bugs-To: <see README>\n"
+"POT-Creation-Date: 2025-06-25 14:06+0200\n"
+"PO-Revision-Date: 2025-06-05 00:14+0200\n"
+"Last-Translator: root <root@vdr>\n"
+"Language-Team: German <translation-team-de@lists.sourceforge.net>\n"
+"Language: de\n"
+"MIME-Version: 1.0\n"
+"Content-Type: text/plain; charset=ISO-8859-1\n"
+"Content-Transfer-Encoding: 8bit\n"
+"Plural-Forms: nplurals=2; plural=(n != 1);\n"
+
+msgid "Send keypresses from IRMP HID-Device to VDR"
+msgstr ""
+
+#~ msgid "Send keypresses from IRMP HIDDevice to VDR"
+#~ msgstr "Sende Tastendrücke vom IRMP HID-Device zum VDR"
