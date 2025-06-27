@@ -76,6 +76,7 @@ void cIrmpRemote::Action(void)
   unsigned int timeout = 0;
   uint64_t code = 0;
   int RepeatRate = 100000;
+  uint8_t protocol = 0;
 
   while(1){
 	usleep(1000); // don't eat too much cpu
@@ -91,7 +92,12 @@ void cIrmpRemote::Action(void)
 	}
 
 	if (read(fd, buf, sizeof(buf)) != -1) { // keypress
-		code = *((uint64_t*)buf);
+		code = *((uint64_t*)buf); // TODO swap endianess
+		if (buf[1] != protocol) { // new protocol, reset RepeatRate
+			RepeatRate = 100000;
+			protocol = buf[1];
+			if(debug) printf("protocol: %02d\n", protocol);
+		}
 		//if(debug) printf("code: %016lx\n", code);
 		if(only_once && code == magic) {
 			if(debug) printf("magic\n");
@@ -106,6 +112,7 @@ void cIrmpRemote::Action(void)
 		if (debug) printf("Delta: %d\n", Delta);
 		if (RepeatRate > Delta)
 			RepeatRate = Delta; // determine repeat rate
+		if (debug) printf("RepeatRate: %d\n", RepeatRate);
 		ThisTime.Set();
 		if(buf[6] == 0 || Delta > RepeatRate * 11 / 10) { // new key
 			if (debug) printf("Neuer\n");
