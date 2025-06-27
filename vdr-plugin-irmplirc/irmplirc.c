@@ -10,7 +10,6 @@
 #include <vdr/i18n.h>
 #include <vdr/remote.h>
 #include <vdr/thread.h>
-//#include "input-event-codes.h"
 
 static const char *VERSION        = "0.0.1";
 static const char *DESCRIPTION    = tr("Send keypresses from IRMP HID-Device to VDR");
@@ -66,14 +65,16 @@ bool cIrmpRemote::Stop()
 void cIrmpRemote::Action(void)
 {
   if(debug) printf("action!\n");
+  cTimeMs FirstTime;
+  cTimeMs LastTime;
+  cTimeMs ThisTime;
   uint8_t buf[64];
   uint64_t magic = 0xFF01; // testen!
   uint8_t only_once = 1;
-  uint8_t release_needed = 0, repeat = 0, skip = 0;
-  long int this_time, last_sent = 0, last_received = 0, timeout = 0;
+  bool pressed = false;
+  bool repeat = false;
+  unsigned int timeout = 0;
   uint64_t code = 0;
-  struct timespec now; // TODO unstellen auf VDR's cTimeMs
-  int Delta; // the time between two subsequent LIRC events
   int RepeatRate = 100000;
 
   while(1){
@@ -89,13 +90,11 @@ void cIrmpRemote::Action(void)
 		}
 	}
 
-	if (read(fd, buf, sizeof(buf)) != -1) {
+	if (read(fd, buf, sizeof(buf)) != -1) { // keypress
 		code = *((uint64_t*)buf);
-		//printf("code: %016lx\n", code);
-		clock_gettime(CLOCK_MONOTONIC, &now);
-		this_time = now.tv_sec * 1000 + now.tv_nsec / 1000 / 1000;
+		//if(debug) printf("code: %016lx\n", code);
 		if(only_once && code == magic) {
-			printf("magic\n");
+			if(debug) printf("magic\n");
 			FILE *out = fopen("/var/log/started_by_IRMP_STM32", "a");
 			time_t date = time(NULL);
 			struct tm *ts = localtime(&date);
@@ -103,47 +102,41 @@ void cIrmpRemote::Action(void)
 			fclose(out);
 			only_once = 0;
 		}
-		Delta = this_time - last_received;
+		int Delta = ThisTime.Elapsed();
 		if (debug) printf("Delta: %d\n", Delta);
 		if (RepeatRate > Delta)
 			RepeatRate = Delta; // determine repeat rate
-		last_received = this_time;
+		ThisTime.Set();
 		if(buf[6] == 0 || Delta > RepeatRate * 11 / 10) { // new key
-			printf("Neuer\n");
-			repeat = 0;
-			skip = 0;
+			if (debug) printf("Neuer\n");
+			pressed = true;
+			repeat = false;
+			FirstTime.Set();
 		} else { // repeat
-			printf("Repeat\n");
-			if (this_time - last_sent < (uint)Setup.RcRepeatDelay || this_time - last_sent < (uint)Setup.RcRepeatDelta) {
-				skip = 1;
+			if (debug) printf("Repeat\n");
+			if (FirstTime.Elapsed() < (uint)Setup.RcRepeatDelay || LastTime.Elapsed() < (uint)Setup.RcRepeatDelta) {
+				if (debug) printf("continue\n\n");
 				continue; // don't send key
 			} else {
-				repeat = 1;
-				skip = 0;
-				timeout = Delta * 11 / 10; // 10 % more should be enough
+				pressed = true;
+				repeat = true;
+				timeout = Delta * 3 / 2; // 11 / 10; // 10 % more should be enough
 			}
 		}
 
 		/* send key */
-		if (!skip){
-			if(debug) printf("delta send: %ld\n", this_time - last_sent); /// TODO checken!!!
+		if (pressed){
+			if(debug) printf("delta send: %ld\n", LastTime.Elapsed());
+			LastTime.Set();
 			cRemote::Put(code, repeat);
-			last_sent = this_time;
-			//if(debug) printf("put code: %016lx, %s\n", code, repeat ? "repeat" : "first");
-			release_needed = 1;
 		}
 	}
 
 	/* send release */
-	clock_gettime(CLOCK_MONOTONIC, &now);
-	this_time = now.tv_sec * 1000 + now.tv_nsec / 1000 / 1000;
-	if (this_time - last_received > timeout) {
-		if (release_needed && repeat) { // statt release_needed !skip
-			release_needed = 0;
-			if(debug) printf("delta release: %ld\n", this_time - last_received); /// TODO checken!!!
-			cRemote::Put(code, false, true);
-			//if(debug) printf("put %ld %016lx release\n\n", this_time, code);
-		}
+	if (ThisTime.Elapsed() > timeout && pressed && repeat) {
+		pressed = false;
+		if(debug) printf("delta release: %ld\n", ThisTime.Elapsed());
+		cRemote::Put(code, false, true);
 	}
   }
 }
