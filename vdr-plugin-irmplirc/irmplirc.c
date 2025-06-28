@@ -92,7 +92,14 @@ void cIrmpRemote::Action(void)
 	}
 
 	if (read(fd, buf, sizeof(buf)) != -1) { // keypress
-		code = *((uint64_t*)buf); // TODO swap endianess
+		code = *((uint64_t*)buf);
+		if(debug) printf("code: %016lx\n", code);
+		code = ((code & 0x00000000FFFFFFFFull) << 32) | ((code & 0xFFFFFFFF00000000ull) >> 32); // make code look like IRMP data
+		code = ((code & 0x0000FFFF0000FFFFull) << 16) | ((code & 0xFFFF0000FFFF0000ull) >> 16);
+		//code = ((code & 0x00FF00FF00FF00FFull) << 8)  | ((code & 0xFF00FF00FF00FF00ull) >> 8);
+		code = ((code & 0x00FF0000000000FFull) << 8)  | ((code & 0xFF0000000000FF00ull) >> 8) | (code & 0x0000FFFFFFFF0000ull);
+		if(debug) printf("code neu: %016lx\n", code);
+
 		if (buf[1] != protocol) { // new protocol, reset RepeatRate
 			RepeatRate = 100000;
 			protocol = buf[1];
