@@ -71,12 +71,10 @@ void cIrmpRemote::Action(void)
   uint8_t buf[64];
   uint64_t magic = 0xFF01; // testen!
   uint8_t only_once = 1;
-  bool pressed = false;
+  bool release_needed = false;
   bool repeat = false;
-  unsigned int timeout = 0;
-  uint64_t code = 0;
-  int RepeatRate = 100000;
-  uint8_t protocol = 0;
+  unsigned int timeout = 155;  // konfigurierbar?!
+  uint64_t code = 0, lastcode = 0;
 
   while(1){
 	usleep(1000); // don't eat too much cpu
@@ -93,18 +91,13 @@ void cIrmpRemote::Action(void)
 
 	if (read(fd, buf, sizeof(buf)) != -1) { // keypress
 		code = *((uint64_t*)buf);
-		if(debug) printf("code: %016lx\n", code);
+		//if(debug) printf("code: %016lx\n", code);
 		code = ((code & 0x00000000FFFFFFFFull) << 32) | ((code & 0xFFFFFFFF00000000ull) >> 32); // make code look like IRMP data
 		code = ((code & 0x0000FFFF0000FFFFull) << 16) | ((code & 0xFFFF0000FFFF0000ull) >> 16);
 		//code = ((code & 0x00FF00FF00FF00FFull) << 8)  | ((code & 0xFF00FF00FF00FF00ull) >> 8);
 		code = ((code & 0x00FF0000000000FFull) << 8)  | ((code & 0xFF0000000000FF00ull) >> 8) | (code & 0x0000FFFFFFFF0000ull);
 		if(debug) printf("code neu: %016lx\n", code);
 
-		if (buf[1] != protocol) { // new protocol, reset RepeatRate
-			RepeatRate = 100000;
-			protocol = buf[1];
-			if(debug) printf("protocol: %02d\n", protocol);
-		}
 		//if(debug) printf("code: %016lx\n", code);
 		if(only_once && code == magic) {
 			if(debug) printf("magic\n");
@@ -115,15 +108,16 @@ void cIrmpRemote::Action(void)
 			fclose(out);
 			only_once = 0;
 		}
-		int Delta = ThisTime.Elapsed();
+		int Delta = ThisTime.Elapsed(); // the time between two consecutive events
 		if (debug) printf("Delta: %d\n", Delta);
-		if (RepeatRate > Delta)
-			RepeatRate = Delta; // determine repeat rate
-		if (debug) printf("RepeatRate: %d\n", RepeatRate);
 		ThisTime.Set();
-		if(buf[6] == 0 || Delta > RepeatRate * 11 / 10) { // new key
+		if(buf[6] == 0) { // new key
 			if (debug) printf("Neuer\n");
-			pressed = true;
+			if (repeat) {
+				printf("put release for previous repeat %016lx\n", lastcode);
+				Put(lastcode, false, true); // generated release for previous repeated key
+			}
+			lastcode = code;
 			repeat = false;
 			FirstTime.Set();
 		} else { // repeat
@@ -132,24 +126,22 @@ void cIrmpRemote::Action(void)
 				if (debug) printf("continue\n\n");
 				continue; // don't send key
 			} else {
-				pressed = true;
 				repeat = true;
 				timeout = Delta * 3 / 2; // 11 / 10; // 10 % more should be enough
 			}
 		}
 
 		/* send key */
-		if (pressed){
-			if(debug) printf("delta send: %ld\n", LastTime.Elapsed());
-			LastTime.Set();
-			cRemote::Put(code, repeat);
-		}
+		if(debug) printf("delta send: %ld\n", LastTime.Elapsed());
+		LastTime.Set();
+		cRemote::Put(code, repeat);
+		release_needed = true;
 	}
 
 	/* send release */
-	if (ThisTime.Elapsed() > timeout && pressed && repeat) {
-		pressed = false;
-		if(debug) printf("delta release: %ld\n", ThisTime.Elapsed());
+	if (ThisTime.Elapsed() > timeout && release_needed && repeat) {
+		release_needed = false;
+		if(debug) printf("delta release: %ld timeout: %d code: %016lx\n", ThisTime.Elapsed(), timeout, code);
 		cRemote::Put(code, false, true);
 	}
   }
