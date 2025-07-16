@@ -18,29 +18,33 @@ const char* irmp_device = "/dev/irmp_stm32";
 
 uint8_t debug = 1;
 
+#define RECONNECTDELAY 3000 // ms
+
 class cIrmpRemote : public cRemote, private cThread {
 private:
+  bool Connect(void);
   virtual void Action(void) override;
 public:
   cIrmpRemote(const char *Name);
-  virtual bool Initialize(void) override;
-  virtual bool Stop();
+  bool Stop();
+  bool Ready();
   int fd;
 };
 
 cIrmpRemote::cIrmpRemote(const char *Name)
 :cRemote(Name)
+,cThread("IRMP_LIRC remote control")
 {
-  Initialize();
+  Connect();
   Start();
 }
 
-bool cIrmpRemote::Initialize()
+bool cIrmpRemote::Connect()
 {
   fd = open(irmp_device, O_RDONLY | O_NONBLOCK);
   if(fd == -1){
     printf("Cannot open %s. %s.\n", irmp_device, strerror(errno));
-    //return false;
+    return false;
   } else {
     printf("opened %s\n", irmp_device);
   }
@@ -62,6 +66,11 @@ bool cIrmpRemote::Stop()
   return true;
 }
 
+bool cIrmpRemote::Ready(void)
+{
+  return fd >= 0;
+}
+
 void cIrmpRemote::Action(void)
 {
   if(debug) printf("action!\n");
@@ -73,77 +82,90 @@ void cIrmpRemote::Action(void)
   uint8_t only_once = 1;
   bool release_needed = false;
   bool repeat = false;
-  unsigned int timeout = 155;  // konfigurierbar?!
+  int lasttimeout = 155, timeout = 155;  // konfigurierbar?!
   uint64_t code = 0, lastcode = 0;
 
-  while(1){
-	usleep(1000); // don't eat too much cpu
-	if (fd < 0) {
-		fd = open(irmp_device, O_RDONLY | O_NONBLOCK);
-		if(fd == -1){
-			printf("Cannot open %s. %s.\n", irmp_device, strerror(errno));
-			sleep(10);
-			continue;
-		} else {
-			printf("opened %s\n", irmp_device);
-		}
+  while(Running()){
+
+  bool ready = fd >= 0 && cFile::FileReady(fd, timeout); // implizit mindestens 100 ms!!!
+    int ret = ready ? safe_read(fd, buf, sizeof(buf)) : -1;
+
+    if (fd < 0 || ready && ret <= 0) {
+	esyslog("ERROR: irmplirc connection broken, trying to reconnect every %.1f seconds", float(RECONNECTDELAY) / 1000);
+	if (fd >= 0)
+	    close(fd);
+	fd = -1;
+	while (Running() && fd < 0) {
+	    cCondWait::SleepMs(RECONNECTDELAY);
+	    if (Connect()) {
+		isyslog("reconnected to irmplirc");
+		break;
+	    }
+	}
+    }
+
+    if (ready && ret > 0) { // keypress
+	code = *((uint64_t*)buf);
+	//if(debug) printf("code: %016lX\n", code);
+	code = ((code & 0x00000000FFFFFFFFull) << 32) | ((code & 0xFFFFFFFF00000000ull) >> 32); // make code look like IRMP data
+	code = ((code & 0x0000FFFF0000FFFFull) << 16) | ((code & 0xFFFF0000FFFF0000ull) >> 16);
+	//code = ((code & 0x00FF00FF00FF00FFull) << 8)  | ((code & 0xFF00FF00FF00FF00ull) >> 8);
+	code = ((code & 0x00FF0000000000FFull) << 8)  | ((code & 0xFF0000000000FF00ull) >> 8) | (code & 0x0000FFFFFFFF0000ull);
+	if(debug) printf("code neu: %016lX\n", code);
+
+	//if(debug) printf("code: %016lX\n", code);
+	if(only_once && code == magic) {
+	    if(debug) printf("magic\n");
+	    FILE *out = fopen("/var/log/started_by_IRMP_STM32", "a");
+	    time_t date = time(NULL);
+	    struct tm *ts = localtime(&date);
+	    fprintf(out, "%s", asctime(ts));
+	    fclose(out);
+	    only_once = 0;
 	}
 
-	if (read(fd, buf, sizeof(buf)) != -1) { // keypress
-		code = *((uint64_t*)buf);
-		//if(debug) printf("code: %016lx\n", code);
-		code = ((code & 0x00000000FFFFFFFFull) << 32) | ((code & 0xFFFFFFFF00000000ull) >> 32); // make code look like IRMP data
-		code = ((code & 0x0000FFFF0000FFFFull) << 16) | ((code & 0xFFFF0000FFFF0000ull) >> 16);
-		//code = ((code & 0x00FF00FF00FF00FFull) << 8)  | ((code & 0xFF00FF00FF00FF00ull) >> 8);
-		code = ((code & 0x00FF0000000000FFull) << 8)  | ((code & 0xFF0000000000FF00ull) >> 8) | (code & 0x0000FFFFFFFF0000ull);
-		if(debug) printf("code neu: %016lx\n", code);
-
-		//if(debug) printf("code: %016lx\n", code);
-		if(only_once && code == magic) {
-			if(debug) printf("magic\n");
-			FILE *out = fopen("/var/log/started_by_IRMP_STM32", "a");
-			time_t date = time(NULL);
-			struct tm *ts = localtime(&date);
-			fprintf(out, "%s", asctime(ts));
-			fclose(out);
-			only_once = 0;
-		}
-		int Delta = ThisTime.Elapsed(); // the time between two consecutive events
-		if (debug) printf("Delta: %d\n", Delta);
-		ThisTime.Set();
-		if(buf[6] == 0) { // new key
-			if (debug) printf("Neuer\n");
-			if (repeat) {
-				printf("put release for previous repeat %016lx\n", lastcode);
-				Put(lastcode, false, true); // generated release for previous repeated key
-			}
-			lastcode = code;
-			repeat = false;
-			FirstTime.Set();
-		} else { // repeat
-			if (debug) printf("Repeat\n");
-			if (FirstTime.Elapsed() < (uint)Setup.RcRepeatDelay || LastTime.Elapsed() < (uint)Setup.RcRepeatDelta) {
-				if (debug) printf("continue\n\n");
-				continue; // don't send key
-			} else {
-				repeat = true;
-				timeout = Delta * 3 / 2; // 11 / 10; // 10 % more should be enough
-			}
-		}
-
-		/* send key */
-		if(debug) printf("delta send: %ld\n", LastTime.Elapsed());
-		LastTime.Set();
-		cRemote::Put(code, repeat);
-		release_needed = true;
+	int Delta = ThisTime.Elapsed(); // the time between two consecutive events
+	if (debug) printf("Delta: %d\n", Delta);
+	ThisTime.Set();
+	if(buf[6] == 0) { // new key
+	    if (debug) printf("Neuer\n");
+	    if (repeat) {
+		printf("put release for previous repeat %016lX\n", lastcode);
+		Put(lastcode, false, true); // generated release for previous repeated key
+	    }
+	    lastcode = code;
+	    repeat = false;
+	    FirstTime.Set();
+	    timeout = -1;
+	} else { // repeat
+	    if (debug) printf("Repeat\n");
+	    if (FirstTime.Elapsed() < (uint)Setup.RcRepeatDelay || LastTime.Elapsed() < (uint)Setup.RcRepeatDelta) {
+		if (debug) printf("continue\n\n");
+		continue; // don't send key
+	    } else {
+		repeat = true;
+		timeout = Delta * 11 / 10; // 10 % more should be enough // implizit mindestens 100 ms!!!
+	    }
 	}
 
-	/* send release */
-	if (ThisTime.Elapsed() > timeout && release_needed && repeat) {
-		release_needed = false;
-		if(debug) printf("delta release: %ld timeout: %d code: %016lx\n", ThisTime.Elapsed(), timeout, code);
-		cRemote::Put(code, false, true);
+	/* send key */
+	if(debug) printf("delta send: %ld\n", LastTime.Elapsed());
+	LastTime.Set();
+	Put(code, repeat);
+	release_needed = true;
+    } else { // no key within timeout // implizit mindestens 100 ms!!!
+	if (release_needed && repeat) {
+	    if(debug) printf("delta release: %ld timeout: %d code: %016lX\n", ThisTime.Elapsed(), timeout, code);
+	    Put(code, false, true);
 	}
+	release_needed = false;
+	repeat = false;
+	count = 0;
+	lastcode = 0;
+	timeout = -1;
+	printf("reset\n");
+    }
+    printf("\n");
   }
 }
 
