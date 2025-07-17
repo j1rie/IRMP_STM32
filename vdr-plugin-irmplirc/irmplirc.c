@@ -24,11 +24,11 @@ class cIrmpRemote : public cRemote, private cThread {
 private:
   bool Connect(void);
   virtual void Action(void) override;
-public:
-  cIrmpRemote(const char *Name);
   bool Stop();
   bool Ready();
   int fd;
+public:
+  cIrmpRemote(const char *Name);
 };
 
 cIrmpRemote::cIrmpRemote(const char *Name)
@@ -82,8 +82,10 @@ void cIrmpRemote::Action(void)
   uint8_t only_once = 1;
   bool release_needed = false;
   bool repeat = false;
-  int lasttimeout = 155, timeout = 155;  // konfigurierbar?!
+  int timeout = -1;
   uint64_t code = 0, lastcode = 0;
+  unsigned int protocol;
+  bool toggle = false;
 
   while(Running()){
 
@@ -112,6 +114,17 @@ void cIrmpRemote::Action(void)
 	//code = ((code & 0x00FF00FF00FF00FFull) << 8)  | ((code & 0xFF00FF00FF00FF00ull) >> 8);
 	code = ((code & 0x00FF0000000000FFull) << 8)  | ((code & 0xFF0000000000FF00ull) >> 8) | (code & 0x0000FFFFFFFF0000ull);
 	if(debug) printf("code neu: %016lX\n", code);
+	code = code & 0xFFFFFFFFFFFF0000ull; // remove flag repetition
+
+	//protocol = (code & 0x00FF000000000000);
+	protocol = buf[1];
+	if (protocol == 6 || protocol == 7 || protocol == 9 || protocol == 12 || protocol == 21 || protocol == 30 || protocol == 45 || protocol == 55) { // RECS80, RC5, RC6, RECS80EXT, RC6A, THOMSON, (S100), METZ
+	    toggle = true;
+	    if(debug) printf("toggle\n");
+	} else {
+	    toggle = false;
+	    if(debug) printf("non toggle\n");
+	}
 
 	//if(debug) printf("code: %016lX\n", code);
 	if(only_once && code == magic) {
@@ -127,8 +140,8 @@ void cIrmpRemote::Action(void)
 	int Delta = ThisTime.Elapsed(); // the time between two consecutive events
 	if (debug) printf("Delta: %d\n", Delta);
 	ThisTime.Set();
-	if(buf[6] == 0) { // new key
-	    if (debug) printf("Neuer\n");
+	if (toggle && buf[6] == 0 || !toggle && lastcode != code) { // new key
+	    if (debug) printf("Neuer, lastcode: %016lX, code: %016lX\n", lastcode, code);
 	    if (repeat) {
 		printf("put release for previous repeat %016lX\n", lastcode);
 		Put(lastcode, false, true); // generated release for previous repeated key
@@ -144,7 +157,7 @@ void cIrmpRemote::Action(void)
 		continue; // don't send key
 	    } else {
 		repeat = true;
-		timeout = Delta * 11 / 10; // 10 % more should be enough // implizit mindestens 100 ms!!!
+		timeout = 155; // für jedes Protokoll eigenes timeout setzen?!
 	    }
 	}
 
@@ -153,14 +166,14 @@ void cIrmpRemote::Action(void)
 	LastTime.Set();
 	Put(code, repeat);
 	release_needed = true;
-    } else { // no key within timeout // implizit mindestens 100 ms!!!
+
+    } else { // no key within timeout
 	if (release_needed && repeat) {
 	    if(debug) printf("delta release: %ld timeout: %d code: %016lX\n", ThisTime.Elapsed(), timeout, code);
 	    Put(code, false, true);
 	}
 	release_needed = false;
 	repeat = false;
-	count = 0;
 	lastcode = 0;
 	timeout = -1;
 	printf("reset\n");
