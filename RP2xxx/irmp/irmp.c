@@ -55,7 +55,7 @@
 #  define IRMP_SUPPORT_SERIAL                       0
 #endif
 
-#define IRMP_KEY_REPETITION_LEN                 (uint_fast16_t)(F_INTERRUPTS * 150.0e-3 + 0.5)           // autodetect key repetition within 150 msec
+#define IRMP_KEY_REPETITION_LEN                 (uint_fast16_t)(F_INTERRUPTS * 151.0e-3 + 0.5)           // autodetect key repetition within 151 msec
 
 #define MIN_TOLERANCE_00                        1.0                           // -0%
 #define MAX_TOLERANCE_00                        1.0                           // +0%
