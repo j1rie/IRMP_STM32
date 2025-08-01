@@ -10,8 +10,9 @@
 #include <vdr/i18n.h>
 #include <vdr/remote.h>
 #include <vdr/thread.h>
+#include "protocols.h"
 
-static const char *VERSION        = "0.0.1";
+static const char *VERSION        = "0.0.2";
 static const char *DESCRIPTION    = tr("Send keypresses from IRMP HID-Device to VDR");
 
 const char* irmp_device = "/dev/irmp_stm32";
@@ -23,12 +24,12 @@ uint8_t debug = 1;
 class cIrmpRemote : public cRemote, private cThread {
 private:
   bool Connect(void);
-  virtual void Action(void) override;
-  bool Stop();
+  void Action(void);
   bool Ready();
   int fd;
 public:
   cIrmpRemote(const char *Name);
+  ~cIrmpRemote();
 };
 
 cIrmpRemote::cIrmpRemote(const char *Name)
@@ -39,18 +40,30 @@ cIrmpRemote::cIrmpRemote(const char *Name)
   Start();
 }
 
+cIrmpRemote::~cIrmpRemote()
+{
+  //ioctl(fd, EVIOCGRAB, 0);
+  int fh = fd;
+  fd = -1;
+  Cancel();
+  if (fh >= 0)
+     close(fh);
+}
+
 bool cIrmpRemote::Connect()
 {
   fd = open(irmp_device, O_RDONLY | O_NONBLOCK);
   if(fd == -1){
-    printf("Cannot open %s. %s.\n", irmp_device, strerror(errno));
+    if(debug) printf("Cannot open %s. %s.\n", irmp_device, strerror(errno));
+    esyslog("Cannot open %s. %s.\n", irmp_device, strerror(errno));
     return false;
   } else {
-    printf("opened %s\n", irmp_device);
+    if(debug) printf("opened %s\n", irmp_device);
+    isyslog("opened %s\n", irmp_device);
   }
 
   /*if(ioctl(fd, EVIOCGRAB, 1)){
-    printf("Cannot grab %s. %s.\n", kbd_device, strerror(errno));
+    if(debug) printf("Cannot grab %s. %s.\n", kbd_device, strerror(errno));
   } else {
     if(debug) printf("Grabbed %s!\n", kbd_device);
   }*/
@@ -58,13 +71,6 @@ bool cIrmpRemote::Connect()
   return true;
 }
 
-bool cIrmpRemote::Stop()
-{
-  //ioctl(fd, EVIOCGRAB, 0);
-  if (fd)
-    close(fd);
-  return true;
-}
 
 bool cIrmpRemote::Ready(void)
 {
@@ -73,7 +79,6 @@ bool cIrmpRemote::Ready(void)
 
 void cIrmpRemote::Action(void)
 {
-  if(debug) printf("action!\n");
   cTimeMs FirstTime;
   cTimeMs LastTime;
   cTimeMs ThisTime;
@@ -84,12 +89,15 @@ void cIrmpRemote::Action(void)
   bool repeat = false;
   int timeout = -1;
   uint64_t code = 0, lastcode = 0;
-  unsigned int protocol;
+  int RepeatRate = 118;
+  unsigned int protocol = 0;
   bool toggle = false;
+
+  if(debug) printf("irmplirc action!\n");
 
   while(Running()){
 
-  bool ready = fd >= 0 && cFile::FileReady(fd, timeout); // implizit mindestens 100 ms!!!
+    bool ready = fd >= 0 && cFile::FileReady(fd, timeout); // implizit mindestens 100 ms!!!
     int ret = ready ? safe_read(fd, buf, sizeof(buf)) : -1;
 
     if (fd < 0 || ready && ret <= 0) {
@@ -117,13 +125,18 @@ void cIrmpRemote::Action(void)
 	code = code & 0xFFFFFFFFFFFF0000ull; // remove flag repetition
 
 	//protocol = (code & 0x00FF000000000000);
-	protocol = buf[1];
+
+	if (buf[1] != protocol) { // new protocol, reset RepeatRate
+	    RepeatRate = 118;
+	    protocol = buf[1];
+	    if(debug) printf("protocol: %02d, %s\n", protocol, (const char *)protocols[protocol]);
+	    isyslog("protocol: %02d, %s\n", protocol, (const char *)protocols[protocol]);
+	}
+
 	if (protocol == 6 || protocol == 7 || protocol == 9 || protocol == 12 || protocol == 21 || protocol == 30 || protocol == 45 || protocol == 55) { // RECS80, RC5, RC6, RECS80EXT, RC6A, THOMSON, (S100), METZ
 	    toggle = true;
-	    if(debug) printf("toggle\n");
 	} else {
 	    toggle = false;
-	    if(debug) printf("non toggle\n");
 	}
 
 	//if(debug) printf("code: %016lX\n", code);
@@ -139,12 +152,29 @@ void cIrmpRemote::Action(void)
 
 	int Delta = ThisTime.Elapsed(); // the time between two consecutive events
 	if (debug) printf("Delta: %d\n", Delta);
+	if (RepeatRate > Delta)
+	    RepeatRate = Delta; // autodetect repeat rate
 	ThisTime.Set();
-	timeout = Setup.RcRepeatTimeout; // für jedes Protokoll eigenes timeout setzen?!
+	// don't set own timeout for each protocol, because some are unknown and it is to error prone, so prefer autodetect and treat NEC and Sky+ extra
+	timeout = RepeatRate * 103 / 100 + 1;  // 3 % + 1 should presumably be enough
+	if (protocol == 2) {
+	    timeout = 112; // NEC + APPLE + ONKYO first 40, than 108
+	    if(debug) printf("NEC detected, timeout set\n");
+	}
+	if (protocol == 61) {
+	    timeout = 155; // Sky+ 150
+	    if(debug) printf("Sky+ detected, timeout set\n");
+	}
+	if (protocol == 62) {
+	    timeout = 155; // Sky+ Pro 150
+	    if(debug) printf("Sky+ Pro detected, timeout set\n");
+	}
+	if (debug) printf("code: %016lX, lastcode: %016lX, toggle: %d, timeout: %d\n", code, lastcode, toggle, timeout);
+	// if the protocol toggles count == 0 is reliable, else regard same keys as new only after a timeout
 	if (toggle && buf[6] == 0 || !toggle && lastcode != code) { // new key
-	    if (debug) printf("Neuer, lastcode: %016lX, code: %016lX\n", lastcode, code);
+	    if(debug) printf("Neuer\n");
 	    if (repeat) {
-		printf("put release for previous repeat %016lX\n", lastcode);
+		if (debug) printf("put release for %016lX\n", lastcode);
 		Put(lastcode, false, true); // generated release for previous repeated key
 	    }
 	    lastcode = code;
@@ -152,9 +182,13 @@ void cIrmpRemote::Action(void)
 	    FirstTime.Set();
 	} else { // repeat
 	    if (debug) printf("Repeat\n");
-	    if (FirstTime.Elapsed() < (uint)Setup.RcRepeatDelay || LastTime.Elapsed() < (uint)Setup.RcRepeatDelta) {
-		if (debug) printf("continue\n\n");
-		continue; // don't send key
+	    if (FirstTime.Elapsed() < (uint)Setup.RcRepeatDelay) {
+		if (debug) printf("continue Delay\n\n");
+		continue; // repeat function kicks in after a short delay
+	    }
+	    if (LastTime.Elapsed() < (uint)Setup.RcRepeatDelta) {
+		if (debug)  printf("continue Delta\n\n");
+                 continue; // skip same keys coming in too fast
 	    }
 	    repeat = true;
 	}
@@ -167,16 +201,16 @@ void cIrmpRemote::Action(void)
 
     } else { // no key within timeout
 	if (release_needed && repeat) {
-	    if(debug) printf("delta release: %ld timeout: %d code: %016lX\n", ThisTime.Elapsed(), timeout, code);
+	    if(debug) printf("put release for %016lX, delta %ld\n", lastcode, ThisTime.Elapsed());
 	    Put(lastcode, false, true);
 	}
 	release_needed = false;
 	repeat = false;
 	lastcode = 0;
 	timeout = -1;
-	printf("reset\n");
+	if (debug) printf("reset\n");
     }
-    printf("\n");
+    if (debug) printf("\n");
   }
 }
 
@@ -197,6 +231,12 @@ cPluginIrmplirc::cPluginIrmplirc(void)
 
 cPluginIrmplirc::~cPluginIrmplirc()
 {
+  //ioctl(fd, EVIOCGRAB, 0);
+/*  int fh = fd;
+  fd = -1;
+  Cancel();
+  if (fh >= 0)
+     close(fh);*/
 }
 
 const char *cPluginIrmplirc::CommandLineHelp(void)
