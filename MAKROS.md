@@ -29,3 +29,7 @@ Nach dem IR-Empfang wird der empfangene IR-Code nacheinander mit allen Makro-Tri
 Wenn der empfangene IR-Code und der Auslöser übereinstimmen, werden die zugehörigen IR-Codes gesendet, aber wiederum bei 'ffffffffffff' wird das Senden beendet.  
 ffffffffffffff' ist also die Stoppmarke sowohl für Trigger als auch für zu sendende IR-Codes.  
 Dies ist praktisch, da die 'ffffffffffff's aufgrund der Eeprom-Eigenschaften bereits von Anfang an vorhanden sind.
+
+## Spezialfall letztes Makro
+Hier ist der Auslöser ein abgelaufener Alarm Timer.
+Gesendet wird ab macro7-macroslot1.

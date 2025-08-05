@@ -436,9 +436,30 @@ void Systick_Init(void)
 	systick_hw->rvr = (clock_get_hz(clk_sys) / 1000) - 1;
 }
 
+void transmit_macro(uint8_t macro)
+{
+	uint8_t i;
+	uint16_t idx;
+	uint8_t buf[SIZEOF_IR];
+	uint8_t zeros[SIZEOF_IR] = {0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF};
+	/* we start from 1, since we don't want to tx the trigger code of the macro*/
+	for (i=1; i < MACRO_DEPTH + 1; i++) {
+		idx = (MACRO_DEPTH + 1) * SIZEOF_IR * macro + SIZEOF_IR * i;
+		eeprom_restore(buf, idx);
+		/* first encounter of zero in macro means end of macro */
+		if (!memcmp(buf, &zeros, sizeof(zeros)))
+			break;
+		/* if macros are sent already, while the trigger IR data are still repeated,
+		* the receiving device may crash
+		* Depending on the protocol we need a pause between the trigger and the transmission
+		* and between two transmissions. The highest known pause is 130 ms for Denon. */
+		yellow_short_on();
+		irsnd_send_data((IRMP_DATA *) buf, 1);
+	}
+}
+
 void Wakeup(void)
 {
-	AlarmValue = 0xFFFFFFFF;
 	/* USB wakeup */
 	tud_remote_wakeup();
 	/* motherboard power switch: WAKEUP_PIN short low (SimpleCircuit) */
@@ -448,6 +469,10 @@ void Wakeup(void)
 	sleep_ms(500);
 	gpio_set_dir(WAKEUP_GPIO, GPIO_IN);
 	gpio_pull_up(WAKEUP_GPIO); // TODO: needed for RP2350-E9?
+	/* send last macro */
+	if (!AlarmValue)
+		transmit_macro(MACRO_SLOTS - 1);
+	AlarmValue = 0xFFFFFFFF;
 	fast_toggle();
 	/* let software know, PC was powered on by firmware */
 	send_after_wakeup = get_send_after_wakeup();
@@ -683,28 +708,6 @@ void check_reboot(IRMP_DATA *ir)
 	eeprom_restore(buf, idx);
 	if (!memcmp(buf, ir, sizeof(buf)))
 		reboot();
-}
-
-void transmit_macro(uint8_t macro)
-{
-	uint8_t i;
-	uint16_t idx;
-	uint8_t buf[SIZEOF_IR];
-	uint8_t zeros[SIZEOF_IR] = {0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF};
-	/* we start from 1, since we don't want to tx the trigger code of the macro*/
-	for (i=1; i < MACRO_DEPTH + 1; i++) {
-		idx = (MACRO_DEPTH + 1) * SIZEOF_IR * macro + SIZEOF_IR * i;
-		eeprom_restore(buf, idx);
-		/* first encounter of zero in macro means end of macro */
-		if (!memcmp(buf, &zeros, sizeof(zeros)))
-			break;
-		/* if macros are sent already, while the trigger IR data are still repeated,
-		* the receiving device may crash
-		* Depending on the protocol we need a pause between the trigger and the transmission
-		* and between two transmissions. The highest known pause is 130 ms for Denon. */
-		yellow_short_on();
-		irsnd_send_data((IRMP_DATA *) buf, 1);
-	}
 }
 
 /* is received ir-code (trigger) in one of the macro-slots? transmit_macro if true */

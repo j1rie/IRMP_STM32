@@ -5216,7 +5216,7 @@ irmp_ISR (void)
                     repetition_frame_number = 0;
                 }
 
-#if IRMP_SUPPORT_SIRCS_PROTOCOL == 1
+/*#if IRMP_SUPPORT_SIRCS_PROTOCOL == 1
                 // if SIRCS protocol and the code will be repeated within 50 ms, we will ignore 2nd and 3rd repetition frame
                 if (irmp_param.protocol == IRMP_SIRCS_PROTOCOL && (repetition_frame_number == 1 || repetition_frame_number == 2))
                 {
@@ -5225,7 +5225,7 @@ irmp_ISR (void)
                     key_repetition_len = 0;
                 }
                 else
-#endif
+#endif*/
 
 #if IRMP_SUPPORT_ORTEK_PROTOCOL == 1
                 // if ORTEK protocol and the code will be repeated within 50 ms, we will ignore 2nd repetition frame

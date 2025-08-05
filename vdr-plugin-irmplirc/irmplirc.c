@@ -155,7 +155,7 @@ void cIrmpRemote::Action(void)
 	if (RepeatRate > Delta)
 	    RepeatRate = Delta; // autodetect repeat rate
 	ThisTime.Set();
-	// don't set own timeout for each protocol, because some are unknown and it is to error prone, so prefer autodetect and treat NEC and Sky+ extra
+	// don't set own timeout for each protocol, because some are unknown and it is too error prone, so prefer autodetect and treat NEC and Sky+ extra
 	timeout = RepeatRate * 103 / 100 + 1;  // 3 % + 1 should presumably be enough
 	if (protocol == 2) {
 	    timeout = 112; // NEC + APPLE + ONKYO first 40, than 108

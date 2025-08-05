@@ -29,3 +29,7 @@ After IR reception the received IR code will be compared with all macro triggers
 If the received IR code and the trigger match, the accompanying IR codes will be sent, but again at 'ffffffffffff' transmission will stop.  
 So 'ffffffffffff' is the stop mark for both triggers and to be sent IR codes.
 This is practical, because the 'ffffffffffff's are there already from the beginning, due to the eeprom properties.
+
+## Special case: last macro
+Here, the trigger is an expired alarm timer.
+The transmission starts with macro7-macroslot1.
