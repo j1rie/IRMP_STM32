@@ -42,12 +42,11 @@ cIrmpRemote::cIrmpRemote(const char *Name)
 
 cIrmpRemote::~cIrmpRemote()
 {
-  //ioctl(fd, EVIOCGRAB, 0);
-  int fh = fd;
-  fd = -1;
   Cancel();
-  if (fh >= 0)
-     close(fh);
+  //ioctl(fd, EVIOCGRAB, 0);
+  if (fd >= 0)
+     close(fd);
+  fd = -1;
 }
 
 bool cIrmpRemote::Connect()
@@ -70,7 +69,6 @@ bool cIrmpRemote::Connect()
 
   return true;
 }
-
 
 bool cIrmpRemote::Ready(void)
 {
@@ -124,8 +122,6 @@ void cIrmpRemote::Action(void)
 	if(debug) printf("code neu: %016lX\n", code);
 	code = code & 0xFFFFFFFFFFFF0000ull; // remove flag repetition
 
-	//protocol = (code & 0x00FF000000000000);
-
 	if (buf[1] != protocol) { // new protocol, reset RepeatRate
 	    RepeatRate = 118;
 	    protocol = buf[1];
@@ -152,8 +148,6 @@ void cIrmpRemote::Action(void)
 
 	int Delta = ThisTime.Elapsed(); // the time between two consecutive events
 	if (debug) printf("Delta: %d\n", Delta);
-	if (RepeatRate > Delta)
-	    RepeatRate = Delta; // autodetect repeat rate
 	ThisTime.Set();
 	// don't set own timeout for each protocol, because some are unknown and it is too error prone, so prefer autodetect and treat NEC and Sky+ extra
 	timeout = RepeatRate * 103 / 100 + 1;  // 3 % + 1 should presumably be enough
@@ -182,6 +176,8 @@ void cIrmpRemote::Action(void)
 	    FirstTime.Set();
 	} else { // repeat
 	    if (debug) printf("Repeat\n");
+	    if (RepeatRate > Delta)
+		RepeatRate = Delta; // autodetect repeat rate
 	    if (FirstTime.Elapsed() < (uint)Setup.RcRepeatDelay) {
 		if (debug) printf("continue Delay\n\n");
 		continue; // repeat function kicks in after a short delay
@@ -231,12 +227,6 @@ cPluginIrmplirc::cPluginIrmplirc(void)
 
 cPluginIrmplirc::~cPluginIrmplirc()
 {
-  //ioctl(fd, EVIOCGRAB, 0);
-/*  int fh = fd;
-  fd = -1;
-  Cancel();
-  if (fh >= 0)
-     close(fh);*/
 }
 
 const char *cPluginIrmplirc::CommandLineHelp(void)
