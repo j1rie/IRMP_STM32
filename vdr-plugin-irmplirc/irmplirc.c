@@ -12,7 +12,7 @@
 #include <vdr/thread.h>
 #include "protocols.h"
 
-static const char *VERSION        = "0.0.2";
+static const char *VERSION        = "0.0.3";
 static const char *DESCRIPTION    = tr("Send keypresses from IRMP HID-Device to VDR");
 
 const char* irmp_device = "/dev/irmp_stm32";
@@ -166,7 +166,7 @@ void cIrmpRemote::Action(void)
 	if (debug) printf("code: %016lX, lastcode: %016lX, toggle: %d, timeout: %d\n", code, lastcode, toggle, timeout);
 	// if the protocol toggles count == 0 is reliable, else regard same keys as new only after a timeout
 	if (toggle && buf[6] == 0 || !toggle && lastcode != code) { // new key
-	    if(debug) printf("Neuer\n");
+	    if (debug) printf("Neuer\n");
 	    if (repeat) {
 		if (debug) printf("put release for %016lX\n", lastcode);
 		Put(lastcode, false, true); // generated release for previous repeated key
