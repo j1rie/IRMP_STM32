@@ -1,0 +1,11 @@
+Dies ist ein Plugin fuer den Video Disk Recorder (VDR).
+
+Verfasst von:                      Joerg Riechardt <J.Riechardt@gmx.de>
+
+Projekt-Homepage:                  https://github.com/j1rie/IRMP_STM32_KBD/vdr-plugin-irmphidkbd
+
+Aktuelle Version verfuegbar unter: https://github.com/j1rie/IRMP_STM32_KBD/vdr-plugin-irmphidkbd
+
+Beschreibung: Das Plugin irmplirc sendet Tastatureingaben von einem IRMP HID-Geraet an VDR.
+
+Die einfachste Methode zum Erstellen von Tastenbelegungen in remote.conf ist die Verwendung des Tasten-Anlernprozesses von VDR.
