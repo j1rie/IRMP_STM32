@@ -320,8 +320,8 @@ FXIMPLEMENT(MainWindow, FXMainWindow, MainWindowMap, ARRAYNUMBER(MainWindowMap))
 MainWindow::MainWindow(FXApp *app)
 	: FXMainWindow(app, "IRMP STM32 Configuration", NULL, NULL, DECOR_ALL, 425, 39, 1050, 1030)  // for 1920x1080
 {
-	this->setIcon(new FXGIFIcon(app,Icon)); // for taskbar
-	this->setMiniIcon(new FXICOIcon(app,MiniIcon)); // for titlebar
+	this->setIcon(new FXGIFIcon(app,Icon,0,IMAGE_OPAQUE)); // for taskbar
+	this->setMiniIcon(new FXGIFIcon(app,Icon,0,IMAGE_OPAQUE)); // for titlebar
 	devices = NULL;
 	connected_device = NULL;
 
