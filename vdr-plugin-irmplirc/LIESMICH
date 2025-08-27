@@ -9,3 +9,5 @@ Aktuelle Version verfuegbar unter: https://github.com/j1rie/IRMP_STM32_KBD/vdr-p
 Beschreibung: Das Plugin irmplirc sendet Tastatureingaben von einem IRMP HID-Geraet an VDR.
 
 Die einfachste Methode zum Erstellen von Tastenbelegungen in remote.conf ist die Verwendung des Tasten-Anlernprozesses von VDR.
+
+irmplircd wird dann nicht mehr gebraucht.

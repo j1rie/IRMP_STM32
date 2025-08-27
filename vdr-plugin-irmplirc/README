@@ -9,3 +9,5 @@ Latest version available at: https://github.com/j1rie/IRMP_STM32/vdr-plugin-irmp
 Description: The 'irmplirc' plugin sends keypresses from a IRMP HID-Device to VDR.
 
 The easiest way for creating key mappings in remote.conf is to use VDR's key learning process.
+
+Than irmplircd is not needed any more.
