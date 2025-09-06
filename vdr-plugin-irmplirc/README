@@ -11,3 +11,5 @@ Description: The 'irmplirc' plugin sends keypresses from a IRMP HID-Device to VD
 The easiest way for creating key mappings in remote.conf is to use VDR's key learning process.
 
 Than irmplircd is not needed any more.
+
+If you use the vdr-plugin-softhddevice, you need to disable softhddevice's remote control function with -P'softhddevice ... -N'.

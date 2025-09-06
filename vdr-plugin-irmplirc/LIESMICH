@@ -11,3 +11,5 @@ Beschreibung: Das Plugin irmplirc sendet Tastatureingaben von einem IRMP HID-Ger
 Die einfachste Methode zum Erstellen von Tastenbelegungen in remote.conf ist die Verwendung des Tasten-Anlernprozesses von VDR.
 
 irmplircd wird dann nicht mehr gebraucht.
+
+Wenn man das vdr-plugin-softhddevice verwendet, muss die Fernbedienungsfunktion von softhddevice mit -P'softhddevice ... -N' deaktiviert werden.
