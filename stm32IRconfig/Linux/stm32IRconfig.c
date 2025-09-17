@@ -44,6 +44,7 @@ enum command {
 	CMD_STATUSLED,
 	CMD_NEOPIXEL,
 	CMD_SEND_AFTER_WAKEUP,
+	CMD_EEPROM_DIRTY,
 };
 
 enum status {
@@ -197,7 +198,7 @@ int main(int argc, const char **argv) {
 		printf("old firmware!\n");
 	puts("");
 
-cont:	printf("set: wakeups, macros, alarm, send_after_wakeup, commit on RP2xxx, statusled and neopixel(s)\nset by remote: wakeups and macros(q)\nget: wakeups, macros, send_after_wakeup, alarm, capabilities and raw eeprom from RP2xxx (g)\nreset: wakeups, macros, send_after_wakeup, alarm and eeprom (r)\nsend IR (i)\nreboot (b)\nmonitor until ^C (m)\nrun test (t)\nhid test (h)\nneopixel test (n)\nexit (x)\n");
+cont:	printf("set: wakeups, macros, alarm, send_after_wakeup, commit on RP2xxx, statusled and neopixel(s)\nset by remote: wakeups and macros(q)\nget: wakeups, macros, send_after_wakeup, alarm, capabilities, raw eeprom and dirty eeprom from RP2xxx (g)\nreset: wakeups, macros, send_after_wakeup, alarm and eeprom (r)\nsend IR (i)\nreboot (b)\nmonitor until ^C (m)\nrun test (t)\nhid test (h)\nneopixel test (n)\nexit (x)\n");
 	scanf("%s", &c);
 
 	switch (c) {
@@ -399,7 +400,7 @@ Set:		printf("set wakeup with remote control(w)\nset macro with remote control(m
 		break;
 
 	case 'g':
-get:		printf("get wakeup(w)\nget macro(m)\nget send_after_weakeup(x)\nget caps(c)\nget alarm(a)\nget raw eeprom from RP2xxx(p)\n");
+get:		printf("get wakeup(w)\nget macro(m)\nget send_after_weakeup(x)\nget caps(c)\nget alarm(a)\nget raw eeprom from RP2xxx(p)\nget dirty eeprom from RP2xxx(d)\n");
 		scanf("%s", &d);
 		memset(&outBuf[2], 0, sizeof(outBuf) - 2);
 		idx = 2;
@@ -490,6 +491,10 @@ again:			;
 				}
 				printf("\n");
 			}
+			break;
+		case 'd':
+			outBuf[idx++] = CMD_EEPROM_DIRTY;
+			write_and_check(idx, 5);
 			break;
 		default:
 			goto get;

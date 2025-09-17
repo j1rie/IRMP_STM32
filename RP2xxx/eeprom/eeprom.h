@@ -28,6 +28,8 @@
 #include <stdbool.h>
 #include <stdlib.h>
 
+extern bool _dirty;
+
 void eeprom_begin(size_t size, uint8_t sectors);
 uint8_t eeprom_read(int const address);
 void eeprom_write(int const address, uint8_t const val);

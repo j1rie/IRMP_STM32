@@ -98,6 +98,8 @@ enum command {
 	CMD_EEPROM_GET_RAW,
 	CMD_STATUSLED,
 	CMD_NEOPIXEL,
+	CMD_SEND_AFTER_WAKEUP,
+	CMD_EEPROM_DIRTY,
 };
 
 enum status {
@@ -519,7 +521,7 @@ MainWindow::MainWindow(FXApp *app)
 	read_cont_button->setHelpText("receive IR until pressed again");
 	upgrade_button->setHelpText("upgrade firmware");
 	reset_button->setHelpText("reset eeprom");
-	commit_button->setHelpText("RP2xxx: commit eeprom");
+	commit_button->setHelpText("RP2xxx: flash permanently into eeprom");
 	get_raw_button->setHelpText("RP2xxx: get eeprom raw");
 	days_text->setHelpText("enter days to be set");
 	hours_text->setHelpText("enter hours to be set");
@@ -563,6 +565,7 @@ MainWindow::MainWindow(FXApp *app)
 	send_button->disable();
 	read_cont_button->disable();
 	reboot_button->disable();
+	reset_button->disable();
 	commit_button->disable();
 	get_raw_button->disable();
 
@@ -600,6 +603,15 @@ MainWindow::onCmdQuit(FXObject *sender, FXSelector sel, void *ptr)
 {
 	if(map_text21->isModified()){
 		if(FXMessageBox::question(this,MBOX_YES_NO,tr("map was changed"),tr("Discard changes to map?"))==MBOX_CLICKED_NO) return 1;
+	}
+	if (uC == "RP2xxx") {
+		FXString s;
+		s.format("%x %x %x %x ", REPORT_ID_CONFIG_OUT, STAT_CMD, ACC_GET, CMD_EEPROM_DIRTY); // hex!
+		output_text->setText(s);
+		Write_and_Check(4, 5);
+		if(buf[4]){
+			if(FXMessageBox::question(this,MBOX_YES_NO,tr("eeprom was changed"),tr("Discard changes to eeprom? Otherwise press 'commit'"))==MBOX_CLICKED_NO) return 1;
+		}
 	}
 	getApp()->exit(0);
 	return 0;
@@ -883,6 +895,15 @@ MainWindow::onDisconnect(FXObject *sender, FXSelector sel, void *ptr)
 		return 1;
 	if(ReadIRcontActive)
 		onReadIRcont(NULL, 0, NULL);
+	if (uC == "RP2xxx") {
+		FXString s;
+		s.format("%x %x %x %x ", REPORT_ID_CONFIG_OUT, STAT_CMD, ACC_GET, CMD_EEPROM_DIRTY); // hex!
+		output_text->setText(s);
+		Write_and_Check(4, 5);
+		if(buf[4]){
+			if(FXMessageBox::question(this,MBOX_YES_NO,tr("eeprom was changed"),tr("Discard changes to eeprom? Otherwise press 'commit'"))==MBOX_CLICKED_NO) return 1;
+		}
+	}
 	hid_close(connected_device);
 	connected_device = NULL;
 	connected_label->setText("Disconnected");
@@ -1172,6 +1193,8 @@ MainWindow::onReadIRcont(FXObject *sender, FXSelector sel, void *ptr)
 		rmacro_button->disable();
 		ralarm_button->disable();
 		send_button->disable();
+		reset_button->disable();
+		commit_button->disable();
 		/* consume IR */
 		int read;
 		read = Read(7);
@@ -1210,6 +1233,8 @@ MainWindow::onReadIRcont(FXObject *sender, FXSelector sel, void *ptr)
 		rmacro_button->enable();
 		ralarm_button->enable();
 		send_button->enable();
+		commit_button->enable();
+		reset_button->enable();
 		ReadIRcontActive = 0;
 		read_cont_button->setBaseColor(storedBaseColor);
 		read_cont_button->setShadowColor(storedShadowColor);

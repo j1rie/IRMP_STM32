@@ -47,6 +47,7 @@ enum command {
 	CMD_STATUSLED,
 	CMD_NEOPIXEL,
 	CMD_SEND_AFTER_WAKEUP,
+	CMD_EEPROM_DIRTY,
 };
 
 enum status {
@@ -552,6 +553,10 @@ int8_t get_handler(uint8_t *buf)
 		break;
 	case CMD_SEND_AFTER_WAKEUP:
 		*((uint8_t*)&buf[4]) = get_send_after_wakeup();
+		ret += 1;
+		break;
+	case CMD_EEPROM_DIRTY:
+		buf[4] = _dirty;
 		ret += 1;
 		break;
 	default:

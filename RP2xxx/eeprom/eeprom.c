@@ -131,6 +131,8 @@ bool eeprom_commit() {
     //rp2040.resumeOtherCore();
     restore_interrupts(status);
 
+    _dirty = false;
+
     return res;
 }
 
