@@ -1,0 +1,45 @@
+# VDR plugin language source file.
+# This file is distributed under the same license as the VDR package.
+#
+msgid ""
+msgstr ""
+"Project-Id-Version: vdr-StatusLeds2irmplirc 0.4\n"
+"Report-Msgid-Bugs-To: <see README>\n"
+"POT-Creation-Date: 2025-10-03 16:58+0200\n"
+"PO-Revision-Date: 2007-08-11 12:34+0200\n"
+"Last-Translator: German <vdr@linuxtv.org>\n"
+"Language-Team: German <vdr@linuxtv.org>\n"
+"Language: de\n"
+"MIME-Version: 1.0\n"
+"Content-Type: text/plain; charset=ISO-8859-15\n"
+"Content-Transfer-Encoding: 8bit\n"
+
+msgid "show vdr status on irmplirc device"
+msgstr "VDR-Status ueber irmplirc Empfänger anzeigen"
+
+msgid "Setup.StatusLeds2irmplirc$Prewarn beep"
+msgstr "Vorwarn Signal"
+
+msgid "Setup.StatusLeds2irmplirc$Prewarn time (s)"
+msgstr "Vorwarnzeit (s)"
+
+msgid "Setup.StatusLeds2irmplirc$Prewarn Beeps"
+msgstr "Vorwarn Anzahl"
+
+msgid "Setup.StatusLeds2irmplirc$Prewarn Pause (100ms)"
+msgstr "Vorwarn Pause (100ms)"
+
+msgid "Setup.StatusLeds2irmplirc$Prewarn On time (100ms)"
+msgstr "Vorwarn Einschaltdauer (100ms)"
+
+msgid "Setup.StatusLeds2irmplirc$One blink per recording"
+msgstr "Pro Aufnahme einmal blinken"
+
+msgid "Setup.StatusLeds2irmplirc$On time (100ms)"
+msgstr "Einschaltdauer (100ms)"
+
+msgid "Setup.StatusLeds2irmplirc$On pause time (100ms)"
+msgstr "Pausendauer (100ms)"
+
+msgid "Setup.StatusLeds2irmplirc$Off time (100ms)"
+msgstr "Ausschaltdauer (100ms)"

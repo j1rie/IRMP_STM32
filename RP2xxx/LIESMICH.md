@@ -57,7 +57,7 @@ Eine Möglichkeit ist es, die Leiterbahn auf dem PCB zu durchtrennen:
 Der Pico(2) hat eine normale LED, der One und der Zero haben eine RGB LED, und der XIAO-RP2350 hat eine Duale und eine RGBW LED.  
 Zusätzlich kann eine externe LED oder externe RGB LED (WS2812 oder APA106) angeschlossen werden.  
 Diese zeigen an, was in der Firmware passiert.  
-Dann gibt es noch die Status LED (über hidraw angesteuert), die den Status des vdr-plugin-statusleds anzeigt (und beim Einschalten, beim Speichern des ersten Wakeups und bei Reboot blinkt).
+Dann gibt es noch die Status LED (über hidraw angesteuert), die den Status des vdr-plugin-statusleds2irmplirc anzeigt (und beim Einschalten, beim Speichern des ersten Wakeups und bei Reboot blinkt).
 
 | Empfänger             |  Board/Externe RGB-LED                       | Board/Externe LED  | Externe Status-LED                      |
 |-----------------------|----------------------------------------------|--------------------|-----------------------------------------|
@@ -73,7 +73,7 @@ Dann gibt es noch die Status LED (über hidraw angesteuert), die den Status des 
 | VDR nimmt auf         |  blinkt rot entsprechend Anzahl Aufnahmen(*) |                    | blinkt entsprechend Anzahl Aufnahmen(*) |
 | Konfigurationsbefehl  |  kurz grün                                   | kurz an            |                                         |
 
-(*) mit vdr-plugin-statusleds [3]
+(*) mit vdr-plugin-statusleds2irmplirc [3]
 
 ## Externe RGB-LEDs
 Es wird empfohlen, zwei Widerstände im Datenkabel zu verwenden, siehe http://stefanfrings.de/ws2812/.
@@ -82,4 +82,4 @@ Es wird empfohlen, zwei Widerstände im Datenkabel zu verwenden, siehe http://st
  \
 [1] Waveshare RP2040-One mit TSOP von clausmuus, siehe https://www.vdr-portal.de/forum/index.php?thread/123572-irmp-auf-stm32-ein-usb-ir-empf%C3%A4nger-sender-einschalter-mit-wakeup-timer/&postID=1361220#post1361220  
 [2] Waveshare RP2040-One mit TSOP von FireFly, siehe https://www.vdr-portal.de/forum/index.php?thread/132289-irmp-auf-stm32-ein-usb-hid-keyboard-ir-empf%C3%A4nger-sender-einschalter-mit-wakeup-t/&postID=1371419#post1371419  
-[3] https://github.com/j1rie/vdr-plugin-statusleds  
+[3] https://github.com/j1rie/vdr-plugin-statusleds2irmplirc  

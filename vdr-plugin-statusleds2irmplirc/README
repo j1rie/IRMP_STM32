@@ -1,0 +1,72 @@
+This is a "plugin" for the Video Disk Recorder (VDR).
+
+Written by:                  Bernd Juraschek <statusleds@bjusystems.de>
+                             Joerg Riechardt
+
+Description:
+
+This plugin shows the status of VDR via LED:
+when VDR starts, the LED is turned on;
+when VDR stops, the LED is turned off;
+if VDR is recording, the LED blinks (as often as recordings are active).
+
+The LED is controlled by a microcontroller, connected via USB (which serves also as IR-receiver for the remote, see https://github.com/j1rie/IRMP_STM32/blob/master/stm32IRstatusled/README).
+
+
+Requirements:
+=============
+
+- vdr 1.2.x (1.1.x should be work also)
+
+
+Installation and Compilation:
+=============================
+
+- cd $VDR/PLUGINS/src
+- Extract statusleds-*.tgz
+- ln -s statusleds-* statusleds
+- cd $VDR
+- make plugins
+
+
+Running the plugin:
+===================
+
+- Append -Pstatusleds to the vdr commandline 
+- Append plugin parameters, if you don't want to use the OSD
+
+  -d timing, --duration=timing    Sets the timing values in 100ms
+                                  Format: on-time,off-time,on-pause-time
+				  Default: 1,10,5
+
+  -p, --perrecordblinking         Enables record count siganlisation
+
+  -w, --prewarn                   warn before recording
+
+  -i, --irmlirc_device            irmlirc device (default /dev/irmp_stm32)
+  not needed, if you use the udev rule 70-irmp.rules
+
+How active recordings will be signaled:
+=======================================
+
+- If recordings are active, the led is blinking:
+  - Blinking per record is disabled:
+    - The led is on for on-time
+    - The led is off for off-time
+  - Blinking per record is enabled:
+    - The led is on for on-time and off for on-pause-time. This repeats
+      for each concurrent recording.
+    - The led is off for off-time
+- If no recording is active, the selected led is turned on
+
+OSD:
+====
+
+- The plugin is configurable via the OSD
+- There is an entry Settings->Plugins->statusleds2irmphidkbd
+
+PROBLEMS:
+=========
+
+- The command line switch -d seems not to be functional.
+- If vdr was killed with signal -9 during active recording the LED may remain on.

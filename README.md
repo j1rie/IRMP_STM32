@@ -127,7 +127,8 @@ Martin Neubauer for integration into EasyVDR, addon board development and sellin
 Alexander Grothe for integration into yaVDR and much help with difficult questions. [7]  
 Helmut Emmerich for selling ready-to-use receiver sets and user support. [8]  
 Claus Muus for integration into MLD. [9]  
-All Users for questions, feature requests, feedback and ideas  
+Bernd Juraschek for vdr-plugin-statusleds, which was the base for vdr-plugin-statusleds2irmphidkbd. [10]  
+All Users for questions, feature requests, feedback and ideas.  
 
 [1] https://www.mikrocontroller.net/articles/IRMP  
 [2] http://mikrocontroller.bplaced.net/wordpress/?page_id=744  
@@ -138,6 +139,7 @@ All Users for questions, feature requests, feedback and ideas
 [7] https://www.vdr-portal.de/user/24681-seahawk1986/  
 [8] https://www.vdr-portal.de/user/13499-emma53/  
 [9] https://www.vdr-portal.de/user/942-clausmuus/  
+[10] <statusleds@bjusystems.de>  
 
 ## Discussion and further information
 Comments, questions and suggestions can be sent to https://www.vdr-portal.de/forum/index.php?thread/123572-irmp-auf-stm32-ein-usb-ir-empf%C3%A4nger-sender-einschalter-mit-wakeup-timer/

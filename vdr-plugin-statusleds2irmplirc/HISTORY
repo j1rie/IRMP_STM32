@@ -1,0 +1,19 @@
+VDR Plugin 'statusleds2irmplirc' Revision History
+---------------------------------------------
+
+2025-10-02: Version 0.4
+
+- again warn before recording
+- improve translations
+
+2025-10-01: Version 0.3
+
+- simplify code, no led change after plugin stop
+
+2025-09-30: Version 0.2
+
+- remove console stuff,  improve translation
+
+2025-09-12: Version 0.1
+
+- Initial revision.

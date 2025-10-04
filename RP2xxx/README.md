@@ -56,7 +56,7 @@ One way is to cut the copper on the pcb:
 The pico(2) has a regular led, the one and the zero have an RGB led, and the XIAO-RP2350 has a dual and an RGBW led.  
 An external led or external RGB led (WS2812 or APA106) can be connected.  
 They show what is happening inside the firmware.  
-Then there is the Status LED (controlled over hidraw), which shows status messages from the vdr-plugin-statusleds (and blinks on power-on, storage of first wakeup and reboot).
+Then there is the Status LED (controlled over hidraw), which shows status messages from the vdr-plugin-statusleds2irmplirc (and blinks on power-on, storage of first wakeup and reboot).
 
 | Receiver              | Board/External RGB-LED                           | Board/External LED | External Status-LED                              |
 |-----------------------|--------------------------------------------------|--------------------|--------------------------------------------------|
@@ -72,7 +72,7 @@ Then there is the Status LED (controlled over hidraw), which shows status messag
 | VDR recording         | flashes red according to number of recordings(*) |                    | flashes according to number of recordings(*)     |
 | configuration command | short green                                      | short blink        |                                                  |
 
-(*) needs vdr-plugin-statusled [3]
+(*) needs vdr-plugin-statusleds2irmplirc [3]
 
 ## External RGB-LEDs
 It is recommended to use two resistors in the data cable, see http://stefanfrings.de/ws2812/.
@@ -81,4 +81,4 @@ It is recommended to use two resistors in the data cable, see http://stefanfring
   \
 [1] Waveshare RP2040-One with TSOP by clausmuus, see https://www.vdr-portal.de/forum/index.php?thread/123572-irmp-auf-stm32-ein-usb-ir-empf%C3%A4nger-sender-einschalter-mit-wakeup-timer/&postID=1361220#post1361220  
 [2] Waveshare RP2040-One with TSOP by FireFly, see https://www.vdr-portal.de/forum/index.php?thread/132289-irmp-auf-stm32-ein-usb-hid-keyboard-ir-empf%C3%A4nger-sender-einschalter-mit-wakeup-t/&postID=1371419#post1371419  
-[3] https://github.com/j1rie/vdr-plugin-statusleds  
+[3] https://github.com/j1rie/vdr-plugin-statusleds2irmplirc  
