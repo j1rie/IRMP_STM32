@@ -12,62 +12,46 @@
 #include <vdr/thread.h>
 #include "protocols.h"
 
-static const char *VERSION        = "0.0.3";
+static const char *VERSION        = "0.0.4";
 static const char *DESCRIPTION    = tr("Send keypresses from IRMP HID-Device to VDR");
 
 const char* irmp_device = "/dev/irmp_stm32";
 
 uint8_t debug = 1;
+int fd;
 
 #define RECONNECTDELAY 3000 // ms
+#define REPORT_ID_IR 1
 
 class cIrmpRemote : public cRemote, private cThread {
 private:
-  bool Connect(void);
   void Action(void);
   bool Ready();
-  int fd;
+  cMutex mutex;
+  cCondVar keyReceived;
+  uint64_t code;
 public:
   cIrmpRemote(const char *Name);
   ~cIrmpRemote();
+
+  void Receive(const uint64_t code_) {
+    //if(debug) printf("Receive code: %016lx\n", code);
+    cMutexLock MutexLock(&mutex);
+    code = code_;
+    keyReceived.Broadcast();
+  }
 };
 
 cIrmpRemote::cIrmpRemote(const char *Name)
 :cRemote(Name)
 ,cThread("IRMP_LIRC remote control")
 {
-  Connect();
   Start();
 }
 
 cIrmpRemote::~cIrmpRemote()
 {
-  Cancel();
-  //ioctl(fd, EVIOCGRAB, 0);
-  if (fd >= 0)
-     close(fd);
-  fd = -1;
-}
-
-bool cIrmpRemote::Connect()
-{
-  fd = open(irmp_device, O_RDONLY | O_NONBLOCK);
-  if(fd == -1){
-    if(debug) printf("Cannot open %s. %s.\n", irmp_device, strerror(errno));
-    esyslog("Cannot open %s. %s.\n", irmp_device, strerror(errno));
-    return false;
-  } else {
-    if(debug) printf("opened %s\n", irmp_device);
-    isyslog("opened %s\n", irmp_device);
-  }
-
-  /*if(ioctl(fd, EVIOCGRAB, 1)){
-    if(debug) printf("Cannot grab %s. %s.\n", kbd_device, strerror(errno));
-  } else {
-    if(debug) printf("Grabbed %s!\n", kbd_device);
-  }*/
-
-  return true;
+  Cancel(3);
 }
 
 bool cIrmpRemote::Ready(void)
@@ -80,51 +64,37 @@ void cIrmpRemote::Action(void)
   cTimeMs FirstTime;
   cTimeMs LastTime;
   cTimeMs ThisTime;
-  uint8_t buf[64];
   uint64_t magic = 0xFF01; // testen!
   uint8_t only_once = 1;
   bool release_needed = false;
   bool repeat = false;
-  int timeout = -1;
-  uint64_t code = 0, lastcode = 0;
+  int timeout = INT_MAX;
+  uint64_t lastcode = 0;
   int RepeatRate = 118;
-  unsigned int protocol = 0;
+  uint8_t protocol = 0, lastprotocol = 0, count = 0;
   bool toggle = false;
 
-  if(debug) printf("irmplirc action!\n");
+  if(debug) printf("IrmpRemote action!\n");
 
   while(Running()){
 
-    bool ready = fd >= 0 && cFile::FileReady(fd, timeout); // implizit mindestens 100 ms!!!
-    int ret = ready ? safe_read(fd, buf, sizeof(buf)) : -1;
+    cMutexLock MutexLock(&mutex);
+    if (keyReceived.TimedWait(mutex, timeout)) { // keypress
 
-    if (fd < 0 || ready && ret <= 0) {
-	esyslog("ERROR: irmplirc connection broken, trying to reconnect every %.1f seconds", float(RECONNECTDELAY) / 1000);
-	if (fd >= 0)
-	    close(fd);
-	fd = -1;
-	while (Running() && fd < 0) {
-	    cCondWait::SleepMs(RECONNECTDELAY);
-	    if (Connect()) {
-		isyslog("reconnected to irmplirc");
-		break;
-	    }
-	}
-    }
-
-    if (ready && ret > 0) { // keypress
-	code = *((uint64_t*)buf);
 	//if(debug) printf("code: %016lX\n", code);
+	protocol = (code & 0x000000000000FF00ull) >> 8;
+	//if(debug) printf("protocol: %02x\n", protocol);
 	code = ((code & 0x00000000FFFFFFFFull) << 32) | ((code & 0xFFFFFFFF00000000ull) >> 32); // make code look like IRMP data
 	code = ((code & 0x0000FFFF0000FFFFull) << 16) | ((code & 0xFFFF0000FFFF0000ull) >> 16);
-	//code = ((code & 0x00FF00FF00FF00FFull) << 8)  | ((code & 0xFF00FF00FF00FF00ull) >> 8);
 	code = ((code & 0x00FF0000000000FFull) << 8)  | ((code & 0xFF0000000000FF00ull) >> 8) | (code & 0x0000FFFFFFFF0000ull);
+	count = (code & 0x000000000000FF00ull) >> 8;
+	//if(debug) printf("count: %02x\n", count);
 	if(debug) printf("code neu: %016lX\n", code);
 	code = code & 0xFFFFFFFFFFFF0000ull; // remove flag repetition
 
-	if (buf[1] != protocol) { // new protocol, reset RepeatRate
+	if (protocol != lastprotocol) { // new protocol, reset RepeatRate
 	    RepeatRate = 118;
-	    protocol = buf[1];
+	    lastprotocol = protocol;
 	    if(debug) printf("protocol: %02d, %s\n", protocol, (const char *)protocols[protocol]);
 	    isyslog("protocol: %02d, %s\n", protocol, (const char *)protocols[protocol]);
 	}
@@ -135,7 +105,6 @@ void cIrmpRemote::Action(void)
 	    toggle = false;
 	}
 
-	//if(debug) printf("code: %016lX\n", code);
 	if(only_once && code == magic) {
 	    if(debug) printf("magic\n");
 	    FILE *out = fopen("/var/log/started_by_IRMP_STM32", "a");
@@ -153,19 +122,19 @@ void cIrmpRemote::Action(void)
 	timeout = RepeatRate * 103 / 100 + 1;  // 3 % + 1 should presumably be enough
 	if (protocol == 2) {
 	    timeout = 112; // NEC + APPLE + ONKYO first 40, than 108
-	    if(debug) printf("NEC detected, timeout set\n");
+	    //if(debug) printf("NEC detected, timeout set\n");
 	}
 	if (protocol == 61) {
 	    timeout = 155; // Sky+ 150
-	    if(debug) printf("Sky+ detected, timeout set\n");
+	    //if(debug) printf("Sky+ detected, timeout set\n");
 	}
 	if (protocol == 62) {
 	    timeout = 155; // Sky+ Pro 150
-	    if(debug) printf("Sky+ Pro detected, timeout set\n");
+	    //if(debug) printf("Sky+ Pro detected, timeout set\n");
 	}
 	if (debug) printf("code: %016lX, lastcode: %016lX, toggle: %d, timeout: %d\n", code, lastcode, toggle, timeout);
 	// if the protocol toggles count == 0 is reliable, else regard same keys as new only after a timeout
-	if (toggle && buf[6] == 0 || !toggle && lastcode != code) { // new key
+	if (toggle && count == 0 || !toggle && lastcode != code) { // new key
 	    if (debug) printf("Neuer\n");
 	    if (repeat) {
 		if (debug) printf("put release for %016lX\n", lastcode);
@@ -203,10 +172,92 @@ void cIrmpRemote::Action(void)
 	release_needed = false;
 	repeat = false;
 	lastcode = 0;
-	timeout = -1;
+	timeout = INT_MAX;
 	if (debug) printf("reset\n");
     }
     if (debug) printf("\n");
+  }
+}
+
+cIrmpRemote *myIrmpRemote = NULL;
+
+class cReadIR : public cThread {
+private:
+  bool Connect(void);
+  void Action(void);
+protected:
+public:
+  cReadIR();
+  ~cReadIR();
+};
+
+cReadIR::cReadIR(void)
+{
+  Connect();
+  Start();
+}
+
+cReadIR::~cReadIR()
+{
+  Cancel();
+  //ioctl(fd, EVIOCGRAB, 0);
+  if (fd >= 0)
+     close(fd);
+  fd = -1;
+}
+
+bool cReadIR::Connect()
+{
+  fd = open(irmp_device, O_RDONLY | O_NONBLOCK);
+  if(fd == -1){
+    if(debug) printf("Cannot open %s. %s.\n", irmp_device, strerror(errno));
+    esyslog("Cannot open %s. %s.\n", irmp_device, strerror(errno));
+    return false;
+  } else {
+    if(debug) printf("opened %s\n", irmp_device);
+    isyslog("opened %s\n", irmp_device);
+  }
+
+  /*if(ioctl(fd, EVIOCGRAB, 1)){
+    if(debug) printf("Cannot grab %s. %s.\n", kbd_device, strerror(errno));
+  } else {
+    if(debug) printf("Grabbed %s!\n", kbd_device);
+  }*/
+
+  return true;
+}
+
+void cReadIR::Action(void)
+{
+  uint8_t buf[64];
+
+  if(debug) printf("ReadIR action!\n");
+
+  while(Running()){
+
+    bool ready = fd >= 0 && cFile::FileReady(fd, -1); // implizit mindestens 100 ms!!! bei timeout 0, wenn was angekommen ist > 0
+    int ret = ready ? safe_read(fd, buf, sizeof(buf)) : -1; //  bei timeout, error -1, bei 0 bytes 0, sonst > 0
+
+    if (fd < 0 || ready && ret <= 0) { // kein fd oder error oder 0 bytes
+	esyslog("ERROR: irmplirc connection broken, trying to reconnect every %.1f seconds", float(RECONNECTDELAY) / 1000);
+	if (fd >= 0)
+	    close(fd);
+	fd = -1;
+	while (Running() && fd < 0) {
+	    cCondWait::SleepMs(RECONNECTDELAY);
+	    if (Connect()) {
+		isyslog("reconnected to irmplirc");
+		break;
+	    }
+	}
+    }
+
+    if (buf[0] == REPORT_ID_IR) {
+	//if(debug) printf("IR report: %016lx\n", *((uint64_t*)buf));
+	myIrmpRemote->Receive(*((uint64_t*)buf));
+    } else {
+	if(debug) printf("configuration report\n");
+    }
   }
 }
 
@@ -244,7 +295,7 @@ bool cPluginIrmplirc::ProcessArgs(int argc, char *argv[])
 
 bool cPluginIrmplirc::Start(void)
 {
-  new cIrmpRemote("IRMP_LIRC");
+  myIrmpRemote = new cIrmpRemote("IRMP_LIRC");
   return true;
 }
 
