@@ -296,6 +296,7 @@ bool cPluginIrmplirc::ProcessArgs(int argc, char *argv[])
 bool cPluginIrmplirc::Start(void)
 {
   myIrmpRemote = new cIrmpRemote("IRMP_LIRC");
+  new cReadIR();
   return true;
 }
 

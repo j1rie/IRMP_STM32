@@ -13,3 +13,8 @@ VDR Plugin 'irmplirc' Revision History
 
 - Further development
 - suitable for productive use
+
+2025-10-10: Version 0.0.4
+
+- implement thread to filter out config reports
+
