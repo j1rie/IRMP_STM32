@@ -12,13 +12,14 @@
 #include <vdr/thread.h>
 #include "protocols.h"
 
-static const char *VERSION        = "0.0.4";
+static const char *VERSION        = "0.0.5";
 static const char *DESCRIPTION    = tr("Send keypresses from IRMP HID-Device to VDR");
 
 const char* irmp_device = "/dev/irmp_stm32";
 
 uint8_t debug = 1;
 int fd;
+uint8_t buf[64];
 
 #define RECONNECTDELAY 3000 // ms
 #define REPORT_ID_IR 1
@@ -29,15 +30,12 @@ private:
   bool Ready();
   cMutex mutex;
   cCondVar keyReceived;
-  uint64_t code;
 public:
   cIrmpRemote(const char *Name);
   ~cIrmpRemote();
 
-  void Receive(const uint64_t code_) {
-    //if(debug) printf("Receive code: %016lx\n", code);
+  void Receive() {
     cMutexLock MutexLock(&mutex);
-    code = code_;
     keyReceived.Broadcast();
   }
 };
@@ -64,12 +62,13 @@ void cIrmpRemote::Action(void)
   cTimeMs FirstTime;
   cTimeMs LastTime;
   cTimeMs ThisTime;
-  uint64_t magic = 0xFF01; // testen!
+  cString magic_key = "FF0000000000"; // testen!
   uint8_t only_once = 1;
   bool release_needed = false;
   bool repeat = false;
   int timeout = INT_MAX;
-  uint64_t lastcode = 0;
+  cString key = "";
+  cString lastkey = "";
   int RepeatRate = 118;
   uint8_t protocol = 0, lastprotocol = 0, count = 0;
   bool toggle = false;
@@ -81,16 +80,19 @@ void cIrmpRemote::Action(void)
     cMutexLock MutexLock(&mutex);
     if (keyReceived.TimedWait(mutex, timeout)) { // keypress
 
-	//if(debug) printf("code: %016lX\n", code);
-	protocol = (code & 0x000000000000FF00ull) >> 8;
+	protocol = buf[1];
 	//if(debug) printf("protocol: %02x\n", protocol);
-	code = ((code & 0x00000000FFFFFFFFull) << 32) | ((code & 0xFFFFFFFF00000000ull) >> 32); // make code look like IRMP data
-	code = ((code & 0x0000FFFF0000FFFFull) << 16) | ((code & 0xFFFF0000FFFF0000ull) >> 16);
-	code = ((code & 0x00FF0000000000FFull) << 8)  | ((code & 0xFF0000000000FF00ull) >> 8) | (code & 0x0000FFFFFFFF0000ull);
-	count = (code & 0x000000000000FF00ull) >> 8;
+	count = buf[6];
 	//if(debug) printf("count: %02x\n", count);
-	if(debug) printf("code neu: %016lX\n", code);
-	code = code & 0xFFFFFFFFFFFF0000ull; // remove flag repetition
+	key = "";
+	for(int i = 0; i < 5; i++) {
+	    char str[3];
+	    sprintf(str, "%02x", buf[i]);
+	    //if(debug) printf("buf[%d]: %s\n", i, str);
+	    key.Append(str);
+	}
+	key.Append("00");
+	//if(debug) printf("key: %s\n", (const char*)key);
 
 	if (protocol != lastprotocol) { // new protocol, reset RepeatRate
 	    RepeatRate = 118;
@@ -105,7 +107,7 @@ void cIrmpRemote::Action(void)
 	    toggle = false;
 	}
 
-	if(only_once && code == magic) {
+	if(only_once && strcmp(key, magic_key) == 0) {
 	    if(debug) printf("magic\n");
 	    FILE *out = fopen("/var/log/started_by_IRMP_STM32", "a");
 	    time_t date = time(NULL);
@@ -132,15 +134,15 @@ void cIrmpRemote::Action(void)
 	    timeout = 155; // Sky+ Pro 150
 	    //if(debug) printf("Sky+ Pro detected, timeout set\n");
 	}
-	if (debug) printf("code: %016lX, lastcode: %016lX, toggle: %d, timeout: %d\n", code, lastcode, toggle, timeout);
+            if (debug) printf("key: %s, lastkey: %s, toggle: %d, timeout: %d\n", (const char*)key, (const char*)lastkey, toggle, timeout);
 	// if the protocol toggles count == 0 is reliable, else regard same keys as new only after a timeout
-	if (toggle && count == 0 || !toggle && lastcode != code) { // new key
+            if (toggle && count == 0 || !toggle && strcmp(key, lastkey) != 0) { // new key
 	    if (debug) printf("Neuer\n");
 	    if (repeat) {
-		if (debug) printf("put release for %016lX\n", lastcode);
-		Put(lastcode, false, true); // generated release for previous repeated key
+                    if (debug) printf("put release for %s\n", (const char*)lastkey);
+                    Put(lastkey, false, true); // generated release for previous repeated key
 	    }
-	    lastcode = code;
+	    lastkey = key;
 	    repeat = false;
 	    FirstTime.Set();
 	} else { // repeat
@@ -161,17 +163,17 @@ void cIrmpRemote::Action(void)
 	/* send key */
 	if(debug) printf("delta send: %ld\n", LastTime.Elapsed());
 	LastTime.Set();
-	Put(code, repeat);
+	Put(key, repeat);
 	release_needed = true;
 
     } else { // no key within timeout
 	if (release_needed && repeat) {
-	    if(debug) printf("put release for %016lX, delta %ld\n", lastcode, ThisTime.Elapsed());
-	    Put(lastcode, false, true);
+                if(debug) printf("put release for %s, delta %ld\n", (const char *)lastkey, ThisTime.Elapsed());
+	    Put(lastkey, false, true);
 	}
 	release_needed = false;
 	repeat = false;
-	lastcode = 0;
+	lastkey = "";
 	timeout = INT_MAX;
 	if (debug) printf("reset\n");
     }
@@ -229,8 +231,6 @@ bool cReadIR::Connect()
 
 void cReadIR::Action(void)
 {
-  uint8_t buf[64];
-
   if(debug) printf("ReadIR action!\n");
 
   while(Running()){
@@ -254,7 +254,7 @@ void cReadIR::Action(void)
 
     if (buf[0] == REPORT_ID_IR) {
 	//if(debug) printf("IR report: %016lx\n", *((uint64_t*)buf));
-	myIrmpRemote->Receive(*((uint64_t*)buf));
+	myIrmpRemote->Receive();
     } else {
 	if(debug) printf("configuration report\n");
     }
