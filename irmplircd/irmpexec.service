@@ -1,5 +1,5 @@
 [Unit]
-Description="Start irmpexec on irmp_stm32 device"
+Description="irmpexec on irmp_stm32 device"
 Requisite=dev-irmp_stm32.device
 After=irmplircd.service
 

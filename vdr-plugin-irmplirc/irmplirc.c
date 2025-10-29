@@ -11,8 +11,9 @@
 #include <vdr/remote.h>
 #include <vdr/thread.h>
 #include "protocols.h"
+#include <locale.h>
 
-static const char *VERSION        = "0.0.5";
+static const char *VERSION        = "0.0.6";
 static const char *DESCRIPTION    = tr("Send keypresses from IRMP HID-Device to VDR");
 
 const char* irmp_device = "/dev/irmp_stm32";
@@ -33,7 +34,6 @@ private:
 public:
   cIrmpRemote(const char *Name);
   ~cIrmpRemote();
-
   void Receive() {
     cMutexLock MutexLock(&mutex);
     keyReceived.Broadcast();
@@ -62,7 +62,7 @@ void cIrmpRemote::Action(void)
   cTimeMs FirstTime;
   cTimeMs LastTime;
   cTimeMs ThisTime;
-  cString magic_key = "FF0000000000"; // testen!
+  cString magic_key = "ff0000000000";
   uint8_t only_once = 1;
   bool release_needed = false;
   bool repeat = false;
@@ -80,41 +80,37 @@ void cIrmpRemote::Action(void)
     cMutexLock MutexLock(&mutex);
     if (keyReceived.TimedWait(mutex, timeout)) { // keypress
 
-	protocol = buf[1];
-	//if(debug) printf("protocol: %02x\n", protocol);
-	count = buf[6];
-	//if(debug) printf("count: %02x\n", count);
-	key = "";
-	for(int i = 0; i < 5; i++) {
-	    char str[3];
-	    sprintf(str, "%02x", buf[i]);
-	    //if(debug) printf("buf[%d]: %s\n", i, str);
-	    key.Append(str);
+	key = cString::sprintf("%02hhx%02hhx%02hhx%02hhx%02hhx00", buf[1],buf[3],buf[2],buf[5],buf[4]);
+
+	if(only_once && strcmp(key, magic_key) == 0) {
+	    FILE *out = fopen("/var/log/started_by_IRMP_STM32", "a");
+	    setlocale(LC_TIME, "de_DE.UTF-8");
+	    time_t date = time(NULL);
+	    struct tm *ts = localtime(&date);
+	    char outstr[30];
+	    strftime(outstr, sizeof(outstr), "%a %e. %b %H:%M:%S %Z %Y", ts); // wie date
+	    fprintf(out, "%s\n", outstr);
+	    fclose(out);
+	    isyslog("irmplircd: started by IRMP_LIRC\n");
+	    only_once = 0;
 	}
-	key.Append("00");
-	//if(debug) printf("key: %s\n", (const char*)key);
+
+	if (buf[1] == 0xFF) continue; // ignore magic
+
+	protocol = buf[1];
+	count = buf[6];
 
 	if (protocol != lastprotocol) { // new protocol, reset RepeatRate
 	    RepeatRate = 118;
 	    lastprotocol = protocol;
-	    if(debug) printf("protocol: %02d, %s\n", protocol, (const char *)protocols[protocol]);
-	    isyslog("protocol: %02d, %s\n", protocol, (const char *)protocols[protocol]);
+	    if(debug) printf("protocol: %02x, %s\n", protocol, (const char *)protocols[protocol]);
+	    isyslog("irmplircd: protocol: %02x, %s\n", protocol, (const char *)protocols[protocol]);
 	}
 
 	if (protocol == 6 || protocol == 7 || protocol == 9 || protocol == 12 || protocol == 21 || protocol == 30 || protocol == 45 || protocol == 55) { // RECS80, RC5, RC6, RECS80EXT, RC6A, THOMSON, (S100), METZ
 	    toggle = true;
 	} else {
 	    toggle = false;
-	}
-
-	if(only_once && strcmp(key, magic_key) == 0) {
-	    if(debug) printf("magic\n");
-	    FILE *out = fopen("/var/log/started_by_IRMP_STM32", "a");
-	    time_t date = time(NULL);
-	    struct tm *ts = localtime(&date);
-	    fprintf(out, "%s", asctime(ts));
-	    fclose(out);
-	    only_once = 0;
 	}
 
 	int Delta = ThisTime.Elapsed(); // the time between two consecutive events
@@ -134,13 +130,15 @@ void cIrmpRemote::Action(void)
 	    timeout = 155; // Sky+ Pro 150
 	    //if(debug) printf("Sky+ Pro detected, timeout set\n");
 	}
-            if (debug) printf("key: %s, lastkey: %s, toggle: %d, timeout: %d\n", (const char*)key, (const char*)lastkey, toggle, timeout);
+
+	if (debug) printf("key: %s, lastkey: %s, toggle: %d, timeout: %d\n", (const char*)key, (const char*)lastkey, toggle, timeout);
+
 	// if the protocol toggles count == 0 is reliable, else regard same keys as new only after a timeout
-            if (toggle && count == 0 || !toggle && strcmp(key, lastkey) != 0) { // new key
+	if (toggle && count == 0 || !toggle && strcmp(key, lastkey) != 0) { // new key
 	    if (debug) printf("Neuer\n");
 	    if (repeat) {
-                    if (debug) printf("put release for %s\n", (const char*)lastkey);
-                    Put(lastkey, false, true); // generated release for previous repeated key
+		if (debug) printf("put release for %s\n", (const char*)lastkey);
+		Put(lastkey, false, true); // generated release for previous repeated key
 	    }
 	    lastkey = key;
 	    repeat = false;
@@ -155,7 +153,7 @@ void cIrmpRemote::Action(void)
 	    }
 	    if (LastTime.Elapsed() < (uint)Setup.RcRepeatDelta) {
 		if (debug)  printf("continue Delta\n\n");
-                 continue; // skip same keys coming in too fast
+                continue; // skip same keys coming in too fast
 	    }
 	    repeat = true;
 	}
@@ -163,12 +161,13 @@ void cIrmpRemote::Action(void)
 	/* send key */
 	if(debug) printf("delta send: %ld\n", LastTime.Elapsed());
 	LastTime.Set();
+	if (debug) printf("put %s %s\n", (const char*)key, repeat ? "" : "Repeat");
 	Put(key, repeat);
 	release_needed = true;
 
     } else { // no key within timeout
 	if (release_needed && repeat) {
-                if(debug) printf("put release for %s, delta %ld\n", (const char *)lastkey, ThisTime.Elapsed());
+	    if(debug) printf("put release for %s, delta %ld\n", (const char *)lastkey, ThisTime.Elapsed());
 	    Put(lastkey, false, true);
 	}
 	release_needed = false;
@@ -217,7 +216,7 @@ bool cReadIR::Connect()
     return false;
   } else {
     if(debug) printf("opened %s\n", irmp_device);
-    isyslog("opened %s\n", irmp_device);
+    isyslog("irmplircd: opened %s\n", irmp_device);
   }
 
   /*if(ioctl(fd, EVIOCGRAB, 1)){

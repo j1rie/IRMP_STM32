@@ -1,5 +1,5 @@
 [Unit]
-Description=Start irmplircd on irmp_stm32 device
+Description=irmplircd on irmp_stm32 device
 Requisite=dev-irmp_stm32.device
 After=dev-irmp_stm32.device
 
