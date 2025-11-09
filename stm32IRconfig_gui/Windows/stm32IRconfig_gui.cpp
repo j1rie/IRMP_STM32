@@ -320,7 +320,7 @@ FXDEFMAP(MainWindow) MainWindowMap [] = {
 FXIMPLEMENT(MainWindow, FXMainWindow, MainWindowMap, ARRAYNUMBER(MainWindowMap));
 
 MainWindow::MainWindow(FXApp *app)
-	: FXMainWindow(app, "IRMP STM32 Configuration", NULL, NULL, DECOR_ALL, 425, 39, 1050, 1030)  // for 1920x1080
+	: FXMainWindow(app, "IRMP STM32 Configuration                 (Version: " + (FXString)DATE_STR + ")", NULL, NULL, DECOR_ALL, 425, 39, 1050, 1030) // for 1920x1080
 {
 	this->setIcon(new FXGIFIcon(app,Icon,0,IMAGE_OPAQUE)); // for taskbar
 	this->setMiniIcon(new FXGIFIcon(app,Icon,0,IMAGE_OPAQUE)); // for titlebar
@@ -771,7 +771,8 @@ MainWindow::onConnect(FXObject *sender, FXSelector sel, void *ptr)
 		reboot_button->enable();
 	}
 
-	//list wakeups, macros and alarm and warn if no STM32
+	//list version, wakeups, macros and alarm and warn if no STM32
+	u += "Version: " + (FXString)DATE_STR + "\n";
 	for(int i = 0; i < wakeupslots; i++) {
 #if (FOX_MINOR >= 7)
 		t.fromInt(i,16);

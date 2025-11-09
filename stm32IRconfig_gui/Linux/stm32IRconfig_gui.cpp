@@ -774,8 +774,7 @@ MainWindow::onConnect(FXObject *sender, FXSelector sel, void *ptr)
 	}
 
 	//list version, wakeups, macros and alarm and warn if no STM32
-	u += "Version: " + (FXString)DATE_STR;
-	u += "\n";
+	u += "Version: " + (FXString)DATE_STR + "\n";
 	for(int i = 0; i < wakeupslots; i++) {
 #if (FOX_MINOR >= 7)
 		t.fromInt(i,16);
