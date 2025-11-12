@@ -697,10 +697,10 @@ void check_wakeups(IRMP_DATA *ir)
 void reboot(void)
 {
 	fast_toggle();
-#ifdef PICO_DEFAULT_LED_PIN
-	reset_usb_boot(PICO_DEFAULT_LED_PIN, 0);
+#ifdef PICO_DEFAULT_LED_PIN // Pico(2), Seeed XIAO RP2350
+	reset_usb_boot(1<<PICO_DEFAULT_LED_PIN | 1<<EXTLED_GPIO | 1<<STATUSLED_GPIO, 0);
 #else
-	reset_usb_boot(0, 0);
+	reset_usb_boot(1<<EXTLED_GPIO | 1<<STATUSLED_GPIO, 0);
 #endif
 }
 
