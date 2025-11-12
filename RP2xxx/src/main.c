@@ -479,6 +479,7 @@ void Wakeup(void)
 	send_after_wakeup = get_send_after_wakeup();
 }
 
+#if (0)
 void store_new_wakeup(void)
 {
 	int8_t loop;
@@ -499,6 +500,7 @@ void store_new_wakeup(void)
 		}
 	}
 }
+#endif
 
 int8_t get_handler(uint8_t *buf)
 {
