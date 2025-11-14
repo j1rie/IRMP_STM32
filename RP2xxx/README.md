@@ -5,7 +5,7 @@
 <img src="https://www.vdr-portal.de/index.php?attachment/49236-ir-sensor-2-jpg" width="60%"> [2]  
 
 For boards with the RP2xxx, e.g. the Raspberry Pi Pico, Pico2 and many others.  
-This is additional information, basic information in https://github.com/j1rie/IRMP_STM32#readme.
+This is additional information, basic information in https://github.com/j1rie/IRMP_STM32/blob/master/README.md.
 
 ## Flashing the firmware
 Disconnect from USB.
