@@ -231,7 +231,6 @@ IRMP_RC6A28_PROTOCOL,
 };
 
 uint32_t AlarmValue = 0xFFFFFFFF;
-volatile unsigned int systicks = 0;
 volatile unsigned int i = 0;
 uint8_t Reboot = 0;
 //volatile uint32_t boot_flag __attribute__((__section__(".noinit")));
@@ -411,7 +410,6 @@ void store_wakeup(IRMP_DATA *ir)
 
 void SysTick_Handler(void)
 {
-	systicks++;
 	if (i == 999) {
 		if (AlarmValue)
 			AlarmValue--;
