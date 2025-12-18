@@ -297,6 +297,17 @@
 #endif
 
 /*---------------------------------------------------------------------------------------------------------------------------------------------------
+ * Autodetect repeat rate
+ * For precise detection of fast key repetitions
+ * F_CPU >= 200 MHz recommended
+ *---------------------------------------------------------------------------------------------------------------------------------------------------
+ */
+#ifndef IRMP_AUTODETECT_REPEATRATE
+#  define IRMP_AUTODETECT_REPEATRATE            1                       // 1: autodetect repeat rate. 0: do not. default is 0
+#  define JITTER_COMPENSATION                   3                       // percent, increase for remote controls with big jitter
+#endif
+
+/*---------------------------------------------------------------------------------------------------------------------------------------------------
  * Use ChibiOS Events to signal that valid IR data was received
  *---------------------------------------------------------------------------------------------------------------------------------------------------
  */

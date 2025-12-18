@@ -8,6 +8,7 @@
  */
 
 #include "usb_hid.h"
+#include "irmp.h"
 
 uint8_t *bufptr; // maybe copying the data into buf would be better? but using this pointer works fine
 //uint8_t buf[BUFFER_SIZE]; // for configuration data
@@ -25,6 +26,17 @@ void USB_HID_SendData(uint8_t Report_ID, uint8_t *ptr, uint8_t len)
 		/* Windows needs HID_IN_REPORT_COUNT, for linux SIZEOF_IR + 1 is sufficient */
 		uint8_t buf[HID_IN_REPORT_COUNT - 1] = {0};
 		memcpy(buf, ptr, SIZEOF_IR);
+		buf[62] = delta;
+		buf[61] = min_delta;
+		buf[60] = timeout;
+		buf[59] = (keep_same_key && !timeout) ? 1 : 0;
+		buf[58] = upper_border;
+		//buf[57] = 
+		//buf[56] = 
+		//buf[55] = 
+		//buf[54] = 
+		buf[53] = keep_same_key;
+
 		tud_hid_report(Report_ID, buf, HID_IN_REPORT_COUNT - 1);
 	}
 	else if (Report_ID == REPORT_ID_CONFIG_IN)

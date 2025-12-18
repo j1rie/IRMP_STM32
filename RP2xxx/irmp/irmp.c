@@ -55,7 +55,7 @@
 #  define IRMP_SUPPORT_SERIAL                       0
 #endif
 
-#define IRMP_KEY_REPETITION_LEN                 (uint_fast16_t)(F_INTERRUPTS * 150.0e-3 + 0.5)           // autodetect key repetition within 151 msec
+#define IRMP_KEY_REPETITION_LEN                 (uint_fast16_t)(F_INTERRUPTS * 150.0e-3 + 0.5)           // autodetect key repetition within 150 msec
 
 #define MIN_TOLERANCE_00                        1.0                           // -0%
 #define MAX_TOLERANCE_00                        1.0                           // +0%
@@ -2464,6 +2464,16 @@ static volatile uint_fast16_t                   irmp_command;
 static volatile uint_fast16_t                   irmp_id;                // only used for SAMSUNG protocol
 static volatile uint_fast8_t                    irmp_flags;
 // static volatile uint_fast8_t                 irmp_busy_flag;
+#if IRMP_AUTODETECT_REPEATRATE
+volatile uint_fast16_t                          delta_detection = 0;    // interval between two detections in ticks
+volatile uint_fast8_t                           delta = 0;              // interval between two detections in ms
+volatile uint_fast8_t                           min_delta = 254 * 100 / (100 + JITTER_COMPENSATION);  // detected repeat rate 
+static volatile uint_fast8_t                    previous_irmp_protocol = 0;
+volatile uint_fast8_t                           same_key = 0;
+volatile uint_fast8_t                           keep_same_key = 0;      // (for debug)
+volatile uint_fast8_t                           timeout;
+volatile uint_fast8_t                           upper_border = 255;     // (for debug)
+#endif
 
 #if defined(__MBED__)
 // DigitalIn inputPin(IRMP_PIN, PullUp);                                // this requires mbed.h and source to be compiled as cpp
@@ -2834,6 +2844,30 @@ irmp_get_data (IRMP_DATA * irmp_data_p)
             irmp_data_p->protocol = irmp_protocol;
             irmp_data_p->address  = irmp_address;
             irmp_data_p->command  = irmp_command;
+
+#if IRMP_AUTODETECT_REPEATRATE
+                    if (irmp_protocol != previous_irmp_protocol){
+                        min_delta = 254 * 100 / (100 + JITTER_COMPENSATION); // reset
+                    }
+                    previous_irmp_protocol = irmp_protocol;
+                    uint_fast16_t tmp_delta = (delta_detection * (1000000 / F_INTERRUPTS)) / 1000; // ms
+                    if (tmp_delta > 0xFF ) // timeout
+                        delta = 255; 
+                    else
+                        delta = tmp_delta; 
+                    delta_detection = 0;
+                    if (!(irmp_param.protocol == IRMP_NEC_PROTOCOL && delta < 75)) { // if NEC, ignore first short interval
+                        if (delta < min_delta)
+                            min_delta = delta;
+                    }
+                    upper_border = min_delta * (100 + JITTER_COMPENSATION) / 100 + 1;
+                    timeout = (delta >= upper_border) /*|| (delta <=  min_delta * (100 - JITTER_COMPENSATION) / 100 - 1)*/; // TODO: does the second part make sense? use average delta?
+                    if (same_key && !timeout)
+                        irmp_flags |= IRMP_FLAG_REPETITION;
+                    keep_same_key = same_key;
+                    same_key = 0;
+#endif
+
             irmp_data_p->flags    = irmp_flags;
         }
         else
@@ -3246,6 +3280,11 @@ irmp_ISR (void)
 #endif // IRMP_USE_CALLBACK == 1
 
     irmp_log(irmp_input);                                                       // log ir signal, if IRMP_LOGGING defined
+
+#if IRMP_AUTODETECT_REPEATRATE
+    if (delta_detection < 0xFFFF)
+        delta_detection++;
+#endif
 
     if (! irmp_ir_detected)                                                     // ir code already detected?
     {                                                                           // no...
@@ -5495,11 +5534,15 @@ irmp_ISR (void)
                 {
                     if (last_irmp_command == irmp_tmp_command &&
                         last_irmp_address == irmp_tmp_address &&
+#ifdef IRMP_AUTODETECT_REPEATRATE
+                        irmp_protocol == previous_irmp_protocol)
+                        same_key = 1; 
+#else
                         key_repetition_len < IRMP_KEY_REPETITION_LEN) // time after data frame, not total since start
                     {
                         irmp_flags |= IRMP_FLAG_REPETITION;
                     }
-
+#endif
                     last_irmp_address   = irmp_tmp_address;                          // store as last address, too
                     last_irmp_command   = irmp_tmp_command;                          // store as last command, too
 

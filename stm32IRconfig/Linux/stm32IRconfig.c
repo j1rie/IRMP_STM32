@@ -657,7 +657,7 @@ monit:	while(true) {
 			printf("converted to protocoladdresscommandflag:\n\t");
 			//printf("%02hhx%02hhx%02hhx%02hhx%02hhx%02hhx", inBuf[1],inBuf[3],inBuf[2],inBuf[5],inBuf[4],inBuf[6]);
 			//printf("%02hhx%02hhx%02hhx%02hhx%02hhx%02hhx   delta: %d min_delta: %d max_delta: %d repeat detected: %d delta_isr_min: %d delta_isr_max: %d diff_isr: %d delta_detection: %d repeat: %d dd*f: %d", inBuf[1],inBuf[3],inBuf[2],inBuf[5],inBuf[4],inBuf[6],  inBuf[63], inBuf[62], inBuf[61], inBuf[60], inBuf[59], inBuf[58], inBuf[57], inBuf[55] * 0xFF + inBuf[56], inBuf[54], (inBuf[55] * 0xFF + inBuf[56]) * 52);
-			printf("%02hhx%02hhx%02hhx%02hhx%02hhx%02hhx   delta: %d min_delta: %d same key: %d timeout: %d repeat detected: %d", inBuf[1],inBuf[3],inBuf[2],inBuf[5],inBuf[4],inBuf[6], inBuf[63], inBuf[62], inBuf[54], inBuf[61],  inBuf[60]);
+			printf("%02hhx%02hhx%02hhx%02hhx%02hhx%02hhx   delta: %d min_delta: %d upper_border: %d same key: %d timeout: %d repeat detected: %d", inBuf[1],inBuf[3],inBuf[2],inBuf[5],inBuf[4],inBuf[6], inBuf[63], inBuf[62], inBuf[59], inBuf[54], inBuf[61],  inBuf[60]);
 			printf("\n\n");
 		}
 	}
