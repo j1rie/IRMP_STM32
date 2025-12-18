@@ -23,6 +23,8 @@
 #include "timestamp.h"
 #include "pico/bootrom.h"
 #include "ws2812.h"
+#include <hardware/vreg.h>
+
 extern void put_pixel(uint8_t red, uint8_t green, uint8_t blue);
 
 #define BYTES_PER_QUERY	(HID_IN_REPORT_COUNT - 4)
@@ -756,6 +758,10 @@ int main(void)
 	uint8_t last_magic_sent = 0;
 	uint8_t old_usb_state_color = usb_state_color;
 
+#if PICO_RP2350 // overclock  a little
+	vreg_set_voltage(VREG_VOLTAGE_1_15);
+	set_sys_clock_khz(200000, true);
+#endif
 	board_init();
 	LED_Switch_init();
 	Systick_Init();
