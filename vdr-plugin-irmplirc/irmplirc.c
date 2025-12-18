@@ -16,14 +16,13 @@
 static const char *VERSION        = "0.0.6";
 static const char *DESCRIPTION    = tr("Send keypresses from IRMP HID-Device to VDR");
 
-const char* irmp_device = "/dev/irmp_stm32";
-
-uint8_t debug = 1;
-int fd;
-uint8_t buf[64];
-
+#define DEBUG 1
 #define RECONNECTDELAY 3000 // ms
 #define REPORT_ID_IR 1
+
+const char* irmp_device = "/dev/irmp_stm32";
+int fd;
+uint8_t buf[64];
 
 class cIrmpRemote : public cRemote, private cThread {
 private:
@@ -69,11 +68,11 @@ void cIrmpRemote::Action(void)
   int timeout = INT_MAX;
   cString key = "";
   cString lastkey = "";
-  int RepeatRate = 118;
   uint8_t protocol = 0, lastprotocol = 0, count = 0;
-  bool toggle = false;
+  uint8_t min_delta = 255;
+  uint8_t delta =255;
 
-  if(debug) printf("IrmpRemote action!\n");
+  if(DEBUG) printf("IrmpRemote action!\n");
 
   while(Running()){
 
@@ -99,84 +98,65 @@ void cIrmpRemote::Action(void)
 
 	protocol = buf[1];
 	count = buf[6];
+	timeout = buf[59];
 
-	if (protocol != lastprotocol) { // new protocol, reset RepeatRate
-	    RepeatRate = 118;
+	min_delta = buf[62];
+	delta = buf[63];
+	if (delta < 111 || (delta > 117 && delta < 255) || min_delta < 111 || (min_delta > 117 && min_delta < 255)) isyslog("irmplircd: /////////////  ACHTUNG  \\\\\\\\\\\\  delta: %d min_delta: %d\n", delta, min_delta); // kommt raus nach Testen
+
+	if (protocol != lastprotocol) { // new protocol
 	    lastprotocol = protocol;
-	    if(debug) printf("protocol: %02x, %s\n", protocol, (const char *)protocols[protocol]);
+	    if(DEBUG) printf("protocol: %02x, %s\n", protocol, (const char *)protocols[protocol]);
 	    isyslog("irmplircd: protocol: %02x, %s\n", protocol, (const char *)protocols[protocol]);
 	}
 
-	if (protocol == 6 || protocol == 7 || protocol == 9 || protocol == 12 || protocol == 21 || protocol == 30 || protocol == 45 || protocol == 55) { // RECS80, RC5, RC6, RECS80EXT, RC6A, THOMSON, (S100), METZ
-	    toggle = true;
-	} else {
-	    toggle = false;
-	}
-
 	int Delta = ThisTime.Elapsed(); // the time between two consecutive events
-	if (debug) printf("Delta: %d\n", Delta);
+	if (DEBUG) printf("Delta: %d\n", Delta);
 	ThisTime.Set();
-	// don't set own timeout for each protocol, because some are unknown and it is too error prone, so prefer autodetect and treat NEC and Sky+ extra
-	timeout = RepeatRate * 103 / 100 + 1;  // 3 % + 1 should presumably be enough
-	if (protocol == 2) {
-	    timeout = 112; // NEC + APPLE + ONKYO first 40, than 108
-	    //if(debug) printf("NEC detected, timeout set\n");
-	}
-	if (protocol == 61) {
-	    timeout = 155; // Sky+ 150
-	    //if(debug) printf("Sky+ detected, timeout set\n");
-	}
-	if (protocol == 62) {
-	    timeout = 155; // Sky+ Pro 150
-	    //if(debug) printf("Sky+ Pro detected, timeout set\n");
-	}
 
-	if (debug) printf("key: %s, lastkey: %s, toggle: %d, timeout: %d\n", (const char*)key, (const char*)lastkey, toggle, timeout);
+	if (DEBUG) printf("key: %s, lastkey: %s, timeout: %d\n", (const char*)key, (const char*)lastkey, timeout);
 
-	// if the protocol toggles count == 0 is reliable, else regard same keys as new only after a timeout
-	if (toggle && count == 0 || !toggle && strcmp(key, lastkey) != 0) { // new key
-	    if (debug) printf("Neuer\n");
+	if (count == 0) { // new key
+	    if (DEBUG) printf("new key\n");
 	    if (repeat) {
-		if (debug) printf("put release for %s\n", (const char*)lastkey);
+		if (DEBUG) printf("put release for %s\n", (const char*)lastkey);
 		Put(lastkey, false, true); // generated release for previous repeated key
 	    }
 	    lastkey = key;
 	    repeat = false;
 	    FirstTime.Set();
 	} else { // repeat
-	    if (debug) printf("Repeat\n");
-	    if (RepeatRate > Delta)
-		RepeatRate = Delta; // autodetect repeat rate
+	    if (DEBUG) printf("repeat\n");
 	    if (FirstTime.Elapsed() < (uint)Setup.RcRepeatDelay) {
-		if (debug) printf("continue Delay\n\n");
+		if (DEBUG) printf("continue Delay\n\n");
 		continue; // repeat function kicks in after a short delay
 	    }
 	    if (LastTime.Elapsed() < (uint)Setup.RcRepeatDelta) {
-		if (debug)  printf("continue Delta\n\n");
+		if (DEBUG)  printf("continue Delta\n\n");
                 continue; // skip same keys coming in too fast
 	    }
 	    repeat = true;
 	}
 
 	/* send key */
-	if(debug) printf("delta send: %ld\n", LastTime.Elapsed());
+	if(DEBUG) printf("delta send: %ld\n", LastTime.Elapsed());
 	LastTime.Set();
-	if (debug) printf("put %s %s\n", (const char*)key, repeat ? "" : "Repeat");
+	if (DEBUG) printf("put %s %s\n", (const char*)key, repeat ? "Repeat" : "");
 	Put(key, repeat);
 	release_needed = true;
 
     } else { // no key within timeout
 	if (release_needed && repeat) {
-	    if(debug) printf("put release for %s, delta %ld\n", (const char *)lastkey, ThisTime.Elapsed());
+	    if(DEBUG) printf("put release for %s, delta %ld\n", (const char *)lastkey, ThisTime.Elapsed());
 	    Put(lastkey, false, true);
 	}
 	release_needed = false;
 	repeat = false;
 	lastkey = "";
 	timeout = INT_MAX;
-	if (debug) printf("reset\n");
+	if (DEBUG) printf("reset\n");
     }
-    if (debug) printf("\n");
+    if (DEBUG) printf("\n");
   }
 }
 
@@ -211,18 +191,18 @@ bool cReadIR::Connect()
 {
   fd = open(irmp_device, O_RDONLY | O_NONBLOCK);
   if(fd == -1){
-    if(debug) printf("Cannot open %s. %s.\n", irmp_device, strerror(errno));
+    if(DEBUG) printf("Cannot open %s. %s.\n", irmp_device, strerror(errno));
     esyslog("Cannot open %s. %s.\n", irmp_device, strerror(errno));
     return false;
   } else {
-    if(debug) printf("opened %s\n", irmp_device);
+    if(DEBUG) printf("opened %s\n", irmp_device);
     isyslog("irmplircd: opened %s\n", irmp_device);
   }
 
   /*if(ioctl(fd, EVIOCGRAB, 1)){
-    if(debug) printf("Cannot grab %s. %s.\n", kbd_device, strerror(errno));
+    if(DEBUG) printf("Cannot grab %s. %s.\n", kbd_device, strerror(errno));
   } else {
-    if(debug) printf("Grabbed %s!\n", kbd_device);
+    if(DEBUG) printf("Grabbed %s!\n", kbd_device);
   }*/
 
   return true;
@@ -230,7 +210,7 @@ bool cReadIR::Connect()
 
 void cReadIR::Action(void)
 {
-  if(debug) printf("ReadIR action!\n");
+  if(DEBUG) printf("ReadIR action!\n");
 
   while(Running()){
 
@@ -252,10 +232,10 @@ void cReadIR::Action(void)
     }
 
     if (buf[0] == REPORT_ID_IR) {
-	//if(debug) printf("IR report: %016lx\n", *((uint64_t*)buf));
+	//if(DEBUG) printf("IR report: %016lx\n", *((uint64_t*)buf));
 	myIrmpRemote->Receive();
     } else {
-	if(debug) printf("configuration report\n");
+	//if(DEBUG) printf("configuration report\n");
     }
   }
 }
