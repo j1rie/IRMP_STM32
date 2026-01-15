@@ -7,7 +7,7 @@ und führe einmal "systemctl enable irmplircd.service" aus.
 
 ## Wurde der Computer vom Empfänger gestartet?
 Man kann protokollieren, wann der Empfänger den Computer gestartet hat.  
-Bei jedem Start durch den Empfänger sendet er eine konfigurierbare Zeit lang sekündlich KEY_REFRESH. Der erste wird in die Logdatei /var/log/started_by_IRMP_STM32_KBD geschrieben. Dazu wird von irexec oder triggerhappy log_KEY_REFRESH.sh aufgerufen.  
+Bei jedem Start durch den Empfänger sendet er eine konfigurierbare Zeit lang sekündlich KEY_REFRESH. Der erste wird in die Logdatei /var/log/started_by_IRMP_STM32 geschrieben. Dazu wird von irexec oder triggerhappy log_KEY_REFRESH_IRMP_STM32.sh aufgerufen.  
 Wenn kurz nach den Bootmeldungen (je nach Distribution/var/log/boot.msg o.ä.) ein Eintrag im Logfile (/var/log/started_by_IRMP_STM32) landet, weiß man, dass der Computer vom Empfänger gestartet wurde.  
 Wenn der Eintrag im Logfile älter ist als die Bootmeldungen, wurde per Einschalter am Computer oder per Timer gestartet.  
 Konfiguration über stm32IRconfig -> s -> x -> 90.  

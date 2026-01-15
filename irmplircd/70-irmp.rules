@@ -1,1 +1,7 @@
-KERNEL=="hidraw*", ATTRS{idVendor}=="1209", ATTRS{idProduct}=="4444", SYMLINK+="irmp_stm32", MODE="0666", TAG+="systemd", TAG+="uaccess"
+KERNEL=="hidraw*", ATTRS{idVendor}=="1209", ATTRS{idProduct}=="4444", SYMLINK+="irmp_stm32", MODE="0666", TAG+="uaccess", TAG+="systemd"
+KERNEL=="hidraw*", ATTRS{idVendor}=="1209", ATTRS{idProduct}=="4445", SYMLINK+="irmp_stm32_kbd", MODE="0666", TAG+="uaccess", TAG+="systemd", RUN+="/usr/bin/systemctl restart triggerhappy"
+SUBSYSTEM=="input", ATTRS{idVendor}=="1209", ATTRS{idProduct}=="4445", SYMLINK+="irmp_stm32_kbd_event", MODE="0666", TAG+="uaccess", TAG+="systemd", ENV{ID_INPUT_KEYBOARD}="1"
+KERNEL=="*numlock", SUBSYSTEM=="leds", ATTRS{idVendor}=="1209", ATTRS{idProduct}=="4445", ACTION=="add", RUN+="/usr/bin/ln -fs /sys%p/brightness /dev/irmp_stm32_kbd_led", RUN+="/bin/chmod a+w /dev/irmp_stm32_kbd_led"
+KERNEL=="hidraw*", ATTRS{idVendor}=="1209", ATTRS{idProduct}=="4446", SYMLINK+="irmp_pico", MODE="0666", TAG+="uaccess", TAG+="systemd", RUN+="/usr/bin/systemctl restart triggerhappy"
+SUBSYSTEM=="input", ATTRS{idVendor}=="1209", ATTRS{idProduct}=="4446", SYMLINK+="irmp_pico_event", MODE="0666", TAG+="uaccess", TAG+="systemd", ENV{ID_INPUT_KEYBOARD}="1"
+KERNEL=="*numlock", SUBSYSTEM=="leds", ATTRS{idVendor}=="1209", ATTRS{idProduct}=="4446", ACTION=="add", RUN+="/usr/bin/ln -fs /sys%p/brightness /dev/irmp_pico_led", RUN+="/bin/chmod a+w /dev/irmp_pico_led"

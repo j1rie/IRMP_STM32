@@ -7,7 +7,7 @@ and run "systemctl enable irmplircd.service" once.
 
 ## Was the computer started by the receiver?
 You can log when the receiver has started the computer.  
-At each start by the receiver, it sends ff0000000000 every second for a configurable period of time. The first one is written to the log file /var/log/started_by_IRMP_STM32. To do this, log_KEY_REFRESH.sh is called by irmpexec.  
+At each start by the receiver, it sends ff0000000000 every second for a configurable period of time. The first one is written to the log file /var/log/started_by_IRMP_STM32. To do this, log_KEY_REFRESH_IRMP_STM32.sh is called by irmpexec.  
 If an entry appears in the log file (/var/log/started_by_IRMP_STM32) shortly after the boot messages (depending on the distribution/var/log/boot.msg or similar), you know that the computer was started by the receiver.  
 If the entry in the log file is older than the boot messages, it was started by switching on the computer or by timer.  
 Configuration via stm32IRconfig -> s -> x -> 90.  
