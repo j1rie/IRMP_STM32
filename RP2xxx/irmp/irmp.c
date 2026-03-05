@@ -700,6 +700,13 @@ static int                                      verbose;
 static void                                     (*irmp_callback_ptr) (uint_fast8_t);
 #endif // IRMP_USE_CALLBACK == 1
 
+#if IRMP_USE_COMPLETE_CALLBACK == 1
+static void (*irmp_complete_callback_function)(void);
+void irmp_register_complete_callback_function(void (*aCompleteCallbackFunction)(void)) {
+    irmp_complete_callback_function = aCompleteCallbackFunction;
+}
+#endif // IRMP_USE_COMPLETE_CALLBACK == 1
+
 #define PARITY_CHECK_OK                         1
 #define PARITY_CHECK_FAILED                     0
 
@@ -1040,7 +1047,7 @@ irmp_uart_init (void)
     USART_Cmd(STM32_UART_COM, ENABLE);
 
 #elif defined(ARDUINO)
-    // we use the Arduino Serial Imlementation
+    // we use the Arduino Serial Implementation
     // you have to call Serial.begin(SER_BAUD); in Arduino setup() function
 
 #elif defined (__AVR_XMEGA__)
@@ -1105,7 +1112,7 @@ irmp_uart_putc (unsigned char ch)
     }
 
 #elif defined(ARDUINO)
-    // we use the Arduino Serial Imlementation
+    // we use the Arduino Serial Implementation
     usb_serial_putchar(ch);
 
 #elif defined(_CHIBIOS_HAL_)
@@ -2466,13 +2473,15 @@ static volatile uint_fast8_t                    irmp_flags;
 // static volatile uint_fast8_t                 irmp_busy_flag;
 #if IRMP_AUTODETECT_REPEATRATE
 volatile uint_fast16_t                          delta_detection = 0;    // interval between two detections in ticks
+volatile uint32_t                               pass_on_delta_detection = 0xFFFF;    // interval between two detections in ticks
+volatile uint_fast16_t                          tmp_delta = 0xFFFF;
 volatile uint_fast8_t                           delta = 0;              // interval between two detections in ms
-volatile uint_fast8_t                           min_delta = 254 * 100 / (100 + JITTER_COMPENSATION);  // detected repeat rate 
+volatile uint_fast8_t                           min_delta = 170;  // detected repeat rate, preset to greatest known repeat rate
 static volatile uint_fast8_t                    previous_irmp_protocol = 0;
 volatile uint_fast8_t                           same_key = 0;
-volatile uint_fast8_t                           keep_same_key = 0;      // (for debug)
-volatile uint_fast8_t                           timeout;
-volatile uint_fast8_t                           upper_border = 255;     // (for debug)
+volatile uint_fast8_t                           keep_same_key = 0;
+volatile uint_fast8_t                           timeout = 1;
+volatile uint_fast8_t                           upper_border = 176;     // repeatrate plus jitter (threshold for timeout)
 #endif
 
 #if defined(__MBED__)
@@ -2620,7 +2629,7 @@ irmp_get_data (IRMP_DATA * irmp_data_p)
                 if ((irmp_command >> 8) == (~irmp_command & 0x00FF))
                 {
                     irmp_command &= 0xff;
-                    irmp_command |= irmp_id << 8;
+//                    irmp_command |= irmp_id << 8; // for samsung32 irmp_id looks to be the same as irmp_command
                     rtc = TRUE;
                 }
                 break;
@@ -2633,32 +2642,50 @@ irmp_get_data (IRMP_DATA * irmp_data_p)
 #endif
 #endif
 
+#if IRMP_SUPPORT_SIRCS_PROTOCOL == 1
+            case IRMP_SIRCS_PROTOCOL:
+                // Concatenate high byte of command and low byte of address
+                irmp_address <<= 7;
+                irmp_address = irmp_address | irmp_command >> 8;
+                // Command is 7 bytes, so add the 8.th bit of command to address
+                irmp_address <<= 1;
+                if ((irmp_command & 0x80))
+                {
+                    irmp_address++;
+                }
+                irmp_command &= 0x7F;
+                rtc = TRUE;
+                break;
+#endif
+
 #if IRMP_SUPPORT_NEC_PROTOCOL == 1
             case IRMP_NEC_PROTOCOL:
                 if ((irmp_command >> 8) == (~irmp_command & 0x00FF))
                 {
+                    if ((irmp_address >> 8) == (~irmp_address & 0x00FF))
+                    {
+                        irmp_address &= 0xff;
+                    }
                     irmp_command &= 0xff;
-                    rtc = TRUE;
                 }
                 else if (irmp_address == 0x87EE)
                 {
                     ANALYZE_PRINTF1 ("Switching to APPLE protocol\n");
                     irmp_protocol = IRMP_APPLE_PROTOCOL;
-                    irmp_address = (irmp_command & 0xFF00) >> 8;
+                    irmp_address = (irmp_command & 0xFF00) >> 8; // address was received in command!
                     irmp_command &= 0x00FF;
-                    rtc = TRUE;
                 }
                 else
                 {
                     ANALYZE_PRINTF1 ("Switching to ONKYO protocol\n");
                     irmp_protocol = IRMP_ONKYO_PROTOCOL;
-                    rtc = TRUE;
                 }
+                rtc = TRUE;
                 break;
 #endif
 
 
-#if IRMP_SUPPORT_NEC_PROTOCOL == 1
+#if IRMP_SUPPORT_VINCENT_PROTOCOL == 1
             case IRMP_VINCENT_PROTOCOL:
                 if ((irmp_command >> 8) == (irmp_command & 0x00FF))
                 {
@@ -2846,26 +2873,36 @@ irmp_get_data (IRMP_DATA * irmp_data_p)
             irmp_data_p->command  = irmp_command;
 
 #if IRMP_AUTODETECT_REPEATRATE
-                    if (irmp_protocol != previous_irmp_protocol){
-                        min_delta = 254 * 100 / (100 + JITTER_COMPENSATION); // reset
-                    }
-                    previous_irmp_protocol = irmp_protocol;
-                    uint_fast16_t tmp_delta = (delta_detection * (1000000 / F_INTERRUPTS)) / 1000; // ms
-                    if (tmp_delta > 0xFF ) // timeout
-                        delta = 255; 
-                    else
-                        delta = tmp_delta; 
-                    delta_detection = 0;
-                    if (!(irmp_param.protocol == IRMP_NEC_PROTOCOL && delta < 75)) { // if NEC, ignore first short interval
-                        if (delta < min_delta)
-                            min_delta = delta;
-                    }
-                    upper_border = min_delta * (100 + JITTER_COMPENSATION) / 100 + 1;
-                    timeout = (delta >= upper_border) /*|| (delta <=  min_delta * (100 - JITTER_COMPENSATION) / 100 - 1)*/; // TODO: does the second part make sense? use average delta?
+            tmp_delta = (pass_on_delta_detection * (1000000 / F_INTERRUPTS)) / 1000; // ms, this division is not precise
+            if (tmp_delta > 0xFF ) // reduce to uint8_t
+                delta = 0xFF;
+            else
+                delta = tmp_delta; 
+            if (irmp_protocol != previous_irmp_protocol) { // reset
+                min_delta = 170;
+                upper_border = min_delta * (100 + JITTER_COMPENSATION) / 100 + 1;
+                timeout = 1;
+                keep_same_key = 0;
+                previous_irmp_protocol = irmp_protocol;
+            } else {
+                if (!(irmp_protocol == IRMP_NEC_PROTOCOL && delta < 75)) { // if NEC, ignore first short interval
+                    if (delta < min_delta && same_key)
+                        min_delta = delta;
+                }
+                upper_border = min_delta * (100 + JITTER_COMPENSATION) / 100 + 1;
+                timeout = (delta >= upper_border);
+                if (irmp_protocol == IRMP_RC5_PROTOCOL || irmp_protocol == IRMP_RC6_PROTOCOL || irmp_protocol == IRMP_RC6A_PROTOCOL || irmp_protocol == IRMP_RECS80_PROTOCOL \
+                    || irmp_protocol == IRMP_RECS80EXT_PROTOCOL || irmp_protocol == IRMP_RCMM24_PROTOCOL || irmp_protocol == IRMP_RCMM32_PROTOCOL \
+                    || irmp_protocol == IRMP_THOMSON_PROTOCOL || irmp_protocol == IRMP_S100_PROTOCOL || irmp_protocol == IRMP_METZ_PROTOCOL) {
+                    if (same_key) // same_key is false, if toggle; not using timeout helps detecting repeats after misdetection and timeout isn't needed for discerning repetition
+                        irmp_flags |= IRMP_FLAG_REPETITION;
+                } else {
                     if (same_key && !timeout)
                         irmp_flags |= IRMP_FLAG_REPETITION;
-                    keep_same_key = same_key;
-                    same_key = 0;
+                }
+                keep_same_key = same_key;
+                same_key = 0;
+            }
 #endif
 
             irmp_data_p->flags    = irmp_flags;
@@ -3217,7 +3254,7 @@ static uint32_t s_startBitSample = 0;
 
 /*---------------------------------------------------------------------------------------------------------------------------------------------------
  *  ISR routine
- *  @details  ISR routine, called 10000 times per second
+ *  @details  ISR routine, called 10000 to 20000 times per second
  *---------------------------------------------------------------------------------------------------------------------------------------------------
  */
 uint_fast8_t
@@ -3226,7 +3263,11 @@ irmp_ISR (void)
     static uint_fast8_t     irmp_start_bit_detected;                                // flag: start bit detected
     static uint_fast8_t     wait_for_space;                                         // flag: wait for data bit space
     static uint_fast8_t     wait_for_start_space;                                   // flag: wait for start bit space
+#if __SIZEOF_INT__ == 4
+    static uint_fast16_t irmp_pulse_time;                                            // count bit time for pulse
+#else
     static uint_fast8_t     irmp_pulse_time;                                        // count bit time for pulse
+#endif
     static PAUSE_LEN        irmp_pause_time;                                        // count bit time for pause
     static uint_fast16_t    last_irmp_address = 0xFFFF;                             // save last irmp address to recognize key repetition
 #if IRMP_ENABLE_RELEASE_DETECTION == 1
@@ -3284,6 +3325,16 @@ irmp_ISR (void)
 #if IRMP_AUTODETECT_REPEATRATE
     if (delta_detection < 0xFFFF)
         delta_detection++;
+#if IRMP_ENABLE_RELEASE_DETECTION == 1
+    if (! key_released && delta_detection * (1000000 / F_INTERRUPTS) / 1000 >= upper_border)
+        {
+            irmp_address        = last_irmp_address;
+            irmp_command        = last_irmp_command;
+            irmp_flags          = IRMP_FLAG_RELEASE;
+            irmp_ir_detected    = TRUE;
+            key_released        = TRUE;
+        }
+#endif
 #endif
 
     if (! irmp_ir_detected)                                                     // ir code already detected?
@@ -3342,14 +3393,16 @@ irmp_ISR (void)
                         key_repetition_len++;
 
 #if IRMP_ENABLE_RELEASE_DETECTION == 1
+#if !IRMP_AUTODETECT_REPEATRATE
                         if (! key_released && key_repetition_len > IRMP_KEY_RELEASE_LEN)
                         {
                             irmp_address        = last_irmp_address;
                             irmp_command        = last_irmp_command;
-                            irmp_flags          = 0x02;
+                            irmp_flags          = IRMP_FLAG_RELEASE;
                             irmp_ir_detected    = TRUE;
                             key_released        = TRUE;
                         }
+#endif
 #endif
 
 #if IRMP_SUPPORT_DENON_PROTOCOL == 1
@@ -5534,9 +5587,13 @@ irmp_ISR (void)
                 {
                     if (last_irmp_command == irmp_tmp_command &&
                         last_irmp_address == irmp_tmp_address &&
-#ifdef IRMP_AUTODETECT_REPEATRATE
+#if IRMP_AUTODETECT_REPEATRATE
                         irmp_protocol == previous_irmp_protocol)
+                    {
                         same_key = 1; 
+                    }
+                    pass_on_delta_detection = delta_detection;
+                    delta_detection = 0;
 #else
                         key_repetition_len < IRMP_KEY_REPETITION_LEN) // time after data frame, not total since start
                     {
@@ -5579,6 +5636,12 @@ irmp_ISR (void)
 #if (defined(_CHIBIOS_RT_) || defined(_CHIBIOS_NIL_)) && IRMP_USE_EVENT == 1
     if (IRMP_EVENT_THREAD_PTR != NULL && irmp_ir_detected)
         chEvtSignalI(IRMP_EVENT_THREAD_PTR,IRMP_EVENT_BIT);
+#endif
+
+#if IRMP_USE_COMPLETE_CALLBACK == 1
+    if (irmp_complete_callback_function != nullptr && irmp_ir_detected) {
+        irmp_complete_callback_function();
+    }
 #endif
 
 #if IRMP_USE_IDLE_CALL == 1

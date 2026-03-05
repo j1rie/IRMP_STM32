@@ -601,7 +601,7 @@ irsnd_on (void)
 
 #  elif defined (ARM_STM32)                             // STM32
         IRSND_TIMER->EGR = TIM_PSCReloadMode_Immediate; // Generate an update event to reload the Prescaler and the Repetition counter values immediately
-        TIM_CCxCmd(IRSND_TIMER, IRSND_TIMER_CHANNEL, TIM_CCx_Enable);      // enable OC-output
+        TIM_CCxCmd(IRSND_TIMER, IRSND_TIMER_CHANNEL, TIM_CCx_Enable);      // enable OC-output (is being disabled in TIM_SelectOCxM())
         TIM_Cmd(IRSND_TIMER, ENABLE);                   // enable counter
 
 #  elif defined (ARM_STM32_OPENCM3)                     // STM32_OPENCM3
@@ -1194,7 +1194,11 @@ static uint8_t  sircs_additional_bitlen;
 #endif // IRSND_SUPPORT_SIRCS_PROTOCOL == 1
 
 /*
- * @param  do_wait - wait for last command to have ended before sending. For Arduino: Additionally wait for sent command to have ended.
+ * @param  do_wait - true: Wait for last command to have ended sending its trailing space before start of new sending.
+ *                   For Arduino: Additionally wait for sent command to have ended (including trailing gap).
+ *                   false: Return directly and do sending in background.
+ *                   Keep in mind not to send next frame in background before this frame and its trailing space has ended!
+ * @return false if protocol was not found or do_wait was false and sending (of former frame and its trailing space) is still in progress.
  */
 #  ifdef __cplusplus
 bool
@@ -1220,6 +1224,9 @@ irsnd_send_data (IRMP_DATA * irmp_data_p, uint8_t do_wait)
 #endif
     uint16_t        address;
     uint16_t        command;
+    // to avoid [-Wunused-variable] compiler warnings, e.g. if only NUBERT is activated.
+    (void) address;
+    (void) command;
 
     if (do_wait)
     {
@@ -1230,6 +1237,7 @@ irsnd_send_data (IRMP_DATA * irmp_data_p, uint8_t do_wait)
     }
     else if (irsnd_busy)
     {
+        // Here we do not want to wait, but sending is still in progress and we may overwrite current frame data if not returning here.
         return (FALSE);
     }
 
@@ -1875,6 +1883,7 @@ irsnd_send_data (IRMP_DATA * irmp_data_p, uint8_t do_wait)
 
         default:
         {
+            return (FALSE); // Error here: we called irsnd_send_data with a non enabled protocol!
             break;
         }
     }
@@ -1882,18 +1891,21 @@ irsnd_send_data (IRMP_DATA * irmp_data_p, uint8_t do_wait)
 #if defined(ARDUINO)
     storeIRTimer(); // store current timer state to enable alternately send and receive with the same timer
     initIRTimerForSend(); // Setup timer and interrupts for sending
-    if (do_wait) {
-        while (irsnd_busy) {
-            // do nothing;
+    if (do_wait)
+    {
+        while (irsnd_busy)
+        {
+            // Wait for frame and leading space to be sent;
         }
     }
-#endif
+    return true; // next frame may start immediately if do_wait was true
 
+#else
     return irsnd_busy;
+#endif
 }
 
-void
-irsnd_stop (void)
+void irsnd_stop(void)
 {
     irsnd_repeat = 0;
 }
@@ -1901,6 +1913,7 @@ irsnd_stop (void)
 /*---------------------------------------------------------------------------------------------------------------------------------------------------
  *  ISR routine
  *  @details  ISR routine, called from 10000 to 20000, typically 15000 times per second
+ *  If new frame starts, check for autorepeat gap, then check for trailing space gap, then initialize frame.
  *---------------------------------------------------------------------------------------------------------------------------------------------------
  */
 #  ifdef __cplusplus
@@ -1910,8 +1923,8 @@ uint8_t
 #endif
 irsnd_ISR (void)
 {
-    static uint8_t              send_trailer                    = FALSE;
-    static uint8_t              current_bit                     = 0xFF;
+    static uint8_t              send_trailer                    = FALSE;    // Only for last trailer after n repeats. if TRUE, we send the trailing space as defined in repeat_frame_pause_len
+    static uint8_t              current_bit                     = 0xFF;     // 0xFF => send start bit
     static uint8_t              pulse_counter                   = 0;
     static IRSND_PAUSE_LEN      pause_counter                   = 0;
     static uint8_t              startbit_pulse_len              = 0;
@@ -1924,7 +1937,7 @@ irsnd_ISR (void)
     static uint8_t              new_frame                       = TRUE;
     static uint8_t              complete_data_len               = 0;
     static uint8_t              n_repeat_frames                 = 0;                                // number of repetition frames
-    static uint8_t              n_auto_repetitions              = 0;                                // number of auto_repetitions
+    static uint8_t              n_auto_repetitions              = 0;                                // number of frames inclusive auto_repetition frames
     static uint8_t              auto_repetition_counter         = 0;                                // auto_repetition counter
     static uint16_t             auto_repetition_pause_len       = 0;                                // pause before auto_repetition, uint16_t!
     static uint16_t             auto_repetition_pause_counter   = 0;                                // pause before auto_repetition, uint16_t!
@@ -1941,13 +1954,17 @@ irsnd_ISR (void)
     {
         if (current_bit == 0xFF && new_frame)                                       // start of transmission...
         {
+//            check for autorepeat gap, then check for trailing space gap, then initialize frame.
             if (auto_repetition_counter > 0)
             {
-                auto_repetition_pause_counter++;
+                /*
+                 * Send gap between auto repetitions
+                 */
+                auto_repetition_pause_counter++; // count gap duration
 
                 if (auto_repetition_pause_counter >= auto_repetition_pause_len)
                 {
-                    auto_repetition_pause_counter = 0;
+                    auto_repetition_pause_counter = 0; // end of auto repetition space
 
 #if IRSND_SUPPORT_DENON_PROTOCOL == 1
                     if (irsnd_protocol == IRMP_DENON_PROTOCOL)                              // n'th denon frame
@@ -2005,12 +2022,19 @@ irsnd_ISR (void)
                         putchar ('1');
                     }
 #endif
+                    // auto repetition pause here
                     return irsnd_busy;
                 }
             }
+            /*
+             * Send trailing space
+             */
             else if (packet_repeat_pause_counter < repeat_frame_pause_len)
             {
-                packet_repeat_pause_counter++;
+                /*
+                 * Send trailing space, especially for repeats
+                 */
+                packet_repeat_pause_counter++; // count trailing space duration
 #ifdef ANALYZE
                 if (irsnd_is_on)
                 {
@@ -2025,9 +2049,10 @@ irsnd_ISR (void)
             }
             else
             {
+                // End of trailing space here => initialize new frame
                 if (send_trailer)
                 {
-                    irsnd_busy = FALSE;
+                    irsnd_busy = FALSE;     // Trailing space sent complete, stop sending
                     send_trailer = FALSE;
                     return irsnd_busy;
                 }
@@ -2043,6 +2068,9 @@ irsnd_ISR (void)
                 pulse_counter               = 0;
                 pause_counter               = 0;
 
+                /*
+                 * Initialize new frame for selected protocol
+                 */
                 switch (irsnd_protocol)
                 {
 #if IRSND_SUPPORT_SIRCS_PROTOCOL == 1
@@ -2265,7 +2293,7 @@ irsnd_ISR (void)
                         pause_0_len                 = IRSND_KASEIKYO_0_PAUSE_LEN - 1;
                         has_stop_bit                = KASEIKYO_STOP_BIT;
                         complete_data_len           = KASEIKYO_COMPLETE_DATA_LEN;
-                        n_auto_repetitions          = (repeat_counter == 0) ? KASEIKYO_FRAMES : 1;          // 2 frames auto repetition if first frame
+                        n_auto_repetitions          = KASEIKYO_FRAMES;                                      // 1 frame
                         auto_repetition_pause_len   = IRSND_KASEIKYO_AUTO_REPETITION_PAUSE_LEN;             // 75 ms pause
                         repeat_frame_pause_len      = IRSND_KASEIKYO_FRAME_REPEAT_PAUSE_LEN;
                         irsnd_set_freq (IRSND_FREQ_38_KHZ);
@@ -2802,7 +2830,7 @@ irsnd_ISR (void)
 #endif
                     default:
                     {
-                        irsnd_busy = FALSE;
+                        irsnd_busy = FALSE; // no enabled protocol is selected -> stop immediately
                         break;
                     }
                 }
@@ -2811,7 +2839,7 @@ irsnd_ISR (void)
 
         if (irsnd_busy)
         {
-            new_frame = FALSE;
+            new_frame = FALSE; // we just have sent start bit here
 
             switch (irsnd_protocol)
             {
@@ -2845,7 +2873,7 @@ irsnd_ISR (void)
 #if IRSND_SUPPORT_MATSUSHITA_PROTOCOL == 1
                 case IRMP_MATSUSHITA_PROTOCOL:
 #endif
-#if IRSND_SUPPORT_MATSUSHITA_PROTOCOL == 1
+#if IRSND_SUPPORT_TECHNICS_PROTOCOL == 1
                 case IRMP_TECHNICS_PROTOCOL:
 #endif
 #if IRSND_SUPPORT_KASEIKYO_PROTOCOL == 1
@@ -3074,7 +3102,11 @@ irsnd_ISR (void)
 
                         if (current_bit >= complete_data_len + has_stop_bit)
                         {
+                            /*
+                             * End of current frame, prepare for a new frame
+                             */
                             current_bit = 0xFF;
+                            new_frame = TRUE;
                             auto_repetition_counter++;
 
                             if (auto_repetition_counter == n_auto_repetitions)
@@ -3082,7 +3114,6 @@ irsnd_ISR (void)
                                 irsnd_busy = FALSE;
                                 auto_repetition_counter = 0;
                             }
-                            new_frame = TRUE;
                         }
 
                         pulse_counter = 0;
@@ -3320,8 +3351,12 @@ irsnd_ISR (void)
 
         if (! irsnd_busy)
         {
+            /*
+             * Check if we are really finished or if we must send a repeat or a trailing space
+             */
             if (repeat_counter < n_repeat_frames)
             {
+                // repeat again
 #if IRSND_SUPPORT_FDC_PROTOCOL == 1
                 if (irsnd_protocol == IRMP_FDC_PROTOCOL)
                 {
@@ -3333,10 +3368,15 @@ irsnd_ISR (void)
             }
             else
             {
-                irsnd_busy = TRUE; //Rainer
+                /*
+                 * Switch to mode: send last trailing space
+                 */
+                irsnd_busy = TRUE;
                 send_trailer = TRUE;
+                // cleanup for ending transmission
                 n_repeat_frames = 0;
                 repeat_counter = 0;
+                repeat_frame_pause_len = 0;
             }
         }
     }

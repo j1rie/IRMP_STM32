@@ -23,6 +23,7 @@
 #include <fcntl.h>
 #include <sys/ioctl.h>
 #include <linux/hidraw.h>
+#include <time.h>
 
 enum access {
 	ACC_GET,
@@ -80,6 +81,20 @@ uint8_t inBuf[64];
 uint8_t outBuf[64];
 unsigned int in_size, out_size;
 
+static inline uint32_t GetUsTicks(void)
+{
+#ifdef CLOCK_MONOTONIC
+    struct timespec tspec;
+    clock_gettime(CLOCK_MONOTONIC, &tspec);
+    return (tspec.tv_sec * 1000 * 1000) + (tspec.tv_nsec / 1000);
+#else
+    struct timeval tval;
+    if (gettimeofday(&tval, NULL) < 0) {
+	return 0;
+    }
+    return (tval.tv_sec * 1000 * 1000) + (tval.tv_usec);
+#endif
+}
 static bool open_stm32(const char *devicename) {
 	stm32fd = open(devicename, O_RDWR );
 	if (stm32fd == -1) {
@@ -140,12 +155,20 @@ int main(int argc, const char **argv) {
 	FILE *fp;
 	char testfilename[10];
 	uint16_t j = 0;
+	uint16_t pc_rate[256] = {0};
+	uint16_t uc_rate[256] = {0};
+	uint32_t now_us;
+	uint32_t last_us;
+	uint32_t diff_us;
+	uint32_t min_diff_us = 0xFFFFFFFF;
+	uint32_t min_dd = 0xFFFFFFFF;
+	uint8_t rrBuf[12];
+	uint8_t first_time = 1;
         struct hidraw_report_descriptor rpt_desc;
 
         memset(&rpt_desc, 0x0, sizeof(rpt_desc));
 
 	open_stm32(argc>1 ? argv[1] : "/dev/irmp_stm32");
-
 
         /* Get Report Descriptor Size */
         res = ioctl(stm32fd, HIDIOCGRDESCSIZE, &desc_size);
@@ -199,7 +222,7 @@ int main(int argc, const char **argv) {
 		printf("old firmware!\n");
 	puts("");
 
-cont:	printf("set: wakeups, macros, alarm, send_after_wakeup, commit on RP2xxx, statusled and neopixel(s)\nset by remote: wakeups and macros(q)\nget: wakeups, macros, send_after_wakeup, alarm, capabilities, raw eeprom and dirty eeprom from RP2xxx (g)\nreset: wakeups, macros, send_after_wakeup, alarm and eeprom (r)\nsend IR (i)\nreboot (b)\nmonitor until ^C (m)\nrun test (t)\nhid test (h)\nneopixel test (n)\nexit (x)\n");
+cont:	printf("set: wakeups, macros, alarm, send_after_wakeup, commit on RP2xxx, statusled and neopixel(s)\nset by remote: wakeups and macros(q)\nget: wakeups, macros, send_after_wakeup, alarm, capabilities, raw eeprom and dirty eeprom from RP2xxx (g)\nreset: wakeups, macros, send_after_wakeup, alarm and eeprom (r)\nsend IR (i)\nreboot (b)\nmonitor until ^C (m)\nrepeat rate statistics until ^C (y)\nrun test (t)\nhid test (h)\nneopixel test (n)\nexit (x)\n");
 	scanf("%s", &c);
 
 	switch (c) {
@@ -575,6 +598,10 @@ reset:		printf("reset wakeup(w)\nreset macro slot(m)\nget send_after_weakeup(x)\
 		goto monit;
 		break;
 
+	case 'y':
+		goto rate;
+		break;
+
 	case 'n':
 		memset(&outBuf[2], 0, sizeof(outBuf) - 2);
 		idx = 2;
@@ -663,6 +690,58 @@ monit:	while(true) {
 		}
 	}
 
+rate:	while(true) {
+		retValm = read(stm32fd, inBuf, in_size);
+		if (retValm >= 0) {
+			if (inBuf[0] == REPORT_ID_IR) {
+
+				printf("%02hhx%02hhx%02hhx%02hhx%02hhx%02hhx\n", inBuf[1],inBuf[3],inBuf[2],inBuf[5],inBuf[4],inBuf[6]);
+				now_us = GetUsTicks();
+				diff_us = now_us - last_us;
+				last_us = now_us;
+				if (first_time) {
+					for(l=0;l<5;l++) {
+						rrBuf[l] = inBuf[l+1];
+					first_time = 0;
+					}
+				} else {
+					if (inBuf[1] != rrBuf[0]) {
+						printf("protocol changed, stopping\n");
+						goto exit;
+					}
+					if (inBuf[1] == rrBuf[0] && inBuf[2] == rrBuf[1] && inBuf[3] == rrBuf[2] && inBuf[4] == rrBuf[3] && inBuf[5] == rrBuf[4]) { // same key
+						if ((diff_us + 500) / 1000 <= 255) {
+							if (min_diff_us > diff_us)
+								min_diff_us = diff_us;
+							pc_rate[(diff_us + 500) / 1000]++;
+							uc_rate[(((inBuf[58] * 0xFF + inBuf[57]) * 52) + 500) / 1000]++;
+							if (min_dd > (uint32_t)((inBuf[58] * 0xFF + inBuf[57]) * 52))
+								min_dd = (inBuf[58] * 0xFF + inBuf[57]) * 52;
+							printf("min_delta: %d\n", inBuf[62]);
+						}
+					} else {
+						for(l=0;l<5;l++) {
+							rrBuf[l] = inBuf[l+1];
+						}
+						printf("key changed\n");
+						continue;
+					}
+					printf("***********************\n");
+					printf("*** pc rate - count ***\n");
+					for(l=0;l<255;l++) {
+						if (pc_rate[l]) printf("***     %03d - %04d  ***\n", l, pc_rate[l]);
+					}
+					printf("***********************\n");
+					printf("*** uc rate - count ***\n");
+					for(l=0;l<255;l++) {
+						if (uc_rate[l]) printf("***     %03d - %04d  ***\n", l, uc_rate[l]);
+					}
+					printf("***********************\n");
+				}
+				printf("\n");
+			}
+		}
+	}
 test:	sprintf(testfilename, "test%u", j); printf("write into %s\n", testfilename); // if directory, it needs to exist (or be created)!
 	fp = fopen(testfilename, "w");
 	while(true) {

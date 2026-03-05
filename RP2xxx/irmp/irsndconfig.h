@@ -53,7 +53,7 @@
 #define IRSND_SUPPORT_JVC_PROTOCOL              1       // JVC                  >= 10000                 ~150 bytes
 #define IRSND_SUPPORT_NEC16_PROTOCOL            1       // NEC16                >= 10000                 ~150 bytes
 #define IRSND_SUPPORT_NEC42_PROTOCOL            1       // NEC42                >= 10000                 ~150 bytes
-#define IRSND_SUPPORT_IR60_PROTOCOL             1       // IR60 (SDA2008)       >= 10000                 ~250 bytes
+#define IRSND_SUPPORT_IR60_PROTOCOL             1       // IR60 (SDA2008)       >= 10000                 ~250 bytes // IR frequency 30 kHz
 #define IRSND_SUPPORT_GRUNDIG_PROTOCOL          1       // Grundig              >= 10000                 ~300 bytes
 #define IRSND_SUPPORT_SIEMENS_PROTOCOL          1       // Siemens, Gigaset     >= 15000                 ~150 bytes
 #define IRSND_SUPPORT_NOKIA_PROTOCOL            1       // Nokia                >= 10000                 ~400 bytes
@@ -64,7 +64,7 @@
 #define IRSND_SUPPORT_NUBERT_PROTOCOL           1       // NUBERT               >= 10000                 ~100 bytes
 #define IRSND_SUPPORT_FAN_PROTOCOL              1       // FAN (ventilator)     >= 10000                 ~100 bytes
 #define IRSND_SUPPORT_SPEAKER_PROTOCOL          1       // SPEAKER              >= 10000                 ~100 bytes
-#define IRSND_SUPPORT_BANG_OLUFSEN_PROTOCOL     1       // Bang&Olufsen         >= 10000                 ~250 bytes
+#define IRSND_SUPPORT_BANG_OLUFSEN_PROTOCOL     1       // Bang&Olufsen         >= 10000                 ~250 bytes // IR frequency 455 kHz
 #define IRSND_SUPPORT_RECS80_PROTOCOL           1       // RECS80               >= 15000                 ~100 bytes
 #define IRSND_SUPPORT_RECS80EXT_PROTOCOL        1       // RECS80EXT            >= 15000                 ~100 bytes
 #define IRSND_SUPPORT_THOMSON_PROTOCOL          1       // Thomson              >= 10000                 ~250 bytes
@@ -84,7 +84,7 @@
 #define IRSND_SUPPORT_PENTAX_PROTOCOL           1       // Pentax               >= 10000                 ~150 bytes
 #define IRSND_SUPPORT_S100_PROTOCOL             0       // S100                 >= 10000                 DON'T CHANGE, NOT SUPPORTED YET!
 #define IRSND_SUPPORT_ACP24_PROTOCOL            1       // ACP24                >= 10000                 ~150 bytes
-#define IRSND_SUPPORT_TECHNICS_PROTOCOL         0       // TECHNICS             >= 10000                 DON'T CHANGE, NOT SUPPORTED YET!
+#define IRSND_SUPPORT_TECHNICS_PROTOCOL         1       // TECHNICS             >= 10000                 ~200 bytes
 #define IRSND_SUPPORT_PANASONIC_PROTOCOL        1       // PANASONIC Beamer     >= 10000                 ~150 bytes
 #define IRSND_SUPPORT_MITSU_HEAVY_PROTOCOL      1       // Mitsubishi-Heavy Aircondition, similar Timing to Panasonic beamer
 #define IRSND_SUPPORT_IRMP16_PROTOCOL           0       // IRMP specific        >= 15000                 ~250 bytes

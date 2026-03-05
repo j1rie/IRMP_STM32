@@ -115,6 +115,13 @@ See https://www.mikrocontroller.net/articles/IRMP_auf_STM32_-_ein_USB_IR_Empf%C3
 ## irmplircd, eventlircd, udev and systemd
 See /irmplircd/README.
 
+## Schematics
+https://datasheets.raspberrypi.com/pico/pico-datasheet.pdf  
+https://datasheets.raspberrypi.com/pico/pico-2-datasheet.pdf  
+https://files.waveshare.com/upload/4/4c/RP2040_Zero.pdf  
+https://files.waveshare.com/upload/9/90/RP2040-One.pdf  
+https://files.seeedstudio.com/wiki/XIAO-RP2350/res/Seeed-Studio-XIAO-RP2350-v1.0.pdf  
+
 ## Thanks to
 Frank Meyer for IRMP. [1]  
 Uwe Becker for adapting IRMP to the STM32F4xx and his USB-HID for the STM32F4xx. [2]  

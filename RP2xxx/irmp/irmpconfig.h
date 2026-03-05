@@ -27,6 +27,8 @@
  * Change F_INTERRUPTS if you change the number of interrupts per second,
  * Normally, F_INTERRUPTS should be in the range from 10000 to 15000, typical is 15000
  * A value above 15000 costs additional program space, absolute maximum value is 20000.
+ * A value of 20000 is needed for Support of LEGO and RCMM, but it prevents using PENTAX or GREE
+ *  since for 20000 they have 8 bit overflow issues because of the long start bits.
  * On PIC with XC8/C18 Compiler, use 15151 as the correct value.
  *---------------------------------------------------------------------------------------------------------------------------------------------------
  */
@@ -78,7 +80,7 @@
 #define IRMP_SUPPORT_BOSE_PROTOCOL              1       // BOSE                 >= 10000                 ~150 bytes
 #define IRMP_SUPPORT_KATHREIN_PROTOCOL          1       // Kathrein             >= 10000                 ~200 bytes
 #define IRMP_SUPPORT_NUBERT_PROTOCOL            1       // NUBERT               >= 10000                  ~50 bytes
-#define IRMP_SUPPORT_FAN_PROTOCOL               0       // FAN (ventilator)     >= 10000                  ~50 bytes
+#define IRMP_SUPPORT_FAN_PROTOCOL               0       // FAN (ventilator)     >= 10000                  ~50 bytes     conflicts with NUBERT
 #define IRMP_SUPPORT_SPEAKER_PROTOCOL           1       // SPEAKER (~NUBERT)    >= 10000                  ~50 bytes
 #define IRMP_SUPPORT_BANG_OLUFSEN_PROTOCOL      1       // Bang & Olufsen       >= 10000                 ~200 bytes
 #define IRMP_SUPPORT_RECS80_PROTOCOL            1       // RECS80 (SAA3004)     >= 15000                  ~50 bytes
@@ -86,29 +88,29 @@
 #define IRMP_SUPPORT_THOMSON_PROTOCOL           1       // Thomson              >= 10000                 ~250 bytes
 #define IRMP_SUPPORT_NIKON_PROTOCOL             1       // NIKON camera         >= 10000                 ~250 bytes
 #define IRMP_SUPPORT_NETBOX_PROTOCOL            1       // Netbox keyboard      >= 10000                 ~400 bytes (PROTOTYPE!)
-#define IRMP_SUPPORT_ORTEK_PROTOCOL             0       // ORTEK (Hama)         >= 10000                 ~150 bytes
+#define IRMP_SUPPORT_ORTEK_PROTOCOL             0       // ORTEK (Hama)         >= 10000                 ~150 bytes     conflicts with FDC and NETBOX
 #define IRMP_SUPPORT_TELEFUNKEN_PROTOCOL        1       // Telefunken 1560      >= 10000                 ~150 bytes
 #define IRMP_SUPPORT_FDC_PROTOCOL               1       // FDC3402 keyboard     >= 10000 (better 15000)  ~150 bytes (~400 in combination with RC5)
 #define IRMP_SUPPORT_RCCAR_PROTOCOL             1       // RC Car               >= 10000 (better 15000)  ~150 bytes (~500 in combination with RC5)
-#define IRMP_SUPPORT_ROOMBA_PROTOCOL            0       // iRobot Roomba        >= 10000                 ~150 bytes
-#define IRMP_SUPPORT_RUWIDO_PROTOCOL            0       // RUWIDO, T-Home       >= 15000                 ~550 bytes
+#define IRMP_SUPPORT_ROOMBA_PROTOCOL            0       // iRobot Roomba        >= 10000                 ~150 bytes     conflicts with RC6
+#define IRMP_SUPPORT_RUWIDO_PROTOCOL            0       // RUWIDO, T-Home       >= 15000                 ~550 bytes     conflicts with DENON
 #define IRMP_SUPPORT_A1TVBOX_PROTOCOL           1       // A1 TV BOX            >= 15000 (better 20000)  ~300 bytes
 #define IRMP_SUPPORT_LEGO_PROTOCOL              1       // LEGO Power RC        >= 20000                 ~150 bytes
 #define IRMP_SUPPORT_RCMM_PROTOCOL              1       // RCMM 12,24, or 32    >= 20000                 ~150 bytes
 #define IRMP_SUPPORT_LGAIR_PROTOCOL             1       // LG Air Condition     >= 10000                 ~300 bytes
 #define IRMP_SUPPORT_SAMSUNG48_PROTOCOL         1       // Samsung48            >= 10000                 ~100 bytes (SAMSUNG must be enabled!)
 #define IRMP_SUPPORT_MERLIN_PROTOCOL            0       // Merlin               >= 15000 (better 20000)  ~300 bytes
-#define IRMP_SUPPORT_PENTAX_PROTOCOL            0       // Pentax               >= 10000                 ~150 bytes
-#define IRMP_SUPPORT_S100_PROTOCOL              0       // S100                 >= 10000                 ~250 bytes
-#define IRMP_SUPPORT_ACP24_PROTOCOL             0       // ACP24                >= 10000                 ~250 bytes
+#define IRMP_SUPPORT_PENTAX_PROTOCOL            1       // Pentax               >= 10000                 ~150 bytes
+#define IRMP_SUPPORT_S100_PROTOCOL              0       // S100                 >= 10000                 ~250 bytes     conflicts with RC5
+#define IRMP_SUPPORT_ACP24_PROTOCOL             0       // ACP24                >= 10000                 ~250 bytes     conflicts with DENON
 #define IRMP_SUPPORT_TECHNICS_PROTOCOL          1       // TECHNICS             >= 10000                 ~250 bytes
-#define IRMP_SUPPORT_PANASONIC_PROTOCOL         0       // PANASONIC Beamer     >= 10000                 ~250 bytes
-#define IRMP_SUPPORT_MITSU_HEAVY_PROTOCOL       0       // Mitsubishi Aircond   >= 10000                 ~250 bytes
+#define IRMP_SUPPORT_PANASONIC_PROTOCOL         0       // PANASONIC Beamer     >= 10000                 ~250 bytes     Panasonic is Kaseikyo with vendor code 0x2002 and you cannot distinguish it by start bit timing.
+#define IRMP_SUPPORT_MITSU_HEAVY_PROTOCOL       0       // Mitsubishi Aircond   >= 10000                 ~250 bytes     Mitsubishi is Kaseikyo with vendor code 0xCB23 and you cannot distinguish it by start bit timing.
 #define IRMP_SUPPORT_VINCENT_PROTOCOL           1       // VINCENT              >= 10000                 ~250 bytes
 #define IRMP_SUPPORT_SAMSUNGAH_PROTOCOL         1       // SAMSUNG AH           >= 10000                 ~250 bytes
 #define IRMP_SUPPORT_IRMP16_PROTOCOL            0       // IRMP specific        >= 15000                 ~250 bytes
-#define IRMP_SUPPORT_GREE_PROTOCOL              0       // GREE CLIMATE         >= 10000                 ~250 bytes
-#define IRMP_SUPPORT_RCII_PROTOCOL              0       // RCII T+A             >= 15000                 ~250 bytes
+#define IRMP_SUPPORT_GREE_PROTOCOL              1       // GREE CLIMATE         >= 10000                 ~250 bytes
+#define IRMP_SUPPORT_RCII_PROTOCOL              0       // RCII T+A             >= 15000                 ~250 bytes     conflicts with GRUNDIG and NOKIA
 #define IRMP_SUPPORT_METZ_PROTOCOL              1       // METZ                 >= 15000                 ~250 bytes
 #define IRMP_SUPPORT_MELINERA_PROTOCOL          1       // MELINERA (Lidl)      >= 10000                  ~50 bytes
 
@@ -297,9 +299,16 @@
 #endif
 
 /*---------------------------------------------------------------------------------------------------------------------------------------------------
+ * Use Callback if complete data was received
+ *---------------------------------------------------------------------------------------------------------------------------------------------------
+ */
+#if !defined(IRMP_USE_COMPLETE_CALLBACK)
+#  define IRMP_USE_COMPLETE_CALLBACK           0                        // 1: use callback. 0: do not. default is 0
+#endif
+
+/*---------------------------------------------------------------------------------------------------------------------------------------------------
  * Autodetect repeat rate
  * For precise detection of fast key repetitions
- * F_CPU >= 200 MHz recommended
  *---------------------------------------------------------------------------------------------------------------------------------------------------
  */
 #ifndef IRMP_AUTODETECT_REPEATRATE

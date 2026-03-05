@@ -33,7 +33,7 @@
 # 2c Fan conflicts with Nubert
 # 2d S100 conflicts with RC5, can't send
 # 2e ACP24 conflicts with Denon
-# 2f Technics can't send
+# 2f Technics
 # 30 Panasonic conflicts with Kaseikyo and Mitsu-Heavy 
 # 31 Mitsu-Heavy conflicts with Kaseikyo and Panasonic 
 # 3c Melinera 0 address bits
@@ -70,6 +70,7 @@ for irdata in	01081f003f01 \
 		27001f003f01 \
 		28001f003f01 \
 		29001f003f01 \
+		2f001f003f01 \
 		3c001f003f01 ;
 do
 	echo "${irdata}"

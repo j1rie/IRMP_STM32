@@ -183,8 +183,12 @@
 #  define memcpy_P                      memcpy
 
 #else
-#  define PROGMEM
-#  define memcpy_P                      memcpy
+#  if ! defined(PROGMEM)
+#    define PROGMEM
+#  endif
+#  if ! defined(memcpy_P)
+#    define memcpy_P                      memcpy
+#  endif
 
 #endif
 
@@ -223,12 +227,12 @@ typedef unsigned short                  uint_fast16_t;
 #  endif
 #endif
 
-typedef struct IRMP_PACKED_STRUCT
+typedef struct
 {
-    uint8_t                             protocol;                                   // protocol, e.g. NEC_PROTOCOL
+    uint8_t                             protocol;                                   // protocol, e.g. IRMP_NEC_PROTOCOL
     uint16_t                            address;                                    // address
     uint16_t                            command;                                    // command
     uint8_t                             flags;                                      // flags, e.g. repetition
-} IRMP_DATA;
+} IRMP_PACKED_STRUCT IRMP_DATA;
 
 #endif // _IRMPSYSTEM_H_

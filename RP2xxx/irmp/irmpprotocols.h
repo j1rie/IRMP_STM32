@@ -25,7 +25,7 @@
  */
 #define IRMP_UNKNOWN_PROTOCOL                    0              // unknown protocol
 #define IRMP_SIRCS_PROTOCOL                      1              // Sony
-#define IRMP_NEC_PROTOCOL                        2              // NEC, Pioneer, JVC, Toshiba, NoName etc.
+#define IRMP_NEC_PROTOCOL                        2              // NEC with 32 bits, 16 address + 8 (+ 8 generated) command bits, Pioneer, JVC, Toshiba, NoName etc.
 #define IRMP_SAMSUNG_PROTOCOL                    3              // Samsung
 #define IRMP_MATSUSHITA_PROTOCOL                 4              // Matsushita
 #define IRMP_KASEIKYO_PROTOCOL                   5              // Kaseikyo (Panasonic etc)
@@ -79,7 +79,7 @@
 #define IRMP_GREE_PROTOCOL                      53              // Gree climate
 #define IRMP_RCII_PROTOCOL                      54              // RC II Infra Red Remote Control Protocol for FM8
 #define IRMP_METZ_PROTOCOL                      55              // METZ
-#define IRMP_ONKYO_PROTOCOL                     56
+#define IRMP_ONKYO_PROTOCOL                     56              // Like NEC but with 16 address + 16 command bits
 
 #define RF_GEN24_PROTOCOL                       57              // RF Generic, 24 Bits (Pollin 550666, EAN 4049702006022 and many other similar RF remote controls))
 #define RF_X10_PROTOCOL                         58              // RF PC X10 Remote Control (Medion, Pollin 721815)
@@ -284,18 +284,18 @@ typedef uint8_t     PAUSE_LEN;
 #define TECHNICS_COMPLETE_DATA_LEN              22                              // complete length
 
 /*---------------------------------------------------------------------------------------------------------------------------------------------------
- * KASEIKYO:
+ * KASEIKYO: 48 bit
  *---------------------------------------------------------------------------------------------------------------------------------------------------
  */
-#define KASEIKYO_START_BIT_PULSE_TIME           3380.0e-6                       // 3380 usec pulse
-#define KASEIKYO_START_BIT_PAUSE_TIME           1690.0e-6                       // 1690 usec pause
-#define KASEIKYO_PULSE_TIME                      423.0e-6                       //  525 usec pulse
-#define KASEIKYO_1_PAUSE_TIME                   1269.0e-6                       //  525 usec pause
-#define KASEIKYO_0_PAUSE_TIME                    423.0e-6                       // 1690 usec pause
+#define KASEIKYO_START_BIT_PULSE_TIME           3456.0e-6                       // 3380 usec pulse
+#define KASEIKYO_START_BIT_PAUSE_TIME           1728.0e-6                       // 1690 usec pause
+#define KASEIKYO_PULSE_TIME                      432.0e-6                       //  525 usec pulse
+#define KASEIKYO_1_PAUSE_TIME                   1296.0e-6                       //  525 usec pause
+#define KASEIKYO_0_PAUSE_TIME                    432.0e-6                       // 1690 usec pause
 #define KASEIKYO_AUTO_REPETITION_PAUSE_TIME       74.0e-3                       // repetition after 74 ms
 #define KASEIKYO_FRAME_REPEAT_PAUSE_TIME          74.0e-3                       // frame repeat after 74 ms
 #define KASEIKYO_ADDRESS_OFFSET                  0                              // skip 0 bits
-#define KASEIKYO_ADDRESS_LEN                    16                              // read 16 address bits
+#define KASEIKYO_ADDRESS_LEN                    16                              // read 16 address / manufacturer bits
 #define KASEIKYO_COMMAND_OFFSET                 28                              // skip 28 bits (16 manufacturer & 4 parity & 8 genre)
 #define KASEIKYO_COMMAND_LEN                    12                              // read 12 command bits (10 real command & 2 id)
 #define KASEIKYO_COMPLETE_DATA_LEN              48                              // complete length
@@ -305,14 +305,14 @@ typedef uint8_t     PAUSE_LEN;
 #define KASEIKYO_FLAGS                          0                               // flags
 
 /*---------------------------------------------------------------------------------------------------------------------------------------------------
- * PANASONIC (Beamer), start bit timings similar to KASEIKYO
+ * PANASONIC (Beamer), start bit timings similar to KASEIKYO   56 bit
  *---------------------------------------------------------------------------------------------------------------------------------------------------
  */
 #define PANASONIC_START_BIT_PULSE_TIME           3600.0e-6                      // 3600 usec pulse
 #define PANASONIC_START_BIT_PAUSE_TIME           1600.0e-6                      // 1690 usec pause
-#define PANASONIC_PULSE_TIME                      565.0e-6                      //  565 usec pulse
-#define PANASONIC_1_PAUSE_TIME                   1140.0e-6                      // 1140 usec pause
-#define PANASONIC_0_PAUSE_TIME                    316.0e-6                      //  316 usec pause
+#define PANASONIC_PULSE_TIME                      432.0e-6                      //  565 usec pulse
+#define PANASONIC_1_PAUSE_TIME                   1296.0e-6                      // 1140 usec pause
+#define PANASONIC_0_PAUSE_TIME                    432.0e-6                      //  316 usec pause
 #define PANASONIC_AUTO_REPETITION_PAUSE_TIME       40.0e-3                      // repetition after 40 ms?
 #define PANASONIC_FRAME_REPEAT_PAUSE_TIME          40.0e-3                      // frame repeat after 40 ms
 #define PANASONIC_ADDRESS_OFFSET                 24                             // skip 24 bits: 010000000000010000000001
@@ -326,7 +326,7 @@ typedef uint8_t     PAUSE_LEN;
 #define PANASONIC_FLAGS                          0                              // flags
 
 /*---------------------------------------------------------------------------------------------------------------------------------------------------
- * MITSUBISHI-Heavy Aircondition, timings similar to PANASONIC beamer
+ * MITSUBISHI-Heavy Aircondition, timings similar to PANASONIC beamer  88 bit
  *---------------------------------------------------------------------------------------------------------------------------------------------------
  */
 #define MITSU_HEAVY_START_BIT_PULSE_TIME          3200.0e-6                     // 3600 usec pulse

@@ -249,6 +249,7 @@ void LED_Switch_init(void)
 	gpio_init(WAKEUP_GPIO);
 	gpio_init(EXTLED_GPIO);
 	gpio_init(STATUSLED_GPIO);
+	gpio_set_drive_strength(IR_OUT_GPIO, GPIO_DRIVE_STRENGTH_12MA);
 	gpio_set_drive_strength(EXTLED_GPIO, GPIO_DRIVE_STRENGTH_12MA);
 	gpio_set_drive_strength(STATUSLED_GPIO, GPIO_DRIVE_STRENGTH_12MA);
 	//gpio_set_drive_strength(WAKEUP_GPIO, GPIO_DRIVE_STRENGTH_12MA); // TODO: once enough?!
@@ -443,6 +444,7 @@ void transmit_macro(uint8_t macro)
 	uint16_t idx;
 	uint8_t buf[SIZEOF_IR];
 	uint8_t zeros[SIZEOF_IR] = {0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF};
+	uint8_t delay[SIZEOF_IR - 3] = {0xFF, 0x11, 0x11};
 	/* we start from 1, since we don't want to tx the trigger code of the macro*/
 	for (i=1; i < MACRO_DEPTH + 1; i++) {
 		idx = (MACRO_DEPTH + 1) * SIZEOF_IR * macro + SIZEOF_IR * i;
@@ -450,11 +452,15 @@ void transmit_macro(uint8_t macro)
 		/* first encounter of zero in macro means end of macro */
 		if (!memcmp(buf, &zeros, sizeof(zeros)))
 			break;
+		if (!memcmp(buf, &delay, sizeof(delay))) {
+			sleep_ms(buf[SIZEOF_IR - 3] << 8 | buf[SIZEOF_IR - 1]);
+			continue;
+		}
 		/* if macros are sent already, while the trigger IR data are still repeated,
 		* the receiving device may crash
 		* Depending on the protocol we need a pause between the trigger and the transmission
 		* and between two transmissions. The highest known pause is 130 ms for Denon. */
-		yellow_short_on();
+		yellow_short_on(); // 130 ms
 		irsnd_send_data((IRMP_DATA *) buf, 1);
 	}
 }
