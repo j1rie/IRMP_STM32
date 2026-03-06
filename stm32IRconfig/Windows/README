@@ -1,9 +1,8 @@
 configure and monitor IRMP_STM32
-Usage:
-stm32IRconfig
 
 program and read the eeprom (wakeups, macros and capabilities)
 reset wakeups, macros, alarm and eeprom
 set and get the alarm
 reboot the device
 send IR
+monitor (read) IRMP_STM32, stop with ^C

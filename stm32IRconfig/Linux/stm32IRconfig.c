@@ -527,7 +527,7 @@ out:
 		break;
 
 	case 'r':
-reset:		printf("reset wakeup(w)\nreset macro slot(m)\nget send_after_weakeup(x)\nreset alarm(a)\nreset eeprom(e)\n");
+reset:		printf("reset wakeup(w)\nreset macro slot(m)\nreset send_after_weakeup(x)\nreset alarm(a)\nreset eeprom(e)\n");
 		scanf("%s", &d);
 		memset(&outBuf[2], 0, sizeof(outBuf) - 2);
 		idx = 2;
@@ -684,8 +684,6 @@ monit:	memset(inBuf, 0, sizeof(inBuf));
 				printf("%02hhx ", inBuf[l]);
 			printf("\n");
 			printf("converted to protocoladdresscommandflag:\n\t");
-			//printf("%02hhx%02hhx%02hhx%02hhx%02hhx%02hhx", inBuf[1],inBuf[3],inBuf[2],inBuf[5],inBuf[4],inBuf[6]);
-			//printf("%02hhx%02hhx%02hhx%02hhx%02hhx%02hhx   delta: %d min_delta: %d max_delta: %d repeat detected: %d delta_isr_min: %d delta_isr_max: %d diff_isr: %d delta_detection: %d repeat: %d dd*f: %d", inBuf[1],inBuf[3],inBuf[2],inBuf[5],inBuf[4],inBuf[6],  inBuf[63], inBuf[62], inBuf[61], inBuf[60], inBuf[59], inBuf[58], inBuf[57], inBuf[55] * 0xFF + inBuf[56], inBuf[54], (inBuf[55] * 0xFF + inBuf[56]) * 52);
 			printf("%02hhx%02hhx%02hhx%02hhx%02hhx%02hhx   delta: %d min_delta: %d upper_border: %d same key: %d timeout: %d repeat detected: %d", inBuf[1],inBuf[3],inBuf[2],inBuf[5],inBuf[4],inBuf[6], inBuf[63], inBuf[62], inBuf[59], inBuf[54], inBuf[61], inBuf[60]);
 			printf("\n\n");
 		}
@@ -743,6 +741,7 @@ rate:	while(true) {
 			}
 		}
 	}
+
 test:	sprintf(testfilename, "test%u", j); printf("write into %s\n", testfilename); // if directory, it needs to exist (or be created)!
 	fp = fopen(testfilename, "w");
 	while(true) {

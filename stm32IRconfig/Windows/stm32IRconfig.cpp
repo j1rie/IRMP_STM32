@@ -28,6 +28,7 @@
 #else
 	#include <unistd.h>
 #endif
+#include <time.h>
 
 enum access {
 	ACC_GET,
@@ -48,6 +49,8 @@ enum command {
 	CMD_EEPROM_GET_RAW,
 	CMD_STATUSLED,
 	CMD_NEOPIXEL,
+	CMD_SEND_AFTER_WAKEUP,
+	CMD_EEPROM_DIRTY,
 };
 
 enum status {
@@ -82,6 +85,21 @@ hid_device *handle;
 uint8_t inBuf[64];
 uint8_t outBuf[64];
 unsigned int in_size, out_size;
+
+static inline uint32_t GetUsTicks(void)
+{
+#ifdef CLOCK_MONOTONIC
+    struct timespec tspec;
+    clock_gettime(CLOCK_MONOTONIC, &tspec);
+    return (tspec.tv_sec * 1000 * 1000) + (tspec.tv_nsec / 1000);
+#else
+    struct timeval tval;
+    if (gettimeofday(&tval, NULL) < 0) {
+	return 0;
+    }
+    return (tval.tv_sec * 1000 * 1000) + (tval.tv_usec);
+#endif
+}
 
 static bool open_stm32() {
 	// Open the device using the VID, PID.
@@ -148,6 +166,15 @@ int main(int argc, char* argv[])
 	FILE *fp;
 	char testfilename[10];
 	uint16_t j = 0;
+	uint16_t pc_rate[256] = {0};
+	uint16_t uc_rate[256] = {0};
+	uint32_t now_us;
+	uint32_t last_us;
+	uint32_t diff_us;
+	uint32_t min_diff_us = 0xFFFFFFFF;
+	uint32_t min_dd = 0xFFFFFFFF;
+	uint8_t rrBuf[12];
+	uint8_t first_time = 1;
 
 #ifdef WIN32
 	UNREFERENCED_PARAMETER(argc);
@@ -198,7 +225,7 @@ int main(int argc, char* argv[])
 	usleep(3000);
 	#endif
 	hid_read(handle, inBuf, in_size);
-	while (inBuf[0] == 0x01)
+	while (inBuf[0] == REPORT_ID_IR)
 		hid_read(handle, inBuf, in_size);
 	if(in_size != (inBuf[7] ? inBuf[7] : 17))
 		printf("warning: hid in report count mismatch: %u %u\n", in_size, inBuf[7] ? inBuf[7] : 17);
@@ -218,7 +245,7 @@ cont:	printf("set: wakeups, macros, alarm, commit on RP2xxx, statusled and neopi
 	switch (c) {
 
 	case 's':
-set:		printf("set wakeup(w)\nset macro(m)\nset alarm(a)\ncommit on RP2xxx(c)\nstatusled(s)\nneopixel(n)\n");
+set:		printf("set wakeup(w)\nset macro(m)\nset send_after_wakeup(x)\nset alarm(a)\ncommit on RP2xxx(c)\nstatusled(s)\nneopixel(n)\n");
 		scanf("%s", &d);
 		memset(&outBuf[2], 0, sizeof(outBuf) - 2);
 		idx = 2;
@@ -256,7 +283,13 @@ set:		printf("set wakeup(w)\nset macro(m)\nset alarm(a)\ncommit on RP2xxx(c)\nst
 			outBuf[idx++] = (i>>16) & 0xFF;
 			outBuf[idx++] = i & 0xFF;
 			write_and_check(idx, 4);
-
+			break;
+		case 'x':
+			outBuf[idx++] = CMD_SEND_AFTER_WAKEUP;
+			printf("enter send_after_delay (dec)\n");
+			scanf("%" SCNu8 "", &l);
+			outBuf[idx++] = l;
+			write_and_check(idx, 4);
 			break;
 		case 'a':
 			outBuf[idx++] = CMD_ALARM;
@@ -324,13 +357,13 @@ color: printf("red(r)\ngreen(g)\nblue(b)\nyellow(y)\nwhite(w)\noff(o)\ncustom(c)
 				write_and_check(idx, 4);
 				break;
 			case 'c':
-				printf("enter red in hex\n");
+				printf("enter red in dec\n");
 				scanf("%u", &s);
 				outBuf[idx++] = s;
-				printf("enter green in hex\n");
+				printf("enter green in dec\n");
 				scanf("%u", &s);
 				outBuf[idx++] = s;
-				printf("enter blue in hex\n");
+				printf("enter blue in dec\n");
 				scanf("%u", &s);
 				outBuf[idx++] = s;
 				write_and_check(idx, 4);
@@ -412,7 +445,7 @@ Set:		printf("set wakeup with remote control(w)\nset macro with remote control(m
 		break;
 
 	case 'g':
-get:		printf("get wakeup(w)\nget macro(m)\nget caps(c)\nget alarm(a)\nget raw eeprom from RP2xxx(p)\n");
+get:		printf("get wakeup(w)\nget macro(m)\nget send_after_weakeup(x)\nget caps(c)\nget alarm(a)\nget raw eeprom from RP2xxx(p)\nget dirty eeprom from RP2xxx(d)\n");
 		scanf("%s", &d);
 		memset(&outBuf[2], 0, sizeof(outBuf) - 2);
 		idx = 2;
@@ -422,7 +455,7 @@ get:		printf("get wakeup(w)\nget macro(m)\nget caps(c)\nget alarm(a)\nget raw ee
 			printf("enter wakeup number (starting with 0)\n");
 			scanf("%u", &s);
 			outBuf[idx++] = CMD_WAKE;
-			outBuf[idx++] = s;
+			outBuf[idx++] = s;    // (s+1)-th slot
 			write_and_check(idx, 10);
 			break;
 		case 'm':
@@ -434,6 +467,10 @@ get:		printf("get wakeup(w)\nget macro(m)\nget caps(c)\nget alarm(a)\nget raw ee
 			scanf("%u", &s);
 			outBuf[idx++] = s;    // (s+1)-th slot
 			write_and_check(idx, 10);
+			break;
+		case 'x':
+			outBuf[idx++] = CMD_SEND_AFTER_WAKEUP;
+			write_and_check(idx, 5);
 			break;
 		case 'a':
 			outBuf[idx++] = CMD_ALARM;
@@ -508,6 +545,10 @@ again:			;
 				printf("\n");
 			}
 			break;
+		case 'd':
+			outBuf[idx++] = CMD_EEPROM_DIRTY;
+			write_and_check(idx, 5);
+			break;
 		default:
 			goto get;
 		}
@@ -515,7 +556,7 @@ out:
 		break;
 
 	case 'r':
-reset:		printf("reset wakeup(w)\nreset macro slot(m)\nreset alarm(a)\nreset eeprom(e)\n");
+reset:		printf("reset wakeup(w)\nreset macro slot(m)\nreset send_after_weakeup(x)\nreset alarm(a)\nreset eeprom(e)\n");
 		scanf("%s", &d);
 		memset(&outBuf[2], 0, sizeof(outBuf) - 2);
 		idx = 2;
@@ -535,6 +576,9 @@ reset:		printf("reset wakeup(w)\nreset macro slot(m)\nreset alarm(a)\nreset eepr
 			printf("enter slot number, 0 for trigger\n");
 			scanf("%u", &s);
 			outBuf[idx++] = s;    // (s+1)-th slot
+			break;
+		case 'x':
+			outBuf[idx++] = CMD_SEND_AFTER_WAKEUP;
 			break;
 		case 'e':
 			outBuf[idx++] = CMD_EEPROM_RESET;
@@ -589,6 +633,10 @@ reset:		printf("reset wakeup(w)\nreset macro slot(m)\nreset alarm(a)\nreset eepr
 
 	case 'm':
 		goto monit;
+		break;
+
+	case 'y':
+		goto rate;
 		break;
 
 	case 'n':
@@ -672,7 +720,8 @@ reset:		printf("reset wakeup(w)\nreset macro slot(m)\nreset alarm(a)\nreset eepr
 
 	goto cont;
 
-monit:	while(true) {
+monit:	memset(inBuf, 0, sizeof(inBuf));
+	while(true) {
 		retValm = hid_read(handle, inBuf, in_size);
 		if (retValm >= 0) {
 			printf("read %d bytes:\n\t", retValm);
@@ -680,8 +729,61 @@ monit:	while(true) {
 				printf("%02x ", (unsigned int)inBuf[l]);
 			printf("\n");
 			printf("converted to protocoladdresscommandflag:\n\t");
-			printf("%02x%02x%02x%02x%02x%02x", (unsigned int)inBuf[1],(unsigned int)inBuf[3],(unsigned int)inBuf[2],(unsigned int)inBuf[5],(unsigned int)inBuf[4],(unsigned int)inBuf[6]);
+			printf("%02x%02x%02x%02x%02x%02x   delta: %d min_delta: %d upper_border: %d same key: %d timeout: %d repeat detected: %d", (unsigned int)inBuf[1],(unsigned int)inBuf[3],(unsigned int)inBuf[2],(unsigned int)inBuf[5],(unsigned int)inBuf[4],(unsigned int)inBuf[6], (unsigned int)inBuf[63], (unsigned int)inBuf[62], (unsigned int)inBuf[59], (unsigned int)inBuf[54], (unsigned int)inBuf[61], (unsigned int)inBuf[60]);
 			printf("\n\n");
+		}
+	}
+
+
+rate:	while(true) {
+		retValm = hid_read(handle, inBuf, in_size);
+		if (retValm >= 0) {
+			if (inBuf[0] == REPORT_ID_IR) {
+				printf("%02hhx%02hhx%02hhx%02hhx%02hhx%02hhx\n", inBuf[1],inBuf[3],inBuf[2],inBuf[5],inBuf[4],inBuf[6]);
+				now_us = GetUsTicks();
+				diff_us = now_us - last_us;
+				last_us = now_us;
+				if (first_time) {
+					for(l=0;l<5;l++) {
+						rrBuf[l] = inBuf[l+1];
+					first_time = 0;
+					}
+				} else {
+					if (inBuf[1] != rrBuf[0]) {
+						printf("protocol changed, stopping\n");
+						goto exit;
+					}
+					if (inBuf[1] == rrBuf[0] && inBuf[2] == rrBuf[1] && inBuf[3] == rrBuf[2] && inBuf[4] == rrBuf[3] && inBuf[5] == rrBuf[4]) { // same key
+						if ((diff_us + 500) / 1000 <= 255) {
+							if (min_diff_us > diff_us)
+								min_diff_us = diff_us;
+							pc_rate[(diff_us + 500) / 1000]++;
+							uc_rate[(((inBuf[58] * 0xFF + inBuf[57]) * 52) + 500) / 1000]++;
+							if (min_dd > (uint32_t)((inBuf[58] * 0xFF + inBuf[57]) * 52))
+								min_dd = (inBuf[58] * 0xFF + inBuf[57]) * 52;
+							printf("min_delta: %d\n", inBuf[62]);
+						}
+					} else {
+						for(l=0;l<5;l++) {
+							rrBuf[l] = inBuf[l+1];
+						}
+						printf("key changed\n");
+						continue;
+					}
+					printf("***********************\n");
+					printf("*** pc rate - count ***\n");
+					for(l=0;l<255;l++) {
+						if (pc_rate[l]) printf("***     %03d - %04d  ***\n", l, pc_rate[l]);
+					}
+					printf("***********************\n");
+					printf("*** uc rate - count ***\n");
+					for(l=0;l<255;l++) {
+						if (uc_rate[l]) printf("***     %03d - %04d  ***\n", l, uc_rate[l]);
+					}
+					printf("***********************\n");
+				}
+				printf("\n");
+			}
 		}
 	}
 
@@ -704,7 +806,6 @@ test:	sprintf(testfilename, "test%u", j); printf("write into %s\n", testfilename
 			}
 		}
 	}
-
 
 exit:	hid_close(handle);
 
