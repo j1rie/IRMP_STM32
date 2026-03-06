@@ -220,7 +220,7 @@ void cReadIR::Action(void)
 	    cCondWait::SleepMs(RECONNECTDELAY);
 	    if (Connect()) {
 		isyslog("reconnected to irmplirc");
-		break;
+                continue; // read anew
 	    }
 	}
     }

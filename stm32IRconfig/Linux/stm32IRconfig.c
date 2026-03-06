@@ -675,7 +675,8 @@ reset:		printf("reset wakeup(w)\nreset macro slot(m)\nget send_after_weakeup(x)\
 
 	goto cont;
 
-monit:	while(true) {
+monit:	memset(inBuf, 0, sizeof(inBuf));
+	while(true) {
 		retValm = read(stm32fd, inBuf, in_size);
 		if (retValm >= 0) {
 			printf("read %d bytes:\n\t", retValm);
