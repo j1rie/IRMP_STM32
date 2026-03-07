@@ -73,10 +73,14 @@ uint8_t const * tud_descriptor_device_cb(void)
 //--------------------------------------------------------------------+
 
 // HID Generic Input & Output
-#define TUD_HID_REPORT_DESC_IRMP( ...) \
+// - 1st parameter is report size (mandatory)
+// - 2nd parameter is report id HID_REPORT_ID(n) (optional)
+#define TUD_HID_REPORT_DESC_IRMP(report_size, ...) \
     HID_USAGE_PAGE_N ( HID_USAGE_PAGE_VENDOR, 2   ),\
     HID_USAGE        ( 0x01                       ),\
     HID_COLLECTION   ( HID_COLLECTION_APPLICATION ),\
+      /* Report ID if any */\
+      /*__VA_ARGS__*/ \
 \
       /* common global */\
       HID_LOGICAL_MIN ( 0x00                                   ),\
@@ -84,27 +88,27 @@ uint8_t const * tud_descriptor_device_cb(void)
       HID_REPORT_SIZE ( 8                                      ),\
 \
       /* RP2xxx->PC */ \
-      HID_REPORT_ID   ( REPORT_ID_IR                           ) \
+      0x85, REPORT_ID_IR,    /*     REPORT_ID                  */\
       HID_USAGE       ( 0x02                                   ),\
       HID_REPORT_COUNT( HID_IN_REPORT_COUNT-1                  ),\
       HID_INPUT       ( HID_DATA | HID_VARIABLE | HID_ABSOLUTE ),\
 \
       /* RP2xxx->PC */ \
-      HID_REPORT_ID   ( REPORT_ID_CONFIG_IN                    ) \
+      0x85, REPORT_ID_CONFIG_IN, /* REPORT_ID                  */\
       HID_USAGE       ( 0x03                                   ),\
       HID_REPORT_COUNT( HID_IN_REPORT_COUNT-1                  ),\
       HID_INPUT       ( HID_DATA | HID_VARIABLE | HID_ABSOLUTE ),\
 \
       /* PC->RP2xxx */ \
-      HID_REPORT_ID   ( REPORT_ID_CONFIG_OUT                   ) \
-      HID_USAGE       ( 0x04                                   ),\
-      HID_REPORT_COUNT( HID_OUT_REPORT_COUNT-1                 ),\
-      HID_OUTPUT      ( HID_DATA | HID_VARIABLE | HID_ABSOLUTE ),\
+      0x85, REPORT_ID_CONFIG_OUT, /* REPORT_ID                  */\
+      HID_USAGE       ( 0x04                                    ),\
+      HID_REPORT_COUNT( HID_OUT_REPORT_COUNT-1                  ),\
+      HID_OUTPUT      ( HID_DATA | HID_VARIABLE | HID_ABSOLUTE  ),\
     HID_COLLECTION_END \
 
 uint8_t const desc_hid_report[] =
 {
-  TUD_HID_REPORT_DESC_IRMP()
+  TUD_HID_REPORT_DESC_IRMP(CFG_TUD_HID_EP_BUFSIZE)
 };
 
 // Invoked when received GET HID REPORT DESCRIPTOR

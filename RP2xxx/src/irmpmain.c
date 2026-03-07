@@ -19,7 +19,7 @@ void IRMP_Init(void)
 {
 	stdio_init_all();
 
-	add_repeating_timer_us(-1000000 / F_INTERRUPTS, irmp_timer_callback, NULL, &irmp_timer);
+	add_repeating_timer_us(-INV_F_INT_US, irmp_timer_callback, NULL, &irmp_timer);
 
 	irmp_init();
 }

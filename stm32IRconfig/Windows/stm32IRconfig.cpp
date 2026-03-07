@@ -488,7 +488,7 @@ get:		printf("get wakeup(w)\nget macro(m)\nget send_after_weakeup(x)\nget caps(c
 				usleep(3000);
 				#endif
 				read_stm32(in_size, l == 0 ? 9 : in_size);
-				while (inBuf[0] == 0x01)
+				while (inBuf[0] == REPORT_ID_IR)
 					read_stm32(in_size, l == 0 ? 9 : in_size);
 				if (!l) { // first query for slots and depth
 					printf("number of macros: %u\n", inBuf[4]);

@@ -208,7 +208,7 @@ int main(int argc, const char **argv) {
 	write(stm32fd, outBuf, 5);
 	usleep(3000);
 	read(stm32fd, inBuf, in_size);  // this hangs every other time on my Asus P8H67-M Evo USB 3.0 port
-	while (inBuf[0] == 0x01)
+	while (inBuf[0] == REPORT_ID_IR)
 		read(stm32fd, inBuf, in_size);
 	if(in_size != (inBuf[7] ? inBuf[7] : 17))
 		printf("warning: hid in report count mismatch: %u %u\n", in_size, inBuf[7] ? inBuf[7] : 17);
@@ -463,7 +463,7 @@ get:		printf("get wakeup(w)\nget macro(m)\nget send_after_weakeup(x)\nget caps(c
 				write_stm32(idx+1);
 				usleep(3000);
 				read_stm32(in_size, l == 0 ? 9 : in_size);
-				while (inBuf[0] == 0x01)
+				while (inBuf[0] == REPORT_ID_IR)
 					read_stm32(in_size, l == 0 ? 9 : in_size);
 				if (!l) { // first query for slots and depth
 					printf("number of macros: %u\n", inBuf[4]);
@@ -684,7 +684,7 @@ monit:	memset(inBuf, 0, sizeof(inBuf));
 				printf("%02hhx ", inBuf[l]);
 			printf("\n");
 			printf("converted to protocoladdresscommandflag:\n\t");
-			printf("%02hhx%02hhx%02hhx%02hhx%02hhx%02hhx   delta: %d min_delta: %d upper_border: %d same key: %d timeout: %d repeat detected: %d", inBuf[1],inBuf[3],inBuf[2],inBuf[5],inBuf[4],inBuf[6], inBuf[63], inBuf[62], inBuf[59], inBuf[54], inBuf[61], inBuf[60]);
+			printf("%02hhx%02hhx%02hhx%02hhx%02hhx%02hhx   pass_on_delta_detection_f: %f delta: %d min_delta: %d upper_border: %d same key: %d timeout: %d repeat detected: %d", inBuf[1],inBuf[3],inBuf[2],inBuf[5],inBuf[4],inBuf[6], ((float)(inBuf[58] * 0xFF + inBuf[57]) * inBuf[56]) / 1000, inBuf[63], inBuf[62], inBuf[59], inBuf[54], inBuf[61], inBuf[60]);
 			printf("\n\n");
 		}
 	}

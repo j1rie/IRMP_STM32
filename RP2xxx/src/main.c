@@ -798,7 +798,7 @@ int main(void)
 		if (!AlarmValue && !tud_ready())
 			Wakeup();
 
-		/* always wait for previous transfer to complete before sending again, consider using a send buffer */
+		/* always wait for previous transfer to complete before sending again */
 		if (PrevXferComplete && send_after_wakeup && last_magic_sent != send_after_wakeup) {
 			send_magic();
 			last_magic_sent = send_after_wakeup;
@@ -839,7 +839,7 @@ int main(void)
 		/* poll IR-data */
 		if (PrevXferComplete && irmp_get_data(&myIRData)) {
 			myIRData.flags = myIRData.flags & IRMP_FLAG_REPETITION;
-			if (!(myIRData.flags)) {
+			if (!(myIRData.flags)) { // new
 				store_wakeup(&myIRData);
 				check_macros(&myIRData);
 				check_wakeups(&myIRData);
