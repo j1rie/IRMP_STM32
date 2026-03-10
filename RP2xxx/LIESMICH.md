@@ -1,8 +1,8 @@
 ## IRMP auf RP2xxx
 
 ![RP2040-One+TSOP](https://raw.githubusercontent.com/wiki/j1rie/IRMP_STM32_KBD/images/RP2040-One+TSOP.jpg) [1]  
-<img src="https://www.vdr-portal.de/index.php?attachment/49235-ir-sensor-1-jpg" width="100%">
-<img src="https://www.vdr-portal.de/index.php?attachment/49236-ir-sensor-2-jpg" width="60%"> [2]  
+![IR-Sensor_1](https://raw.githubusercontent.com/wiki/j1rie/IRMP_STM32_KBD/images//IR-Sensor_1.jpg)
+![IR-Sensor_2](https://raw.githubusercontent.com/wiki/j1rie/IRMP_STM32_KBD/images//IR-Sensor_2.jpg) [2]  
 
 Für Boards mit dem RP2xxx, z.B. den Raspberry Pi Pico, Pico2 und viele andere.  
 Dies sind zusätzliche Informationen, grundlegende Informationen unter https://github.com/j1rie/IRMP_STM32/blob/master/LIESMICH.md.
