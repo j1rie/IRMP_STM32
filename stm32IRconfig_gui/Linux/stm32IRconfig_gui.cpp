@@ -604,7 +604,7 @@ long
 MainWindow::onCmdQuit(FXObject *sender, FXSelector sel, void *ptr)
 {
 	if(map_text21->isModified()){
-		if(FXMessageBox::question(this,MBOX_YES_NO,tr("map was changed"),tr("Discard changes to map?"))==MBOX_CLICKED_NO) return 1;
+		if(FXMessageBox::question(this,MBOX_YES_NO,tr("map was changed"),"%s", tr("Discard changes to map?"))==MBOX_CLICKED_NO) return 1;
 	}
 	if (uC == "RP2xxx") {
 		FXString s;
@@ -612,7 +612,7 @@ MainWindow::onCmdQuit(FXObject *sender, FXSelector sel, void *ptr)
 		output_text->setText(s);
 		Write_and_Check(4, 5);
 		if(buf[4]){
-			if(FXMessageBox::question(this,MBOX_YES_NO,tr("eeprom was changed"),tr("Discard changes to eeprom? Otherwise press 'commit'"))==MBOX_CLICKED_NO) return 1;
+			if(FXMessageBox::question(this,MBOX_YES_NO,tr("eeprom was changed"),"%s",tr("Discard changes to eeprom? Otherwise press 'commit'"))==MBOX_CLICKED_NO) return 1;
 		}
 	}
 	getApp()->exit(0);
@@ -904,7 +904,7 @@ MainWindow::onDisconnect(FXObject *sender, FXSelector sel, void *ptr)
 		output_text->setText(s);
 		Write_and_Check(4, 5);
 		if(buf[4]){
-			if(FXMessageBox::question(this,MBOX_YES_NO,tr("eeprom was changed"),tr("Discard changes to eeprom? Otherwise press 'commit'"))==MBOX_CLICKED_NO) return 1;
+			if(FXMessageBox::question(this,MBOX_YES_NO,tr("eeprom was changed"),"%s",tr("Discard changes to eeprom? Otherwise press 'commit'"))==MBOX_CLICKED_NO) return 1;
 		}
 	}
 	hid_close(connected_device);
@@ -1933,7 +1933,7 @@ long
 MainWindow::onOpen(FXObject *sender, FXSelector sel, void *ptr)
 {
 	if(map_text21->isModified()){
-		if(FXMessageBox::question(this,MBOX_YES_NO,tr("map was changed"),tr("Discard changes to map?"))==MBOX_CLICKED_NO) return 1;
+		if(FXMessageBox::question(this,MBOX_YES_NO,tr("map was changed"),"%s",tr("Discard changes to map?"))==MBOX_CLICKED_NO) return 1;
 	}
 	const FXchar patterns[]="All Files (*)\nmap Files (*.map)";
 	long loaded = 0;

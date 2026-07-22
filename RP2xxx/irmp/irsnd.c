@@ -1311,7 +1311,7 @@ irsnd_send_data (IRMP_DATA * irmp_data_p, uint8_t do_wait)
                 command = bitsrevervse (irmp_data_p->command, NEC_COMMAND_LEN);
 
                 irsnd_buffer[0] = (address & 0xFF00) >> 8;                                              // AAAAAAAA
-                irsnd_buffer[1] = (address & 0x00FF);                                                   // AAAAAAAA
+                irsnd_buffer[1] = ~((address & 0xFF00) >> 8);                                           // aaaaaaaa
                 irsnd_buffer[2] = (command & 0xFF00) >> 8;                                              // CCCCCCCC
                 irsnd_buffer[3] = ~((command & 0xFF00) >> 8);                                           // cccccccc
             }
@@ -3376,7 +3376,7 @@ irsnd_ISR (void)
                 // cleanup for ending transmission
                 n_repeat_frames = 0;
                 repeat_counter = 0;
-                repeat_frame_pause_len = 0;
+                //repeat_frame_pause_len = 0; // this is wrong for only/last frame
             }
         }
     }

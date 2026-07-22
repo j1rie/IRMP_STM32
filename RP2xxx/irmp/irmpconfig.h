@@ -253,7 +253,7 @@
  *---------------------------------------------------------------------------------------------------------------------------------------------------
  */
 #ifndef IRMP_ENABLE_RELEASE_DETECTION
-#  define IRMP_ENABLE_RELEASE_DETECTION         0                       // enable detection of key releases
+#  define IRMP_ENABLE_RELEASE_DETECTION         1                       // enable detection of key releases
 #endif
 
 /*---------------------------------------------------------------------------------------------------------------------------------------------------
@@ -308,7 +308,7 @@
 
 /*---------------------------------------------------------------------------------------------------------------------------------------------------
  * Autodetect repeat rate
- * For precise detection of fast key repetitions
+ * For precise detection of fast key repetitions (and key release, if enabled)
  *---------------------------------------------------------------------------------------------------------------------------------------------------
  */
 #ifndef IRMP_AUTODETECT_REPEATRATE

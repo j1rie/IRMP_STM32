@@ -104,16 +104,12 @@ int _tmain(int argc, TCHAR** argv) {
 	uint32_t alarm = 0;
 	int opt = 0;
 	int aflag = 0;
-	char *dvalue = NULL;
 	char *svalue = NULL;
 	time_t wakeup;
 	struct tm *ts;
 	
-	while ((opt = getopt(argc, argv, _T(":d:as:"))) != -1) {
+	while ((opt = getopt(argc, argv, _T(":as:"))) != -1) {
 	    switch (opt) {
-	    case _T('d'):
-		dvalue = optarg;
-		break;
 	    case _T('a'):
 		aflag = 1;
 		break;

@@ -15,8 +15,8 @@
 #include "tusb.h"
 #include "config.h"
 
-#define HID_IN_REPORT_COUNT	64 /* STM32->PC */
-#define HID_OUT_REPORT_COUNT	64 /* PC->STM32 */
+#define HID_IN_REPORT_COUNT	64 /* RP2xxx->PC */
+#define HID_OUT_REPORT_COUNT	64 /* PC->RP2xxx */
 #define BUFFER_SIZE (HID_IN_REPORT_COUNT < HID_OUT_REPORT_COUNT ? HID_OUT_REPORT_COUNT : HID_IN_REPORT_COUNT)
 
 #define HID_IN_INTERVAL		1

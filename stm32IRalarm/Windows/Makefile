@@ -10,6 +10,8 @@ ifeq ($(MSYSTEM),MINGW32)
 LIBS= -lsetupapi -static-libgcc
 else ifeq ($(MSYSTEM),MINGW64)
 LIBS= -lsetupapi
+else ifeq ($(MSYSTEM),UCRT64)
+LIBS= -lsetupapi
 endif
 CXXFLAGS=-g -s
 

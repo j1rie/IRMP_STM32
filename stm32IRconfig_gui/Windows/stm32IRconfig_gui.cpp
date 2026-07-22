@@ -260,6 +260,7 @@ public:
 	long onWrite_IR(FXObject *sender, FXSelector sel, void *ptr);
 	long onDevDClicked(FXObject *sender, FXSelector sel, void *ptr);
 	long onCmdQuit(FXObject *sender, FXSelector sel, void *ptr);
+	FXString app_label = "IRMP STM32 Configuration                 (Version: " + (FXString)DATE_STR + ")";
 };
 
 // FOX 1.7 changes the timeouts to all be nanoseconds.
@@ -320,8 +321,9 @@ FXDEFMAP(MainWindow) MainWindowMap [] = {
 FXIMPLEMENT(MainWindow, FXMainWindow, MainWindowMap, ARRAYNUMBER(MainWindowMap));
 
 MainWindow::MainWindow(FXApp *app)
-	: FXMainWindow(app, "IRMP STM32 Configuration                 (Version: " + (FXString)DATE_STR + ")", NULL, NULL, DECOR_ALL, 425, 39, 1050, 1030) // for 1920x1080
+	: FXMainWindow(app, "IRMP STM32 Configuration", NULL, NULL, DECOR_ALL, 425, 39, 1050, 1030)  // for 1920x1080
 {
+	setTitle(app_label);
 	this->setIcon(new FXGIFIcon(app,Icon,0,IMAGE_OPAQUE)); // for taskbar
 	this->setMiniIcon(new FXGIFIcon(app,Icon,0,IMAGE_OPAQUE)); // for titlebar
 	devices = NULL;
@@ -602,7 +604,7 @@ long
 MainWindow::onCmdQuit(FXObject *sender, FXSelector sel, void *ptr)
 {
 	if(map_text21->isModified()){
-		if(FXMessageBox::question(this,MBOX_YES_NO,tr("map was changed"),tr("Discard changes to map?"))==MBOX_CLICKED_NO) return 1;
+		if(FXMessageBox::question(this,MBOX_YES_NO,tr("map was changed"),"%s", tr("Discard changes to map?"))==MBOX_CLICKED_NO) return 1;
 	}
 	if (uC == "RP2xxx") {
 		FXString s;
@@ -610,7 +612,7 @@ MainWindow::onCmdQuit(FXObject *sender, FXSelector sel, void *ptr)
 		output_text->setText(s);
 		Write_and_Check(4, 5);
 		if(buf[4]){
-			if(FXMessageBox::question(this,MBOX_YES_NO,tr("eeprom was changed"),tr("Discard changes to eeprom? Otherwise press 'commit'"))==MBOX_CLICKED_NO) return 1;
+			if(FXMessageBox::question(this,MBOX_YES_NO,tr("eeprom was changed"),"%s",tr("Discard changes to eeprom? Otherwise press 'commit'"))==MBOX_CLICKED_NO) return 1;
 		}
 	}
 	getApp()->exit(0);
@@ -902,7 +904,7 @@ MainWindow::onDisconnect(FXObject *sender, FXSelector sel, void *ptr)
 		output_text->setText(s);
 		Write_and_Check(4, 5);
 		if(buf[4]){
-			if(FXMessageBox::question(this,MBOX_YES_NO,tr("eeprom was changed"),tr("Discard changes to eeprom? Otherwise press 'commit'"))==MBOX_CLICKED_NO) return 1;
+			if(FXMessageBox::question(this,MBOX_YES_NO,tr("eeprom was changed"),"%s",tr("Discard changes to eeprom? Otherwise press 'commit'"))==MBOX_CLICKED_NO) return 1;
 		}
 	}
 	hid_close(connected_device);
@@ -1931,7 +1933,7 @@ long
 MainWindow::onOpen(FXObject *sender, FXSelector sel, void *ptr)
 {
 	if(map_text21->isModified()){
-		if(FXMessageBox::question(this,MBOX_YES_NO,tr("map was changed"),tr("Discard changes to map?"))==MBOX_CLICKED_NO) return 1;
+		if(FXMessageBox::question(this,MBOX_YES_NO,tr("map was changed"),"%s",tr("Discard changes to map?"))==MBOX_CLICKED_NO) return 1;
 	}
 	const FXchar patterns[]="All Files (*)\nmap Files (*.map)";
 	long loaded = 0;

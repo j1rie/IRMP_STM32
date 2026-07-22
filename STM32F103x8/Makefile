@@ -15,7 +15,7 @@ LD = $(CC)
 OBJCP = $(CROSS_COMPILE)objcopy
 
 ARCH = -mcpu=cortex-m3 -mthumb
-COMMON = -g -Os -flto
+COMMON = -g -Os -flto -std=c99
 INCLUDES = -Icmsis -Icmsis_boot -Istm_lib/inc -Iusb_hid/inc -Iirmp -Isrc
 ifdef DEBUG
 INCLUDES += -Isemihosting -Istdio

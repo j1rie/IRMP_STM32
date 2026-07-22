@@ -235,7 +235,6 @@ IRMP_RC6A28_PROTOCOL,
 uint32_t AlarmValue = 0xFFFFFFFF;
 volatile unsigned int i = 0;
 uint8_t Reboot = 0;
-//volatile uint32_t boot_flag __attribute__((__section__(".noinit")));
 volatile unsigned int send_after_wakeup = 0;
 static bool led_state = false;
 static enum color statusled_state = off; // cache for blink_LED(), fast_toggle(), yellow_short_on()
@@ -344,13 +343,14 @@ void fast_toggle(void)
 	}
 }
 
-void yellow_short_on(void)
+void yellow_on(uint8_t on)
 {
 	toggle_led();
-	set_rgb_led(yellow, 1);
-	sleep_ms(130);
-	toggle_led();
-	set_rgb_led(statusled_state, 1);
+	if (on) {
+		set_rgb_led(yellow, 1);
+	} else {
+		set_rgb_led(statusled_state, 1);
+	}
 }
 
 void statusled_write(uint8_t led_state) {
@@ -458,10 +458,10 @@ void transmit_macro(uint8_t macro)
 		}
 		/* if macros are sent already, while the trigger IR data are still repeated,
 		* the receiving device may crash
-		* Depending on the protocol we need a pause between the trigger and the transmission
-		* and between two transmissions. The highest known pause is 130 ms for Denon. */
-		yellow_short_on(); // 130 ms
-		irsnd_send_data((IRMP_DATA *) buf, 1);
+		 * we may need a pause between the trigger and the transmission */
+		yellow_on(1);
+		irsnd_send_data((IRMP_DATA *) buf, 1); // send data and trailing pause
+		yellow_on(0);
 	}
 }
 
@@ -580,8 +580,9 @@ int8_t set_handler(uint8_t *buf)
 	uint16_t idx;
 	switch (buf[3]) {
 	case CMD_EMIT:
-		yellow_short_on();
-		irsnd_send_data((IRMP_DATA *) &buf[4], 1);
+		yellow_on(1);
+		irsnd_send_data((IRMP_DATA *) &buf[4], 1); // send data and trailing pause
+		yellow_on(0);
 		break;
 	case CMD_ALARM:
 		memcpy(&AlarmValue, &buf[4], sizeof(AlarmValue));
@@ -755,6 +756,8 @@ void send_magic(void)
 {
 	uint8_t magic[SIZEOF_IR] = {0xFF, 0x00, 0x00, 0x00, 0x00, 0x00};
 	USB_HID_SendData(REPORT_ID_IR, magic, SIZEOF_IR);
+	while (!PrevXferComplete)
+		tud_task();
 }
 
 int main(void)
@@ -792,8 +795,7 @@ int main(void)
 			}
 		}
 
-		if (board_button_read() && !tud_ready())
-			Wakeup();
+		// don't use board_button_read() here, it disables and enables interrupts and disturbs the steadiness of the pulse of the irmp_ISR()
 
 		if (!AlarmValue && !tud_ready())
 			Wakeup();
@@ -838,8 +840,7 @@ int main(void)
 
 		/* poll IR-data */
 		if (PrevXferComplete && irmp_get_data(&myIRData)) {
-			myIRData.flags = myIRData.flags & IRMP_FLAG_REPETITION;
-			if (!(myIRData.flags)) { // new
+			if (myIRData.flags == IRMP_FLAG_NEW ) { // new
 				store_wakeup(&myIRData);
 				check_macros(&myIRData);
 				check_wakeups(&myIRData);
@@ -847,7 +848,7 @@ int main(void)
 			}
 
 			/* send IR-data */
-			USB_HID_SendData(REPORT_ID_IR, (uint8_t *) &myIRData, sizeof(myIRData));
+			USB_HID_SendData(REPORT_ID_IR, (uint8_t *) &myIRData, sizeof(myIRData)); // new, repeat, release
 		}
 	}
 }

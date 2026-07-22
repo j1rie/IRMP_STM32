@@ -74,6 +74,10 @@ enum color {
 	strong_white
 };
 
+#define IRMP_FLAG_NEW                   0x00
+#define IRMP_FLAG_REPETITION            0x01
+#define IRMP_FLAG_RELEASE               0x02
+
 #define NUM_PIXELS 64
 
 static int stm32fd = -1;
@@ -160,8 +164,6 @@ int main(int argc, const char **argv) {
 	uint32_t now_us;
 	uint32_t last_us;
 	uint32_t diff_us;
-	uint32_t min_diff_us = 0xFFFFFFFF;
-	uint32_t min_dd = 0xFFFFFFFF;
 	uint8_t rrBuf[12];
 	uint8_t first_time = 1;
         struct hidraw_report_descriptor rpt_desc;
@@ -680,11 +682,11 @@ monit:	memset(inBuf, 0, sizeof(inBuf));
 		retValm = read(stm32fd, inBuf, in_size);
 		if (retValm >= 0) {
 			printf("read %d bytes:\n\t", retValm);
-			for (l = 0; l < 7; l++)
+			for (l = 0; l < retValm; l++)
 				printf("%02hhx ", inBuf[l]);
 			printf("\n");
 			printf("converted to protocoladdresscommandflag:\n\t");
-			printf("%02hhx%02hhx%02hhx%02hhx%02hhx%02hhx   pass_on_delta_detection_f: %f delta: %d min_delta: %d upper_border: %d same key: %d timeout: %d repeat detected: %d", inBuf[1],inBuf[3],inBuf[2],inBuf[5],inBuf[4],inBuf[6], ((float)(inBuf[58] * 0xFF + inBuf[57]) * inBuf[56]) / 1000, inBuf[63], inBuf[62], inBuf[59], inBuf[54], inBuf[61], inBuf[60]);
+			printf("%02hhx%02hhx%02hhx%02hhx%02hhx%02hhx   delta: %f min_delta: %f max_delta: %f upper_border: %f same key: %d timeout: %d repeat detected: %d", inBuf[1],inBuf[3],inBuf[2],inBuf[5],inBuf[4],inBuf[6], ((float)(inBuf[58] * 0xFF + inBuf[57]) * inBuf[56]) / 1000, ((float)(inBuf[53] * 0xFF + inBuf[52]) * inBuf[56]) / 1000, ((float)(inBuf[49] * 0xFF + inBuf[48]) * inBuf[56]) / 1000, ((float)(inBuf[51] * 0xFF + inBuf[50]) * inBuf[56]) / 1000, inBuf[54], inBuf[61], inBuf[60]);
 			printf("\n\n");
 		}
 	}
@@ -692,7 +694,7 @@ monit:	memset(inBuf, 0, sizeof(inBuf));
 rate:	while(true) {
 		retValm = read(stm32fd, inBuf, in_size);
 		if (retValm >= 0) {
-			if (inBuf[0] == REPORT_ID_IR) {
+			if (inBuf[0] == REPORT_ID_IR && inBuf[6] != IRMP_FLAG_RELEASE) {
 
 				printf("%02hhx%02hhx%02hhx%02hhx%02hhx%02hhx\n", inBuf[1],inBuf[3],inBuf[2],inBuf[5],inBuf[4],inBuf[6]);
 				now_us = GetUsTicks();
@@ -708,22 +710,15 @@ rate:	while(true) {
 						printf("protocol changed, stopping\n");
 						goto exit;
 					}
-					if (inBuf[1] == rrBuf[0] && inBuf[2] == rrBuf[1] && inBuf[3] == rrBuf[2] && inBuf[4] == rrBuf[3] && inBuf[5] == rrBuf[4]) { // same key
+					uint8_t same_key = inBuf[2] == rrBuf[1] && inBuf[3] == rrBuf[2] && inBuf[4] == rrBuf[3] && inBuf[5] == rrBuf[4];
+					if (same_key && inBuf[6] == IRMP_FLAG_REPETITION) {
 						if ((diff_us + 500) / 1000 <= 255) {
-							if (min_diff_us > diff_us)
-								min_diff_us = diff_us;
 							pc_rate[(diff_us + 500) / 1000]++;
-							uc_rate[(((inBuf[58] * 0xFF + inBuf[57]) * 52) + 500) / 1000]++;
-							if (min_dd > (uint32_t)((inBuf[58] * 0xFF + inBuf[57]) * 52))
-								min_dd = (inBuf[58] * 0xFF + inBuf[57]) * 52;
-							printf("min_delta: %d\n", inBuf[62]);
-						}
-					} else {
-						for(l=0;l<5;l++) {
-							rrBuf[l] = inBuf[l+1];
-						}
-						printf("key changed\n");
-						continue;
+							uc_rate[(((inBuf[58] * 0xFF + inBuf[57]) * inBuf[56]) + 500) / 1000]++;
+							printf("delta: %f\n", ((float)(inBuf[58] * 0xFF + inBuf[57]) * inBuf[56]) / 1000);
+							printf("min_delta: %f\n", ((float)(inBuf[53] * 0xFF + inBuf[52]) * inBuf[56]) / 1000);
+							printf("max_delta: %f\n", ((float)(inBuf[49] * 0xFF + inBuf[48]) * inBuf[56]) / 1000);
+							printf("max/min: %f %%\n", (((float)(inBuf[49] * 0xFF + inBuf[48]))/((float)(inBuf[53] * 0xFF + inBuf[52])) - 1) * 100);
 					}
 					printf("***********************\n");
 					printf("*** pc rate - count ***\n");
@@ -737,6 +732,17 @@ rate:	while(true) {
 					}
 					printf("***********************\n");
 				}
+					if (!same_key) {
+						printf("key changed, diff_ms: %d, delta: %f\n\n", (diff_us + 500) / 1000, ((float)(inBuf[58] * 0xFF + inBuf[57]) * inBuf[56]) / 1000);
+						for(l=1;l<5;l++) {
+							rrBuf[l] = inBuf[l+1];
+						}
+						continue;
+					}
+					if (inBuf[6] == IRMP_FLAG_NEW) {
+						printf("new key, diff_ms: %d, delta: %f\n", (diff_us + 500) / 1000, ((float)(inBuf[58] * 0xFF + inBuf[57]) * inBuf[56]) / 1000);
+					}
+				}
 				printf("\n");
 			}
 		}
@@ -749,7 +755,7 @@ test:	sprintf(testfilename, "test%u", j); printf("write into %s\n", testfilename
 		if (retValm >= 0) {
 			printf("%02hhx%02hhx%02hhx%02hhx%02hhx%02hhx\n", inBuf[1],inBuf[3],inBuf[2],inBuf[5],inBuf[4],inBuf[6]);
 			fprintf(fp, "%02hhx%02hhx%02hhx%02hhx%02hhx%02hhx\n", inBuf[1],inBuf[3],inBuf[2],inBuf[5],inBuf[4],inBuf[6]);
-			if (inBuf[1] == 0x3c && inBuf[3] == 0 && inBuf[2] == 0 && inBuf[5] == 0 && inBuf[4] == 0x3f && inBuf[6] == 1) { // 3c0000003f01, stopsequence TODO make configurable
+			if (inBuf[1] == 0x3c && inBuf[3] == 0 && inBuf[2] == 0 && inBuf[5] == 0 && inBuf[4] == 0x3f && inBuf[6] == 2) { // 3c0000003f02, stopsequence TODO make configurable
 				printf("received stopsequence\n");
 				fclose(fp);
 				j++;

@@ -1,5 +1,5 @@
 /*
- *  Copyright (C) 2014-2025 Joerg Riechardt
+ *  Copyright (C) 2014-2026 Joerg Riechardt
  *
  *  This program is free software; you can redistribute it and/or modify
  *  it under the terms of the GNU General Public License as published by
@@ -26,16 +26,22 @@ void USB_HID_SendData(uint8_t Report_ID, uint8_t *ptr, uint8_t len)
 		/* Windows needs HID_IN_REPORT_COUNT, for linux SIZEOF_IR + 1 is sufficient */
 		uint8_t buf[HID_IN_REPORT_COUNT - 1] = {0};
 		memcpy(buf, ptr, SIZEOF_IR);
-		buf[62] = delta;
-		buf[61] = min_delta;
+		//buf[62] = ;
+		//buf[61] = ;
 		buf[60] = timeout;
 		buf[59] = (keep_same_key && !timeout);
-		buf[58] = upper_border;
-		buf[57] = pass_on_delta_detection >> 8;
-		buf[56] = pass_on_delta_detection & 0xFF;
+		//buf[58] = ;
+		buf[57] = delta >> 8;
+		buf[56] = delta & 0xFF;
 		buf[55] = INV_F_INT_US;
 		//buf[54] = ;
 		buf[53] = keep_same_key;
+		buf[52] = min_delta >> 8;
+		buf[51] = min_delta & 0xFF;
+		buf[50] = upper_border >> 8;
+		buf[49] = upper_border & 0xFF;
+		buf[48] = max_delta >> 8;
+		buf[47] = max_delta & 0xFF;
 		tud_hid_report(Report_ID, buf, HID_IN_REPORT_COUNT - 1);
 	}
 	else if (Report_ID == REPORT_ID_CONFIG_IN)

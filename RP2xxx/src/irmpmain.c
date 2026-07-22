@@ -1,5 +1,5 @@
 /*
- *  Copyright (c) 2023 Joerg Riechardt
+ *  Copyright (c) 2026 Joerg Riechardt
  *
  *  Copyright (c) 2009-2015 Frank Meyer - frank(at)fli4l.de
  *

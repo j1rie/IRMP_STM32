@@ -45,6 +45,8 @@ enum command {
 	CMD_EEPROM_GET_RAW,
 	CMD_STATUSLED,
 	CMD_NEOPIXEL,
+	CMD_SEND_AFTER_WAKEUP,
+	CMD_EEPROM_DIRTY,
 };
 
 enum status {
@@ -856,8 +858,7 @@ int main(void)
 
 		/* poll IR-data */
 		if (PrevXferComplete && irmp_get_data(&myIRData)) {
-			myIRData.flags = myIRData.flags & IRMP_FLAG_REPETITION;
-			if (!(myIRData.flags)) {
+			if (myIRData.flags == IRMP_FLAG_NEW ) { // new
 				store_wakeup(&myIRData);
 				check_macros(&myIRData);
 				check_wakeups(&myIRData);
@@ -865,7 +866,8 @@ int main(void)
 				check_reboot(&myIRData);
 			}
 
-			USB_HID_SendData(REPORT_ID_IR, (uint8_t *) &myIRData, sizeof(myIRData));
+			/* send IR-data */
+			USB_HID_SendData(REPORT_ID_IR, (uint8_t *) &myIRData, sizeof(myIRData)); // new, repeat, release
 
 #ifdef TM1637
 			/* send IR-data to 4-digit-display */

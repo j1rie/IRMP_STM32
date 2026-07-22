@@ -331,9 +331,8 @@ extern void                             irmp_init (void);
 extern uint_fast8_t                     irmp_get_data (IRMP_DATA *);
 extern uint_fast8_t                     irmp_ISR (void);
 #if IRMP_AUTODETECT_REPEATRATE
-extern volatile uint_fast8_t            delta, min_delta, keep_same_key, timeout, upper_border;
-extern volatile uint_fast16_t           tmp_delta;
-extern volatile uint32_t                pass_on_delta_detection;
+extern volatile uint_fast8_t            keep_same_key, timeout;
+extern volatile uint32_t                delta, min_delta, max_delta, upper_border;
 #endif
 
 #if IRMP_PROTOCOL_NAMES == 1
