@@ -60,16 +60,15 @@ void fast_toggle(void)
 	LED_deinit();
 }
 
-/* yellow short on */
-void yellow_short_on(void)
+/* yellow on */
+void yellow_on(uint8_t on)
 {
-	LED_init();
-	GPIO_WriteBit(GPIOA, GPIO_Pin_9, Bit_RESET);
-#ifdef EXTLED_PORT
-	EXTLED_PORT->ODR ^= EXTLED_PIN;
-#endif
-	delay_ms(130);
-	LED_deinit();
+	if (on) {
+		LED_init();
+		GPIO_WriteBit(GPIOA, GPIO_Pin_9, Bit_RESET);
+	} else {
+		LED_deinit();
+	}
 #ifdef EXTLED_PORT
 	EXTLED_PORT->ODR ^= EXTLED_PIN;
 #endif
@@ -108,13 +107,8 @@ void fast_toggle(void)
 }
 void both_on(void) {}
 void red_on(void) {}
-void yellow_short_on(void)
+void yellow_on(uint8_t on)
 {
-	LED_PORT->ODR ^= LED_PIN;
-#ifdef EXTLED_PORT
-	EXTLED_PORT->ODR ^= EXTLED_PIN;
-#endif
-	delay_ms(130);
 	LED_PORT->ODR ^= LED_PIN;
 #ifdef EXTLED_PORT
 	EXTLED_PORT->ODR ^= EXTLED_PIN;

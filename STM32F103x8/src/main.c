@@ -555,8 +555,11 @@ int8_t set_handler(uint8_t *buf)
 	uint8_t tmp[SIZEOF_IR];
 	switch (buf[3]) {
 	case CMD_EMIT:
-		yellow_short_on();
-		irsnd_send_data((IRMP_DATA *) &buf[4], 1);
+		yellow_on(1);
+		irsnd_send_data((IRMP_DATA *) &buf[4], 1); // send data and trailing pause
+		while (irsnd_is_busy())
+			; // wait until sending is finished
+		yellow_on(0);
 		break;
 	case CMD_ALARM:
 		memcpy(&AlarmValue, &buf[4], sizeof(AlarmValue));
@@ -703,10 +706,12 @@ void transmit_macro(uint8_t macro)
 				break;
 			/* if macros are sent already, while the trigger IR data are still repeated,
 			* the receiving device may crash
-			* Depending on the protocol we need a pause between the trigger and the transmission
-			* and between two transmissions. The highest known pause is 130 ms for Denon. */
-			yellow_short_on();
-			irsnd_send_data((IRMP_DATA *) buf, 1);
+			* we may need a pause between the trigger and the transmission */
+		yellow_on(1);
+		irsnd_send_data((IRMP_DATA *) buf, 1); // send data and trailing pause
+		while (irsnd_is_busy())
+			; // wait until sending is finished
+		yellow_on(0);
 		}
 	}
 }
