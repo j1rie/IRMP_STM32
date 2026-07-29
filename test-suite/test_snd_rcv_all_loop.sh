@@ -75,6 +75,6 @@ for irdata in	01081f003f01 \
 do
 	echo "${irdata}"
 	./irctl -dstm32 -e -s0x${irdata} /dev/hidraw1 > /dev/null 2>&1
-	sleep 0.3
+	sleep 0.135 # wait for release, needed for NEC and Apple
 done
 done
