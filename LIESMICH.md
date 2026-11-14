@@ -159,4 +159,6 @@ Die letzten beiden sind auch in /doc/old/Deutsch.
 
 Viel Spaß mit IRMP auf STM32!
 
+Es gibt ein neues Projekt, in dem die Entwicklung weitergeführt wird: https://github.com/j1rie/IRMP_PICO
+
 Copyright (C) 2014-2025 Jörg Riechardt
